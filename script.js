@@ -115,7 +115,7 @@ Chaque matin, si Cerbère se trouve à droite ou à gauche d'un loup-garou, Cerb
 
 {
   id: "LE CONDAMNÉ",
-  title: "🪢 Le Condamné — L’Ultime Révélateur",
+  title: "🪢 Le Condamné",
   image: "le_condamne.png",
   description: `
 <span style="font-size:1.2em;">🪢 <strong>Le Condamné — L’Ultime Révélateur</strong></span><br>
@@ -199,7 +199,7 @@ Chaque matin, si l'insomniaque se trouve à droite ou à gauche d'un joueur ayan
 {
   id: "L’ORPHELIN",
   title: "🧒 L’Orphelin",
-  image: "lorphelin.png",
+  image: "l_orphelin.png",
   description: `
 <span style="font-size:1.2em;">🧒 <strong>L’Orphelin</strong></span><br>
 Un paysan qui rêve d’une vraie famille : le destin lie sa vie à celle d’un couple désigné au début de la partie.<br><br>
@@ -1710,6 +1710,7 @@ function openDetails(cardData) {
   detailsPanel.classList.add('active');
   detailsOverlay.classList.add('active');
   document.body.style.overflow = 'hidden';
+  detailsPanel.scrollTop = 0;
   detailsPanel.querySelector('.close-details').addEventListener('click', closeDetails);
 }
 function closeDetails() {

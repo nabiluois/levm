@@ -329,10 +329,11 @@ h2 {
 }
 
 .carte-back p {
-  color: #dbc86e;
-  font-size: 0.65em;
-  line-height: 1.3;
-  text-align: justify;
+  white-space: pre-line;
+  text-align: left;
+  line-height: 1.5;
+  font-size: 0.8em;
+  color: #dbc86e; /* ou la couleur de ton choix */
   flex: 1;
 }
 
@@ -768,3 +769,28 @@ body.light-mode .close-details {
     font-size: 1.6em;
   }
 }
+body.light-mode .details-panel,
+body.light-mode .details-section p,
+body.light-mode .details-section li {
+  color: #1a130d; /* ou #000 pour noir */
+}
+body.light-mode .details-panel,
+body.light-mode .details-section p,
+body.light-mode .details-section li {
+  color: #1a130d;
+}
+body.light-mode .details-panel,
+body.light-mode .details-panel *,
+body.light-mode .details-content,
+body.light-mode .details-content *,
+body.light-mode .details-title,
+body.light-mode .details-section,
+body.light-mode .details-section *,
+body.light-mode .details-section h3,
+body.light-mode .details-section p,
+body.light-mode .details-section li,
+body.light-mode .details-section ul {
+  color: #1a130d !important;
+}
+
+
