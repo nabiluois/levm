@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Le Village Maudit - Jeu de rôles avec cartes Paysans, Loups-garous, Vampires, Solo et Événements">
+  <meta name="theme-color" content="#4e342e">
+  <title>Le Village Maudit</title>
+  <link href="https://fonts.googleapis.com/css2?family=Almendra&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Pirata+One&display=swap" rel="stylesheet">
+  <link href="style.css" rel="stylesheet">
+  <link href="manifest.json" rel="manifest">
+</head>
+<body>
+
+  <!-- Menu latéral -->
+  <button class="menu-toggle" aria-label="Ouvrir le menu">☰</button>
+
+  <nav class="side-menu" role="navigation" aria-label="Menu principal">
+    <button class="close-menu" aria-label="Fermer le menu">×</button>
+    <div class="menu-links">
+      <a href="#village">Village</a>
+      <a href="#loups">Loups</a>
+      <a href="#solo">Solo</a>
+      <a href="#vampires">Vampires</a>
+      <a href="#event-cards">Cartes VM</a>
+    </div>
+    <div class="search-container">
+      <input id="searchInput" type="text" placeholder="Rechercher une carte..." aria-label="Rechercher une carte">
+      <div class="suggestions" id="searchSuggestions" role="listbox"></div>
+    </div>
+    <div class="menu-footer">
+      <strong>© 2026 Le Village Maudit</strong><br>
+      <em>by Nabil & Joelson</em>
+    </div>
+  </nav>
+
+  <section id="village">
+    <h2>🏘️ LE VILLAGE</h2>
+    <div class="carte-jeu">
+      <div class="carte-inner">
+        <div class="carte-front">
+          <img src="le_paysan.png" alt="LE PAYSAN" loading="lazy">
+        </div>
+        <div class="carte-back">
+          <h3>LE PAYSAN</h3>
+          <p>Le paysan est un personnage qui incarne l'habitant basique d'un village. Son rôle est de découvrir l'identité des loup garous et de les éliminer avant qu'ils ne tuent tous les paysan. Il gagne lorsque tous les loup garous sont morts. Le paysan n'a aucun pouvoir spécial, si ce n'est de voter au conseil du village contre celui qu'il suspecte être loup garou.</p>
+              <button class="btn-details">📖 Détails</button>
+    </div>
+      </div>
+    </div>
+    <div class="carte-jeu">
+      <div class="carte-inner">
+        <div class="carte-front">
+          <img src="la_sorciere.png" alt="LA SORCIÈRE" loading="lazy">
+        </div>
+        <div class="carte-back">
+          <h3>LA SORCIÈRE</h3>
+          <p>La sorcière possède deux potions : une de guérison et une d'empoisonnement. Ressusciter la personne tuée et donc perdre sa seule potion de guérison. tuer une autre personne en plus de la victime et donc perdre sa seule potion d'empoisonnement. Ou ne rien faire.</p>
+              <button class="btn-details">📖 Détails</button>
+    </div>
+      </div>
+    </div>
+    <div class="carte-jeu">
+      <div class="carte-inner">
+        <div class="carte-front">
+          <img src="l_homme_a_la_hache.png" alt="L’HOMME À LA HACHE" loading="lazy">
+        </div>
+        <div class="carte-back">
+          <h3>L’HOMME À LA HACHE</h3>
+          <p>L’homme à la hache est un paysan redoutable. La nuit, il meurt s’il est la cible des loups-garous ou s’il est touché par la potion empoisonnée de la sorcière mal utilisée.
+En revanche, si l’homme à la hache est éliminé lors du vote de jour, il peut retourner cette élimination contre l’un des opposants qui voulait sa mort, et survivre au bûcher. Après cela, il redevient un simple paysan.</p>
+              <button class="btn-details">📖 Détails</button>
+    </div>
+      </div>
+    </div>
+    <div class="carte-jeu">
+      <div class="carte-inner">
+        <div class="carte-front">
+          <img src="cerbere.png" alt="CERBÈRE" loading="lazy">
+        </div>
+        <div class="carte-back">
+          <h3>CERBÈRE</h3>
+          <p>Chaque matin, si Cerbère se trouve à droite ou à gauche d'un loup-garou, Cerbère se réveille, sinon il dort (le MJ). Si Cerbère est infecté par le papa des loups, il sera réveillé jusqu'à la fin de la partie.</p>
+              <button class="btn-details">📖 Détails</button>
+    </div>
+      </div>
+    </div>
+    <div class="carte-jeu">
+      <div class="carte-inner">
+        <div class="carte-front">
+          <img src="le_condamne.png" alt="LE CONDAMNÉ" loading="lazy">
+        </div>
+        <div class="carte-back">
+          <h3>LE CONDAMNÉ</h3>
+          <p>Chaque nuit est une pendaison différée. Le Condamné est en sursis dès le début de la partie. À tout moment, il peut se révéler publiquement et découvrir le rôle exact d’un joueur dont l’identité n’est pas déjà connue du village. Il peut ensuite révéler ou inventer cette information. Si la majorité du village choisit de le gracier, il devient la copie du rôle observé et continue la partie. Sinon, si le village préfère éliminer un autre joueur, sa mort est inéluctable.</p>
+              <button class="btn-details">📖 Détails</button>
+    </div>
+      </div>
+    </div>
+    <div class="carte-jeu">
+      <div class="carte-inner">
+        <div class="carte-front">
+          <img src="le_mentaliste.png" alt="LE MENTALISTE" loading="lazy">
+        </div>
+        <div class="carte-back">
+          <h3>LE MENTALISTE</h3>
+          <p>Chaque nuit, le Mentaliste désigne deux joueurs de son choix. Le Maître du Jeu lui indique alors si ces deux joueurs appartiennent à la même équipe ou non, sans révéler leurs rôles exacts. Exemple : Si le Mentaliste choisit un Loup-Garou et la Sorcière, le MJ répondra : « Ces joueurs ne sont pas dans la même équipe. » Ce pouvoir permet au Mentaliste de mieux orienter ses choix… sans pour autant tout savoir. Il reste versatile, douteux, parfois mal influencé.</p>
+              <button class="btn-details">📖 Détails</button>
+    </div>
+      </div>
+    </div>
+    <div class="carte-jeu">
+      <div class="carte-inner">
+        <div class="carte-front">
+          <img src="l_insomniaque.png" alt="L’INSOMNIAQUE" loading="lazy">
+        </div>
+        <div class="carte-back">
+          <h3>L’INSOMNIAQUE</h3>
+          <p>Chaque matin, si l'insomniaque se trouve à droite ou à gauche d'un joueur ayant eu une interaction nocturne, alors le narrateur lui indiquera si des joueurs ont eu un sommeil de mauvaise qualité pendant la nuit.</p>
+              <button class="btn-details">📖 Détails</button>
+    </div>
+      </div>
+    </div>
+    <div class="carte-jeu">
+      <div class="carte-inner">
+        <div class="carte-front">
+          <img src="l_orphelin.png" alt="L’ORPHELIN" loading="lazy">
+        </div>
+        <div class="carte-back">
+          <h3>L’ORPHELIN</h3>
+          <p>Son plus grand rêve, c'est d'avoir des parents qu'il n'a jamais eus. L'orphelin forme un couple au début de la partie. Ce couple sera lié par les lois du Village Maudit : si l'un meurt, l'autre meurt aussi immédiatement. Mais si l'orphelin est toujours en jeu après la mort du couple, il pourra choisir de récupérer le rôle et les facultés spéciales de l’un des deux, et continuer la partie avec ce nouveau pouvoir.</p>
+              <button class="btn-details">📖 Détails</button>
+    </div>
+      </div>
+    </div>
+    <div class="carte-jeu">
+      <div class="carte-inner">
+        <div class="carte-front">
+          <img src="le_traqueur.png" alt="LE TRAQUEUR" loading="lazy">
+        </div>
+        <div class="carte-back">
+          <h3>LE TRAQUEUR</h3>
+          <p>Fin limier, le Traqueur suit la piste des Loups-Garous comme nul autre. Une fois dans la partie, il peut consulter le MJ en secret pour connaître le nombre exact de Loups-Garous encore en vie. Le MJ lui indiquera alors ce nombre en silence, avec les doigts. Une capacité unique… à utiliser au bon moment.</p>
+              <button class="btn-details">📖 Détails</button>
+    </div>
+      </div>
+    </div>
+    <div class="carte-jeu">
+      <div class="carte-inner">
+        <div class="carte-front">
+          <img src="le_don_juan.png" alt="LE DON JUAN" loading="lazy">
+        </div>
+        <div class="carte-back">
+          <h3>LE DON JUAN</h3>
+          <p>Séducteur légendaire, il n’a qu’une arme : le charme. Et un don irrésistible pour offrir… des présents dont on ne sort pas toujours vivant.
+Pouvoir : Le Cadeau de l’Amour
+Deux fois dans la partie, quand il le souhaite pendant la nuit, Don Juan peut choisir un joueur à qui offrir un cadeau. Au lever du jour, le Maître du Jeu annonce : [Nom du joueur] a reçu un cadeau de Don Juan. Ce joueur devra alors décider publiquement : Ouvrir le cadeau ou le refuser.
+S’il l’ouvre, son destin dépend du choix secret de Don Juan :
+
+Cadeau Passionné : il reçoit le pouvoir de tuer un joueur de son choix pendant la journée (une seule fois).
+
+Cadeau Maudit : le présent contenait la mort. Le joueur meurt immédiatement.
+S’il refuse, il reste en vie… mais ne saura jamais ce que contenait le cadeau.
+C’est Don Juan, et lui seul, qui décide la nature du présent lors de la nuit où il agit.</p>
+              <button class="btn-details">📖 Détails</button>
+    </div>
+      </div>
+    </div>
+    <div class="carte-jeu">
+      <div class="carte-inner">
+        <div class="carte-front">
+          <img src="la_cameriste.png" alt="LA CAMÉRISTE" loading="lazy">
+        </div>
+        <div class="carte-back">
+          <h3>LA CAMERISTE</h3>
+          <p>Une fois dans la partie, juste avant que le MJ ne révèle le rôle d’un joueur éliminé par le village pendant la journée, elle peut interrompre en disant : "STOP, je suis la Camériste, je veux récupérer ce rôle." Le village ferme alors les yeux, la Camériste prend secrètement connaissance du rôle du joueur éliminé et le remplace : elle adopte immédiatement son pouvoir et son objectif. Elle reste ensuite dans la partie sous sa nouvelle identité.</p>
+              <button class="btn-details">📖 Détails</button>
+    </div>
+      </div>
+    </div>
+    <div class="carte-jeu">
+      <div class="carte-inner">
+        <div class="carte-front">
+          <img src="la_balance.png" alt="LA BALANCE" loading="lazy">
+        </div>
+        <div class="carte-back">
+          <h3>LA BALANCE</h3>
+          <p>Personne n'aime les balances ici sauf, dans le Village Maudit. La Balance est un paysan, mais avec un pouvoir à ne pas mettre entre toutes les mains. Chaque nuit, la Balance se réveille et peut choisir ou non de désigner une personne. Si cette personne est un loup-garou, alors au réveil du village, le narrateur pointera du doigt le loup en question, révélant son identité à tout le monde. En revanche, si la Balance désigne un joueur non loup, la Balance meurt instantanément. Eh oui, personne n'aime les balances ici !</p>
+              <button class="btn-details">📖 Détails</button>
+    </div>
+      </div>
+    </div>
+    <div class="carte-jeu">
+      <div class="carte-inner">
+        <div class="carte-front">
+          <img src="le_chuchoteur.png" alt="LE CHUCHOTEUR" loading="lazy">
+        </div>
+        <div class="carte-back">
+          <h3>LE CHUCHOTEUR</h3>
+          <p>Empêcher quelqu'un de parler, surtout quand le village commence à avoir des soupçons contre vous… Voilà tout l’art du Chuchoteur. Chaque nuit, il choisit un joueur qui sera réduit au silence pendant toute la journée suivante, incapable de s'exprimer lors des débats. Une capacité simple, mais diablement efficace.</p>
+              <button class="btn-details">📖 Détails</button>
+    </div>
+      </div>
+    </div>
+    <div class="carte-jeu">
+      <div class="carte-inner">
+        <div class="carte-front">
+          <img src="la_fille.png" alt="LA FILLE" loading="lazy">
+        </div>
+        <div class="carte-back">
+          <h3>LA FILLE</h3>
+          <p>Paysanne de père en fille : tant que le Bûcheron est en vie, la Fille ne peut pas mourir.</p>
+              <button class="btn-details">📖 Détails</button>
+    </div>
+      </div>
+    </div>
+    <div class="carte-jeu">
+      <div class="carte-inner">
+        <div class="carte-front">
+          <img src="la_dame_de_complaisance.png" alt="LA DAME DE COMPLAISANCE" loading="lazy">
+        </div>
+        <div class="carte-back">
+          <h3>LA DAME DE COMPLAISANCE</h3>
+          <p>Fille de joie de génération en génération, elle accumule les conquêtes et son bodycount est plus élevé que le PIB du Djibouti. Chaque nuit, cette paysanne au grand cœur peut, si elle le souhaite, aller dormir chez quelqu’un. Si elle dort chez un loup, elle meurt au réveil ; si elle dort chez une personne du village, elle reste en vie. Si elle dort chez quelqu’un (découche) et qu’elle est la cible des loups-garous pendant la nuit, elle ne meurt pas : son absence la protège.</p>
+              <button class="btn-details">📖 Détails</button>
+    </div>
+      </div>
+    </div>
+    <div class="carte-jeu">
+      <div class="carte-inner">
+        <div class="carte-front">
+          <img src="target.png" alt="TARGET" loading="lazy">
+        </div>
+        <div class="carte-back">
+          <h3>TARGET</h3>
+          <p>Il est traqué, pisté, visé de toutes parts... Alors il a trouvé la meilleure stratégie : faire porter le chapeau à quelqu’un d’autre.
+Pouvoir : Détournement de Cible. Au début de la partie, Target choisit un joueur comme "cible miroir". Ce joueur ne le saura pas, mais il subira tout ce qui devait arriver à Target :
+🐺 Les loups veulent manger Target ? C’est sa cible qui finit en steak tartare.
+🧪 La sorcière veut le tuer ? C’est la cible qui boit la mauvaise potion.
+🛡️ Le salvateur veut protéger Target ? C’est la cible qui reçoit le bouclier.
+🔍 Voyant, chasseur, n’importe quel pouvoir ? Tout est redirigé.
+⚠️ Règle d’or. Tant que la cible est en vie, Target est intouchable. Mais si la cible meurt… Target redevient une proie comme les autres. Et là, les vraies balles recommencent à le viser.</p>
+              <button class="btn-details">📖 Détails</button>
+    </div>
+      </div>
+    </div>
+    <div class="carte-jeu">
+      <div class="carte-inner">
+        <div class="carte-front">
+          <img src="le_milliardaire.png" alt="LE MILLIARDAIRE" loading="lazy">
+        </div>
+        <div class="carte-back">
+          <h3>LE MILLIARDAIRE</h3>
+          <p>Riche. Arrogant. Imbu de lui-même. Et surtout... intouchable tant qu’il garde son image intacte.
+Pouvoir : Le Pouvoir de l’Argent
+Tant que sa carte reste face cachée, le Milliardaire peut, chaque nuit, choisir qui sera le maire du village. Il peut changer d’avis autant de fois qu’il le souhaite durant la nuit — après tout, c’est lui qui paie.
+Intouchable ? Oui, mais pas éternellement... Le jour, il ne peut pas mourir, peu importe les votes ou la vengeance d’un rôle de jour (comme le Bûcheron, l’Homme à la Hache, etc.). Mais si la majorité vote contre lui, il doit révéler sa carte. Une fois exposé, il perd son pouvoir de nomination du maire. Et surtout, il devient vulnérable aux votes de jour.
+⚠️ Orgueil XXL : Le Milliardaire refuse toute forme de protection nocturne tant que sa carte est cachée. Pas question d’être sauvé par un paysan… Même riche, il a des principes.</p>
+              <button class="btn-details">📖 Détails</button>
+    </div>
+      </div>
+    </div>
+    <div class="carte-jeu">
+      <div class="carte-inner">
+        <div class="carte-front">
+          <img src="le_bienfaiteur.png" alt="LE BIENFAITEUR" loading="lazy">
+        </div>
+        <div class="carte-back">
+          <h3>LE BIENFAITEUR</h3>
+          <p>Chaque nuit, le Bienfaiteur protège une personne. Cette personne sera protégée et ne pourra donc pas mourir durant la nuit. Le Bienfaiteur ne peut pas protéger la même personne deux nuits de suite.</p>
+              <button class="btn-details">📖 Détails</button>
+    </div>
+      </div>
+    </div>
+    <div class="carte-jeu">
+      <div class="carte-inner">
+        <div class="carte-front">
+          <img src="le_devoreur_d_ames.png" alt="LE DÉVOREUR D’ÂMES" loading="lazy">
+        </div>
+        <div class="carte-back">
+          <h3>LE DÉVOREUR D’ÂMES</h3>
+          <p>Lorsqu’il meurt, il choisit un joueur encore en vie. Ce joueur meurt à sa place, et si ce dernier possédait un pouvoir spécial, le Dévoreur d’Âmes s’en empare immédiatement. Il ne peut dévorer une âme qu’une seule fois dans la partie.</p>
+              <button class="btn-details">📖 Détails</button>
+    </div>
+      </div>
+    </div>
+    <div class="carte-jeu">
+      <div class="carte-inner">
+        <div class="carte-front">
+          <img src="le_bucheron.png" alt="LE BUCHERON" loading="lazy">
+        </div>
+        <div class="carte-back">
+          <h3>LE BUCHERON</h3>
+          <p>Le Bûcheron, dès qu’il meurt, que ce soit la nuit (tué par les Loups-Garous ou la Sorcière) ou suite à une décision des Paysans, il doit désigner une personne qui mourra également sur-le-champ. Son effet ne s’arrête pas là. Tant que le Bûcheron est en jeu, la Petite Fille ne peut pas mourir.</p>
+              <button class="btn-details">📖 Détails</button>
+    </div>
+      </div>
+    </div>
+    <div class="carte-jeu">
+      <div class="carte-inner">
+        <div class="carte-front">
+          <img src="le_fossoyeur.png" alt="LE FOSSOYEUR" loading="lazy">
+        </div>
+        <div class="carte-back">
+          <h3>LE FOSSOYEUR</h3>
+          <p>Une fois par partie, le Fossoyeur peut plonger sa pelle dans la tombe… et choisir le rôle d’un joueur déjà éliminé pour le récupérer comme sien. Plus il y a de morts, plus il a de choix… Il ne peut utiliser ce pouvoir qu’une seule fois, alors autant frapper quand la fosse est bien pleine.</p>
+              <button class="btn-details">📖 Détails</button>
+    </div>
+      </div>
+    </div>
+    <div class="carte-jeu">
+      <div class="carte-inner">
+        <div class="carte-front">
+          <img src="le_voyant.png" alt="LE VOYANT" loading="lazy">
+        </div>
+        <div class="carte-back">
+          <h3>LE VOYANT</h3>
+          <p>Chaque nuit le voyant est appelé par le maître du jeu et peut découvrir la carte d'un joueur. Le voyant est un des personnages les plus puissants dans le camp du village. Il pourra facilement identifier des joueurs en qui il pourra avoir confiance, mais surtout l'identité de ses ennemis.</p>
+              <button class="btn-details">📖 Détails</button>
+    </div>
+      </div>
+    </div>
+    <div class="carte-jeu">
+      <div class="carte-inner">
+        <div class="carte-front">
+          <img src="olaf_et_pilaf.png" alt="OLAF ET PILAF" loading="lazy">
+        </div>
+        <div class="carte-back">
+          <h3>OLAF ET PILAF</h3>
+          <p>Paysan, cette carte se décline en deux exemplaires identiques. Si l'un des deux joueurs possédant cette carte est élu à la majorité ou devient le maire du village par substitution, alors il devient immortel face à toutes les attaques, de jour comme de nuit, à condition que son binôme soit toujours en jeu. S'il meurt, alors le maire perdra son immortalité.</p>
+              <button class="btn-details">📖 Détails</button>
+    </div>
+      </div>
+    </div>
+    <div class="carte-jeu">
+      <div class="carte-inner">
+        <div class="carte-front">
+          <img src="le_marabout.png" alt="LE MARABOUT" loading="lazy">
+        </div>
+        <div class="carte-back">
+          <h3>LE MARABOUT</h3>
+          <p>Pouvoir : La Poupée Vaudou
+Chaque nuit, le Marabout place sa poupée vaudou chez un joueur. Ce joueur est protégé des attaques nocturnes. Rien ne passe. Même pas un mauvais rêve. MAIS… sa capacité de nuit est bloquée. Les voisins directs (à gauche et à droite) perdent eux aussi leur pouvoir de nuit, mais ne sont pas protégés.
+☠️ Effet secondaire : Si le joueur en possession de la poupée meurt pendant la journée, la poupée est détruite dans les flammes du bûcher populaire. Le Marabout perd alors définitivement son pouvoir. Si le Marabout meurt, la poupée meurt aussi.
+💡 Moralité : bouge ta poupée, souvent, subtilement, et idéalement loin des joueurs en danger.</p>
+              <button class="btn-details">📖 Détails</button>
+    </div>
+      </div>
+    </div>
+    <div class="carte-jeu">
+      <div class="carte-inner">
+        <div class="carte-front">
+          <img src="le_detective.png" alt="LE DETECTIVE" loading="lazy">
+        </div>
+        <div class="carte-back">
+          <h3>LE DETECTIVE</h3>
+          <p>Le Détective est un rôle compliqué à optimiser, il ne doit rien à personne. Il écoute attentivement, théorise, suppute, puis, à un moment donné, il se lance et révèle l’identité de chaque joueur autour de la table. S’il fait un sans-faute, il remporte immédiatement la partie lui et son camp. En revanche, s’il commet la moindre erreur, il meurt sur-le-champ. (Moins il y a de joueurs en jeu, plus son enquête sera facile.)</p>
+              <button class="btn-details">📖 Détails</button>
+    </div>
+      </div>
+    </div>
+    <div class="carte-jeu">
+      <div class="carte-inner">
+        <div class="carte-front">
+          <img src="le_chat.png" alt="LE CHAT" loading="lazy">
+        </div>
+        <div class="carte-back">
+          <h3>LE CHAT</h3>
+          <p>Chaque nuit, ce mystérieux félin s’étire, puis désigne en toute discrétion un joueur. Le lendemain, la voix de cette personne comptera double lors du vote de jour.</p>
+              <button class="btn-details">📖 Détails</button>
+    </div>
+      </div>
+    </div>
+    <div class="carte-jeu">
+      <div class="carte-inner">
+        <div class="carte-front">
+          <img src="l_ivrogne.png" alt="L’IVROGNE" loading="lazy">
+        </div>
+        <div class="carte-back">
+          <h3>L’IVROGNE</h3>
+          <p>L’ivrogne est un personnage clé de la partie. Il ignore son propre rôle jusqu’à la troisième nuit. Son jeu commence au moment précis où le narrateur l’appelle lors de la troisième nuit, et lui demande de choisir le rôle de son choix parmi n'importe quel rôle du jeu.</p>
+              <button class="btn-details">📖 Détails</button>
+    </div>
+      </div>
+    </div>
+    <div class="carte-jeu">
+      <div class="carte-inner">
+        <div class="carte-front">
+          <img src="le_petit_rigolo.png" alt="LE PETIT RIGOLO" loading="lazy">
+        </div>
+        <div class="carte-back">
+          <h3>LE PETIT RIGOLO</h3>
+          <p>Chaque nuit qui passe, le village sombre petit à petit dans la terreur et la tourmente. Mais le Petit Rigolo est là pour redonner le sourire aux paysans. Son rôle est simple : chaque jour, il a l'obligation de faire rire au moins un joueur pour rester en vie. S'il échoue, il meurt. Le MJ reste attentif à ce qu'il parvienne bien à faire rire quelqu'un chaque jour.</p>
+              <button class="btn-details">📖 Détails</button>
+    </div>
+      </div>
+    </div>
+    <div class="carte-jeu">
+      <div class="carte-inner">
+        <div class="carte-front">
+          <img src="uchronie.png" alt="UCHRONIE" loading="lazy">
+        </div>
+        <div class="carte-back">
+          <h3>UCHRONIE</h3>
+          <p>Uchronie est un voyageur interdimensionnel capable de créer une réalité alternative… à condition de convaincre le village de ne pas refaire deux fois la même erreur. Lors des votes du village, Uchronie peut stopper le temps juste avant que le MJ ne révèle le rôle du joueur éliminé : le MJ endort le village et demande à Uchronie s’il veut utiliser son pouvoir et remonter le temps. À cet instant, le MJ lui montre secrètement le rôle du joueur sur le point de mourir, puis la journée est entièrement rejouée comme si rien ne s'était passé. Uchronie peut tenter de modifier le cours des événements en anticipant la défense du joueur éliminé ou en l’enfonçant si la carte qu’il a vue confirme ses soupçons.
+Uchronie peut utiliser deux fois sa capacité spéciale dans toute la partie. Après la seconde utilisation, il devient un paysan sans aucun pouvoir.</p>
+              <button class="btn-details">📖 Détails</button>
+    </div>
+      </div>
+    </div>
+    <div class="carte-jeu">
+      <div class="carte-inner">
+        <div class="carte-front">
+          <img src="le_clodo.png" alt="LE CLODO" loading="lazy">
+        </div>
+        <div class="carte-back">
+          <h3>LE CLODO</h3>
+          <p>Trois fois dans la partie, le Clodo peut, pendant la nuit, fouiller discrètement les poches d’un joueur (“faire les poubelles sociales”). Si la cible a un rôle actif (Voyant, Sorcière, Bienfaiteur, etc.), le Clodo lui "emprunte" ce rôle pour la nuit. Le Maître du Jeu informe discrètement le Clodo de ce qu’il a récupéré, et touche subtilement la tête de la victime pour lui signifier qu’elle a été détroussée (son pouvoir est neutralisé pour cette nuit-là).
+⚠️ Si le Clodo tente de faire les poches d’un Loup-Garou, c’est la clodo-fin : il devient un simple paysan et perd son pouvoir pour le reste de la partie.</p>
+              <button class="btn-details">📖 Détails</button>
+    </div>
+      </div>
+    </div>
+  </section>
+  <section id="loups">
+    <h2>🐺 LES LOUPS-GAROUS</h2>
+    <div class="carte-jeu">
+      <div class="carte-inner">
+        <div class="carte-front">
+          <img src="le_loup_garou.png" alt="LE LOUP-GAROU" loading="lazy">
+        </div>
+        <div class="carte-back">
+          <h3>LE LOUP-GAROU</h3>
+          <p>Le loup-garou incarne l'un des rôles de l'équipe des loups-garous. Il connaît l'identité des autres loups-garous et doit essayer de tuer tous les paysans sans se faire découvrir. Il se réunit chaque nuit avec les autres loups-garous pour décider de leur victime. Il gagne si tout le village est éliminé.</p>
+              <button class="btn-details">📖 Détails</button>
+    </div>
+      </div>
+    </div>
+    <div class="carte-jeu">
+      <div class="carte-inner">
+        <div class="carte-front">
+          <img src="le_loup_garou_rouge.png" alt="LE LOUP-GAROU ROUGE" loading="lazy">
+        </div>
+        <div class="carte-back">
+          <h3>LE LOUP-GAROU ROUGE</h3>
+          <p>Le Loup-Garou Rouge est le plus coriace des loups, mais aussi le plus fragile. Il est appelé seul en premier chaque nuit et donne son cœur au joueur de son choix. Tant que ce joueur est en vie, le Loup-Garou Rouge est immortel.</p>
+              <button class="btn-details">📖 Détails</button>
+    </div>
+      </div>
+    </div>
+    <div class="carte-jeu">
+      <div class="carte-inner">
+        <div class="carte-front">
+          <img src="le_loup_garou_maudit.png" alt="LE LOUP-GAROU MAUDIT" loading="lazy">
+        </div>
+        <div class="carte-back">
+          <h3>LE LOUP-GAROU MAUDIT</h3>
+          <p>Né sous une lune de sang, il vit encore parmi les humains… mais la malédiction dort, tapie dans son âme. Avant la première nuit, le Loup-Garou Maudit choisit secrètement un joueur : son Mentor. Ce joueur n’est pas informé de ce lien maudit. Tant que le Mentor est en vie, le Loup-Garou Maudit et un simple paysan. Mais si le Mentor vient à mourir — quelle qu’en soit la cause — la malédiction s’éveille : Le Loup-Garou Maudit se transforme et rejoint la meute des Loups-Garous. Dès la nuit suivante, il se réveille avec eux et agit comme un loup à part entière.</p>
+              <button class="btn-details">📖 Détails</button>
+    </div>
+      </div>
+    </div>
+    <div class="carte-jeu">
+      <div class="carte-inner">
+        <div class="carte-front">
+          <img src="le_loup_garou_alpha.png" alt="LE LOUP-GAROU ALPHA" loading="lazy">
+        </div>
+        <div class="carte-back">
+          <h3>LE LOUP-GAROU ALPHA</h3>
+          <p>Contrairement à ses compères velus, l’Alpha sait manier la courtoisie… à sa manière. Une fois par partie, il peut faire une offre “irrésistible” à un joueur de son choix pour rejoindre la meute. Lors de la nuit, l’Alpha désigne secrètement sa cible, puis se rendort paisiblement. Le Maître du Jeu réveille ensuite le village au matin et indique : “Le Loup-Garou Alpha a jeté son dévolu sur toi…” La nuit suivante, le joueur cible devra choisir s’il accepte ou refuse l’offre. Accepter : il rejoint alors les loups-garous et joue avec eux. Refuser : il reste dans son camp, et l’offre ne pourra plus jamais être faite à personne. L’Alpha n’a droit qu’à une seule tentative.</p>
+              <button class="btn-details">📖 Détails</button>
+    </div>
+      </div>
+    </div>
+    <div class="carte-jeu">
+      <div class="carte-inner">
+        <div class="carte-front">
+          <img src="loup_garou_voyant.png" alt="LOUP-GAROU VOYANT" loading="lazy">
+        </div>
+        <div class="carte-back">
+          <h3>LOUP-GAROU VOYANT</h3>
+          <p>Le Loup-Garou Voyant possède la double capacité de manger avec la meute et de voir comme le Voyant chaque nuit. Il est l’arme ultime du côté des Loups : chaque nuit, il découvre le rôle d’un joueur de son choix, puis participe à la désignation de la victime avec les autres loups-garous.</p>
+              <button class="btn-details">📖 Détails</button>
+    </div>
+      </div>
+    </div>
+    <div class="carte-jeu">
+      <div class="carte-inner">
+        <div class="carte-front">
+          <img src="le_loup_garou_bavard.png" alt="LE LOUP GAROU BAVARD" loading="lazy">
+        </div>
+        <div class="carte-back">
+          <h3>LE LOUP GAROU BAVARD</h3>
+          <p>Pouvoir (ou malédiction ?) : Langue bien pendue. Chaque jour, du réveil du village jusqu’à la fin des votes, le Loup-Garou Bavard doit obligatoirement dire "LOUP-GAROU" dans une phrase audible et explicite. Cela peut être une accusation, une remarque, etc. Le Maître du Jeu doit l’entendre clairement. S’il ne dit rien ou s’il est trop discret, il meurt mystérieusement à la fin de la journée. Peut-être étranglé par sa propre langue, qui sait ?</p>
+              <button class="btn-details">📖 Détails</button>
+    </div>
+      </div>
+    </div>
+    <div class="carte-jeu">
+      <div class="carte-inner">
+        <div class="carte-front">
+          <img src="le_loup_garou_faineant.png" alt="LE LOUP GAROU FAINEANT" loading="lazy">
+        </div>
+        <div class="carte-back">
+          <h3>LE LOUP GAROU FAINEANT</h3>
+          <p>Dormir, c’est sa grande passion. Comploter ? Trop fatiguant. Mais attention… quand un copain loup tombe, il se réveille enfin. Au début de la partie, le Loup-Garou Fainéant ne connaît pas son équipe. Il ne se réveille pas avec les autres loups pendant la phase de nuit. Mais, dès qu’un Loup-Garou meurt, ce paresseux se réveille lors de la prochaine nuit, découvre enfin qui sont ses alliés encore vivants, et rejoint la meute. À partir de là, il participe aux attaques et peut devenir un stratège redoutable.</p>
+              <button class="btn-details">📖 Détails</button>
+    </div>
+      </div>
+    </div>
+    <div class="carte-jeu">
+      <div class="carte-inner">
+        <div class="carte-front">
+          <img src="le_papa_des_loups.png" alt="LE PAPA DES LOUPS" loading="lazy">
+        </div>
+        <div class="carte-back">
+          <h3>LE PAPA DES LOUPS</h3>
+          <p>Le Papa des Loups détient un pouvoir unique et sinistre, capable de semer la discorde et le doute au sein du village. Dans l'équipe des loups-garous, il joue un rôle crucial. En plus de participer aux décisions nocturnes pour éliminer les paysans, il possède un pouvoir particulier : celui d'infecter un paysan une fois dans la partie, le transformant en loup-garou.</p>
+              <button class="btn-details">📖 Détails</button>
+    </div>
+      </div>
+    </div>
+    <div class="carte-jeu">
+      <div class="carte-inner">
+        <div class="carte-front">
+          <img src="l_enfant_loup_garou.png" alt="L'ENFANT LOUP-GAROU" loading="lazy">
+        </div>
+        <div class="carte-back">
+          <h3>L'ENFANT LOUP-GAROU</h3>
+          <p>Il a l’air doux, fragile… presque inoffensif. Et pourtant. L’Enfant Loup-Garou est indétectable : aux yeux des paysans, c’est un paysan comme les autres. Il passe tous les tests, résiste à toutes les vérifications. Même les meilleurs rôles défensifs ou les pouvoirs de contrôle ne voient que du feu.</p>
+              <button class="btn-details">📖 Détails</button>
+    </div>
+      </div>
+    </div>
+  </section>
+  <section id="solo">
+    <h2>🃏 RÔLES SOLO</h2>
+    <div class="carte-jeu">
+      <div class="carte-inner">
+        <div class="carte-front">
+          <img src="la_bete_immonde.png" alt="LA BÊTE IMMONDE" loading="lazy">
+        </div>
+        <div class="carte-back">
+          <h3>LA BÊTE IMMONDE</h3>
+          <p>Le cauchemar des Loups, enfin de la partie ! Cette Bête Immonde est seule contre le reste du monde. Son objectif est simple : manger un Loup chaque nuit. Si la Bête Immonde désigne un paysan au lieu d'un Loup, il ne se passe rien ; la Bête aura simplement perdu un tour. Lorsque tous les Loups sont éliminés et que la Bête Immonde est toujours en jeu, elle gagne fin de partie. À un moment ou à un autre, les Loups devront faire alliance avec le Village pour débusquer cette abomination et éviter la victoire prématurée de la Bête, au détriment d'un camp comme de l'autre.</p>
+              <button class="btn-details">📖 Détails</button>
+    </div>
+      </div>
+    </div>
+    <div class="carte-jeu">
+      <div class="carte-inner">
+        <div class="carte-front">
+          <img src="l_avocat_du_diable.png" alt="L'AVOCAT DU DIABLE" loading="lazy">
+        </div>
+        <div class="carte-back">
+          <h3>L'AVOCAT DU DIABLE</h3>
+          <p>Le crime n’existe pas sans preuve… mais les preuves, lui, il les invente. L’Avocat du Diable ne croit ni au Bien, ni au Mal. Il plaide pour qui il veut, selon son humeur ou son intérêt. Chaque nuit, tant qu’il est en vie, il se réveille et désigne trois joueurs : son trio du jugement. Au lever du jour, le Maître du Jeu annonce : « Aujourd’hui, le village devra choisir entre [Nom 1], [Nom 2] et [Nom 3]. » Durant cette journée, seuls ces trois joueurs peuvent être votés par le village. Le bûcher devra en emporter un… que l’Avocat aura, d’une certaine manière, choisi. Chaque nuit suivante, il peut reformer un nouveau trio, ou conserver le même selon sa stratégie. L’Avocat du Diable n’appartient à aucun camp : ni au village, ni aux loups, ni à quiconque. Il gagne avec qui il veut, selon la tournure de la partie. Son véritable pouvoir, c’est l’influence.</p>
+              <button class="btn-details">📖 Détails</button>
+    </div>
+      </div>
+    </div>
+    <div class="carte-jeu">
+      <div class="carte-inner">
+        <div class="carte-front">
+          <img src="la_valkyrie.png" alt="LA VALKYRIE" loading="lazy">
+        </div>
+        <div class="carte-back">
+          <h3>LA VALKYRIE</h3>
+          <p>Il s'agit d'un rôle presque "obligatoire" à placer durant les parties avec de nombreux joueurs, car le premier vote est très réfléchi et oblige les joueurs à se concentrer. Du point de vue de La Valkyrie, son but est de se faire tuer dès le premier tour, elle n'a donc que l'embarras du choix des moyens de se faire tuer. Si La Valkyrie ne réussit pas à se faire tuer, elle devient Simple paysanne pour le reste de la partie.</p>
+              <button class="btn-details">📖 Détails</button>
+    </div>
+      </div>
+    </div>
+    <div class="carte-jeu">
+      <div class="carte-inner">
+        <div class="carte-front">
+          <img src="le_clown.png" alt="LE CLOWN" loading="lazy">
+        </div>
+        <div class="carte-back">
+          <h3>LE CLOWN</h3>
+          <p>"Lorsqu’un clown entre dans un village, il ne devient pas roi de ce village, c’est le village qui devient un cirque.” (Proverbe Turc)
+Le clown ne doit en aucun cas être la cible de qui que ce soit la nuit, sous peine de mourir instantanément. Le seul moyen d’en venir à bout est de le désigner lors du vote en journée.</p>
+              <button class="btn-details">📖 Détails</button>
+    </div>
+      </div>
+    </div>
+    <div class="carte-jeu">
+      <div class="carte-inner">
+        <div class="carte-front">
+          <img src="le_diable.png" alt="LE DIABLE" loading="lazy">
+        </div>
+        <div class="carte-back">
+          <h3>LE DIABLE</h3>
+          <p>Le Diable choisit son camp en fonction du déroulement de la partie. Il gagne avec les paysans comme avec les Loups, tant qu’il est toujours en jeu.
+La nuit, le Diable a la possibilité de doubler la faculté spéciale d’un joueur. Exemple : s’il vise le Bienfaiteur, celui-ci protégera deux personnes ; s’il vise un Loup, les Loups pourront manger deux fois.
+Son pouvoir s’étend jusqu’au jour : lorsque des personnages ayant des pouvoirs diurnes agissent, leur capacité est également doublée. Exemple : si le Bûcheron est éliminé durant la journée, il emportera deux personnes avec lui. Le Diable reste neutre et opportuniste jusqu’au bout.</p>
+              <button class="btn-details">📖 Détails</button>
+    </div>
+      </div>
+    </div>
+    <div class="carte-jeu">
+      <div class="carte-inner">
+        <div class="carte-front">
+          <img src="le_gourou.png" alt="LE GOUROU" loading="lazy">
+        </div>
+        <div class="carte-back">
+          <h3>LE GOUROU</h3>
+          <p>Le Gourou est un rôle solo. Il se réveille en dernier et peut marabouter un ou deux joueurs (en fonction du nombre de participants), qui deviendront des ensorcelés. Il gagne lorsque tous les joueurs en vie sont sous son emprise.</p>
+              <button class="btn-details">📖 Détails</button>
+    </div>
+      </div>
+    </div>
+    <div class="carte-jeu">
+      <div class="carte-inner">
+        <div class="carte-front">
+          <img src="le_chevalier_de_la_mort.png" alt="LE CHEVALIER DE LA MORT" loading="lazy">
+        </div>
+        <div class="carte-back">
+          <h3>LE CHEVALIER DE LA MORT</h3>
+          <p>🧩 Ce rôle n’est pas fait pour les parties classiques. Il est réservé aux parties scénarisées, où la narration, les retournements de situation et les surprises sont au cœur du jeu. Il peut être introduit en secret, à un moment précis de l’histoire, ou dépendre d’un événement déclencheur prévu dans le scénario.</p>
+              <button class="btn-details">📖 Détails</button>
+    </div>
+      </div>
+    </div>
+    <div class="carte-jeu">
+      <div class="carte-inner">
+        <div class="carte-front">
+          <img src="le_serial_killer.png" alt="LE SERIAL KILLER" loading="lazy">
+        </div>
+        <div class="carte-back">
+          <h3>LE SERIAL KILLER</h3>
+          <p>Il ne parle pas. Il ne pactise pas. Il tue. Le Serial Killer joue seul, contre tous. Il ne fait pas partie du village, ni des Loups, ni des Vampires. Il n’a pas d’alliés. Juste une lame… et beaucoup de rancune. Chaque nuit, il peut décider de tuer un joueur, ou pas. C’est lui qui choisit quand frapper, et quand se fondre dans la masse. Il gagne uniquement s’il reste le dernier en vie. S’il vous dit qu’il est "un simple paysan un peu discret", fuyez !</p>
+              <button class="btn-details">📖 Détails</button>
+    </div>
+      </div>
+    </div>
+    <div class="carte-jeu">
+      <div class="carte-inner">
+        <div class="carte-front">
+          <img src="le_loup_garou_sauvage.png" alt="LE LOUP-GAROU SAUVAGE" loading="lazy">
+        </div>
+        <div class="carte-back">
+          <h3>LE LOUP-GAROU SAUVAGE</h3>
+          <p>Le Loup-Garou Sauvage n’obéit pas aux règles de la meute, il agit en solo. C’est un des rôles les plus difficiles à jouer, car il gagne seul, ayant éliminé tout le village et les loups-garous. Une nuit sur deux, il peut dévorer un loup-garou juste après leur tour. Il se réveille et vote en même temps que les loups.</p>
+              <button class="btn-details">📖 Détails</button>
+    </div>
+      </div>
+    </div>
+    <div class="carte-jeu">
+      <div class="carte-inner">
+        <div class="carte-front">
+          <img src="les_jumeaux_explosifs.png" alt="LES JUMEAUX EXPLOSIFS" loading="lazy">
+        </div>
+        <div class="carte-back">
+          <h3>LES JUMEAUX EXPLOSIFS</h3>
+          <p>Deux joueurs, un seul but : faire péter la partie… au sens propre. Chaque nuit, les Jumeaux se réveillent en secret pour attacher une bombe dans le dos d’un joueur. Au lever du jour, le MJ annonce : « Ce joueur se balade avec un léger tic-tac dans le dos... » Le village doit alors sauver cette personne en votant contre elle pour désamorcer la bombe, ce qui n’élimine pas le joueur. S’il ne le fait pas, la bombe explose, entraînant la mort de deux joueurs ce jour-là. Chaque nuit, une nouvelle bombe peut être posée tant qu’au moins un Jumeau est en vie. Le massacre ne s’arrête qu’une fois les deux Jumeaux découverts et éliminés.</p>
+              <button class="btn-details">📖 Détails</button>
+    </div>
+      </div>
+    </div>
+  </section>
+  <section id="vampires">
+    <h2>🦇 LES VAMPIRES</h2>
+    <div class="carte-jeu">
+      <div class="carte-inner">
+        <div class="carte-front">
+          <img src="dracula.png" alt="DRACULA" loading="lazy">
+        </div>
+        <div class="carte-back">
+          <h3>DRACULA</h3>
+          <p>Le roi des suceurs de sang ne porte pas ce nom pour rien… Chaque nuit, Dracula peut sélectionner un cou bien charnu à son goût. Le joueur ainsi mordu rejoint secrètement les rangs des vampires, devenant l’un de ses fidèles créatures de la nuit. Fini les bains de soleil, place aux bains de sang. Mais attention, l’éternité a un prix… Si Dracula meurt, tous ses sujets le suivent dans la tombe. Littéralement. En une seconde, toute sa lignée prend feu comme une brochette à la pleine lune. Les vampires ne survivent jamais à la chute de leur roi.</p>
+              <button class="btn-details">📖 Détails</button>
+    </div>
+      </div>
+    </div>
+    <div class="carte-jeu">
+      <div class="carte-inner">
+        <div class="carte-front">
+          <img src="la_succube.png" alt="LA SUCCUBE" loading="lazy">
+        </div>
+        <div class="carte-back">
+          <h3>LA SUCCUBE</h3>
+          <p>La Succube ne se contente pas de charmer, elle copie. Chaque nuit, elle s’approprie le pouvoir d’un rôle emblématique, un vrai défilé de déguisements maléfiques. Première nuit : elle voit à travers les esprits comme le Voyant. Deuxième nuit : elle manie les potions comme la Sorcière. Troisième nuit : elle vise, tire, et emporte un joueur avec elle, comme le Bûcheron. Après ces trois nuits, ses pouvoirs s’évanouissent, mais son aura, elle, reste intacte… et redoutable.</p>
+              <button class="btn-details">📖 Détails</button>
+    </div>
+      </div>
+    </div>
+    <div class="carte-jeu">
+      <div class="carte-inner">
+        <div class="carte-front">
+          <img src="le_chasseur_de_vampires.png" alt="LE CHASSEUR DE VAMPIRES" loading="lazy">
+        </div>
+        <div class="carte-back">
+          <h3>LE CHASSEUR DE VAMPIRES</h3>
+          <p>Silencieux. Déterminé. Et équipé d’ail dans toutes ses poches, le Chasseur de Vampires cible chaque nuit un joueur. Le Maître du Jeu lui révèle si cette personne est un vampire ou non. Il traque dans l’ombre, mais avec méthode. Une seule fois dans la partie, il peut effectuer un rituel de guérison sur un joueur vampirisé : la cible redevient un paysan. ⚠️ Si le pouvoir de verification est utilisé sur un innocent, il est perdu. C’est le seul vrai vaccin contre la morsure… et parfois, il suffit aussi d’un pieu bien placé.</p>
+              <button class="btn-details">📖 Détails</button>
+    </div>
+      </div>
+    </div>
+    <div class="carte-jeu">
+      <div class="carte-inner">
+        <div class="carte-front">
+          <img src="le_demon_vampire.png" alt="LE DÉMON VAMPIRE" loading="lazy">
+        </div>
+        <div class="carte-back">
+          <h3>LE DÉMON VAMPIRE</h3>
+          <p>Mi-démon, mi-vampire… 100% problème. Le Démon Vampire n’est pas une créature ordinaire. Il rôde dans l’ombre, invulnérable à tout ce qui pourrait l’atteindre la nuit. Loups, sorcières, bêtes ou bombes : rien ne peut l’égratigner quand le soleil dort. La seule façon de le faire disparaître ? Le convoquer au bûcher, en plein jour, sous les yeux brûlants du village… et espérer qu’il ne rit pas avant de flamber.</p>
+              <button class="btn-details">📖 Détails</button>
+    </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="event-cards">
+    <h2>🎲 CARTES VM</h2>
+
+    <h3 class="event-subtitle gold-title">GOLD</h3>
+    <div class="category">
+      <div class="carte-vm gold"><img src="or1.png" alt="RÉSURRECTION TOTALE" loading="lazy"></div>
+      <div class="carte-vm gold"><img src="or2.png" alt="RÉSURRECTION LIBRE" loading="lazy"></div>
+      <div class="carte-vm gold"><img src="or3.png" alt="VOILE DU SILENCE" loading="lazy"></div>
+      <div class="carte-vm gold"><img src="or4.png" alt="MALÉDICTION X" loading="lazy"></div>
+      <div class="carte-vm gold"><img src="or5.png" alt="HÉRITAGE SACRÉ" loading="lazy"></div>
+      <div class="carte-vm gold"><img src="or6.png" alt="RÉVÉLATION SINGULIÈRE" loading="lazy"></div>
+      <div class="carte-vm gold"><img src="or7.png" alt="BOOST INSTANTANÉ" loading="lazy"></div>
+      <div class="carte-vm gold"><img src="or8.png" alt="MIMÉTISME PARFAIT" loading="lazy"></div>
+      <div class="carte-vm gold"><img src="or9.png" alt="CIBLE MARQUÉE" loading="lazy"></div>
+      <div class="carte-vm gold"><img src="or10.png" alt="TRANSMISSION INTÉGRALE" loading="lazy"></div>
+    </div>
+
+    <h3 class="event-subtitle silver-title">SILVER</h3>
+    <div class="category">
+      <div class="carte-vm silver"><img src="ar1.png" alt="SPECTRE BAVARD" loading="lazy"></div>
+      <div class="carte-vm silver"><img src="ar2.png" alt="SMILE OR DIE" loading="lazy"></div>
+      <div class="carte-vm silver"><img src="ar3.png" alt="CHIFOUMI FATAL" loading="lazy"></div>
+      <div class="carte-vm silver"><img src="ar4.png" alt="SILENCE DANS LA SALLE" loading="lazy"></div>
+      <div class="carte-vm silver"><img src="ar5.png" alt="PARI SPECTRAL" loading="lazy"></div>
+      <div class="carte-vm silver"><img src="ar6.png" alt="VOTE CIBLÉ" loading="lazy"></div>
+      <div class="carte-vm silver"><img src="ar7.png" alt="CHARME INTOUCHABLE" loading="lazy"></div>
+      <div class="carte-vm silver"><img src="ar8.png" alt="DOUBLE CHEF" loading="lazy"></div>
+      <div class="carte-vm silver"><img src="ar9.png" alt="HOMMAGE OBLIGATOIRE" loading="lazy"></div>
+      <div class="carte-vm silver"><img src="ar10.png" alt="JUGEMENT RETARDÉ" loading="lazy"></div>
+    </div>
+
+    <h3 class="event-subtitle bronze-title">BRONZE</h3>
+    <div class="category">
+      <div class="carte-vm bronze"><img src="br1.png" alt="PROTECTION ANTICIPÉE" loading="lazy"></div>
+      <div class="carte-vm bronze"><img src="br2.png" alt="DESTIN CHOISI" loading="lazy"></div>
+      <div class="carte-vm bronze"><img src="br3.png" alt="ÉCHANGE FATAL" loading="lazy"></div>
+      <div class="carte-vm bronze"><img src="br4.png" alt="TROU DIMENSIONNEL" loading="lazy"></div>
+      <div class="carte-vm bronze"><img src="br5.png" alt="CHANGEMENT DE RÈGNE" loading="lazy"></div>
+      <div class="carte-vm bronze"><img src="br6.png" alt="VOILE DU SILENCE" loading="lazy"></div>
+      <div class="carte-vm bronze"><img src="br7.png" alt="INFORMATION PRÉOCCUPANTE" loading="lazy"></div>
+    </div>
+  </section>
+
+  <div id="vm-overlay" aria-hidden="true"></div>
+  <script src="script.js"></script>
+</body>
+</html>
