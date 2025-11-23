@@ -1552,8 +1552,6 @@ document.querySelectorAll('.carte-jeu').forEach(carte => {
     if (e.target.classList.contains('btn-details')) return;
     e.stopPropagation();
 
-    // VIBRATION : Augmentée à 70ms pour être bien sentie
-    // (Note : Fonctionne uniquement sur Android, iOS bloque cette fonction sur le Web)
     if (navigator.vibrate) {
       navigator.vibrate(70); 
     }
@@ -1607,13 +1605,8 @@ if (quickSearchInput) {
     const sections = document.querySelectorAll('section');
 
     cards.forEach(card => {
-      // 1. On ne récupère QUE le titre (h3)
       const titleRaw = card.querySelector('h3').textContent;
       const title = normalizeText(titleRaw);
-
-      // 2. On a supprimé la recherche dans la description (p)
-      
-      // 3. Vérification : Est-ce que les mots cherchés sont DANS LE TITRE ?
       const matches = searchTerms.every(word => title.includes(word));
       
       if (matches) {
@@ -1625,13 +1618,10 @@ if (quickSearchInput) {
       }
     });
 
-    // Gestion des titres de sections
     sections.forEach(sec => {
       if(sec.id === 'event-cards') return;
-      
       const visibleCards = sec.querySelectorAll('.carte-jeu[style="display: block"]');
       const h2 = sec.querySelector('h2');
-      
       if(h2) {
         h2.style.display = (visibleCards.length > 0 || term === '') ? 'block' : 'none';
       }
@@ -1650,45 +1640,32 @@ if (searchInput && suggestionsBox) {
   searchInput.addEventListener('input', function() {
     const rawValue = this.value;
     const value = normalizeText(rawValue);
-    
     if (value === '') { suggestionsBox.innerHTML = ''; return; }
 
     const suggestions = cardsArray
       .filter(card => {
         const titleRaw = card.querySelector('.carte-back h3').textContent;
         const title = normalizeText(titleRaw);
-        // On cherche seulement dans le titre pour les suggestions du menu
         return title.includes(value);
       })
       .map(card => card.querySelector('.carte-back h3').textContent)
-      .slice(0, 10); // Limite à 10 résultats
+      .slice(0, 10);
 
     if (suggestions.length > 0) {
       suggestionsBox.innerHTML = suggestions.map(sug => `<div>${sug}</div>`).join('');
-      
       suggestionsBox.querySelectorAll('div').forEach(div => {
         div.addEventListener('click', () => {
-          // Action au clic sur une suggestion
           const clickedTitle = div.textContent;
           searchInput.value = clickedTitle;
           suggestionsBox.innerHTML = '';
-          
-          // Trouver la carte correspondante exact
           const targetCard = cardsArray.find(card => 
             card.querySelector('.carte-back h3').textContent === clickedTitle
           );
-          
           if (targetCard) {
-            menu.classList.remove('open'); // Ferme le menu
-            
-            // Si la carte était cachée par une recherche précédente, on la réaffiche
+            menu.classList.remove('open');
             targetCard.style.display = 'block'; 
             targetCard.parentElement.querySelector('h2').style.display = 'block';
-
-            // Scroll vers la carte
             targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            
-            // Retourne la carte pour montrer le texte
             setTimeout(() => {
               if (!targetCard.classList.contains('flipped')) targetCard.classList.add('flipped');
             }, 800);
@@ -1742,9 +1719,7 @@ if (!document.querySelector('.details-overlay')) {
 }
 
 function openDetails(cardData) {
-  // VIBRATION
   if (navigator.vibrate) navigator.vibrate(15);
-
   const content = `
     <div class="details-content">
       <div class="details-header">
