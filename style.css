@@ -86,7 +86,7 @@ body.light-mode .carte-back h3, body.light-mode .carte-back p { color: #3e2f23; 
   .menu-toggle, .theme-toggle {
     z-index: 1001 !important;
   }
-}
+
 
 /* ============================================
    MENU LATÉRAL

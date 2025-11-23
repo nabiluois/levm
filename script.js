@@ -1807,4 +1807,6 @@ detailsPanel.addEventListener('touchstart', (e) => touchStartX = e.changedTouche
 detailsPanel.addEventListener('touchend', (e) => {
   touchEndX = e.changedTouches[0].screenX;
   if (touchEndX - touchStartX > 100) closeDetails();
-}, false);
+, false);
+
+}
