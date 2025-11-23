@@ -1508,7 +1508,7 @@ Mi-démon, mi-vampire… 100% problème. Le Démon Vampire n’est pas une créa
 ];
 
 // ===============================
-// RESTE DE TON SCRIPT INCHANGÉ
+// GESTION DU MENU & THÈME
 // ===============================
 const menu = document.querySelector('.side-menu');
 const toggle = document.querySelector('.menu-toggle');
@@ -1517,11 +1517,8 @@ const closeBtn = document.querySelector('.close-menu');
 if (toggle && menu && closeBtn) {
   toggle.addEventListener('click', () => menu.classList.add('open'));
   closeBtn.addEventListener('click', () => menu.classList.remove('open'));
-
   document.addEventListener('click', (e) => {
-    if (menu.classList.contains('open') && 
-        !menu.contains(e.target) && 
-        e.target !== toggle) {
+    if (menu.classList.contains('open') && !menu.contains(e.target) && e.target !== toggle) {
       menu.classList.remove('open');
     }
   });
@@ -1547,13 +1544,17 @@ themeToggle.addEventListener('click', () => {
   localStorage.setItem('theme', isLight ? 'light' : 'dark');
 });
 
-// FLIP CARTES - Une seule carte à la fois
+// ===============================
+// FLIP CARTES & HAPTIC (VIBRATION)
+// ===============================
 document.querySelectorAll('.carte-jeu').forEach(carte => {
   carte.addEventListener('click', function(e) {
-    if (e.target.classList.contains('btn-details')) {
-      return;
-    }
+    if (e.target.classList.contains('btn-details')) return;
     e.stopPropagation();
+
+    // VIBRATION (Android)
+    if (navigator.vibrate) navigator.vibrate(10);
+
     if (this.classList.contains('flipped')) {
       this.classList.remove('flipped');
       return;
@@ -1565,27 +1566,52 @@ document.querySelectorAll('.carte-jeu').forEach(carte => {
   });
 });
 
-// ANIMATION AU SCROLL (Intersection Observer)
-const observerOptions = {
-  threshold: 0.1,
-  rootMargin: '0px 0px -50px 0px'
-};
+// ANIMATION AU SCROLL
+const observerOptions = { threshold: 0.1, rootMargin: '0px 0px -50px 0px' };
 const observer = new IntersectionObserver((entries) => {
   entries.forEach((entry, index) => {
     if (entry.isIntersecting) {
-      setTimeout(() => {
-        entry.target.classList.add('visible');
-      }, index * 50);
+      setTimeout(() => { entry.target.classList.add('visible'); }, index * 50);
       observer.unobserve(entry.target);
     }
   });
 }, observerOptions);
 
-document.querySelectorAll('.carte-jeu, .carte-vm').forEach(carte => {
-  observer.observe(carte);
-});
+document.querySelectorAll('.carte-jeu, .carte-vm').forEach(carte => observer.observe(carte));
 
-// RECHERCHE
+// ===============================
+// RECHERCHE MOBILE RAPIDE (NOUVEAU)
+// ===============================
+const quickSearchInput = document.getElementById('quickSearch');
+if (quickSearchInput) {
+  quickSearchInput.addEventListener('input', function() {
+    const term = this.value.toLowerCase().trim();
+    const cards = document.querySelectorAll('.carte-jeu');
+    const sections = document.querySelectorAll('section');
+
+    cards.forEach(card => {
+      const title = card.querySelector('h3').textContent.toLowerCase();
+      const desc = card.querySelector('p').textContent.toLowerCase(); // Recherche dans la description aussi
+      
+      if (title.includes(term) || desc.includes(term)) {
+        card.style.display = 'block';
+        setTimeout(() => card.classList.add('visible'), 50);
+      } else {
+        card.style.display = 'none';
+      }
+    });
+
+    // Masquer les titres de section vides
+    sections.forEach(sec => {
+      if(sec.id === 'event-cards') return; // On ne touche pas aux cartes VM
+      const visibleCards = sec.querySelectorAll('.carte-jeu[style="display: block"]');
+      const h2 = sec.querySelector('h2');
+      if(h2) h2.style.display = (visibleCards.length > 0 || term === '') ? 'block' : 'none';
+    });
+  });
+}
+
+// RECHERCHE CLASSIQUE (MENU)
 const searchInput = document.getElementById('searchInput');
 const suggestionsBox = document.getElementById('searchSuggestions');
 const cards = Array.from(document.querySelectorAll('.carte-jeu'));
@@ -1593,11 +1619,7 @@ const cards = Array.from(document.querySelectorAll('.carte-jeu'));
 if (searchInput && suggestionsBox) {
   searchInput.addEventListener('input', function() {
     const value = this.value.toLowerCase().trim();
-    if (value === '') {
-      suggestionsBox.innerHTML = '';
-      return;
-    }
-
+    if (value === '') { suggestionsBox.innerHTML = ''; return; }
     const suggestions = cards
       .filter(card => {
         const title = card.querySelector('.carte-back h3');
@@ -1607,27 +1629,18 @@ if (searchInput && suggestionsBox) {
       .slice(0, 10);
 
     if (suggestions.length > 0) {
-      suggestionsBox.innerHTML = suggestions
-        .map(sug => `<div>${sug}</div>`)
-        .join('');
-
+      suggestionsBox.innerHTML = suggestions.map(sug => `<div>${sug}</div>`).join('');
       suggestionsBox.querySelectorAll('div').forEach(div => {
         div.addEventListener('click', () => {
           searchInput.value = div.textContent;
           suggestionsBox.innerHTML = '';
-          const targetCard = cards.find(card => 
-            card.querySelector('.carte-back h3').textContent === div.textContent
-          );
+          const targetCard = cards.find(card => card.querySelector('.carte-back h3').textContent === div.textContent);
           if (targetCard) {
-            targetCard.scrollIntoView({ 
-              behavior: 'smooth', 
-              block: 'center' 
-            });
+            menu.classList.remove('open'); // Ferme le menu
+            targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
             setTimeout(() => {
-              if (!targetCard.classList.contains('flipped')) {
-                targetCard.classList.add('flipped');
-              }
-            }, 600);
+              if (!targetCard.classList.contains('flipped')) targetCard.classList.add('flipped');
+            }, 800);
           }
         });
       });
@@ -1641,59 +1654,46 @@ if (searchInput && suggestionsBox) {
 (function () {
   const overlay = document.getElementById('vm-overlay');
   if (!overlay) return;
-
   function closeZoom() {
-    document.querySelectorAll('.carte-vm.zoomed').forEach(c => 
-      c.classList.remove('zoomed')
-    );
+    document.querySelectorAll('.carte-vm.zoomed').forEach(c => c.classList.remove('zoomed'));
     overlay.classList.remove('active');
     document.body.classList.remove('no-scroll');
   }
-
   function openZoom(card) {
-    document.querySelectorAll('.carte-vm.zoomed').forEach(c => {
-      if (c !== card) c.classList.remove('zoomed');
-    });
+    document.querySelectorAll('.carte-vm.zoomed').forEach(c => { if (c !== card) c.classList.remove('zoomed'); });
     card.classList.add('zoomed');
     overlay.classList.add('active');
     document.body.classList.add('no-scroll');
   }
-
   document.addEventListener('click', (e) => {
     const card = e.target.closest('.carte-vm');
     if (card) {
       e.stopPropagation();
-      if (card.classList.contains('zoomed')) {
-        closeZoom();
-      } else {
-        openZoom(card);
-      }
+      if (card.classList.contains('zoomed')) closeZoom(); else openZoom(card);
     } else if (overlay.classList.contains('active')) {
       closeZoom();
     }
   });
-
   overlay.addEventListener('click', closeZoom);
-
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-      closeZoom();
-    }
-  });
 })();
 
-// ============================================
-// PANNEAU DÉTAILS STYLE PANINI
-// ============================================
-const detailsPanel = document.createElement('div');
-detailsPanel.className = 'details-panel';
-document.body.appendChild(detailsPanel);
+// DÉTAILS PANEL (PANINI)
+const detailsPanel = document.querySelector('.details-panel') || document.createElement('div');
+if (!document.querySelector('.details-panel')) {
+  detailsPanel.className = 'details-panel';
+  document.body.appendChild(detailsPanel);
+}
 
-const detailsOverlay = document.createElement('div');
-detailsOverlay.className = 'details-overlay';
-document.body.appendChild(detailsOverlay);
+const detailsOverlay = document.querySelector('.details-overlay') || document.createElement('div');
+if (!document.querySelector('.details-overlay')) {
+  detailsOverlay.className = 'details-overlay';
+  document.body.appendChild(detailsOverlay);
+}
 
 function openDetails(cardData) {
+  // VIBRATION
+  if (navigator.vibrate) navigator.vibrate(15);
+
   const content = `
     <div class="details-content">
       <div class="details-header">
@@ -1713,18 +1713,15 @@ function openDetails(cardData) {
   detailsPanel.scrollTop = 0;
   detailsPanel.querySelector('.close-details').addEventListener('click', closeDetails);
 }
+
 function closeDetails() {
   detailsPanel.classList.remove('active');
   detailsOverlay.classList.remove('active');
   document.body.style.overflow = '';
 }
 detailsOverlay.addEventListener('click', closeDetails);
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape' && detailsPanel.classList.contains('active')) {
-    closeDetails();
-  }
-});
-// Gestion des clics sur boutons Détails
+
+// Boutons Détails
 document.addEventListener('click', (e) => {
   if (e.target.classList.contains('btn-details')) {
     e.stopPropagation();
@@ -1732,44 +1729,24 @@ document.addEventListener('click', (e) => {
     const carte = e.target.closest('.carte-jeu');
     const title = carte.querySelector('.carte-back h3').textContent.trim();
     const image = carte.querySelector('.carte-front img').src;
-    const panini = paniniRoles.find(r => r.id === title);
+    const panini = paniniRoles.find(r => r.title.includes(title) || r.id === title);
+    
     let cardData;
     if (panini) {
-      cardData = {
-        ...panini,
-        image: panini.image || image
-      };
+      cardData = { ...panini, image: panini.image || image };
     } else {
       const desc = carte.querySelector('.carte-back p').textContent;
-      cardData = {
-        title: title,
-        image: image,
-        description: desc
-      };
+      cardData = { title: title, image: image, description: `<p>${desc}</p>` };
     }
     openDetails(cardData);
   }
 });
-// ============================================
-// SWIPE MOBILE POUR FERMER LE PANNEAU
-// ============================================
+
+// SWIPE FERMETURE
 let touchStartX = 0;
 let touchEndX = 0;
-let touchStartY = 0;
-let touchEndY = 0;
-detailsPanel.addEventListener('touchstart', (e) => {
-  touchStartX = e.changedTouches[0].screenX;
-  touchStartY = e.changedTouches[0].screenY;
-}, false);
+detailsPanel.addEventListener('touchstart', (e) => touchStartX = e.changedTouches[0].screenX, false);
 detailsPanel.addEventListener('touchend', (e) => {
   touchEndX = e.changedTouches[0].screenX;
-  touchEndY = e.changedTouches[0].screenY;
-  handleSwipe();
+  if (touchEndX - touchStartX > 100) closeDetails();
 }, false);
-function handleSwipe() {
-  const swipeDistanceX = touchEndX - touchStartX;
-  const swipeDistanceY = Math.abs(touchEndY - touchStartY);
-  if (swipeDistanceX > 100 && swipeDistanceY < 50) {
-    closeDetails();
-  }
-}

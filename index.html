@@ -2,18 +2,22 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="description" content="Le Village Maudit - Jeu de rôles avec cartes Paysans, Loups-garous, Vampires, Solo et Événements">
-  <meta name="theme-color" content="#4e342e">
+  <meta name="theme-color" content="#2a1f15">
   <title>Le Village Maudit</title>
   <link href="https://fonts.googleapis.com/css2?family=Almendra&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Pirata+One&display=swap" rel="stylesheet">
   <link href="style.css" rel="stylesheet">
   <link href="manifest.json" rel="manifest">
+  <link rel="apple-touch-icon" href="icon.png">
 </head>
 <body>
 
-  <!-- Menu latéral -->
+  <div class="mobile-search-bar">
+    <input type="text" id="quickSearch" placeholder="🔍 Chercher un rôle (ex: Sorcière)..." aria-label="Recherche rapide">
+  </div>
+
   <button class="menu-toggle" aria-label="Ouvrir le menu">☰</button>
 
   <nav class="side-menu" role="navigation" aria-label="Menu principal">
@@ -1242,7 +1246,18 @@ La seule façon de le faire disparaître ? Le convoquer au bûcher, en plein j
     </div>
   </section>
 
-  <div id="vm-overlay" aria-hidden="true"></div>
+<div id="vm-overlay" aria-hidden="true"></div>
+
   <script src="script.js"></script>
+  
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+          .then(reg => console.log('Service Worker enregistré !'))
+          .catch(err => console.log('Erreur Service Worker :', err));
+      });
+    }
+  </script>
 </body>
 </html>
