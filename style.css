@@ -37,7 +37,7 @@ body.light-mode .carte-back { background: linear-gradient(135deg, #f5e6d3 0%, #e
 body.light-mode .carte-back h3, body.light-mode .carte-back p { color: #3e2f23; }
 
 /* ============================================
-   BARRE DE RECHERCHE MOBILE (NOUVEAU)
+   BARRE DE RECHERCHE MOBILE (CORRIGÉ)
    ============================================ */
 .mobile-search-bar {
   display: none; /* Caché sur PC */
@@ -45,38 +45,46 @@ body.light-mode .carte-back h3, body.light-mode .carte-back p { color: #3e2f23; 
 
 @media (max-width: 768px) {
   .mobile-search-bar {
-    display: block;
+    display: flex;               /* Active le mode Flexbox */
+    justify-content: center;     /* Centre l'input */
+    align-items: center;         /* Centre verticalement */
     position: sticky;
     top: 0;
     z-index: 900;
-    background: rgba(42, 31, 21, 0.85);
-    padding: 10px 15px;
-    padding-top: max(10px, var(--safe-top)); /* Gère l'encoche iPhone */
+    
+    /* C'est ICI que ça se joue : on ajoute des marges intérieures (padding)
+       à gauche et à droite pour laisser la place aux boutons Menu et Lune */
+    padding: 10px 70px;          
+    
+    background: rgba(42, 31, 21, 0.95);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border-bottom: 1px solid rgba(212, 175, 55, 0.3);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
   }
   
   .mobile-search-bar input {
     width: 100%;
-    padding: 12px 20px;
-    border-radius: 30px;
+    max-width: 300px; /* Évite qu'il soit trop large sur tablette */
+    padding: 8px 15px;
+    border-radius: 20px;
     border: 1px solid #d4af37;
     background: rgba(0,0,0,0.4);
     color: #f5e6b3;
     font-family: 'Almendra', serif;
-    font-size: 16px; /* 16px empêche le zoom auto sur iOS */
+    font-size: 16px;
     outline: none;
-    transition: box-shadow 0.3s;
+    text-align: center; /* Texte centré c'est plus joli */
   }
   
-  .mobile-search-bar input:focus {
-    box-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+  .mobile-search-bar input::placeholder {
+    color: rgba(245, 230, 179, 0.6);
+    font-size: 0.9em;
   }
-
-  /* On cache la recherche du menu burger pour éviter le doublon */
-  .side-menu .search-container {
-    display: none;
+  
+  /* On s'assure que les boutons Menu et Thème passent bien AU-DESSUS */
+  .menu-toggle, .theme-toggle {
+    z-index: 1001 !important;
   }
 }
 
