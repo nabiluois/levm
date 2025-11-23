@@ -37,63 +37,110 @@ body.light-mode .carte-back { background: linear-gradient(135deg, #f5e6d3 0%, #e
 body.light-mode .carte-back h3, body.light-mode .carte-back p { color: #3e2f23; }
 
 /* ============================================
-   BARRE DE RECHERCHE MOBILE (CORRIGÉ)
+   BARRE DE RECHERCHE MOBILE (FINALISÉE)
    ============================================ */
 .mobile-search-bar {
   display: none; /* Caché sur PC */
 }
 
 @media (max-width: 768px) {
+  /* LE CONTENEUR PRINCIPAL (La barre marron) */
   .mobile-search-bar {
-    display: flex;               /* Active le mode Flexbox */
-    justify-content: center;     /* Centre l'input */
-    align-items: center;         /* Centre verticalement */
+    display: flex;
+    justify-content: center; /* Centre l'input au milieu */
+    align-items: center;     /* Centre tout verticalement */
     position: sticky;
     top: 0;
     z-index: 900;
     
-    /* C'est ICI que ça se joue : on ajoute des marges intérieures (padding)
-       à gauche et à droite pour laisser la place aux boutons Menu et Lune */
-    padding: 10px 70px;          
+    /* HAUTEUR AUGMENTÉE : On passe à 80px pour que les boutons rentrent */
+    height: 80px;
     
-    background: rgba(42, 31, 21, 0.95);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border-bottom: 1px solid rgba(212, 175, 55, 0.3);
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    /* Marges intérieures pour ne pas coller aux bords de l'écran */
+    padding: 0 15px;
+    
+    background: rgba(42, 31, 21, 0.98); /* Fond un peu plus opaque */
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 2px solid #d4af37; /* Bordure dorée plus épaisse */
+    box-shadow: 0 6px 15px rgba(0,0,0,0.5);
   }
   
+  /* LE CHAMP DE TEXTE (Input au milieu) */
   .mobile-search-bar input {
-    width: 100%;
-    max-width: 300px; /* Évite qu'il soit trop large sur tablette */
-    padding: 8px 15px;
-    border-radius: 20px;
-    border: 1px solid #d4af37;
-    background: rgba(0,0,0,0.4);
+    /* Largeur calculée : 100% de l'écran MOINS la place pour les 2 boutons et les marges */
+    width: calc(100% - 120px); 
+    height: 46px; /* Hauteur fixe */
+    
+    padding: 0 20px;
+    border-radius: 23px; /* Arrondi parfait (moitié de la hauteur) */
+    border: 2px solid #d4af37;
+    background: rgba(20, 15, 10, 0.6); /* Fond plus sombre */
     color: #f5e6b3;
     font-family: 'Almendra', serif;
     font-size: 16px;
     outline: none;
-    text-align: center; /* Texte centré c'est plus joli */
+    text-align: center;
+    
+    /* Pour que l'input soit parfaitement centré dans la barre */
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
   }
   
   .mobile-search-bar input::placeholder {
-    color: rgba(245, 230, 179, 0.6);
-    font-size: 0.9em;
+    color: rgba(245, 230, 179, 0.5);
+    font-style: italic;
+  }
+
+  /* --- BOUTONS DANS LA BARRE --- */
+  
+  /* Réinitialisation des styles fixes pour qu'ils rentrent dans la barre */
+  .menu-toggle, .theme-toggle {
+    position: absolute !important; /* On force la position absolue */
+    top: 50% !important;           /* Centré verticalement */
+    transform: translateY(-50%) !important; /* Ajustement du centrage */
+    z-index: 1001 !important;
+    
+    /* NOUVELLE TAILLE : Plus petits pour rentrer (44x44 au lieu de 50x50) */
+    width: 44px !important;
+    height: 44px !important;
+    padding: 0 !important; /* On enlève le padding */
+    
+    border-width: 2px !important;
+    font-size: 1.4em !important;
+    
+    /* Flexbox pour centrer l'icône DANS le bouton */
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Positionnement précis à GAUCHE et à DROITE */
+  .menu-toggle {
+    left: 15px !important;
+    border-radius: 10px !important; /* Bouton menu un peu carré */
   }
   
-  /* On s'assure que les boutons Menu et Thème passent bien AU-DESSUS */
-  .menu-toggle, .theme-toggle {
-    z-index: 1001 !important;
+  .theme-toggle {
+    right: 15px !important;
+    /* Le theme-toggle est déjà rond par défaut, pas besoin de le repréciser */
   }
-
+  
+  /* Effet au survol (hover) */
+  .theme-toggle:hover {
+     transform: translateY(-50%) rotate(180deg) !important; /* On garde le centrage vertical lors de la rotation */
+  }
+}
+/* FIN DU BLOC MOBILE */
 
 /* ============================================
-   MENU LATÉRAL
+   STYLES DES BOUTONS (Version PC/Tablette)
+   Ces styles s'appliquent quand on n'est PAS sur mobile
    ============================================ */
 .menu-toggle {
   position: fixed;
-  top: max(20px, var(--safe-top)); /* Adapter à l'iPhone */
+  top: max(20px, var(--safe-top));
   left: 20px;
   z-index: 1000;
   background: rgba(62, 47, 35, 0.9);
@@ -112,7 +159,6 @@ body.light-mode .carte-back h3, body.light-mode .carte-back p { color: #3e2f23; 
   top: max(20px, var(--safe-top));
   right: 20px;
   z-index: 1000;
-  /* ... Reste inchangé ... */
   background: rgba(62, 47, 35, 0.9);
   color: #f5e6b3;
   border: 2px solid #f5e6b3;

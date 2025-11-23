@@ -1585,44 +1585,39 @@ document.querySelectorAll('.carte-jeu, .carte-vm').forEach(carte => observer.obs
 // ===============================
 // FONCTION DE RECHERCHE INTELLIGENTE
 // ===============================
-// Cette fonction nettoie le texte (enlève accents, met en minuscule) pour mieux comparer
 function normalizeText(text) {
   return text
     .toLowerCase()
-    .normalize("NFD") // Sépare les accents des lettres
-    .replace(/[\u0300-\u036f]/g, "") // Supprime les accents
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
     .trim();
 }
 
 // ===============================
-// RECHERCHE MOBILE RAPIDE
+// RECHERCHE MOBILE RAPIDE (STRICTE SUR LE TITRE)
 // ===============================
 const quickSearchInput = document.getElementById('quickSearch');
 if (quickSearchInput) {
   quickSearchInput.addEventListener('input', function() {
     const rawTerm = this.value;
-    const term = normalizeText(rawTerm); // On nettoie ce que l'utilisateur tape
-    const searchTerms = term.split(" "); // On sépare les mots (pour gérer "loup rouge")
+    const term = normalizeText(rawTerm);
+    const searchTerms = term.split(" ");
 
     const cards = document.querySelectorAll('.carte-jeu');
     const sections = document.querySelectorAll('section');
 
     cards.forEach(card => {
-      // On récupère le titre et la description
+      // 1. On ne récupère QUE le titre (h3)
       const titleRaw = card.querySelector('h3').textContent;
-      const descRaw = card.querySelector('p').textContent;
-      
-      // On nettoie le titre et la description pour la comparaison
       const title = normalizeText(titleRaw);
-      const desc = normalizeText(descRaw);
 
-      // LOGIQUE DE RECHERCHE :
-      // La carte doit contenir TOUS les mots tapés (dans le titre OU la description)
-      const matches = searchTerms.every(word => title.includes(word) || desc.includes(word));
+      // 2. On a supprimé la recherche dans la description (p)
+      
+      // 3. Vérification : Est-ce que les mots cherchés sont DANS LE TITRE ?
+      const matches = searchTerms.every(word => title.includes(word));
       
       if (matches) {
         card.style.display = 'block';
-        // Petit délai pour l'animation d'apparition
         setTimeout(() => card.classList.add('visible'), 50);
       } else {
         card.style.display = 'none';
@@ -1630,16 +1625,14 @@ if (quickSearchInput) {
       }
     });
 
-    // GESTION DES TITRES DE SECTION
-    // Si une section n'a plus aucune carte visible, on cache son titre (H2)
+    // Gestion des titres de sections
     sections.forEach(sec => {
-      if(sec.id === 'event-cards') return; // On laisse les cartes VM tranquilles
+      if(sec.id === 'event-cards') return;
       
       const visibleCards = sec.querySelectorAll('.carte-jeu[style="display: block"]');
       const h2 = sec.querySelector('h2');
       
       if(h2) {
-        // Affiche le titre s'il y a des cartes visibles OU si la recherche est vide
         h2.style.display = (visibleCards.length > 0 || term === '') ? 'block' : 'none';
       }
     });
