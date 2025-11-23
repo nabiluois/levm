@@ -94,9 +94,8 @@ body.light-mode .carte-back h3, body.light-mode .carte-back p { color: #3e2f23; 
     z-index: 1001 !important;   /* Au-dessus de la barre */
     
     /* ALIGNEMENT VERTICAL PARFAIT */
-    /* On calcule : (HauteurBarre 70px - HauteurBouton 36px) / 2 = ~17px du haut */
-    /* On ajoute var(--safe-top) pour l'encoche iPhone */
-    top: calc(17px + var(--safe-top)) !important;
+    /* On force le top à 17px + la safe-area pour qu'ils soient pile dans la barre de 70px */
+    top: calc(17px + env(safe-area-inset-top, 20px)) !important;
     
     /* TAILLE RÉDUITE */
     width: 36px !important;
@@ -114,17 +113,20 @@ body.light-mode .carte-back h3, body.light-mode .carte-back p { color: #3e2f23; 
     align-items: center;
     justify-content: center;
     transform: none !important; /* Annule les anciens effets */
+    margin: 0 !important; /* Enlève toute marge parasite */
   }
 
   /* Position Gauche (Burger) */
   .menu-toggle {
-    left: 10px !important;
+    left: 15px !important;
+    right: auto !important; /* Sécurité */
   }
   
   /* Position Droite (Lune) */
   .theme-toggle {
-    right: 10px !important;
-    border-radius: 50% !important; /* Rond pour la lune */
+    right: 15px !important;
+    left: auto !important; /* Sécurité */
+    border-radius: 50% !important;
   }
 }
 
