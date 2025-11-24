@@ -1508,14 +1508,14 @@ Mi-démon, mi-vampire… 100% problème. Le Démon Vampire n’est pas une créa
 ];
 
 // ===============================
-// 1. GESTION DU MENU & OVERLAY
+// 1. GESTION DU MENU & NAVIGATION
 // ===============================
 const menu = document.querySelector('.side-menu');
 const menuToggle = document.querySelector('.menu-toggle');
 const closeBtn = document.querySelector('.close-menu');
 const overlay = document.querySelector('.details-overlay') || document.createElement('div');
 
-// Si l'overlay n'existe pas dans le HTML, on le crée
+// Création overlay si inexistant
 if (!document.querySelector('.details-overlay')) {
   overlay.className = 'details-overlay';
   document.body.appendChild(overlay);
@@ -1532,7 +1532,6 @@ function openMenu() {
 function closeMenu() {
   if (menu) {
     menu.classList.remove('open');
-    // On ferme l'overlay seulement si le panneau détails est fermé aussi
     if (!document.querySelector('.details-panel.active')) {
       overlay.classList.remove('active');
       document.body.classList.remove('no-scroll');
@@ -1543,25 +1542,29 @@ function closeMenu() {
 if (menuToggle) menuToggle.addEventListener('click', openMenu);
 if (closeBtn) closeBtn.addEventListener('click', closeMenu);
 
-// Clic sur l'overlay ferme tout (Menu + Détails)
+// --- CORRECTION : FAIRE FONCTIONNER LES LIENS DU MENU ---
+document.querySelectorAll('.menu-links a').forEach(link => {
+  link.addEventListener('click', () => {
+    closeMenu(); // Ferme le menu quand on clique sur un lien
+  });
+});
+
+// Clic sur l'overlay ferme tout
 overlay.addEventListener('click', () => {
   closeMenu();
   closeDetails();
 });
 
 // ===============================
-// 2. GESTION DU THÈME (NOUVELLE LOGIQUE)
+// 2. GESTION DU THÈME
 // ===============================
-// On cible le bouton qui est maintenant en dur dans le HTML
 const themeBtn = document.getElementById('themeBtn');
 
-// Charger le thème sauvegardé
 if (localStorage.getItem('theme') === 'light') {
   document.body.classList.add('light-mode');
   if(themeBtn) themeBtn.textContent = '☀️';
 }
 
-// Basculer le thème
 if (themeBtn) {
   themeBtn.addEventListener('click', () => {
     document.body.classList.toggle('light-mode');
@@ -1572,20 +1575,15 @@ if (themeBtn) {
 }
 
 // ===============================
-// 3. FLIP CARTES & HAPTIC
+// 3. FLIP CARTES
 // ===============================
 document.querySelectorAll('.carte-jeu').forEach(carte => {
   carte.addEventListener('click', function(e) {
     if (e.target.classList.contains('btn-details')) return;
     e.stopPropagation();
-
-    // Vibration mobile
     if (navigator.vibrate) navigator.vibrate(50);
 
-    // Gestion du flip unique
     const isFlipped = this.classList.contains('flipped');
-    
-    // On retourne les autres cartes face cachée
     document.querySelectorAll('.carte-jeu.flipped').forEach(c => {
       if (c !== this) c.classList.remove('flipped');
     });
@@ -1595,50 +1593,39 @@ document.querySelectorAll('.carte-jeu').forEach(carte => {
 });
 
 // ===============================
-// 4. ANIMATION AU SCROLL (OPTIMISÉE)
+// 4. ANIMATION AU SCROLL (INSTANTANÉE)
 // ===============================
 const observerOptions = { threshold: 0.05, rootMargin: '50px' };
 const observer = new IntersectionObserver((entries) => {
   entries.forEach((entry) => {
     if (entry.isIntersecting) {
-      // Suppression du setTimeout pour corriger la lenteur
       entry.target.classList.add('visible');
       observer.unobserve(entry.target);
     }
   });
 }, observerOptions);
-
 document.querySelectorAll('.carte-jeu, .carte-vm').forEach(carte => observer.observe(carte));
 
 // ===============================
-// 5. FONCTION DE NORMALISATION
+// 5. FONCTION RECHERCHE RAPIDE
 // ===============================
 function normalizeText(text) {
   return text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
 }
 
-// ===============================
-// 6. RECHERCHE RAPIDE (TOP BAR)
-// ===============================
 const quickSearchInput = document.getElementById('quickSearch');
-
 if (quickSearchInput) {
   quickSearchInput.addEventListener('input', function() {
-    const rawTerm = this.value;
-    const term = normalizeText(rawTerm);
+    const term = normalizeText(this.value);
     const searchTerms = term.split(" ");
 
-    const cards = document.querySelectorAll('.carte-jeu');
-    const sections = document.querySelectorAll('section:not(#event-cards)');
-
-    cards.forEach(card => {
+    document.querySelectorAll('.carte-jeu').forEach(card => {
       const titleRaw = card.querySelector('h3').textContent;
       const title = normalizeText(titleRaw);
       const matches = searchTerms.every(word => title.includes(word));
       
       if (matches) {
-        card.style.display = ''; // IMPORTANT: '' permet de garder le GRID layout
-        // Petit délai imperceptible pour l'animation CSS
+        card.style.display = ''; 
         setTimeout(() => card.classList.add('visible'), 10);
       } else {
         card.style.display = 'none';
@@ -1646,68 +1633,16 @@ if (quickSearchInput) {
       }
     });
 
-    // Masquer les titres de sections vides
-    sections.forEach(sec => {
+    document.querySelectorAll('section:not(#event-cards)').forEach(sec => {
       const visibleCards = Array.from(sec.querySelectorAll('.carte-jeu')).filter(c => c.style.display !== 'none');
       const h2 = sec.querySelector('h2');
-      if(h2) {
-        h2.style.display = (visibleCards.length > 0 || term === '') ? '' : 'none';
-      }
+      if(h2) h2.style.display = (visibleCards.length > 0 || term === '') ? '' : 'none';
     });
   });
 }
 
 // ===============================
-// 7. RECHERCHE CLASSIQUE (MENU)
-// ===============================
-const searchInput = document.getElementById('searchInput');
-const suggestionsBox = document.getElementById('searchSuggestions');
-const cardsArray = Array.from(document.querySelectorAll('.carte-jeu'));
-
-if (searchInput && suggestionsBox) {
-  searchInput.addEventListener('input', function() {
-    const rawValue = this.value;
-    const value = normalizeText(rawValue);
-    if (value === '') { suggestionsBox.innerHTML = ''; return; }
-
-    const suggestions = cardsArray
-      .filter(card => {
-        const titleRaw = card.querySelector('.carte-back h3').textContent;
-        const title = normalizeText(titleRaw);
-        return title.includes(value);
-      })
-      .map(card => card.querySelector('.carte-back h3').textContent)
-      .slice(0, 10);
-
-    if (suggestions.length > 0) {
-      suggestionsBox.innerHTML = suggestions.map(sug => `<div>${sug}</div>`).join('');
-      suggestionsBox.querySelectorAll('div').forEach(div => {
-        div.addEventListener('click', () => {
-          const clickedTitle = div.textContent;
-          searchInput.value = clickedTitle;
-          suggestionsBox.innerHTML = '';
-          const targetCard = cardsArray.find(card => 
-            card.querySelector('.carte-back h3').textContent === clickedTitle
-          );
-          if (targetCard) {
-            closeMenu();
-            targetCard.style.display = ''; 
-            targetCard.parentElement.querySelector('h2').style.display = 'block';
-            targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            setTimeout(() => {
-              if (!targetCard.classList.contains('flipped')) targetCard.classList.add('flipped');
-            }, 800);
-          }
-        });
-      });
-    } else {
-      suggestionsBox.innerHTML = '<div style="opacity:0.6; padding:8px;">Aucun résultat</div>';
-    }
-  });
-}
-
-// ===============================
-// 8. ZOOM CARTES VM
+// 6. ZOOM CARTES VM
 // ===============================
 (function () {
   const vmOverlay = document.getElementById('vm-overlay');
@@ -1739,23 +1674,15 @@ if (searchInput && suggestionsBox) {
 })();
 
 // ===============================
-// 9. DÉTAILS PANEL (PANINI)
+// 7. DÉTAILS PANEL
 // ===============================
-const detailsPanel = document.querySelector('.details-panel') || document.createElement('div');
-if (!document.querySelector('.details-panel')) {
-  detailsPanel.className = 'details-panel';
-  document.body.appendChild(detailsPanel);
-}
-
-// Création du conteneur interne si inexistant
-if (!detailsPanel.querySelector('.details-content')) {
-    detailsPanel.innerHTML = '<div class="details-content"></div>';
+const detailsPanel = document.querySelector('.details-panel');
+if (detailsPanel && !detailsPanel.querySelector('.details-content')) {
+  detailsPanel.innerHTML = '<div class="details-content"></div>';
 }
 
 function openDetails(cardData) {
   if (navigator.vibrate) navigator.vibrate(15);
-  
-  // Utilisation du conteneur interne pour éviter d'écraser la structure
   const content = detailsPanel.querySelector('.details-content') || detailsPanel;
   
   content.innerHTML = `
@@ -1777,14 +1704,12 @@ function openDetails(cardData) {
 
 function closeDetails() {
   detailsPanel.classList.remove('active');
-  // Si le menu n'est pas ouvert, on enlève l'overlay et le blocage scroll
   if (!menu.classList.contains('open')) {
     overlay.classList.remove('active');
     document.body.classList.remove('no-scroll');
   }
 }
 
-// Écouteur sur les boutons "Détails"
 document.addEventListener('click', (e) => {
   if (e.target.classList.contains('btn-details')) {
     e.stopPropagation();
@@ -1793,10 +1718,7 @@ document.addEventListener('click', (e) => {
     const title = carte.querySelector('.carte-back h3').textContent.trim();
     const image = carte.querySelector('.carte-front img').src;
     
-    // Récupération des données depuis paniniRoles (si présent) ou depuis la carte HTML
-    // On vérifie si paniniRoles existe pour éviter une erreur
     const panini = (typeof paniniRoles !== 'undefined') ? paniniRoles.find(r => r.title.includes(title) || r.id === title) : null;
-    
     let cardData;
     if (panini) {
       cardData = { ...panini, image: panini.image || image };
@@ -1808,10 +1730,8 @@ document.addEventListener('click', (e) => {
   }
 });
 
-// Swipe pour fermer le panneau détails
 let touchStart = 0;
 detailsPanel.addEventListener('touchstart', (e) => touchStart = e.changedTouches[0].screenX, false);
 detailsPanel.addEventListener('touchend', (e) => {
-  const touchEnd = e.changedTouches[0].screenX;
-  if (touchEnd - touchStart > 100) closeDetails();
+  if (e.changedTouches[0].screenX - touchStart > 100) closeDetails();
 }, false);

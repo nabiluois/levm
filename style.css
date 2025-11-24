@@ -19,70 +19,52 @@ body {
   color: var(--text-dark);
   line-height: 1.6;
   overflow-x: hidden;
-  padding-top: calc(var(--header-height) + 20px); /* IMPORTANT: Espace pour la barre fixe */
+  padding-top: calc(var(--header-height) + 20px);
   transition: background 0.3s ease, color 0.3s ease;
 }
 
 body.no-scroll { overflow: hidden; }
 
 /* ============================================
-   MODE CLAIR (GÉRÉ GLOBALEMENT)
+   MODE CLAIR
    ============================================ */
-body.light-mode {
-  background-color: var(--bg-light);
-  color: var(--text-light);
-}
-/* Adaptation des textes et fonds en mode clair */
+body.light-mode { background-color: var(--bg-light); color: var(--text-light); }
 body.light-mode .top-bar { background: rgba(245, 230, 211, 0.95); border-bottom-color: var(--text-light); }
 body.light-mode .top-bar input { background: rgba(255, 255, 255, 0.8); color: #000; border-color: var(--text-light); }
 body.light-mode .menu-toggle, body.light-mode #themeBtn { color: var(--text-light); border-color: var(--text-light); background: rgba(255,255,255,0.5); }
 body.light-mode .side-menu { background: #fffcf5; border-right-color: var(--text-light); }
 body.light-mode .menu-links a, body.light-mode .close-menu { color: var(--text-light); }
-body.light-mode h2 { background: rgba(245, 230, 211, 0.9); color: var(--text-light); box-shadow: inset 0 0 5px var(--text-light); }
+body.light-mode h2 { background: rgba(245, 230, 211, 0.9); color: var(--text-light); }
 body.light-mode .carte-back { background: linear-gradient(135deg, #f5e6d3 0%, #fff 100%); }
 body.light-mode .carte-back h3, body.light-mode .carte-back p { color: var(--text-light); }
 body.light-mode .details-panel { background: rgba(255, 250, 240, 0.98); color: var(--text-light); }
-body.light-mode .details-section p, body.light-mode .details-section li { color: #5a4a3a; }
 
 /* ============================================
-   BARRE DU HAUT (TOP BAR) - UNIFIÉE
+   BARRE DU HAUT (TOP BAR)
    ============================================ */
 .top-bar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  position: fixed;
-  top: 0; left: 0; width: 100%;
-  height: var(--header-height);
+  display: flex; justify-content: space-between; align-items: center;
+  position: fixed; top: 0; left: 0; width: 100%; height: var(--header-height);
   padding: var(--safe-top) 15px 10px 15px;
-  background: rgba(42, 31, 21, 0.95);
-  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-  border-bottom: 2px solid var(--gold);
-  box-shadow: 0 4px 15px rgba(0,0,0,0.4);
-  z-index: 1000;
-  gap: 15px;
-  transition: background 0.3s ease;
+  background: rgba(42, 31, 21, 0.95); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-bottom: 2px solid var(--gold); box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+  z-index: 1000; gap: 15px;
 }
 
-/* Champ de recherche central */
 .search-wrapper { flex: 1; max-width: 600px; }
 .top-bar input {
   width: 100%; height: 40px; padding: 0 15px;
   border-radius: 20px; border: 1px solid var(--gold);
   background: rgba(0, 0, 0, 0.3); color: #f5e6b3;
   font-family: 'Almendra', serif; font-size: 16px; outline: none; text-align: center;
-  transition: all 0.3s;
 }
-.top-bar input:focus { background: rgba(0, 0, 0, 0.6); border-color: #fff; }
 
-/* Boutons (Menu & Thème) */
 .menu-toggle, #themeBtn {
   width: 40px; height: 40px; border-radius: 8px;
   display: flex; align-items: center; justify-content: center;
   background: rgba(0,0,0,0.3); border: 1px solid var(--gold); color: var(--gold);
-  font-size: 1.2em; cursor: pointer; transition: all 0.2s;
+  font-size: 1.2em; cursor: pointer;
 }
-.menu-toggle:active, #themeBtn:active { transform: scale(0.95); }
 
 /* ============================================
    MENU LATÉRAL
@@ -98,18 +80,20 @@ body.light-mode .details-section p, body.light-mode .details-section li { color:
 .menu-links { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
 .menu-links a { color: inherit; text-decoration: none; font-size: 1.2em; padding: 12px; border-radius: 8px; transition: background 0.2s; }
 .menu-links a:hover { background: rgba(212, 175, 55, 0.15); }
-
-/* Recherche dans le menu */
 .search-container { margin-top: 30px; }
 #searchInput { width: 100%; padding: 10px; background: rgba(255,255,255,0.1); border: 1px solid var(--gold); color: inherit; border-radius: 5px; }
 .suggestions div { padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); cursor: pointer; }
 
 /* ============================================
-   GRILLE ET CARTES (CORRECTION VITESSE)
+   EFFET PINTEREST & GRILLE (VILLAGE & LOUPS)
    ============================================ */
 section:not(#event-cards) {
-  display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;
-  margin: 0 auto 40px auto; max-width: 1400px; padding: 0 10px;
+  display: grid; 
+  grid-template-columns: repeat(2, 1fr); /* 2 colonnes sur mobile */
+  gap: 15px;
+  margin: 0 auto 40px auto; 
+  max-width: 1400px; 
+  padding: 0 10px;
 }
 
 h2 {
@@ -120,12 +104,15 @@ h2 {
 
 .carte-jeu {
   position: relative; width: 100%; aspect-ratio: 2/3; perspective: 1000px; cursor: pointer;
-  /* Optimisation performance */
   opacity: 0; transform: translateY(20px); 
   will-change: transform, opacity;
-  transition: opacity 0.4s ease-out, transform 0.4s ease-out; /* Transition plus rapide */
+  transition: opacity 0.4s ease-out, transform 0.4s ease-out;
 }
 .carte-jeu.visible { opacity: 1; transform: translateY(0); }
+
+/* L'EFFET 3D "PINTEREST" QUI FLOTTE */
+.carte-jeu:hover { transform: translateY(-8px) scale(1.02); z-index: 10; }
+.carte-jeu:hover .carte-front { box-shadow: 0 15px 30px rgba(212, 175, 55, 0.4); border-color: var(--gold); }
 
 .carte-inner { position: relative; width: 100%; height: 100%; transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1); transform-style: preserve-3d; }
 .carte-jeu.flipped .carte-inner { transform: rotateY(180deg); }
@@ -133,6 +120,7 @@ h2 {
 .carte-front, .carte-back {
   position: absolute; width: 100%; height: 100%; backface-visibility: hidden;
   border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+  transition: box-shadow 0.3s ease;
 }
 .carte-front { background: #1a1510; border: 2px solid rgba(212, 175, 55, 0.2); }
 .carte-front img { width: 100%; height: 100%; object-fit: cover; }
@@ -150,11 +138,46 @@ h2 {
 }
 
 /* ============================================
+   CARTES VM (CORRIGÉ : RETOUR EN PETIT)
+   ============================================ */
+#event-cards { display: block; padding: 0 10px 80px 10px; max-width: 1400px; margin: 0 auto; }
+.event-subtitle { display: block; width: 100%; text-align: center; font-family: 'Pirata One', serif; font-size: 1.4em; margin: 30px 0 15px 0; }
+.gold-title { color: gold; text-shadow: 0 0 10px gold; }
+.silver-title { color: silver; text-shadow: 0 0 10px silver; }
+.bronze-title { color: #cd7f32; text-shadow: 0 0 10px #cd7f32; }
+
+/* La grille spécifique pour les VM */
+.category { 
+  display: grid; 
+  grid-template-columns: repeat(3, 1fr); /* 3 colonnes sur mobile */
+  gap: 10px; 
+  margin-bottom: 30px; 
+}
+
+.carte-vm { width: 100%; aspect-ratio: 2/3; border-radius: 8px; overflow: hidden; cursor: pointer; transition: transform 0.2s; position: relative; opacity: 1; }
+.carte-vm:hover { transform: scale(1.1); z-index: 5; }
+.carte-vm img { width: 100%; height: 100%; object-fit: cover; }
+
+/* Zoom VM */
+.carte-vm.zoomed { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(1) !important; z-index: 2000; width: 85vw; max-width: 400px; height: auto; box-shadow: 0 0 50px rgba(0,0,0,0.9); }
+#vm-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1999; }
+#vm-overlay.active { display: block; }
+
+/* ============================================
    RESPONSIVE (TABLETTE / PC)
    ============================================ */
-@media (min-width: 500px) { section:not(#event-cards) { grid-template-columns: repeat(3, 1fr); } }
-@media (min-width: 800px) { section:not(#event-cards) { grid-template-columns: repeat(4, 1fr); gap: 20px; } }
-@media (min-width: 1200px) { section:not(#event-cards) { grid-template-columns: repeat(5, 1fr); } }
+@media (min-width: 500px) { 
+  section:not(#event-cards) { grid-template-columns: repeat(3, 1fr); }
+  .category { grid-template-columns: repeat(4, 1fr); gap: 15px; } 
+}
+@media (min-width: 800px) { 
+  section:not(#event-cards) { grid-template-columns: repeat(4, 1fr); gap: 20px; }
+  .category { grid-template-columns: repeat(6, 1fr); gap: 20px; }
+}
+@media (min-width: 1200px) { 
+  section:not(#event-cards) { grid-template-columns: repeat(5, 1fr); } 
+  .category { grid-template-columns: repeat(8, 1fr); }
+}
 
 /* ============================================
    PANEL DETAILS
