@@ -1515,7 +1515,6 @@ const menuToggle = document.querySelector('.menu-toggle');
 const closeBtn = document.querySelector('.close-menu');
 const overlay = document.querySelector('.details-overlay') || document.createElement('div');
 
-// Création overlay si inexistant
 if (!document.querySelector('.details-overlay')) {
   overlay.className = 'details-overlay';
   document.body.appendChild(overlay);
@@ -1532,7 +1531,7 @@ function openMenu() {
 function closeMenu() {
   if (menu) {
     menu.classList.remove('open');
-    // On ferme l'overlay seulement si le panneau détails n'est pas ouvert
+    // On ne ferme l'overlay que si les détails ne sont pas ouverts
     if (!document.querySelector('.details-panel.active')) {
       overlay.classList.remove('active');
       document.body.classList.remove('no-scroll');
@@ -1543,22 +1542,16 @@ function closeMenu() {
 if (menuToggle) menuToggle.addEventListener('click', openMenu);
 if (closeBtn) closeBtn.addEventListener('click', closeMenu);
 
-// --- CORRECTION : Navigation fluide ---
-// On sélectionne tous les liens DANS le menu
+// Navigation au clic sur un lien
 document.querySelectorAll('.side-menu a').forEach(link => {
-  link.addEventListener('click', (e) => {
-    // On ferme le menu
+  link.addEventListener('click', () => {
     closeMenu();
-    
-    // Petite astuce : on laisse le navigateur aller vers l'ancre (#village, etc.)
-    // Pas besoin de preventDefault ici sauf si tu veux une animation JS spécifique
   });
 });
 
-// Clic sur l'overlay ferme tout
+// Clic sur l'overlay
 overlay.addEventListener('click', () => {
   closeMenu();
-  // On vérifie si la fonction closeDetails existe avant de l'appeler
   if (typeof closeDetails === 'function') closeDetails();
 });
 
@@ -1582,7 +1575,7 @@ if (themeBtn) {
 }
 
 // ===============================
-// 3. FLIP CARTES
+// 3. FLIP CARTES (Jeu)
 // ===============================
 document.querySelectorAll('.carte-jeu').forEach(carte => {
   carte.addEventListener('click', function(e) {
@@ -1600,7 +1593,7 @@ document.querySelectorAll('.carte-jeu').forEach(carte => {
 });
 
 // ===============================
-// 4. ANIMATION AU SCROLL (INSTANTANÉE)
+// 4. ANIMATION AU SCROLL
 // ===============================
 const observerOptions = { threshold: 0.05, rootMargin: '50px' };
 const observer = new IntersectionObserver((entries) => {
@@ -1614,7 +1607,7 @@ const observer = new IntersectionObserver((entries) => {
 document.querySelectorAll('.carte-jeu, .carte-vm').forEach(carte => observer.observe(carte));
 
 // ===============================
-// 5. FONCTION RECHERCHE RAPIDE
+// 5. RECHERCHE RAPIDE
 // ===============================
 function normalizeText(text) {
   return text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
@@ -1649,7 +1642,7 @@ if (quickSearchInput) {
 }
 
 // ===============================
-// 6. ZOOM CARTES VM
+// 6. ZOOM CARTES VM (Spécifique VM)
 // ===============================
 (function () {
   const vmOverlay = document.getElementById('vm-overlay');
@@ -1669,6 +1662,7 @@ if (quickSearchInput) {
   }
   
   document.addEventListener('click', (e) => {
+    // Si on clique sur une carte VM
     const card = e.target.closest('.carte-vm');
     if (card) {
       e.stopPropagation();
