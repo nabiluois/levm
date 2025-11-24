@@ -1515,21 +1515,40 @@ const toggle = document.querySelector('.menu-toggle');
 const closeBtn = document.querySelector('.close-menu');
 
 if (toggle && menu && closeBtn) {
-  toggle.addEventListener('click', () => menu.classList.add('open'));
-  closeBtn.addEventListener('click', () => menu.classList.remove('open'));
+  toggle.addEventListener('click', () => {
+    menu.classList.add('open');
+    document.body.classList.add('no-scroll'); // Bloque le scroll arrière-plan
+  });
+  
+  closeBtn.addEventListener('click', () => {
+    menu.classList.remove('open');
+    document.body.classList.remove('no-scroll'); // Débloque
+  });
+
   document.addEventListener('click', (e) => {
     if (menu.classList.contains('open') && !menu.contains(e.target) && e.target !== toggle) {
       menu.classList.remove('open');
+      document.body.classList.remove('no-scroll'); // Débloque au clic dehors
     }
   });
 }
 
-// MODE SOMBRE/CLAIR
+// MODE SOMBRE/CLAIR (LOGIQUE MOBILE AJOUTÉE)
 const themeToggle = document.createElement('button');
 themeToggle.className = 'theme-toggle';
 themeToggle.innerHTML = '🌙';
 themeToggle.setAttribute('aria-label', 'Changer le thème');
-document.body.appendChild(themeToggle);
+
+// --- CORRECTION MOBILE : On place le bouton au bon endroit ---
+const themePlaceholder = document.getElementById('theme-placeholder');
+
+// Si on est sur un petit écran ET que le placeholder existe (barre mobile présente)
+if (themePlaceholder && window.innerWidth <= 768) {
+    themePlaceholder.appendChild(themeToggle); // On met la lune dans la barre
+} else {
+    document.body.appendChild(themeToggle); // Sinon on la laisse flottante (PC)
+}
+// -------------------------------------------------------------
 
 const savedTheme = localStorage.getItem('theme');
 if (savedTheme === 'light') {
@@ -1545,7 +1564,7 @@ themeToggle.addEventListener('click', () => {
 });
 
 // ===============================
-// FLIP CARTES & HAPTIC (VIBRATION CORRIGÉE)
+// FLIP CARTES & HAPTIC
 // ===============================
 document.querySelectorAll('.carte-jeu').forEach(carte => {
   carte.addEventListener('click', function(e) {
@@ -1584,15 +1603,11 @@ document.querySelectorAll('.carte-jeu, .carte-vm').forEach(carte => observer.obs
 // FONCTION DE RECHERCHE INTELLIGENTE
 // ===============================
 function normalizeText(text) {
-  return text
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .trim();
+  return text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
 }
 
 // ===============================
-// RECHERCHE MOBILE RAPIDE (STRICTE SUR LE TITRE)
+// RECHERCHE MOBILE RAPIDE (CORRIGÉE POUR GRID)
 // ===============================
 const quickSearchInput = document.getElementById('quickSearch');
 if (quickSearchInput) {
@@ -1610,7 +1625,8 @@ if (quickSearchInput) {
       const matches = searchTerms.every(word => title.includes(word));
       
       if (matches) {
-        card.style.display = 'block';
+        // CORRECTION : On met '' au lieu de 'block' pour ne pas casser la Grid CSS
+        card.style.display = ''; 
         setTimeout(() => card.classList.add('visible'), 50);
       } else {
         card.style.display = 'none';
@@ -1620,9 +1636,13 @@ if (quickSearchInput) {
 
     sections.forEach(sec => {
       if(sec.id === 'event-cards') return;
-      const visibleCards = sec.querySelectorAll('.carte-jeu[style="display: block"]');
+      
+      // On compte les cartes visibles (celles qui n'ont pas display: none)
+      const visibleCards = Array.from(sec.querySelectorAll('.carte-jeu')).filter(c => c.style.display !== 'none');
       const h2 = sec.querySelector('h2');
+      
       if(h2) {
+        // Si cartes visibles OU recherche vide -> on affiche le titre de section
         h2.style.display = (visibleCards.length > 0 || term === '') ? 'block' : 'none';
       }
     });
@@ -1630,7 +1650,7 @@ if (quickSearchInput) {
 }
 
 // ===============================
-// RECHERCHE CLASSIQUE (MENU) - MISE À JOUR
+// RECHERCHE CLASSIQUE (MENU)
 // ===============================
 const searchInput = document.getElementById('searchInput');
 const suggestionsBox = document.getElementById('searchSuggestions');
@@ -1663,7 +1683,9 @@ if (searchInput && suggestionsBox) {
           );
           if (targetCard) {
             menu.classList.remove('open');
-            targetCard.style.display = 'block'; 
+            document.body.classList.remove('no-scroll'); // Débloque le scroll
+            
+            targetCard.style.display = ''; // Reset display pour Grid
             targetCard.parentElement.querySelector('h2').style.display = 'block';
             targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
             setTimeout(() => {
@@ -1735,7 +1757,7 @@ function openDetails(cardData) {
   detailsPanel.innerHTML = content;
   detailsPanel.classList.add('active');
   detailsOverlay.classList.add('active');
-  document.body.style.overflow = 'hidden';
+  document.body.classList.add('no-scroll'); // Bloque avec la classe CSS
   detailsPanel.scrollTop = 0;
   detailsPanel.querySelector('.close-details').addEventListener('click', closeDetails);
 }
@@ -1743,7 +1765,7 @@ function openDetails(cardData) {
 function closeDetails() {
   detailsPanel.classList.remove('active');
   detailsOverlay.classList.remove('active');
-  document.body.style.overflow = '';
+  document.body.classList.remove('no-scroll'); // Débloque avec la classe CSS
 }
 detailsOverlay.addEventListener('click', closeDetails);
 
