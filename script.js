@@ -1261,7 +1261,6 @@ function openMenu() {
 function closeMenu() {
   if (menu) {
     menu.classList.remove('open');
-    // On ne ferme l'overlay que si les détails ne sont pas ouverts
     if (!document.querySelector('.details-panel.active')) {
       overlay.classList.remove('active');
       document.body.classList.remove('no-scroll');
@@ -1272,14 +1271,12 @@ function closeMenu() {
 if (menuToggle) menuToggle.addEventListener('click', openMenu);
 if (closeBtn) closeBtn.addEventListener('click', closeMenu);
 
-// Navigation au clic sur un lien (CORRECTIF MENU)
 document.querySelectorAll('.side-menu a').forEach(link => {
   link.addEventListener('click', () => {
     closeMenu();
   });
 });
 
-// Clic sur l'overlay
 overlay.addEventListener('click', () => {
   closeMenu();
   if (typeof closeDetails === 'function') closeDetails();
@@ -1305,20 +1302,29 @@ if (themeBtn) {
 }
 
 // ===============================
-// 3. FLIP CARTES (Jeu)
+// 3. FLIP CARTES (CORRIGÉ)
 // ===============================
 document.querySelectorAll('.carte-jeu').forEach(carte => {
   carte.addEventListener('click', function(e) {
-    if (e.target.classList.contains('btn-details')) return;
+    // Empêche le flip si on clique sur le bouton "Détails"
+    if (e.target.closest('.btn-details')) return; 
+    
     e.stopPropagation();
     if (navigator.vibrate) navigator.vibrate(50);
 
     const isFlipped = this.classList.contains('flipped');
+    
+    // On retourne toutes les autres cartes face cachée
     document.querySelectorAll('.carte-jeu.flipped').forEach(c => {
       if (c !== this) c.classList.remove('flipped');
     });
 
-    if (!isFlipped) this.classList.add('flipped');
+    // On bascule l'état de la carte cliquée
+    if (!isFlipped) {
+      this.classList.add('flipped');
+    } else {
+      this.classList.remove('flipped'); // Permet de la refermer si on reclique
+    }
   });
 });
 
@@ -1372,7 +1378,7 @@ if (quickSearchInput) {
 }
 
 // ===============================
-// 6. ZOOM CARTES VM (Spécifique VM)
+// 6. ZOOM CARTES VM
 // ===============================
 (function () {
   const vmOverlay = document.getElementById('vm-overlay');
@@ -1404,7 +1410,7 @@ if (quickSearchInput) {
 })();
 
 // ===============================
-// 7. DÉTAILS PANEL
+// 7. DÉTAILS PANEL (PANINI)
 // ===============================
 const detailsPanel = document.querySelector('.details-panel');
 if (detailsPanel && !detailsPanel.querySelector('.details-content')) {
@@ -1441,7 +1447,8 @@ function closeDetails() {
 }
 
 document.addEventListener('click', (e) => {
-  if (e.target.classList.contains('btn-details')) {
+  // On cible spécifiquement le bouton "Détails"
+  if (e.target.closest('.btn-details')) {
     e.stopPropagation();
     e.preventDefault();
     const carte = e.target.closest('.carte-jeu');
@@ -1465,7 +1472,6 @@ document.addEventListener('click', (e) => {
 // ===============================
 const searchInput = document.getElementById('searchInput');
 const suggestionsBox = document.getElementById('searchSuggestions');
-// On s'assure que cardsArray est bien peuplé
 const cardsArray = Array.from(document.querySelectorAll('.carte-jeu'));
 
 if (searchInput && suggestionsBox) {
@@ -1491,25 +1497,17 @@ if (searchInput && suggestionsBox) {
           searchInput.value = clickedTitle;
           suggestionsBox.innerHTML = '';
           
-          // On cherche la carte correspondante dans cardsArray
           const targetCard = cardsArray.find(card => 
             card.querySelector('.carte-back h3').textContent === clickedTitle
           );
           
           if (targetCard) {
-            closeMenu(); // Ferme le menu
-            
-            // Affiche la carte si elle était cachée
+            closeMenu();
             targetCard.style.display = ''; 
-            // Affiche le titre de la section parente si caché
             if (targetCard.parentElement.querySelector('h2')) {
                targetCard.parentElement.querySelector('h2').style.display = 'block';
             }
-            
-            // Scroll vers la carte
             targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            
-            // Petit effet visuel : on la retourne après un court délai
             setTimeout(() => {
               if (!targetCard.classList.contains('flipped')) targetCard.classList.add('flipped');
             }, 800);
