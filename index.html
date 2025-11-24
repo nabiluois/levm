@@ -1,23 +1,18 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    </head>
-<body> <div class="top-bar">...</div>
-
-    <nav class="side-menu">...</nav>
-
-    <section id="village">...</section>
-    <section id="loups">...</section>
-    <section id="solo">...</section>
-    <section id="vampires">...</section>
-    <section id="event-cards">...</section>
-
-    <div id="vm-overlay"></div>
-    <div class="details-panel"></div>
-    <div class="details-overlay"></div>
-
-    <script src="script.js"></script>
-    </body> </html>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="description" content="Le Village Maudit - Jeu de rôles">
+  <meta name="theme-color" content="#2a1f15">
+  <title>Le Village Maudit</title>
+  <link href="https://fonts.googleapis.com/css2?family=Almendra&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Pirata+One&display=swap" rel="stylesheet">
+  <link href="style.css" rel="stylesheet">
+  <link href="manifest.json" rel="manifest">
+  <link rel="apple-touch-icon" href="icon.png">
+</head>
+<body>
 
   <div class="top-bar">
     <button class="menu-toggle" aria-label="Ouvrir le menu">☰</button>
@@ -43,8 +38,8 @@
     </div>
 
     <div class="search-container">
-      <input id="searchInput" type="text" placeholder="Rechercher dans la liste..." aria-label="Rechercher une carte">
-      <div class="suggestions" id="searchSuggestions" role="listbox"></div>
+      <input id="searchInput" type="text" placeholder="Rechercher..." aria-label="Rechercher">
+      <div class="suggestions" id="searchSuggestions"></div>
     </div>
 
     <div class="menu-footer">
@@ -52,10 +47,6 @@
       <em>by Nabil & Joelson</em>
     </div>
   </nav>
-
-  <script src="script.js"></script>
-</body>
-</html>
 
   <section id="village">
     <h2>🏘️ LE VILLAGE</h2>
