@@ -72,8 +72,11 @@ body.light-mode .details-panel { background: rgba(255, 250, 240, 0.98); color: v
 .side-menu {
   position: fixed; top: 0; left: -320px; width: 300px; height: 100vh;
   background: rgba(31, 23, 16, 0.98); padding: 20px; padding-top: calc(30px + var(--safe-top));
-  z-index: 1100; transition: left 0.3s ease-in-out; overflow-y: auto; border-right: 3px solid var(--gold);
+  /* CORRECTION ICI : z-index doit être très haut (plus haut que l'overlay) */
+  z-index: 2100; 
+  transition: left 0.3s ease-in-out; overflow-y: auto; border-right: 3px solid var(--gold);
   box-shadow: 5px 0 20px rgba(0,0,0,0.5);
+}
 }
 .side-menu.open { left: 0; }
 .close-menu { position: absolute; top: 15px; right: 15px; background: none; border: none; color: var(--gold); font-size: 2em; cursor: pointer; }
@@ -130,7 +133,14 @@ h2 {
   display: flex; flex-direction: column; padding: 12px; border: 2px solid var(--gold); overflow-y: auto;
 }
 .carte-back h3 { font-family: 'Pirata One'; color: var(--gold); text-align: center; margin-bottom: 8px; font-size: 1.1em; }
-.carte-back p { font-size: 0.9em; line-height: 1.4; flex: 1; }
+.carte-back p { 
+  font-size: 0.9em; 
+  line-height: 1.4; 
+  flex: 1;
+  
+  /* C'est LA ligne magique qui remet tes sauts de ligne */
+  white-space: pre-line; 
+}
 
 .btn-details {
   background: var(--gold); color: #000; border: none; padding: 8px; border-radius: 5px;
@@ -189,7 +199,12 @@ h2 {
   border-left: 1px solid var(--gold);
 }
 .details-panel.active { right: 0; }
-.details-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1500; }
+.details-overlay { 
+  display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+  background: rgba(0,0,0,0.7); 
+  /* CORRECTION ICI : z-index doit être inférieur au menu (2100) mais supérieur au reste */
+  z-index: 1500; 
+}
 .details-overlay.active { display: block; }
 .details-header { display: flex; justify-content: space-between; margin-bottom: 20px; }
 .details-title { font-family: 'Pirata One'; color: var(--gold); font-size: 1.8em; margin: 0; }

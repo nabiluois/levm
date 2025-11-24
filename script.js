@@ -1532,6 +1532,7 @@ function openMenu() {
 function closeMenu() {
   if (menu) {
     menu.classList.remove('open');
+    // On ferme l'overlay seulement si le panneau détails n'est pas ouvert
     if (!document.querySelector('.details-panel.active')) {
       overlay.classList.remove('active');
       document.body.classList.remove('no-scroll');
@@ -1542,17 +1543,23 @@ function closeMenu() {
 if (menuToggle) menuToggle.addEventListener('click', openMenu);
 if (closeBtn) closeBtn.addEventListener('click', closeMenu);
 
-// --- CORRECTION : FAIRE FONCTIONNER LES LIENS DU MENU ---
-document.querySelectorAll('.menu-links a').forEach(link => {
-  link.addEventListener('click', () => {
-    closeMenu(); // Ferme le menu quand on clique sur un lien
+// --- CORRECTION : Navigation fluide ---
+// On sélectionne tous les liens DANS le menu
+document.querySelectorAll('.side-menu a').forEach(link => {
+  link.addEventListener('click', (e) => {
+    // On ferme le menu
+    closeMenu();
+    
+    // Petite astuce : on laisse le navigateur aller vers l'ancre (#village, etc.)
+    // Pas besoin de preventDefault ici sauf si tu veux une animation JS spécifique
   });
 });
 
 // Clic sur l'overlay ferme tout
 overlay.addEventListener('click', () => {
   closeMenu();
-  closeDetails();
+  // On vérifie si la fonction closeDetails existe avant de l'appeler
+  if (typeof closeDetails === 'function') closeDetails();
 });
 
 // ===============================
