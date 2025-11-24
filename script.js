@@ -1508,90 +1508,101 @@ Mi-démon, mi-vampire… 100% problème. Le Démon Vampire n’est pas une créa
 ];
 
 // ===============================
-// GESTION DU MENU & THÈME
+// 1. GESTION DU MENU & OVERLAY
 // ===============================
 const menu = document.querySelector('.side-menu');
-const toggle = document.querySelector('.menu-toggle');
+const menuToggle = document.querySelector('.menu-toggle');
 const closeBtn = document.querySelector('.close-menu');
+const overlay = document.querySelector('.details-overlay') || document.createElement('div');
 
-if (toggle && menu && closeBtn) {
-  toggle.addEventListener('click', () => {
+// Si l'overlay n'existe pas dans le HTML, on le crée
+if (!document.querySelector('.details-overlay')) {
+  overlay.className = 'details-overlay';
+  document.body.appendChild(overlay);
+}
+
+function openMenu() {
+  if (menu) {
     menu.classList.add('open');
-    document.body.classList.add('no-scroll'); // Bloque le scroll arrière-plan
-  });
-  
-  closeBtn.addEventListener('click', () => {
+    overlay.classList.add('active');
+    document.body.classList.add('no-scroll');
+  }
+}
+
+function closeMenu() {
+  if (menu) {
     menu.classList.remove('open');
-    document.body.classList.remove('no-scroll'); // Débloque
-  });
-
-  document.addEventListener('click', (e) => {
-    if (menu.classList.contains('open') && !menu.contains(e.target) && e.target !== toggle) {
-      menu.classList.remove('open');
-      document.body.classList.remove('no-scroll'); // Débloque au clic dehors
+    // On ferme l'overlay seulement si le panneau détails est fermé aussi
+    if (!document.querySelector('.details-panel.active')) {
+      overlay.classList.remove('active');
+      document.body.classList.remove('no-scroll');
     }
-  });
+  }
 }
 
-// MODE SOMBRE/CLAIR (LOGIQUE MOBILE AJOUTÉE)
-const themeToggle = document.createElement('button');
-themeToggle.className = 'theme-toggle';
-themeToggle.innerHTML = '🌙';
-themeToggle.setAttribute('aria-label', 'Changer le thème');
+if (menuToggle) menuToggle.addEventListener('click', openMenu);
+if (closeBtn) closeBtn.addEventListener('click', closeMenu);
 
-// --- CORRECTION MOBILE : On place le bouton au bon endroit ---
-const themePlaceholder = document.getElementById('theme-placeholder');
-
-// Si on est sur un petit écran ET que le placeholder existe (barre mobile présente)
-if (themePlaceholder && window.innerWidth <= 768) {
-    themePlaceholder.appendChild(themeToggle); // On met la lune dans la barre
-} else {
-    document.body.appendChild(themeToggle); // Sinon on la laisse flottante (PC)
-}
-// -------------------------------------------------------------
-
-const savedTheme = localStorage.getItem('theme');
-if (savedTheme === 'light') {
-  document.body.classList.add('light-mode');
-  themeToggle.innerHTML = '☀️';
-}
-
-themeToggle.addEventListener('click', () => {
-  document.body.classList.toggle('light-mode');
-  const isLight = document.body.classList.contains('light-mode');
-  themeToggle.innerHTML = isLight ? '☀️' : '🌙';
-  localStorage.setItem('theme', isLight ? 'light' : 'dark');
+// Clic sur l'overlay ferme tout (Menu + Détails)
+overlay.addEventListener('click', () => {
+  closeMenu();
+  closeDetails();
 });
 
 // ===============================
-// FLIP CARTES & HAPTIC
+// 2. GESTION DU THÈME (NOUVELLE LOGIQUE)
+// ===============================
+// On cible le bouton qui est maintenant en dur dans le HTML
+const themeBtn = document.getElementById('themeBtn');
+
+// Charger le thème sauvegardé
+if (localStorage.getItem('theme') === 'light') {
+  document.body.classList.add('light-mode');
+  if(themeBtn) themeBtn.textContent = '☀️';
+}
+
+// Basculer le thème
+if (themeBtn) {
+  themeBtn.addEventListener('click', () => {
+    document.body.classList.toggle('light-mode');
+    const isLight = document.body.classList.contains('light-mode');
+    themeBtn.textContent = isLight ? '☀️' : '🌙';
+    localStorage.setItem('theme', isLight ? 'light' : 'dark');
+  });
+}
+
+// ===============================
+// 3. FLIP CARTES & HAPTIC
 // ===============================
 document.querySelectorAll('.carte-jeu').forEach(carte => {
   carte.addEventListener('click', function(e) {
     if (e.target.classList.contains('btn-details')) return;
     e.stopPropagation();
 
-    if (navigator.vibrate) {
-      navigator.vibrate(70); 
-    }
+    // Vibration mobile
+    if (navigator.vibrate) navigator.vibrate(50);
 
-    if (this.classList.contains('flipped')) {
-      this.classList.remove('flipped');
-      return;
-    }
-    document.querySelectorAll('.carte-jeu').forEach(c => {
+    // Gestion du flip unique
+    const isFlipped = this.classList.contains('flipped');
+    
+    // On retourne les autres cartes face cachée
+    document.querySelectorAll('.carte-jeu.flipped').forEach(c => {
       if (c !== this) c.classList.remove('flipped');
     });
-    this.classList.add('flipped');
+
+    if (!isFlipped) this.classList.add('flipped');
   });
 });
 
-// ANIMATION AU SCROLL
-const observerOptions = { threshold: 0.1, rootMargin: '0px 0px -50px 0px' };
+// ===============================
+// 4. ANIMATION AU SCROLL (OPTIMISÉE)
+// ===============================
+const observerOptions = { threshold: 0.05, rootMargin: '50px' };
 const observer = new IntersectionObserver((entries) => {
-  entries.forEach((entry, index) => {
+  entries.forEach((entry) => {
     if (entry.isIntersecting) {
-      setTimeout(() => { entry.target.classList.add('visible'); }, index * 50);
+      // Suppression du setTimeout pour corriger la lenteur
+      entry.target.classList.add('visible');
       observer.unobserve(entry.target);
     }
   });
@@ -1600,16 +1611,17 @@ const observer = new IntersectionObserver((entries) => {
 document.querySelectorAll('.carte-jeu, .carte-vm').forEach(carte => observer.observe(carte));
 
 // ===============================
-// FONCTION DE RECHERCHE INTELLIGENTE
+// 5. FONCTION DE NORMALISATION
 // ===============================
 function normalizeText(text) {
   return text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
 }
 
 // ===============================
-// RECHERCHE MOBILE RAPIDE (CORRIGÉE POUR GRID)
+// 6. RECHERCHE RAPIDE (TOP BAR)
 // ===============================
 const quickSearchInput = document.getElementById('quickSearch');
+
 if (quickSearchInput) {
   quickSearchInput.addEventListener('input', function() {
     const rawTerm = this.value;
@@ -1617,7 +1629,7 @@ if (quickSearchInput) {
     const searchTerms = term.split(" ");
 
     const cards = document.querySelectorAll('.carte-jeu');
-    const sections = document.querySelectorAll('section');
+    const sections = document.querySelectorAll('section:not(#event-cards)');
 
     cards.forEach(card => {
       const titleRaw = card.querySelector('h3').textContent;
@@ -1625,32 +1637,28 @@ if (quickSearchInput) {
       const matches = searchTerms.every(word => title.includes(word));
       
       if (matches) {
-        // CORRECTION : On met '' au lieu de 'block' pour ne pas casser la Grid CSS
-        card.style.display = ''; 
-        setTimeout(() => card.classList.add('visible'), 50);
+        card.style.display = ''; // IMPORTANT: '' permet de garder le GRID layout
+        // Petit délai imperceptible pour l'animation CSS
+        setTimeout(() => card.classList.add('visible'), 10);
       } else {
         card.style.display = 'none';
         card.classList.remove('visible');
       }
     });
 
+    // Masquer les titres de sections vides
     sections.forEach(sec => {
-      if(sec.id === 'event-cards') return;
-      
-      // On compte les cartes visibles (celles qui n'ont pas display: none)
       const visibleCards = Array.from(sec.querySelectorAll('.carte-jeu')).filter(c => c.style.display !== 'none');
       const h2 = sec.querySelector('h2');
-      
       if(h2) {
-        // Si cartes visibles OU recherche vide -> on affiche le titre de section
-        h2.style.display = (visibleCards.length > 0 || term === '') ? 'block' : 'none';
+        h2.style.display = (visibleCards.length > 0 || term === '') ? '' : 'none';
       }
     });
   });
 }
 
 // ===============================
-// RECHERCHE CLASSIQUE (MENU)
+// 7. RECHERCHE CLASSIQUE (MENU)
 // ===============================
 const searchInput = document.getElementById('searchInput');
 const suggestionsBox = document.getElementById('searchSuggestions');
@@ -1682,10 +1690,8 @@ if (searchInput && suggestionsBox) {
             card.querySelector('.carte-back h3').textContent === clickedTitle
           );
           if (targetCard) {
-            menu.classList.remove('open');
-            document.body.classList.remove('no-scroll'); // Débloque le scroll
-            
-            targetCard.style.display = ''; // Reset display pour Grid
+            closeMenu();
+            targetCard.style.display = ''; 
             targetCard.parentElement.querySelector('h2').style.display = 'block';
             targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
             setTimeout(() => {
@@ -1700,76 +1706,85 @@ if (searchInput && suggestionsBox) {
   });
 }
 
-// ZOOM CARTES VM
+// ===============================
+// 8. ZOOM CARTES VM
+// ===============================
 (function () {
-  const overlay = document.getElementById('vm-overlay');
-  if (!overlay) return;
+  const vmOverlay = document.getElementById('vm-overlay');
+  if (!vmOverlay) return;
+  
   function closeZoom() {
     document.querySelectorAll('.carte-vm.zoomed').forEach(c => c.classList.remove('zoomed'));
-    overlay.classList.remove('active');
+    vmOverlay.classList.remove('active');
     document.body.classList.remove('no-scroll');
   }
+  
   function openZoom(card) {
     document.querySelectorAll('.carte-vm.zoomed').forEach(c => { if (c !== card) c.classList.remove('zoomed'); });
     card.classList.add('zoomed');
-    overlay.classList.add('active');
+    vmOverlay.classList.add('active');
     document.body.classList.add('no-scroll');
   }
+  
   document.addEventListener('click', (e) => {
     const card = e.target.closest('.carte-vm');
     if (card) {
       e.stopPropagation();
       if (card.classList.contains('zoomed')) closeZoom(); else openZoom(card);
-    } else if (overlay.classList.contains('active')) {
+    } else if (vmOverlay.classList.contains('active')) {
       closeZoom();
     }
   });
-  overlay.addEventListener('click', closeZoom);
+  vmOverlay.addEventListener('click', closeZoom);
 })();
 
-// DÉTAILS PANEL (PANINI)
+// ===============================
+// 9. DÉTAILS PANEL (PANINI)
+// ===============================
 const detailsPanel = document.querySelector('.details-panel') || document.createElement('div');
 if (!document.querySelector('.details-panel')) {
   detailsPanel.className = 'details-panel';
   document.body.appendChild(detailsPanel);
 }
 
-const detailsOverlay = document.querySelector('.details-overlay') || document.createElement('div');
-if (!document.querySelector('.details-overlay')) {
-  detailsOverlay.className = 'details-overlay';
-  document.body.appendChild(detailsOverlay);
+// Création du conteneur interne si inexistant
+if (!detailsPanel.querySelector('.details-content')) {
+    detailsPanel.innerHTML = '<div class="details-content"></div>';
 }
 
 function openDetails(cardData) {
   if (navigator.vibrate) navigator.vibrate(15);
-  const content = `
-    <div class="details-content">
-      <div class="details-header">
-        <h2 class="details-title">${cardData.title}</h2>
-        <button class="close-details">✕</button>
-      </div>
-      <img src="${cardData.image}" alt="${cardData.title}" class="details-image">
-      <div class="details-section">
-        ${cardData.description || ''}
-      </div>
+  
+  // Utilisation du conteneur interne pour éviter d'écraser la structure
+  const content = detailsPanel.querySelector('.details-content') || detailsPanel;
+  
+  content.innerHTML = `
+    <div class="details-header">
+      <h2 class="details-title">${cardData.title}</h2>
+      <button class="close-details" onclick="closeDetails()">✕</button>
+    </div>
+    <img src="${cardData.image}" alt="${cardData.title}" class="details-image">
+    <div class="details-section">
+      ${cardData.description || ''}
     </div>
   `;
-  detailsPanel.innerHTML = content;
+  
   detailsPanel.classList.add('active');
-  detailsOverlay.classList.add('active');
-  document.body.classList.add('no-scroll'); // Bloque avec la classe CSS
+  overlay.classList.add('active');
+  document.body.classList.add('no-scroll');
   detailsPanel.scrollTop = 0;
-  detailsPanel.querySelector('.close-details').addEventListener('click', closeDetails);
 }
 
 function closeDetails() {
   detailsPanel.classList.remove('active');
-  detailsOverlay.classList.remove('active');
-  document.body.classList.remove('no-scroll'); // Débloque avec la classe CSS
+  // Si le menu n'est pas ouvert, on enlève l'overlay et le blocage scroll
+  if (!menu.classList.contains('open')) {
+    overlay.classList.remove('active');
+    document.body.classList.remove('no-scroll');
+  }
 }
-detailsOverlay.addEventListener('click', closeDetails);
 
-// Boutons Détails
+// Écouteur sur les boutons "Détails"
 document.addEventListener('click', (e) => {
   if (e.target.classList.contains('btn-details')) {
     e.stopPropagation();
@@ -1777,7 +1792,10 @@ document.addEventListener('click', (e) => {
     const carte = e.target.closest('.carte-jeu');
     const title = carte.querySelector('.carte-back h3').textContent.trim();
     const image = carte.querySelector('.carte-front img').src;
-    const panini = paniniRoles.find(r => r.title.includes(title) || r.id === title);
+    
+    // Récupération des données depuis paniniRoles (si présent) ou depuis la carte HTML
+    // On vérifie si paniniRoles existe pour éviter une erreur
+    const panini = (typeof paniniRoles !== 'undefined') ? paniniRoles.find(r => r.title.includes(title) || r.id === title) : null;
     
     let cardData;
     if (panini) {
@@ -1790,11 +1808,10 @@ document.addEventListener('click', (e) => {
   }
 });
 
-// SWIPE FERMETURE
-let touchStartX = 0;
-let touchEndX = 0;
-detailsPanel.addEventListener('touchstart', (e) => touchStartX = e.changedTouches[0].screenX, false);
+// Swipe pour fermer le panneau détails
+let touchStart = 0;
+detailsPanel.addEventListener('touchstart', (e) => touchStart = e.changedTouches[0].screenX, false);
 detailsPanel.addEventListener('touchend', (e) => {
-  touchEndX = e.changedTouches[0].screenX;
-  if (touchEndX - touchStartX > 100) closeDetails();
+  const touchEnd = e.changedTouches[0].screenX;
+  if (touchEnd - touchStart > 100) closeDetails();
 }, false);

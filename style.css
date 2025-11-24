@@ -1,270 +1,174 @@
 /* ============================================
-   RESET & BASE & OPTIMISATION MOBILE
+   RESET & BASE
    ============================================ */
 :root {
-  --safe-bottom: env(safe-area-inset-bottom, 20px);
   --safe-top: env(safe-area-inset-top, 20px);
+  --header-height: 70px;
+  --bg-dark: #2a1f15;
+  --text-dark: #f5e6b3;
+  --bg-light: #f5e6d3;
+  --text-light: #3e2f23;
+  --gold: #d4af37;
 }
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  -webkit-tap-highlight-color: transparent;
-}
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
 body {
   font-family: 'Almendra', serif;
-  background-color: #2a1f15;
-  color: #f5e6b3;
+  background-color: var(--bg-dark);
+  color: var(--text-dark);
   line-height: 1.6;
   overflow-x: hidden;
-  transition: background-color 0.3s ease, color 0.3s ease;
-  overscroll-behavior-y: none;
+  padding-top: calc(var(--header-height) + 20px); /* IMPORTANT: Espace pour la barre fixe */
+  transition: background 0.3s ease, color 0.3s ease;
 }
 
-/* IMPORTANT : Empêche le défilement quand le menu est ouvert */
 body.no-scroll { overflow: hidden; }
 
-/* MODE CLAIR */
+/* ============================================
+   MODE CLAIR (GÉRÉ GLOBALEMENT)
+   ============================================ */
 body.light-mode {
-  background-color: #f5e6d3;
-  color: #3e2f23;
+  background-color: var(--bg-light);
+  color: var(--text-light);
 }
-body.light-mode .menu-toggle, body.light-mode .theme-toggle { background: rgba(245, 230, 211, 0.9); color: #3e2f23; border-color: #3e2f23; }
-body.light-mode .side-menu { background: rgba(255, 255, 255, 0.98); border-right-color: #3e2f23; }
-body.light-mode .menu-links a, body.light-mode .close-menu { color: #3e2f23; }
-body.light-mode h2 { background: rgba(245, 230, 211, 0.8); color: #3e2f23; }
-body.light-mode .carte-back { background: linear-gradient(135deg, #f5e6d3 0%, #e8d5b8 100%); }
-body.light-mode .carte-back h3, body.light-mode .carte-back p { color: #3e2f23; }
+/* Adaptation des textes et fonds en mode clair */
+body.light-mode .top-bar { background: rgba(245, 230, 211, 0.95); border-bottom-color: var(--text-light); }
+body.light-mode .top-bar input { background: rgba(255, 255, 255, 0.8); color: #000; border-color: var(--text-light); }
+body.light-mode .menu-toggle, body.light-mode #themeBtn { color: var(--text-light); border-color: var(--text-light); background: rgba(255,255,255,0.5); }
+body.light-mode .side-menu { background: #fffcf5; border-right-color: var(--text-light); }
+body.light-mode .menu-links a, body.light-mode .close-menu { color: var(--text-light); }
+body.light-mode h2 { background: rgba(245, 230, 211, 0.9); color: var(--text-light); box-shadow: inset 0 0 5px var(--text-light); }
+body.light-mode .carte-back { background: linear-gradient(135deg, #f5e6d3 0%, #fff 100%); }
+body.light-mode .carte-back h3, body.light-mode .carte-back p { color: var(--text-light); }
+body.light-mode .details-panel { background: rgba(255, 250, 240, 0.98); color: var(--text-light); }
+body.light-mode .details-section p, body.light-mode .details-section li { color: #5a4a3a; }
 
 /* ============================================
-   BARRE DE RECHERCHE MOBILE & BOUTONS INTÉGRÉS
+   BARRE DU HAUT (TOP BAR) - UNIFIÉE
    ============================================ */
-
-/* --- CONFIGURATION PAR DÉFAUT (VERSION PC) --- */
-/* Sur PC, la barre est invisible mais laisse passer les clics pour le bouton menu */
-.mobile-search-bar {
-  position: fixed; top: 20px; left: 20px; z-index: 1000;
-  background: transparent;
-  pointer-events: none; /* Laisse passer les clics à travers le conteneur */
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: fixed;
+  top: 0; left: 0; width: 100%;
+  height: var(--header-height);
+  padding: var(--safe-top) 15px 10px 15px;
+  background: rgba(42, 31, 21, 0.95);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-bottom: 2px solid var(--gold);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+  z-index: 1000;
+  gap: 15px;
+  transition: background 0.3s ease;
 }
 
-/* On cache l'input et la lune sur PC dans cette barre (car ils sont dans le menu latéral) */
-.mobile-search-bar input, .mobile-search-bar #theme-placeholder { display: none; }
-
-/* On s'assure que le bouton menu reste cliquable sur PC */
-.menu-toggle { pointer-events: auto; cursor: pointer; }
-
-/* Style du bouton burger sur PC */
-@media (min-width: 769px) {
-  .menu-toggle {
-    background: rgba(0, 0, 0, 0.5); color: #d4af37; border: 1px solid #d4af37;
-    padding: 10px 15px; font-size: 1.5em; border-radius: 8px;
-  }
+/* Champ de recherche central */
+.search-wrapper { flex: 1; max-width: 600px; }
+.top-bar input {
+  width: 100%; height: 40px; padding: 0 15px;
+  border-radius: 20px; border: 1px solid var(--gold);
+  background: rgba(0, 0, 0, 0.3); color: #f5e6b3;
+  font-family: 'Almendra', serif; font-size: 16px; outline: none; text-align: center;
+  transition: all 0.3s;
 }
+.top-bar input:focus { background: rgba(0, 0, 0, 0.6); border-color: #fff; }
 
-/* --- CONFIGURATION MOBILE (<= 768px) --- */
-@media (max-width: 768px) {
-  .mobile-search-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    position: sticky; /* Reste collé en haut */
-    top: 0; left: 0; width: 100%;
-    z-index: 900;
-    height: 70px;
-    padding: var(--safe-top) 10px 10px 10px;
-    gap: 10px;
-    
-    background: rgba(42, 31, 21, 0.98);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border-bottom: 2px solid #d4af37;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.6);
-    pointer-events: auto; /* Réactive les clics partout sur la barre */
-  }
-
-  .mobile-search-bar input {
-    display: block; /* Affiche la recherche */
-    flex: 1; /* Prend toute la place au milieu */
-    width: auto; height: 40px; padding: 0 15px;
-    border-radius: 20px; border: 1px solid #d4af37;
-    background: rgba(20, 15, 10, 0.5); color: #f5e6b3;
-    font-family: 'Almendra', serif; font-size: 16px; outline: none; text-align: center;
-  }
-
-  /* Style des boutons Burger et Lune sur Mobile */
-  .menu-toggle, .theme-toggle {
-    position: relative !important; top: auto !important; left: auto !important; margin: 0 !important;
-    width: 40px !important; height: 40px !important;
-    display: flex !important; align-items: center; justify-content: center;
-    background: rgba(0, 0, 0, 0.3) !important; border: 1px solid #d4af37 !important;
-    border-radius: 8px !important; font-size: 1.2em !important; z-index: 10;
-  }
-  
-  #theme-placeholder {
-    display: flex; width: 40px; height: 40px; align-items: center; justify-content: center;
-  }
+/* Boutons (Menu & Thème) */
+.menu-toggle, #themeBtn {
+  width: 40px; height: 40px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(0,0,0,0.3); border: 1px solid var(--gold); color: var(--gold);
+  font-size: 1.2em; cursor: pointer; transition: all 0.2s;
 }
+.menu-toggle:active, #themeBtn:active { transform: scale(0.95); }
 
 /* ============================================
    MENU LATÉRAL
    ============================================ */
 .side-menu {
   position: fixed; top: 0; left: -320px; width: 300px; height: 100vh;
-  background: rgba(31, 23, 16, 0.98); padding: 20px; padding-top: calc(50px + var(--safe-top));
-  z-index: 1001; transition: left 0.4s ease; overflow-y: auto; border-right: 3px solid #f5e6b3;
+  background: rgba(31, 23, 16, 0.98); padding: 20px; padding-top: calc(30px + var(--safe-top));
+  z-index: 1100; transition: left 0.3s ease-in-out; overflow-y: auto; border-right: 3px solid var(--gold);
+  box-shadow: 5px 0 20px rgba(0,0,0,0.5);
 }
 .side-menu.open { left: 0; }
+.close-menu { position: absolute; top: 15px; right: 15px; background: none; border: none; color: var(--gold); font-size: 2em; cursor: pointer; }
+.menu-links { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
+.menu-links a { color: inherit; text-decoration: none; font-size: 1.2em; padding: 12px; border-radius: 8px; transition: background 0.2s; }
+.menu-links a:hover { background: rgba(212, 175, 55, 0.15); }
 
-.close-menu {
-  position: absolute; top: max(15px, var(--safe-top)); right: 15px;
-  background: transparent; border: none; color: #f5e6b3; font-size: 2em; cursor: pointer; transition: transform 0.3s;
-}
-.close-menu:hover { transform: rotate(90deg); }
-
-.menu-links { margin-top: 20px; display: flex; flex-direction: column; gap: 15px; }
-.menu-links a { color: #f5e6b3; text-decoration: none; font-size: 1.2em; padding: 10px; border-radius: 8px; transition: background 0.3s; }
-.menu-links a:hover { background: rgba(245, 230, 179, 0.2); }
-
+/* Recherche dans le menu */
 .search-container { margin-top: 30px; }
-#searchInput { width: 100%; padding: 10px; background: rgba(245, 230, 179, 0.1); border: 1px solid #f5e6b3; border-radius: 6px; color: #f5e6b3; font-family: 'Almendra', serif; }
-.suggestions { margin-top: 10px; max-height: 200px; overflow-y: auto; background: rgba(0, 0, 0, 0.5); border-radius: 6px; }
-.suggestions div { padding: 8px; cursor: pointer; border-bottom: 1px solid rgba(245, 230, 179, 0.2); }
-.suggestions div:hover { background: rgba(245, 230, 179, 0.2); }
-.menu-footer { margin-top: 40px; text-align: center; font-size: 0.9em; opacity: 0.8; }
+#searchInput { width: 100%; padding: 10px; background: rgba(255,255,255,0.1); border: 1px solid var(--gold); color: inherit; border-radius: 5px; }
+.suggestions div { padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); cursor: pointer; }
 
 /* ============================================
-   SECTIONS & GRILLES
+   GRILLE ET CARTES (CORRECTION VITESSE)
    ============================================ */
 section:not(#event-cards) {
-  display: grid; grid-template-columns: repeat(2, 1fr) !important; gap: 15px;
-  padding: 15px; padding-bottom: calc(30px + var(--safe-bottom));
-  margin: 20px auto 60px auto; max-width: 1400px;
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;
+  margin: 0 auto 40px auto; max-width: 1400px; padding: 0 10px;
 }
 
 h2 {
-  grid-column: 1 / -1; text-align: center; font-size: 1.5em; font-family: 'Pirata One', serif;
-  background: rgba(62, 47, 35, 0.8); color: #f5e6b3; padding: 12px 24px; border-radius: 32px;
-  box-shadow: inset 0 0 8px #f5e6b3; margin: 0 auto 20px auto; max-width: fit-content;
+  grid-column: 1 / -1; text-align: center; font-size: 1.6em; font-family: 'Pirata One', serif;
+  background: rgba(62, 47, 35, 0.9); color: var(--gold); padding: 10px 30px; border-radius: 50px;
+  margin: 30px auto 20px auto; width: max-content; border: 1px solid rgba(212, 175, 55, 0.3);
 }
 
-/* ============================================
-   CARTES - LISIBILITÉ AMÉLIORÉE
-   ============================================ */
 .carte-jeu {
   position: relative; width: 100%; aspect-ratio: 2/3; perspective: 1000px; cursor: pointer;
-  opacity: 0; transform: translateY(30px); transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  /* Optimisation performance */
+  opacity: 0; transform: translateY(20px); 
+  will-change: transform, opacity;
+  transition: opacity 0.4s ease-out, transform 0.4s ease-out; /* Transition plus rapide */
 }
 .carte-jeu.visible { opacity: 1; transform: translateY(0); }
-.carte-jeu:hover { transform: translateY(-8px) scale(1.03); filter: drop-shadow(0 12px 24px rgba(212, 175, 55, 0.4)); }
-.carte-jeu:hover .carte-front { box-shadow: 0 0 25px rgba(212, 175, 55, 0.6); }
-.carte-inner { position: relative; width: 100%; height: 100%; transition: transform 0.6s ease; transform-style: preserve-3d; }
+
+.carte-inner { position: relative; width: 100%; height: 100%; transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1); transform-style: preserve-3d; }
 .carte-jeu.flipped .carte-inner { transform: rotateY(180deg); }
 
 .carte-front, .carte-back {
   position: absolute; width: 100%; height: 100%; backface-visibility: hidden;
-  border-radius: 12px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5); overflow: hidden; transition: all 0.3s ease;
+  border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.4);
 }
-.carte-front { background: #241c14; border: 2px solid rgba(212, 175, 55, 0.3); }
-.carte-front img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.carte-front { background: #1a1510; border: 2px solid rgba(212, 175, 55, 0.2); }
+.carte-front img { width: 100%; height: 100%; object-fit: cover; }
 
 .carte-back {
   background: linear-gradient(135deg, #2a1f15 0%, #1a130d 100%); transform: rotateY(180deg);
-  display: flex; flex-direction: column; justify-content: flex-start;
-  padding: 15px; border: 3px solid rgba(212, 175, 55, 0.5);
-  box-shadow: inset 0 0 20px rgba(212, 175, 55, 0.2); overflow-y: auto;
+  display: flex; flex-direction: column; padding: 12px; border: 2px solid var(--gold); overflow-y: auto;
 }
+.carte-back h3 { font-family: 'Pirata One'; color: var(--gold); text-align: center; margin-bottom: 8px; font-size: 1.1em; }
+.carte-back p { font-size: 0.9em; line-height: 1.4; flex: 1; }
 
-.carte-back h3 { font-size: 1.1em; color: #f5e6b3; margin-bottom: 12px; text-align: center; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5); font-family: 'Pirata One', serif; letter-spacing: 1px; flex-shrink: 0; }
-.carte-back p { white-space: pre-line; text-align: left; line-height: 1.45; font-size: 15px; color: #fcebb6; flex: 1; font-weight: 500; }
-
-/* ============================================
-   CARTES VM (Reste inchangé)
-   ============================================ */
-#event-cards { display: block; margin: 60px auto; max-width: 1400px; padding: 15px; padding-bottom: 80px; }
-#event-cards h2 { text-align: center; margin-bottom: 30px; }
-.event-subtitle { display: block; width: 100%; text-align: center; font-family: 'Pirata One', serif; font-size: 1.4em; margin: 25px auto 15px auto; }
-.gold-title { color: gold; text-shadow: 0 0 10px gold; }
-.silver-title { color: silver; text-shadow: 0 0 10px silver; }
-.bronze-title { color: #cd7f32; text-shadow: 0 0 10px #cd7f32; }
-.category { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin: 15px 0 30px 0; }
-.carte-vm { width: 100%; cursor: pointer; border-radius: 12px; overflow: hidden; transition: transform 0.3s, box-shadow 0.3s; position: relative; opacity: 0; transform: translateY(30px); }
-.carte-vm.visible { opacity: 1; transform: translateY(0); }
-.carte-vm:hover { transform: scale(1.08); }
-.carte-vm.gold { border: 3px solid gold; box-shadow: 0 0 15px gold; }
-.carte-vm.silver { border: 3px solid silver; box-shadow: 0 0 15px silver; }
-.carte-vm.bronze { border: 3px solid #cd7f32; box-shadow: 0 0 15px #cd7f32; }
-.carte-vm img { width: 100%; height: auto; display: block; }
-.carte-vm.zoomed { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 2000; width: 85vw; max-width: 400px; height: auto; box-shadow: 0 0 50px rgba(0, 0, 0, 0.9); }
-#vm-overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.85); z-index: 1999; }
-#vm-overlay.active { display: block; }
-
-@media (min-width: 481px) { section:not(#event-cards), .category { grid-template-columns: repeat(3, 1fr) !important; gap: 18px; } h2 { font-size: 1.7em; } }
-@media (min-width: 769px) { section:not(#event-cards), .category { grid-template-columns: repeat(4, 1fr) !important; gap: 20px; } h2 { font-size: 2em; } .carte-back h3 { font-size: 1.3em !important; } .carte-back p { font-size: 0.95em !important; } }
-@media (min-width: 1201px) { section:not(#event-cards), .category { grid-template-columns: repeat(5, 1fr) !important; gap: 22px; } }
-
-/* ============================================
-   ANIMATIONS
-   ============================================ */
-.carte-back h3 { animation: fadeInText 0.4s ease 0.3s both; }
-.carte-back p { animation: fadeInText 0.6s ease 0.4s both; }
-@keyframes fadeInText { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-/* ============================================
-   BOUTON DÉTAILS
-   ============================================ */
 .btn-details {
-  display: block; width: calc(100% - 20px); margin: 10px auto 0; padding: 8px 16px;
-  background: linear-gradient(135deg, #d4af37 0%, #b8941f 100%);
-  color: #1a130d; border: none; border-radius: 6px;
-  font-family: 'Pirata One', serif; font-size: 0.9em; font-weight: bold; cursor: pointer;
-  transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(212, 175, 55, 0.3);
-  animation: fadeInText 0.6s ease 0.6s both;
+  background: var(--gold); color: #000; border: none; padding: 8px; border-radius: 5px;
+  font-weight: bold; margin-top: 5px; width: 100%; font-family: 'Pirata One'; cursor: pointer;
 }
-.btn-details:hover { background: linear-gradient(135deg, #f5d061 0%, #d4af37 100%); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(212, 175, 55, 0.5); }
-.btn-details:active { transform: translateY(0); }
 
 /* ============================================
-   PANNEAU LATÉRAL STYLE PANINI (OPTIMISÉ)
+   RESPONSIVE (TABLETTE / PC)
+   ============================================ */
+@media (min-width: 500px) { section:not(#event-cards) { grid-template-columns: repeat(3, 1fr); } }
+@media (min-width: 800px) { section:not(#event-cards) { grid-template-columns: repeat(4, 1fr); gap: 20px; } }
+@media (min-width: 1200px) { section:not(#event-cards) { grid-template-columns: repeat(5, 1fr); } }
+
+/* ============================================
+   PANEL DETAILS
    ============================================ */
 .details-panel {
   position: fixed; top: 0; right: -100%; width: 100%; max-width: 500px; height: 100vh;
-  /* GLASSMORPHISM */
-  background: rgba(42, 31, 21, 0.95);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  
-  border-left: 1px solid rgba(212, 175, 55, 0.3);
-  box-shadow: -5px 0 30px rgba(0, 0, 0, 0.8);
-  z-index: 4000;
-  overflow-y: auto;
-  transition: right 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  padding-bottom: calc(20px + var(--safe-bottom));
+  background: rgba(42, 31, 21, 0.98); z-index: 2000; overflow-y: auto;
+  transition: right 0.3s cubic-bezier(0.25, 1, 0.5, 1); padding: 20px;
+  border-left: 1px solid var(--gold);
 }
 .details-panel.active { right: 0; }
-.details-overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.7); z-index: 3999; transition: opacity 0.3s ease; }
+.details-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1500; }
 .details-overlay.active { display: block; }
-.details-content { padding: 25px; color: #f5e6b3; padding-top: max(25px, var(--safe-top)); }
-.details-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px; padding-bottom: 20px; border-bottom: 2px solid rgba(212, 175, 55, 0.3); }
-.details-title { font-family: 'Pirata One', serif; font-size: 2em; color: #d4af37; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5); margin: 0; }
-.close-details {
-  background: rgba(212, 175, 55, 0.2); border: 2px solid rgba(212, 175, 55, 0.4);
-  color: #f5e6b3; width: 40px; height: 40px; border-radius: 50%; font-size: 1.5em; cursor: pointer;
-  transition: all 0.3s ease; display: flex; align-items: center; justify-content: center;
-}
-.close-details:hover { background: rgba(212, 175, 55, 0.4); transform: rotate(90deg); }
-.details-image { width: 100%; aspect-ratio: 2/3; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5); object-fit: cover; }
-.details-section { margin-bottom: 25px; }
-.details-section h3 { font-family: 'Pirata One', serif; font-size: 1.5em; color: #d4af37; margin-bottom: 12px; display: flex; align-items: center; gap: 10px; }
-.details-section h3::before { content: ''; width: 4px; height: 24px; background: linear-gradient(180deg, #d4af37 0%, transparent 100%); border-radius: 2px; }
-.details-section p { font-size: 1.1em; line-height: 1.6; color: #fcebb6; margin-bottom: 15px; }
-.details-section ul { list-style: none; padding: 0; }
-.details-section li { padding: 8px 0 8px 20px; position: relative; color: #fcebb6; line-height: 1.6; }
-.details-section li::before { content: '▸'; position: absolute; left: 0; color: #d4af37; font-weight: bold; }
-
-@media (min-width: 769px) {
-  .details-panel { width: 500px; }
-  .mobile-search-bar { display: none; }
-}
+.details-header { display: flex; justify-content: space-between; margin-bottom: 20px; }
+.details-title { font-family: 'Pirata One'; color: var(--gold); font-size: 1.8em; margin: 0; }
+.close-details { background: none; border: 1px solid var(--gold); color: inherit; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; }
+.details-image { width: 100%; border-radius: 10px; margin-bottom: 20px; border: 1px solid var(--gold); }
