@@ -50,7 +50,7 @@ body::before {
 body.no-scroll { overflow: hidden; }
 
 /* ============================================
-   MODE CLAIR
+   MODE CLAIR (MODIFIÉ POUR PANINI LISIBLE)
    ============================================ */
 body.light-mode { background: var(--bg-light); color: var(--text-light); }
 body.light-mode::before { opacity: 0.1; } /* Moins de grain en jour */
@@ -62,7 +62,13 @@ body.light-mode .menu-links a, body.light-mode .close-menu { color: #5a4633; }
 body.light-mode h2 { background: rgba(245, 230, 211, 0.95); color: #5a4633; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-shadow: none; border-color: #8a6e2f; }
 body.light-mode .carte-back { background: linear-gradient(135deg, #f5e6d3 0%, #fff 100%); }
 body.light-mode .carte-back h3, body.light-mode .carte-back p { color: #3e2f23; }
-body.light-mode .details-panel { background: #fffcf5; color: #3e2f23; border-color: #8a6e2f; }
+
+/* --- CORRECTION PANINI (DETAILS) MODE CLAIR --- */
+body.light-mode .details-panel { background: #fffcf5; border-color: #8a6e2f; }
+body.light-mode .details-title { color: #1a120b; text-shadow: none; } /* Titre foncé sans néon */
+body.light-mode .details-section { color: #000000 !important; } /* Texte NOIR forcé */
+body.light-mode .close-details { color: #1a120b; border-color: #1a120b; }
+
 
 /* ============================================
    BARRE DU HAUT (TOP BAR)
@@ -244,7 +250,7 @@ h2::after {
 }
 
 /* ============================================
-   CARTES VM (ZOOM)
+   CARTES VM (ZOOM) - CORRIGÉ
    ============================================ */
 #event-cards { display: block; padding: 0 10px 80px 10px; max-width: 1400px; margin: 0 auto; }
 .event-subtitle { display: block; width: 100%; text-align: center; font-family: 'Pirata One', serif; font-size: 1.6em; margin: 40px 0 20px 0; grid-column: 1 / -1; }
@@ -255,12 +261,22 @@ h2::after {
 .carte-vm {
   width: 100%; aspect-ratio: 2/3; border-radius: 12px; overflow: hidden; cursor: pointer;
   position: relative; opacity: 1;
-  background: #1a1510; border: 2px solid rgba(212, 175, 55, 0.3);
+  background: #1a1510; 
+  border: 2px solid rgba(212, 175, 55, 0.3);
   box-shadow: 0 4px 10px rgba(0,0,0,0.4);
   transition: transform 0.3s ease;
+  padding: 0; /* SÉCURITÉ : Force 0 marge interne */
 }
 .carte-vm:hover { transform: scale(1.05); border-color: var(--gold); }
-.carte-vm img { width: 100%; height: 100%; object-fit: cover; }
+
+/* ICI C'EST LA CORRECTION PRINCIPALE POUR L'IMAGE */
+.carte-vm img { 
+  width: 100%; 
+  height: 100%; 
+  object-fit: cover; 
+  display: block; /* TRES IMPORTANT : Supprime l'espace blanc en bas */
+  margin: 0;
+}
 
 /* ETAT ZOOMÉ (OVERLAY) */
 .carte-vm.zoomed {
@@ -270,6 +286,8 @@ h2::after {
   width: 85vw; max-width: 450px; height: auto; aspect-ratio: auto;
   box-shadow: 0 0 50px rgba(0,0,0,0.95); 
   border: 3px solid var(--gold);
+  background: #000; /* Fond noir si jamais l'image charge mal */
+  padding: 0; /* Force le collage au bord */
 }
 #vm-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 2150; backdrop-filter: blur(5px); }
 #vm-overlay.active { display: block; }
