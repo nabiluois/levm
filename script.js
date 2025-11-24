@@ -1454,4 +1454,76 @@ document.addEventListener('click', (e) => {
       cardData = { ...panini, image: panini.image || image };
     } else {
       const desc = carte.querySelector('.carte-back p').textContent;
-      cardData = { title: title, image: image, description: `<p>${desc}</p>
+      cardData = { title: title, image: image, description: `<p>${desc}</p>` };
+    }
+    openDetails(cardData);
+  }
+});
+
+// ===============================
+// 8. RECHERCHE CLASSIQUE (MENU)
+// ===============================
+const searchInput = document.getElementById('searchInput');
+const suggestionsBox = document.getElementById('searchSuggestions');
+// On s'assure que cardsArray est bien peuplé
+const cardsArray = Array.from(document.querySelectorAll('.carte-jeu'));
+
+if (searchInput && suggestionsBox) {
+  searchInput.addEventListener('input', function() {
+    const rawValue = this.value;
+    const value = normalizeText(rawValue);
+    if (value === '') { suggestionsBox.innerHTML = ''; return; }
+
+    const suggestions = cardsArray
+      .filter(card => {
+        const titleRaw = card.querySelector('.carte-back h3').textContent;
+        const title = normalizeText(titleRaw);
+        return title.includes(value);
+      })
+      .map(card => card.querySelector('.carte-back h3').textContent)
+      .slice(0, 10);
+
+    if (suggestions.length > 0) {
+      suggestionsBox.innerHTML = suggestions.map(sug => `<div>${sug}</div>`).join('');
+      suggestionsBox.querySelectorAll('div').forEach(div => {
+        div.addEventListener('click', () => {
+          const clickedTitle = div.textContent;
+          searchInput.value = clickedTitle;
+          suggestionsBox.innerHTML = '';
+          
+          // On cherche la carte correspondante dans cardsArray
+          const targetCard = cardsArray.find(card => 
+            card.querySelector('.carte-back h3').textContent === clickedTitle
+          );
+          
+          if (targetCard) {
+            closeMenu(); // Ferme le menu
+            
+            // Affiche la carte si elle était cachée
+            targetCard.style.display = ''; 
+            // Affiche le titre de la section parente si caché
+            if (targetCard.parentElement.querySelector('h2')) {
+               targetCard.parentElement.querySelector('h2').style.display = 'block';
+            }
+            
+            // Scroll vers la carte
+            targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            
+            // Petit effet visuel : on la retourne après un court délai
+            setTimeout(() => {
+              if (!targetCard.classList.contains('flipped')) targetCard.classList.add('flipped');
+            }, 800);
+          }
+        });
+      });
+    } else {
+      suggestionsBox.innerHTML = '<div style="opacity:0.6; padding:8px;">Aucun résultat</div>';
+    }
+  });
+}
+
+let touchStart = 0;
+detailsPanel.addEventListener('touchstart', (e) => touchStart = e.changedTouches[0].screenX, false);
+detailsPanel.addEventListener('touchend', (e) => {
+  if (e.changedTouches[0].screenX - touchStart > 100) closeDetails();
+}, false);
