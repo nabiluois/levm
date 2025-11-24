@@ -132,27 +132,20 @@ body.light-mode .close-details { color: #1a120b; border-color: #1a120b; }
 /* ============================================
    TITRES NÉONS, GRILLE & SÉPARATEURS
    ============================================ */
-/* AMÉLIORATION 3 : SÉPARATEURS DE SECTIONS */
+/* CORRECTIF SÉPARATEURS : Plus de position absolute qui traverse les cartes */
 section:not(#event-cards), .category {
   display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;
   margin: 0 auto 50px auto; max-width: 1400px; padding: 0 12px;
-  position: relative;
-  padding-bottom: 60px; /* Espace pour le séparateur */
+  /* Le séparateur est maintenant une image de fond en bas */
+  padding-bottom: 60px;
+  background-image: linear-gradient(90deg, transparent, var(--gold), transparent);
+  background-size: 60% 1px; /* Largeur 60%, hauteur 1px */
+  background-repeat: no-repeat;
+  background-position: bottom center;
 }
 
-section::after {
-  content: "";
-  display: block;
-  position: absolute;
-  bottom: 20px;
-  left: 20%;
-  width: 60%;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--gold), transparent);
-  opacity: 0.5;
-}
+/* J'ai supprimé le bloc section::after qui posait problème */
 
-/* AMÉLIORATION 4 : TITRES PLUS RAFFINÉS */
 h2 {
   grid-column: 1 / -1; text-align: center; font-size: 1.8em; font-family: 'Pirata One', serif;
   background: rgba(40, 28, 20, 0.95); 
@@ -199,7 +192,6 @@ h2 {
   position: absolute; width: 100%; height: 100%;
   top: 0; left: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden;
   border-radius: 12px; overflow: hidden; 
-  /* AMÉLIORATION 2 : Profondeur via box-shadow */
   box-shadow: 0 5px 15px rgba(0,0,0,0.5);
 }
 
@@ -207,7 +199,7 @@ h2 {
   background: #120c08;
   border: 2px solid rgba(212, 175, 55, 0.3);
   z-index: 2; 
-  /* Effet d'encastrement de l'image */
+  /* Effet d'encastrement */
   box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 5px 15px rgba(0,0,0,0.5);
 }
 .carte-front img { width: 100%; height: 100%; object-fit: cover; display: block; }
@@ -222,22 +214,26 @@ h2 {
 .carte-back h3 { font-family: 'Pirata One'; color: var(--gold); text-align: center; margin-bottom: 10px; font-size: 1.3em; text-shadow: 0 2px 4px #000; }
 .carte-back p { font-size: 0.95em; line-height: 1.5; flex: 1; white-space: pre-line; text-shadow: 0 1px 2px #000; }
 
-/* AMÉLIORATION 1 : BOUTONS MAGIQUES */
+/* CORRECTIF BOUTON COUPÉ : On empêche le bouton de rétrécir */
 .btn-details { 
   background: linear-gradient(135deg, #d4af37, #b8941f); 
   color: #1a120b; border: none; padding: 10px; border-radius: 6px; 
-  font-weight: bold; margin-top: 10px; width: 100%; 
+  font-weight: bold; 
+  /* Marge en haut pour pousser, marge en bas pour ne pas être coupé */
+  margin-top: 15px; 
+  margin-bottom: 5px;
+  width: 100%; 
   font-family: 'Pirata One'; font-size: 1.1em; cursor: pointer; 
   box-shadow: 0 4px 8px rgba(0,0,0,0.4);
-  /* Animation */
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
+  /* SÉCURITÉ : Le bouton ne doit jamais être écrasé par le texte */
+  flex-shrink: 0; 
 }
 
 .btn-details:active { transform: scale(0.95); }
 
-/* Éclat lumineux sur le bouton */
 .btn-details::after {
   content: '';
   position: absolute;
@@ -246,7 +242,6 @@ h2 {
   background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
   transition: 0.5s;
 }
-/* L'éclat passe au survol (PC) ou au touch (Mobile) */
 .btn-details:hover::after { left: 100%; }
 
 
