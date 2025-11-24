@@ -101,7 +101,7 @@ body.light-mode .close-details { color: #1a120b; border-color: #1a120b; }
 }
 
 /* ============================================
-   MENU LATÉRAL (MODIFIÉ : SUPPRESSION RECHERCHE)
+   MENU LATÉRAL (MODIFIÉ : FLEXBOX & FOOTER BAS)
    ============================================ */
 .side-menu {
   position: fixed; top: 0; left: -320px; width: 300px; height: 100vh;
@@ -111,6 +111,10 @@ body.light-mode .close-details { color: #1a120b; border-color: #1a120b; }
   border-right: 3px solid var(--gold);
   box-shadow: 10px 0 30px rgba(0,0,0,0.8);
   overflow-y: auto;
+  
+  /* Permet de pousser le footer en bas */
+  display: flex;
+  flex-direction: column;
 }
 .side-menu.open { left: 0; }
 .close-menu { position: absolute; top: 15px; right: 20px; background: none; border: none; color: var(--gold); font-size: 2.5em; cursor: pointer; }
@@ -123,6 +127,16 @@ body.light-mode .close-details { color: #1a120b; border-color: #1a120b; }
 
 /* SUPPRESSION DE LA RECHERCHE DANS LE MENU */
 .side-menu .search-container { display: none !important; }
+
+/* STYLE DU FOOTER (TEXTE EN BAS) */
+.menu-footer {
+  margin-top: auto; /* Pousse le texte tout en bas */
+  padding-top: 20px;
+  text-align: center;
+  font-size: 0.85em;
+  opacity: 0.7;
+  color: var(--gold);
+}
 
 
 /* ============================================
