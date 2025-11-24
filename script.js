@@ -1238,13 +1238,14 @@ Mi-démon, mi-vampire… 100% problème. Le Démon Vampire n’est pas une créa
 ];
 
 // ===============================
-// 1. GESTION DU MENU & NAVIGATION
+// 2. GESTION DU MENU & NAVIGATION
 // ===============================
 const menu = document.querySelector('.side-menu');
 const menuToggle = document.querySelector('.menu-toggle');
 const closeBtn = document.querySelector('.close-menu');
 const overlay = document.querySelector('.details-overlay') || document.createElement('div');
 
+// Initialisation overlay si manquant
 if (!document.querySelector('.details-overlay')) {
   overlay.className = 'details-overlay';
   document.body.appendChild(overlay);
@@ -1261,6 +1262,7 @@ function openMenu() {
 function closeMenu() {
   if (menu) {
     menu.classList.remove('open');
+    // On ferme l'overlay SEULEMENT si le panneau détails est aussi fermé
     if (!document.querySelector('.details-panel.active')) {
       overlay.classList.remove('active');
       document.body.classList.remove('no-scroll');
@@ -1271,19 +1273,19 @@ function closeMenu() {
 if (menuToggle) menuToggle.addEventListener('click', openMenu);
 if (closeBtn) closeBtn.addEventListener('click', closeMenu);
 
+// Fermeture du menu au clic sur un lien
 document.querySelectorAll('.side-menu a').forEach(link => {
-  link.addEventListener('click', () => {
-    closeMenu();
-  });
+  link.addEventListener('click', () => closeMenu());
 });
 
+// Clic sur l'overlay gère la fermeture intelligente
 overlay.addEventListener('click', () => {
-  closeMenu();
+  if (menu.classList.contains('open')) closeMenu();
   if (typeof closeDetails === 'function') closeDetails();
 });
 
 // ===============================
-// 2. GESTION DU THÈME
+// 3. GESTION DU THÈME
 // ===============================
 const themeBtn = document.getElementById('themeBtn');
 
@@ -1302,66 +1304,62 @@ if (themeBtn) {
 }
 
 // ===============================
-// 3. FLIP CARTES (CORRIGÉ)
+// 4. FLIP CARTES (VERSION ROBUSTE)
 // ===============================
 document.querySelectorAll('.carte-jeu').forEach(carte => {
   carte.addEventListener('click', function(e) {
-    // Empêche le flip si on clique sur le bouton "Détails"
-    if (e.target.closest('.btn-details')) return; 
+    // 1. Si on clique sur le bouton détails, on ne retourne pas
+    if (e.target.closest('.btn-details')) return;
     
     e.stopPropagation();
-    if (navigator.vibrate) navigator.vibrate(50);
+    if (navigator.vibrate) navigator.vibrate(50); // Petit retour haptique
 
-    const isFlipped = this.classList.contains('flipped');
+    const isAlreadyFlipped = this.classList.contains('flipped');
     
-    // On retourne toutes les autres cartes face cachée
+    // 2. On remet TOUTES les autres cartes face visible (reset)
     document.querySelectorAll('.carte-jeu.flipped').forEach(c => {
       if (c !== this) c.classList.remove('flipped');
     });
 
-    // On bascule l'état de la carte cliquée
-    if (!isFlipped) {
+    // 3. On bascule la carte actuelle
+    if (!isAlreadyFlipped) {
       this.classList.add('flipped');
     } else {
-      this.classList.remove('flipped'); // Permet de la refermer si on reclique
+      this.classList.remove('flipped');
     }
   });
 });
 
 // ===============================
-// 4. ANIMATION AU SCROLL
+// 5. ANIMATION AU SCROLL (Apparition)
 // ===============================
-const observerOptions = { threshold: 0.05, rootMargin: '50px' };
 const observer = new IntersectionObserver((entries) => {
   entries.forEach((entry) => {
     if (entry.isIntersecting) {
       entry.target.classList.add('visible');
-      observer.unobserve(entry.target);
+      observer.unobserve(entry.target); // On arrête d'observer une fois apparu
     }
   });
-}, observerOptions);
-document.querySelectorAll('.carte-jeu, .carte-vm').forEach(carte => observer.observe(carte));
+}, { threshold: 0.05, rootMargin: '50px' });
+
+document.querySelectorAll('.carte-jeu, .carte-vm').forEach(el => observer.observe(el));
 
 // ===============================
-// 5. RECHERCHE RAPIDE
+// 6. RECHERCHE RAPIDE (TOP BAR)
 // ===============================
-function normalizeText(text) {
-  return text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
-}
-
 const quickSearchInput = document.getElementById('quickSearch');
+
 if (quickSearchInput) {
   quickSearchInput.addEventListener('input', function() {
-    const term = normalizeText(this.value);
+    const term = this.value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
     const searchTerms = term.split(" ");
 
     document.querySelectorAll('.carte-jeu').forEach(card => {
-      const titleRaw = card.querySelector('h3').textContent;
-      const title = normalizeText(titleRaw);
+      const title = card.querySelector('h3').textContent.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
       const matches = searchTerms.every(word => title.includes(word));
       
       if (matches) {
-        card.style.display = ''; 
+        card.style.display = ''; // Reset display (utilise Grid par défaut)
         setTimeout(() => card.classList.add('visible'), 10);
       } else {
         card.style.display = 'none';
@@ -1369,16 +1367,66 @@ if (quickSearchInput) {
       }
     });
 
+    // Cache les sections vides
     document.querySelectorAll('section:not(#event-cards)').forEach(sec => {
-      const visibleCards = Array.from(sec.querySelectorAll('.carte-jeu')).filter(c => c.style.display !== 'none');
+      const hasVisibleCards = Array.from(sec.querySelectorAll('.carte-jeu')).some(c => c.style.display !== 'none');
       const h2 = sec.querySelector('h2');
-      if(h2) h2.style.display = (visibleCards.length > 0 || term === '') ? '' : 'none';
+      if(h2) h2.style.display = (hasVisibleCards || term === '') ? '' : 'none';
     });
   });
 }
 
 // ===============================
-// 6. ZOOM CARTES VM
+// 7. RECHERCHE CLASSIQUE (MENU)
+// ===============================
+const searchInput = document.getElementById('searchInput');
+const suggestionsBox = document.getElementById('searchSuggestions');
+// On charge la liste au démarrage
+const cardsArray = Array.from(document.querySelectorAll('.carte-jeu'));
+
+if (searchInput && suggestionsBox) {
+  searchInput.addEventListener('input', function() {
+    const value = this.value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+    if (value === '') { suggestionsBox.innerHTML = ''; return; }
+
+    const suggestions = cardsArray
+      .filter(card => {
+        const title = card.querySelector('.carte-back h3').textContent.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        return title.includes(value);
+      })
+      .map(card => card.querySelector('.carte-back h3').textContent)
+      .slice(0, 10);
+
+    if (suggestions.length > 0) {
+      suggestionsBox.innerHTML = suggestions.map(sug => `<div>${sug}</div>`).join('');
+      suggestionsBox.querySelectorAll('div').forEach(div => {
+        div.addEventListener('click', () => {
+          const clickedTitle = div.textContent;
+          searchInput.value = clickedTitle;
+          suggestionsBox.innerHTML = '';
+          
+          const targetCard = cardsArray.find(c => c.querySelector('.carte-back h3').textContent === clickedTitle);
+          
+          if (targetCard) {
+            closeMenu();
+            targetCard.style.display = ''; 
+            targetCard.parentElement.querySelector('h2').style.display = '';
+            targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            
+            setTimeout(() => {
+              if (!targetCard.classList.contains('flipped')) targetCard.classList.add('flipped');
+            }, 800);
+          }
+        });
+      });
+    } else {
+      suggestionsBox.innerHTML = '<div style="opacity:0.6; padding:10px;">Aucun résultat</div>';
+    }
+  });
+}
+
+// ===============================
+// 8. ZOOM CARTES VM (FIXED)
 // ===============================
 (function () {
   const vmOverlay = document.getElementById('vm-overlay');
@@ -1391,7 +1439,8 @@ if (quickSearchInput) {
   }
   
   function openZoom(card) {
-    document.querySelectorAll('.carte-vm.zoomed').forEach(c => { if (c !== card) c.classList.remove('zoomed'); });
+    // Ferme les autres zooms
+    document.querySelectorAll('.carte-vm.zoomed').forEach(c => c.classList.remove('zoomed'));
     card.classList.add('zoomed');
     vmOverlay.classList.add('active');
     document.body.classList.add('no-scroll');
@@ -1406,13 +1455,13 @@ if (quickSearchInput) {
       closeZoom();
     }
   });
-  vmOverlay.addEventListener('click', closeZoom);
 })();
 
 // ===============================
-// 7. DÉTAILS PANEL (PANINI)
+// 9. DÉTAILS PANEL (PANINI)
 // ===============================
 const detailsPanel = document.querySelector('.details-panel');
+// On s'assure d'avoir le conteneur interne
 if (detailsPanel && !detailsPanel.querySelector('.details-content')) {
   detailsPanel.innerHTML = '<div class="details-content"></div>';
 }
@@ -1438,16 +1487,16 @@ function openDetails(cardData) {
   detailsPanel.scrollTop = 0;
 }
 
-function closeDetails() {
+// La fonction est globale pour être appelée par le bouton X
+window.closeDetails = function() {
   detailsPanel.classList.remove('active');
   if (!menu.classList.contains('open')) {
     overlay.classList.remove('active');
     document.body.classList.remove('no-scroll');
   }
-}
+};
 
 document.addEventListener('click', (e) => {
-  // On cible spécifiquement le bouton "Détails"
   if (e.target.closest('.btn-details')) {
     e.stopPropagation();
     e.preventDefault();
@@ -1455,11 +1504,14 @@ document.addEventListener('click', (e) => {
     const title = carte.querySelector('.carte-back h3').textContent.trim();
     const image = carte.querySelector('.carte-front img').src;
     
+    // Recherche sécurisée dans paniniRoles
     const panini = (typeof paniniRoles !== 'undefined') ? paniniRoles.find(r => r.title.includes(title) || r.id === title) : null;
+    
     let cardData;
     if (panini) {
       cardData = { ...panini, image: panini.image || image };
     } else {
+      // Fallback si le rôle n'est pas dans la liste
       const desc = carte.querySelector('.carte-back p').textContent;
       cardData = { title: title, image: image, description: `<p>${desc}</p>` };
     }
@@ -1467,59 +1519,7 @@ document.addEventListener('click', (e) => {
   }
 });
 
-// ===============================
-// 8. RECHERCHE CLASSIQUE (MENU)
-// ===============================
-const searchInput = document.getElementById('searchInput');
-const suggestionsBox = document.getElementById('searchSuggestions');
-const cardsArray = Array.from(document.querySelectorAll('.carte-jeu'));
-
-if (searchInput && suggestionsBox) {
-  searchInput.addEventListener('input', function() {
-    const rawValue = this.value;
-    const value = normalizeText(rawValue);
-    if (value === '') { suggestionsBox.innerHTML = ''; return; }
-
-    const suggestions = cardsArray
-      .filter(card => {
-        const titleRaw = card.querySelector('.carte-back h3').textContent;
-        const title = normalizeText(titleRaw);
-        return title.includes(value);
-      })
-      .map(card => card.querySelector('.carte-back h3').textContent)
-      .slice(0, 10);
-
-    if (suggestions.length > 0) {
-      suggestionsBox.innerHTML = suggestions.map(sug => `<div>${sug}</div>`).join('');
-      suggestionsBox.querySelectorAll('div').forEach(div => {
-        div.addEventListener('click', () => {
-          const clickedTitle = div.textContent;
-          searchInput.value = clickedTitle;
-          suggestionsBox.innerHTML = '';
-          
-          const targetCard = cardsArray.find(card => 
-            card.querySelector('.carte-back h3').textContent === clickedTitle
-          );
-          
-          if (targetCard) {
-            closeMenu();
-            targetCard.style.display = ''; 
-            if (targetCard.parentElement.querySelector('h2')) {
-               targetCard.parentElement.querySelector('h2').style.display = 'block';
-            }
-            targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            setTimeout(() => {
-              if (!targetCard.classList.contains('flipped')) targetCard.classList.add('flipped');
-            }, 800);
-          }
-        });
-      });
-    } else {
-      suggestionsBox.innerHTML = '<div style="opacity:0.6; padding:8px;">Aucun résultat</div>';
-    }
-  });
-}
-
+// SWIPE FERMETURE
 let touchStart = 0;
 detailsPanel.addEventListener('touchstart', (e) => touchStart = e.changedTouches[0].screenX, false);
 detailsPanel.addEventListener('touchend', (e) => {
