@@ -4,7 +4,7 @@
 :root {
   --safe-top: env(safe-area-inset-top, 20px);
   --header-height: 70px;
-  --bg-dark: #1a120b; /* Plus sombre pour l'effet nuit */
+  --bg-dark: #1a120b; 
   --text-dark: #f5e6b3;
   --bg-light: #f5e6d3;
   --text-light: #3e2f23;
@@ -14,7 +14,7 @@
 * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
 /* ============================================
-   SCROLLBAR PREMIUM (Forcée)
+   SCROLLBAR PREMIUM
    ============================================ */
 body::-webkit-scrollbar { width: 10px; }
 body::-webkit-scrollbar-track { background: #0f0a06; }
@@ -29,7 +29,6 @@ body::-webkit-scrollbar-thumb {
 body {
   font-family: 'Almendra', serif;
   background-color: var(--bg-dark);
-  /* Dégradé radial pour l'effet vignette */
   background-image: radial-gradient(circle at 50% 50%, #2f241a 0%, #0f0a06 100%);
   color: var(--text-dark);
   line-height: 1.6;
@@ -39,7 +38,7 @@ body {
   transition: background 0.5s ease;
 }
 
-/* TEXTURE GRAIN (BRUME) - En Base64 pour être sûr qu'elle charge */
+/* TEXTURE GRAIN */
 body::before {
   content: "";
   position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -50,10 +49,10 @@ body::before {
 body.no-scroll { overflow: hidden; }
 
 /* ============================================
-   MODE CLAIR (MODIFIÉ POUR PANINI LISIBLE)
+   MODE CLAIR
    ============================================ */
 body.light-mode { background: var(--bg-light); color: var(--text-light); }
-body.light-mode::before { opacity: 0.1; } /* Moins de grain en jour */
+body.light-mode::before { opacity: 0.1; }
 body.light-mode .top-bar { background: rgba(245, 230, 211, 0.95); border-bottom-color: #8a6e2f; }
 body.light-mode .top-bar input { background: rgba(255, 255, 255, 0.7); color: #000; border-color: #8a6e2f; }
 body.light-mode .menu-toggle, body.light-mode #themeBtn { color: #5a4633; border-color: #8a6e2f; background: rgba(255,255,255,0.5); }
@@ -63,10 +62,10 @@ body.light-mode h2 { background: rgba(245, 230, 211, 0.95); color: #5a4633; box-
 body.light-mode .carte-back { background: linear-gradient(135deg, #f5e6d3 0%, #fff 100%); }
 body.light-mode .carte-back h3, body.light-mode .carte-back p { color: #3e2f23; }
 
-/* --- CORRECTION PANINI (DETAILS) MODE CLAIR --- */
+/* CORRECTION LISIBILITÉ PANINI (Mode Clair) */
 body.light-mode .details-panel { background: #fffcf5; border-color: #8a6e2f; }
-body.light-mode .details-title { color: #1a120b; text-shadow: none; } /* Titre foncé sans néon */
-body.light-mode .details-section { color: #000000 !important; } /* Texte NOIR forcé */
+body.light-mode .details-title { color: #1a120b; text-shadow: none; }
+body.light-mode .details-section { color: #000000 !important; }
 body.light-mode .close-details { color: #1a120b; border-color: #1a120b; }
 
 
@@ -77,7 +76,7 @@ body.light-mode .close-details { color: #1a120b; border-color: #1a120b; }
   display: flex; justify-content: space-between; align-items: center;
   position: fixed; top: 0; left: 0; width: 100%; height: var(--header-height);
   padding: var(--safe-top) 15px 15px 10px;
-  background: rgba(20, 14, 10, 0.95); /* Très sombre */
+  background: rgba(20, 14, 10, 0.95);
   backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
   border-bottom: 2px solid var(--gold);
   box-shadow: 0 5px 20px rgba(0,0,0,0.6);
@@ -102,12 +101,13 @@ body.light-mode .close-details { color: #1a120b; border-color: #1a120b; }
 }
 
 /* ============================================
-   MENU LATÉRAL
+   MENU LATÉRAL (MODIFIÉ : SUPPRESSION RECHERCHE)
    ============================================ */
 .side-menu {
   position: fixed; top: 0; left: -320px; width: 300px; height: 100vh;
   background: rgba(25, 18, 12, 0.98); padding: 25px; padding-top: calc(30px + var(--safe-top));
-  z-index: 2100; transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 2200; /* Augmenté pour être AU-DESSUS de l'overlay */
+  transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   border-right: 3px solid var(--gold);
   box-shadow: 10px 0 30px rgba(0,0,0,0.8);
   overflow-y: auto;
@@ -120,9 +120,10 @@ body.light-mode .close-details { color: #1a120b; border-color: #1a120b; }
   border-radius: 8px; border: 1px solid transparent; transition: all 0.2s;
 }
 .menu-links a:hover { background: rgba(212, 175, 55, 0.15); border-color: var(--gold); }
-.search-container { margin-top: 40px; }
-#searchInput { width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid var(--gold); color: inherit; border-radius: 8px; }
-.suggestions div { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.1); cursor: pointer; }
+
+/* SUPPRESSION DE LA RECHERCHE DANS LE MENU */
+.side-menu .search-container { display: none !important; }
+
 
 /* ============================================
    TITRES NÉONS & GRILLE
@@ -134,7 +135,6 @@ section:not(#event-cards), .category {
 
 h2 {
   grid-column: 1 / -1; text-align: center; font-size: 1.8em; font-family: 'Pirata One', serif;
-  /* Fond sombre semi-transparent */
   background: rgba(40, 28, 20, 0.9); 
   color: var(--gold); 
   padding: 15px 40px; 
@@ -142,8 +142,6 @@ h2 {
   margin: 40px auto 30px auto; 
   width: max-content; 
   border: 2px solid var(--gold);
-  
-  /* EFFET NÉON MAGIQUE (Renforcé) */
   text-shadow: 
     0 0 5px rgba(212, 175, 55, 0.8), 
     0 0 15px rgba(212, 175, 55, 0.5), 
@@ -151,12 +149,11 @@ h2 {
   box-shadow: 
     0 0 15px rgba(0, 0, 0, 0.8), 
     inset 0 0 20px rgba(0,0,0,0.7),
-    0 0 10px rgba(212, 175, 55, 0.3); /* Lueur externe */
+    0 0 10px rgba(212, 175, 55, 0.3);
   position: relative;
   letter-spacing: 1px;
 }
 
-/* Séparateur Diamant */
 h2::after {
   content: '♦'; position: absolute; bottom: -30px; left: 50%;
   transform: translateX(-50%); color: var(--gold); font-size: 24px; 
@@ -164,7 +161,7 @@ h2::after {
 }
 
 /* ============================================
-   CARTES JEU (CORRECTION TOTALE DU FLIP)
+   CARTES JEU
    ============================================ */
 .carte-jeu {
   position: relative; 
@@ -172,52 +169,36 @@ h2::after {
   aspect-ratio: 2/3; 
   perspective: 1000px; 
   cursor: pointer;
-  /* Animation d'apparition */
   opacity: 0; transform: translateY(30px); 
   transition: opacity 0.5s ease, transform 0.5s ease;
 }
 .carte-jeu.visible { opacity: 1; transform: translateY(0); }
 
-/* CONTENEUR 3D (C'est lui qui tourne) */
 .carte-inner {
-  position: relative; 
-  width: 100%; 
-  height: 100%;
-  transform-style: preserve-3d; /* Indispensable pour la 3D */
+  position: relative; width: 100%; height: 100%;
+  transform-style: preserve-3d; 
   transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
 }
 
-/* L'ÉTAT RETOURNÉ */
-.carte-jeu.flipped .carte-inner {
-  transform: rotateY(180deg);
-}
+.carte-jeu.flipped .carte-inner { transform: rotateY(180deg); }
 
-/* LE CONTENU DES FACES */
 .carte-front, .carte-back {
-  position: absolute; 
-  width: 100%; 
-  height: 100%;
-  top: 0; left: 0; /* Force la position */
-  backface-visibility: hidden; /* Cache le dos */
-  -webkit-backface-visibility: hidden;
-  border-radius: 12px; 
-  overflow: hidden; /* Pour que l'effet brillance ne dépasse pas */
+  position: absolute; width: 100%; height: 100%;
+  top: 0; left: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden;
+  border-radius: 12px; overflow: hidden; 
   box-shadow: 0 5px 15px rgba(0,0,0,0.5);
 }
 
-/* FACE AVANT */
 .carte-front {
   background: #120c08;
   border: 2px solid rgba(212, 175, 55, 0.3);
-  z-index: 2; /* Devant par défaut */
-  /* rotateY(0deg) est implicite */
+  z-index: 2; 
 }
 .carte-front img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
-/* FACE ARRIÈRE (Texte) */
 .carte-back {
   background: linear-gradient(145deg, #2a1f15 0%, #120c08 100%);
-  transform: rotateY(180deg); /* Déjà tournée pour être prête */
+  transform: rotateY(180deg); 
   border: 3px solid var(--gold);
   display: flex; flex-direction: column; padding: 15px;
   overflow-y: auto;
@@ -232,25 +213,22 @@ h2::after {
   box-shadow: 0 4px 8px rgba(0,0,0,0.4);
 }
 
-/* EFFET HOVER (Saut + Ombre) - Désactivé sur mobile si on veut, mais sympa */
 @media (hover: hover) {
   .carte-jeu:hover .carte-inner { transform: translateY(-10px); }
   .carte-jeu.flipped:hover .carte-inner { transform: rotateY(180deg) translateY(-10px); }
 }
 
-/* EFFET BRILLANCE (SHINE) - C'est ça qui claque */
 .carte-front::after, .carte-vm::after {
   content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
   background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.4), transparent);
   transform: skewX(-25deg); transition: 0s; pointer-events: none;
 }
-/* On déclenche la brillance au survol (PC) ou au clic (Mobile via JS simulation) */
 .carte-jeu:hover .carte-front::after, .carte-vm:hover::after {
   left: 200%; transition: 0.8s ease-in-out;
 }
 
 /* ============================================
-   CARTES VM (ZOOM) - CORRIGÉ
+   CARTES VM (CORRECTION BORDURES)
    ============================================ */
 #event-cards { display: block; padding: 0 10px 80px 10px; max-width: 1400px; margin: 0 auto; }
 .event-subtitle { display: block; width: 100%; text-align: center; font-family: 'Pirata One', serif; font-size: 1.6em; margin: 40px 0 20px 0; grid-column: 1 / -1; }
@@ -265,35 +243,27 @@ h2::after {
   border: 2px solid rgba(212, 175, 55, 0.3);
   box-shadow: 0 4px 10px rgba(0,0,0,0.4);
   transition: transform 0.3s ease;
-  padding: 0; /* SÉCURITÉ : Force 0 marge interne */
+  padding: 0;
 }
 .carte-vm:hover { transform: scale(1.05); border-color: var(--gold); }
+.carte-vm img { width: 100%; height: 100%; object-fit: cover; display: block; margin: 0; }
 
-/* ICI C'EST LA CORRECTION PRINCIPALE POUR L'IMAGE */
-.carte-vm img { 
-  width: 100%; 
-  height: 100%; 
-  object-fit: cover; 
-  display: block; /* TRES IMPORTANT : Supprime l'espace blanc en bas */
-  margin: 0;
-}
-
-/* ETAT ZOOMÉ (OVERLAY) */
+/* VM ZOOMÉE */
 .carte-vm.zoomed {
   position: fixed; top: 50%; left: 50%; 
-  transform: translate(-50%, -50%) scale(1) !important; /* Force le centrage */
-  z-index: 2200; /* Très haut */
+  transform: translate(-50%, -50%) scale(1) !important;
+  z-index: 2200; /* AU-DESSUS de l'overlay */
   width: 85vw; max-width: 450px; height: auto; aspect-ratio: auto;
   box-shadow: 0 0 50px rgba(0,0,0,0.95); 
   border: 3px solid var(--gold);
-  background: #000; /* Fond noir si jamais l'image charge mal */
-  padding: 0; /* Force le collage au bord */
+  background: #000; 
+  padding: 0;
 }
 #vm-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 2150; backdrop-filter: blur(5px); }
 #vm-overlay.active { display: block; }
 
 /* ============================================
-   RESPONSIVE (PC)
+   RESPONSIVE
    ============================================ */
 @media (min-width: 500px) { section:not(#event-cards), .category { grid-template-columns: repeat(3, 1fr); } }
 @media (min-width: 800px) { section:not(#event-cards), .category { grid-template-columns: repeat(4, 1fr); gap: 25px; } }
@@ -304,13 +274,17 @@ h2::after {
    ============================================ */
 .details-panel {
   position: fixed; top: 0; right: -100%; width: 100%; max-width: 500px; height: 100vh;
-  background: rgba(35, 25, 18, 0.98); z-index: 2200; overflow-y: auto;
+  background: rgba(35, 25, 18, 0.98); z-index: 2200; /* AU-DESSUS de l'overlay */
+  overflow-y: auto;
   transition: right 0.3s cubic-bezier(0.25, 1, 0.5, 1); padding: 25px;
   border-left: 2px solid var(--gold); box-shadow: -10px 0 40px rgba(0,0,0,0.9);
 }
 .details-panel.active { right: 0; }
+
+/* OVERLAY COMMUN */
 .details-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2150; backdrop-filter: blur(3px); }
 .details-overlay.active { display: block; }
+
 .details-header { display: flex; justify-content: space-between; margin-bottom: 25px; border-bottom: 1px solid var(--gold); padding-bottom: 15px; }
 .details-title { font-family: 'Pirata One'; color: var(--gold); font-size: 2em; margin: 0; text-shadow: 0 2px 5px #000; }
 .close-details { background: none; border: 1px solid var(--gold); color: inherit; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 1.5em; }
