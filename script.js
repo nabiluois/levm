@@ -1311,10 +1311,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     if(notif && notifTitle && notifMsg) {
         notifTitle.textContent = title;
-        notifMsg.innerHTML = message.replace(/\n/g, '<br>'); // Gère les sauts de ligne
+        notifMsg.innerHTML = message.replace(/\n/g, '<br>');
         notif.classList.add('active');
     } else {
-        // Fallback si le HTML n'est pas encore mis à jour
         alert(message);
     }
   };
@@ -1324,7 +1323,6 @@ document.addEventListener('DOMContentLoaded', function() {
     if(notif) notif.classList.remove('active');
   };
 
-  // Fermer la notif en cliquant à côté
   const notifOverlay = document.getElementById('custom-notification');
   if(notifOverlay) {
       notifOverlay.addEventListener('click', (e) => {
@@ -1333,10 +1331,8 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // ===============================
-  // GESTION ENVOI FORMULAIRES
-  // ===============================
-
   // GESTION ENVOI PROPOSITION RÔLE
+  // ===============================
   window.submitRole = function(e) {
     e.preventDefault();
     const form = e.target;
@@ -1347,8 +1343,11 @@ document.addEventListener('DOMContentLoaded', function() {
     submitBtn.disabled = true;
 
     const formData = new FormData(form);
+    // On force le format JSON ici (plus fiable que l'URL /ajax/ pour les formulaires complexes)
+    formData.append("_format", "json");
 
-    fetch("https://formsubmit.co/ajax/contact@lacourduroi.fr", {
+    // NOTE: J'ai retiré "/ajax/" de l'URL pour une meilleure compatibilité
+    fetch("https://formsubmit.co/contact@lacourduroi.fr", {
         method: "POST",
         body: formData
     })
@@ -1368,7 +1367,9 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   };
 
-  // GESTION ENVOI RAPPORT BUG
+  // ===============================
+  // GESTION ENVOI RAPPORT BUG (CORRIGÉ POUR IMAGES)
+  // ===============================
   window.submitBug = function(e) {
     e.preventDefault();
     const form = e.target;
@@ -1379,8 +1380,11 @@ document.addEventListener('DOMContentLoaded', function() {
     submitBtn.disabled = true;
 
     const formData = new FormData(form);
+    // CORRECTION MAJEURE : On force le JSON via FormData et non via l'URL
+    // L'URL "/ajax/" supprime souvent les fichiers. L'URL standard les garde.
+    formData.append("_format", "json");
 
-    fetch("https://formsubmit.co/ajax/contact@lacourduroi.fr", {
+    fetch("https://formsubmit.co/contact@lacourduroi.fr", {
         method: "POST",
         body: formData
     })
@@ -1518,7 +1522,6 @@ document.addEventListener('DOMContentLoaded', function() {
   window.closeDetails = function() {
     if (detailsPanel) {
         detailsPanel.classList.remove('active');
-        // On nettoie le style 'transform' après l'animation CSS pour éviter les bugs
         setTimeout(() => { detailsPanel.style.transform = ''; }, 300);
     }
     if(overlay) overlay.classList.remove('active');
@@ -1612,43 +1615,32 @@ document.addEventListener('DOMContentLoaded', function() {
   let isDragging = false;
 
   if (detailsPanel) {
-    // 1. Début du touch : on mémorise le point de départ
     detailsPanel.addEventListener('touchstart', (e) => {
       touchStartX = e.touches[0].clientX;
       isDragging = true;
-      // On désactive la transition CSS pour que le panneau colle au doigt immédiatement
       detailsPanel.style.transition = 'none';
     }, {passive: true});
 
-    // 2. Mouvement : le panneau suit le doigt
     detailsPanel.addEventListener('touchmove', (e) => {
       if (!isDragging) return;
       const touchCurrentX = e.touches[0].clientX;
       const deltaX = touchCurrentX - touchStartX;
-
-      // On ne bouge que si on va vers la droite (fermeture)
       if (deltaX > 0) {
         currentTranslateX = deltaX;
         detailsPanel.style.transform = `translateX(${deltaX}px)`;
       }
     }, {passive: true});
 
-    // 3. Fin du touch : on décide si on ferme ou on remet en place
     detailsPanel.addEventListener('touchend', (e) => {
       isDragging = false;
-      // On remet la transition douce pour l'animation de fin
       detailsPanel.style.transition = 'transform 0.3s cubic-bezier(0.25, 1, 0.5, 1), right 0.3s cubic-bezier(0.25, 1, 0.5, 1)';
-
-      // SEUIL : Si on a glissé de plus de 100px vers la droite...
       if (currentTranslateX > 100) {
-        // ... on ferme
         closeDetails();
         setTimeout(() => {
           detailsPanel.style.transform = '';
           currentTranslateX = 0;
         }, 300);
       } else {
-        // ... sinon, effet rebond (retour à la normale)
         detailsPanel.style.transform = 'translateX(0)';
         currentTranslateX = 0;
       }
