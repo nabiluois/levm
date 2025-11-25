@@ -51,7 +51,15 @@ body.light-mode .nav-btn { color: #5a4633; border-color: rgba(138, 110, 47, 0.3)
 body.light-mode .nav-btn.active, body.light-mode .nav-btn:hover { background: #8a6e2f; color: #fff; border-color: #8a6e2f; }
 body.light-mode h2 { background: rgba(245, 230, 211, 0.95); color: #5a4633; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-shadow: none; border-color: #8a6e2f; }
 body.light-mode .carte-back { background: linear-gradient(135deg, #f5e6d3 0%, #fff 100%); }
-body.light-mode .carte-back h3, body.light-mode .carte-back p { color: #3e2f23; }
+
+/* CORRECTION VISIBILITÉ TITRE CARTE (MODE CLAIR) */
+body.light-mode .carte-back h3 { 
+  color: #5a4633; /* Brun foncé au lieu de doré */
+  text-shadow: none; /* Supprime l'ombre noire qui bavait */
+  font-weight: bold; 
+}
+
+body.light-mode .carte-back p { color: #3e2f23; }
 body.light-mode .details-panel { background: #fffcf5; border-color: #8a6e2f; }
 body.light-mode .details-title { color: #1a120b; text-shadow: none; }
 body.light-mode .details-section { color: #000000 !important; }
@@ -178,9 +186,9 @@ section:not(#event-cards), .category {
   scroll-margin-top: calc(var(--header-height-mobile) + 20px);
 }
 
-/* Ajustement pour Desktop */
+/* Ajustement pour Desktop (Inclut aussi #event-cards maintenant) */
 @media (min-width: 768px) {
-  section:not(#event-cards), .category {
+  section:not(#event-cards), .category, #event-cards {
     scroll-margin-top: calc(var(--header-height-desktop) + 20px);
   }
 }
@@ -257,7 +265,13 @@ h2 {
 .carte-jeu.flipped:hover .carte-inner { transform: rotateY(180deg) translateY(-10px); }
 
 /* CARTES VM */
-#event-cards { display: block; padding: 0 10px 80px 10px; max-width: 1400px; margin: 0 auto; }
+#event-cards { 
+  display: block; padding: 0 10px 80px 10px; max-width: 1400px; margin: 0 auto; 
+  
+  /* AJOUT CORRECTIF SCROLL MOBILE POUR CARTE VM */
+  scroll-margin-top: calc(var(--header-height-mobile) + 20px);
+}
+
 .event-subtitle { display: block; width: 100%; text-align: center; font-family: 'Pirata One', serif; font-size: 1.6em; margin: 40px 0 20px 0; grid-column: 1 / -1; }
 .gold-title { color: gold; text-shadow: 0 0 15px gold; }
 .silver-title { color: silver; text-shadow: 0 0 15px silver; }
