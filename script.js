@@ -1,4 +1,3 @@
-
 // ===============================
 // PANINI : RÔLES DÉTAILLÉS
 // ===============================
@@ -1319,24 +1318,41 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // ===============================
-  // 4. FLIP CARTES (VERSION ROBUSTE + PATCH IOS)
+  // 4. FLIP CARTES (VERSION ROBUSTE + PATCH IOS MANUEL)
   // ===============================
   document.querySelectorAll('.carte-jeu').forEach(carte => {
     
-    // --- PATCH IOS : SCROLL INTERNE ---
-    // Sur iOS, le scroll dans un élément rotateY(180deg) bug souvent.
-    // On force l'événement tactile à rester dans la carte (stopPropagation).
+    // --- PATCH IOS : SCROLL MANUEL FORCÉ ---
+    // Sur iOS, le scroll natif dans un élément rotateY(180deg) est souvent cassé.
+    // Cette solution force le scroll via JS pour garantir que le texte bouge.
     const backFace = carte.querySelector('.carte-back');
     if (backFace) {
-      // Évite que le "toucher" remonte au body
+      let startY = 0;
+
+      // On capture la position du doigt au début
       backFace.addEventListener('touchstart', (e) => {
-        e.stopPropagation();
-      }, { passive: true });
-      
-      // Évite que le "glisser" remonte au body
+        startY = e.touches[0].pageY;
+      }, { passive: false });
+
+      // On gère le mouvement nous-mêmes
       backFace.addEventListener('touchmove', (e) => {
+        // Si le contenu est plus petit que la carte, pas besoin de scroller
+        if (backFace.scrollHeight <= backFace.clientHeight) return;
+
+        // Calcul du mouvement
+        const y = e.touches[0].pageY;
+        const delta = startY - y;
+        
+        // 1. On applique le scroll manuellement sur l'élément
+        backFace.scrollTop += delta;
+        
+        // 2. On empêche le scroll de la page principale (body)
+        if (e.cancelable) e.preventDefault();
         e.stopPropagation();
-      }, { passive: true });
+
+        // Mise à jour pour le prochain mouvement
+        startY = y;
+      }, { passive: false });
     }
     // ----------------------------------
 
@@ -1451,7 +1467,7 @@ document.addEventListener('DOMContentLoaded', function() {
     detailsPanel.innerHTML = '<div class="details-content"></div>';
   }
 
-  // === NOUVELLE FONCTION APPLIQUÉE ICI ===
+  // === NOUVELLE FONCTION : DÉTAILS AVEC VIDÉO ===
   function openDetails(cardData) {
     // Petit retour haptique
     if (navigator.vibrate) navigator.vibrate(15);
@@ -1468,7 +1484,6 @@ document.addEventListener('DOMContentLoaded', function() {
         <button class="close-details" onclick="closeDetails()">✕</button>
       </div>
       
-      <!-- LECTEUR VIDÉO -->
       <video 
         class="details-video" 
         src="${videoSrc}" 
@@ -1479,7 +1494,6 @@ document.addEventListener('DOMContentLoaded', function() {
         playsinline 
         webkit-playsinline
       >
-        <!-- Fallback Image -->
         <img src="${cardData.image}" alt="${cardData.title}" class="details-image">
       </video>
 
