@@ -1446,9 +1446,24 @@ document.addEventListener('DOMContentLoaded', function() {
 
       const title = h3.textContent.trim();
       const image = img.src;
-      const desc = p ? p.innerHTML : "Pas de description.";
       
-      const cardData = { title: title, image: image, description: desc };
+      // LOGIQUE DE RECUPERATION AMELIOREE
+      // On cherche d'abord dans la liste paniniRoles
+      const panini = (typeof paniniRoles !== 'undefined') 
+        ? paniniRoles.find(r => r.title.includes(title) || r.id === title.toUpperCase()) 
+        : null;
+      
+      let cardData;
+      
+      if (panini) {
+        // Si trouvé dans la liste JSON, on prend les infos riches
+        cardData = { ...panini, image: panini.image || image };
+      } else {
+        // Sinon, on prend le texte basique du HTML (fallback)
+        const desc = p ? p.innerHTML : "Pas de description.";
+        cardData = { title: title, image: image, description: desc };
+      }
+      
       openDetails(cardData);
     }
   });
