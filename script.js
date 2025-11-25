@@ -1318,9 +1318,58 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // ===============================
-  // 4. FLIP CARTES (VERSION NATIVE - SANS PATCH)
+  // 4. FLIP CARTES (VERSION HYBRIDE : PATCH VIEUX IOS)
   // ===============================
+  
+  // Fonction pour détecter si c'est une "vieille" version d'iOS (ex: < 15)
+  function isOldIOS() {
+    const ua = navigator.userAgent;
+    // Vérifie si c'est un iPhone, iPad ou iPod
+    if (/iP(hone|od|ad)/.test(ua)) {
+      // Extrait la version (ex: "OS 12_1" -> 12.1)
+      const match = ua.match(/OS (\d+)_/);
+      if (match && match[1]) {
+        const version = parseInt(match[1], 10);
+        // Si la version est inférieure à 15, on considère que c'est "vieux"
+        return version < 15;
+      }
+    }
+    return false; // Android, PC, ou iOS récent
+  }
+
+  const useManualScroll = isOldIOS();
+
   document.querySelectorAll('.carte-jeu').forEach(carte => {
+    
+    // --- PATCH IOS : SCROLL MANUEL (UNIQUEMENT SI VIEUX IOS DETECTÉ) ---
+    if (useManualScroll) {
+      const backFace = carte.querySelector('.carte-back');
+      if (backFace) {
+        let startY = 0;
+
+        backFace.addEventListener('touchstart', (e) => {
+          startY = e.touches[0].pageY;
+        }, { passive: false });
+
+        backFace.addEventListener('touchmove', (e) => {
+          if (backFace.scrollHeight <= backFace.clientHeight) return;
+
+          const y = e.touches[0].pageY;
+          const delta = startY - y;
+          
+          // On force le scroll
+          backFace.scrollTop += delta;
+          
+          // On bloque le body
+          if (e.cancelable) e.preventDefault();
+          e.stopPropagation();
+
+          startY = y;
+        }, { passive: false });
+      }
+    }
+    // ----------------------------------
+
     carte.addEventListener('click', function(e) {
       // 1. Si on clique sur le bouton détails, on ne retourne pas
       if (e.target.closest('.btn-details')) return;
