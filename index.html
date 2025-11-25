@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
@@ -14,15 +14,22 @@
 </head>
 <body>
 
+  <!-- HEADER -->
   <header class="main-header">
     
+    <!-- Étage 1 : Burger + Recherche + Thème -->
     <div class="header-top">
+      <!-- BOUTON BURGER (NOUVEAU) -->
+      <button class="burger-btn" aria-label="Menu options">☰</button>
+
       <div class="search-wrapper">
         <input type="text" id="quickSearch" placeholder="🔍 Rechercher un rôle..." aria-label="Recherche rapide">
       </div>
+      
       <button id="themeBtn" aria-label="Changer le thème">🌙</button>
     </div>
 
+    <!-- Étage 2 : Navigation Rapide -->
     <nav class="nav-shortcuts">
       <a href="#village" class="nav-btn">Village</a>
       <a href="#loups" class="nav-btn">Loups</a>
@@ -32,6 +39,77 @@
     </nav>
 
   </header>
+
+  <!-- MENU LATÉRAL (EXTRA) -->
+  <div class="extra-menu-overlay"></div>
+  <nav class="extra-menu">
+    <div class="extra-header">
+      <h3>Menu du Village</h3>
+      <button class="close-extra">✕</button>
+    </div>
+    <ul class="extra-links">
+      <li><a href="#" onclick="openModal('modal-regles')">📜 Le Pacte (Règles)</a></li>
+      <li><a href="#" onclick="openModal('modal-propose')">✍️ Proposer un Rôle</a></li>
+      <li><a href="#" onclick="alert('Fonctionnalité bientôt disponible !')">🐛 Signaler un Bug</a></li>
+    </ul>
+    <div class="extra-footer">
+      <em>Le Village Maudit v1.0</em>
+    </div>
+  </nav>
+
+  <!-- MODALE 1 : PROPOSER UN RÔLE -->
+  <div id="modal-propose" class="modal">
+    <div class="modal-content">
+      <span class="close-modal" onclick="closeModal('modal-propose')">✕</span>
+      <h2>Le Grimoire des Créations</h2>
+      <p>Tu as une idée de rôle géniale ? Décris-la ici. Si elle est retenue par le Conseil, elle sera ajoutée au jeu !</p>
+      
+      <form id="roleForm" onsubmit="submitRole(event)">
+        <div class="form-group">
+          <label>Nom du Rôle</label>
+          <input type="text" placeholder="Ex: Le Forgeron Fou" required>
+        </div>
+        
+        <div class="form-group">
+          <label>Camp</label>
+          <select>
+            <option>Villageois</option>
+            <option>Loup-Garou</option>
+            <option>Solitaire</option>
+            <option>Autre</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Description & Pouvoirs</label>
+          <textarea rows="5" placeholder="Quel est son but ? Que fait-il la nuit ?" required></textarea>
+        </div>
+
+        <button type="submit" class="btn-submit">Envoyer au Conseil</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODALE 2 : RÈGLES (LE PACTE) -->
+  <div id="modal-regles" class="modal">
+    <div class="modal-content">
+      <span class="close-modal" onclick="closeModal('modal-regles')">✕</span>
+      <h2>Le Pacte du Village</h2>
+      <div class="rules-content">
+        <p>Pour que la partie soit légendaire, chaque habitant s'engage à respecter ce code d'honneur :</p>
+        <ul>
+          <li>🤫 <strong>Silence de Mort :</strong> La nuit, le silence est d'or. Le moindre bruit peut trahir un rôle.</li>
+          <li>📱 <strong>Déconnexion :</strong> Les téléphones sont bannis du cercle (sauf pour consulter cette app).</li>
+          <li>👻 <strong>L'Au-delà est Muet :</strong> Les morts ne parlent pas et ne réagissent pas aux débats.</li>
+          <li>🤝 <strong>Fair-Play :</strong> On joue pour s'amuser. Pas d'insultes, pas de triche.</li>
+          <li>🎭 <strong>Incarne ton Rôle :</strong> Joue le jeu à fond, c'est ce qui crée l'ambiance !</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTENU PRINCIPAL (Exemple : À adapter selon votre contenu réel de cartes) -->
+  <!-- ... Vos sections #village, #loups, etc. ... -->
 
   <script src="script.js"></script>
 </body>

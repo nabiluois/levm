@@ -1243,7 +1243,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // 1. INITIALISATION & VARIABLES
   // ===============================
   
-  // Overlay commun
+  // Overlay pour les détails des cartes
   let overlay = document.querySelector('.details-overlay');
   if (!overlay) {
     overlay = document.createElement('div');
@@ -1259,7 +1259,55 @@ document.addEventListener('DOMContentLoaded', function() {
   const cardsArray = Array.from(document.querySelectorAll('.carte-jeu')); 
 
   // ===============================
-  // 2. GESTION DU THÈME
+  // 2. GESTION MENU BURGER (EXTRA)
+  // ===============================
+  const burgerBtn = document.querySelector('.burger-btn');
+  const extraMenu = document.querySelector('.extra-menu');
+  const extraOverlay = document.querySelector('.extra-menu-overlay');
+  const closeExtraBtn = document.querySelector('.close-extra');
+
+  function toggleExtraMenu() {
+    if(extraMenu) extraMenu.classList.toggle('open');
+    if(extraOverlay) extraOverlay.classList.toggle('active');
+    document.body.classList.toggle('no-scroll');
+  }
+
+  if(burgerBtn) burgerBtn.addEventListener('click', toggleExtraMenu);
+  if(closeExtraBtn) closeExtraBtn.addEventListener('click', toggleExtraMenu);
+  if(extraOverlay) extraOverlay.addEventListener('click', toggleExtraMenu);
+
+  // ===============================
+  // 3. GESTION DES MODALES
+  // ===============================
+  
+  window.openModal = function(modalId) {
+    const modal = document.getElementById(modalId);
+    if(modal) {
+      modal.classList.add('active');
+      if(extraMenu && extraMenu.classList.contains('open')) toggleExtraMenu();
+    }
+  };
+
+  window.closeModal = function(modalId) {
+    const modal = document.getElementById(modalId);
+    if(modal) modal.classList.remove('active');
+  };
+
+  document.querySelectorAll('.modal').forEach(modal => {
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) modal.classList.remove('active');
+    });
+  });
+
+  window.submitRole = function(e) {
+    e.preventDefault();
+    alert("📜 Proposition scellée et envoyée au Conseil des Anciens !\nMerci pour ta contribution.");
+    closeModal('modal-propose');
+    e.target.reset();
+  };
+
+  // ===============================
+  // 4. GESTION DU THÈME
   // ===============================
   const themeBtn = document.getElementById('themeBtn');
   
@@ -1278,7 +1326,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // ===============================
-  // 3. FLIP CARTES (SANS PATCH MANUEL IOS)
+  // 5. FLIP CARTES
   // ===============================
   document.querySelectorAll('.carte-jeu').forEach(carte => {
     carte.addEventListener('click', function(e) {
@@ -1289,7 +1337,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
       const isAlreadyFlipped = this.classList.contains('flipped');
       
-      // Reset des autres cartes
       document.querySelectorAll('.carte-jeu.flipped').forEach(c => {
         if (c !== this) c.classList.remove('flipped');
       });
@@ -1299,7 +1346,7 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
   // ===============================
-  // 4. ANIMATION AU SCROLL
+  // 6. ANIMATION AU SCROLL
   // ===============================
   const observer = new IntersectionObserver((entries) => {
     entries.forEach((entry) => {
@@ -1313,7 +1360,7 @@ document.addEventListener('DOMContentLoaded', function() {
   document.querySelectorAll('.carte-jeu, .carte-vm').forEach(el => observer.observe(el));
 
   // ===============================
-  // 5. RECHERCHE RAPIDE
+  // 7. RECHERCHE RAPIDE
   // ===============================
   const quickSearchInput = document.getElementById('quickSearch');
   if (quickSearchInput) {
@@ -1335,7 +1382,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
       });
       
-      // Masquer les sections vides
       document.querySelectorAll('section:not(#event-cards)').forEach(sec => {
         const hasVisibleCards = Array.from(sec.querySelectorAll('.carte-jeu')).some(c => c.style.display !== 'none');
         const h2 = sec.querySelector('h2');
@@ -1345,7 +1391,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // ===============================
-  // 6. ZOOM CARTES VM
+  // 8. ZOOM CARTES VM
   // ===============================
   const vmOverlay = document.getElementById('vm-overlay');
   
@@ -1372,7 +1418,7 @@ document.addEventListener('DOMContentLoaded', function() {
   if (vmOverlay) vmOverlay.addEventListener('click', closeZoom);
 
   // ===============================
-  // 7. DÉTAILS PANEL (SÉCURISÉ + FALLBACK VIDEO)
+  // 9. DÉTAILS PANEL
   // ===============================
   
   window.closeDetails = function() {
@@ -1391,7 +1437,6 @@ document.addEventListener('DOMContentLoaded', function() {
     if (navigator.vibrate) navigator.vibrate(15);
     const content = detailsPanel.querySelector('.details-content') || detailsPanel;
     
-    // Fallback automatique si la vidéo n'existe pas
     const videoSrc = cardData.image.replace(/\.(png|jpg|jpeg|webp)$/i, '.mp4');
     const uniqueId = 'fallback-' + Math.random().toString(36).substr(2, 9);
 
@@ -1447,19 +1492,14 @@ document.addEventListener('DOMContentLoaded', function() {
       const title = h3.textContent.trim();
       const image = img.src;
       
-      // LOGIQUE DE RECUPERATION AMELIOREE
-      // On cherche d'abord dans la liste paniniRoles
       const panini = (typeof paniniRoles !== 'undefined') 
         ? paniniRoles.find(r => r.title.includes(title) || r.id === title.toUpperCase()) 
         : null;
       
       let cardData;
-      
       if (panini) {
-        // Si trouvé dans la liste JSON, on prend les infos riches
         cardData = { ...panini, image: panini.image || image };
       } else {
-        // Sinon, on prend le texte basique du HTML (fallback)
         const desc = p ? p.innerHTML : "Pas de description.";
         cardData = { title: title, image: image, description: desc };
       }
@@ -1477,7 +1517,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // ===============================
-  // 8. PIED DE PAGE
+  // 10. PIED DE PAGE
   // ===============================
   const pageFooter = document.createElement('footer');
   pageFooter.innerHTML = `
@@ -1489,7 +1529,7 @@ document.addEventListener('DOMContentLoaded', function() {
   document.body.appendChild(pageFooter);
 
   // ===============================
-  // 9. PWA SERVICE WORKER
+  // 11. PWA SERVICE WORKER
   // ===============================
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
