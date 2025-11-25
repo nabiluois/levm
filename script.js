@@ -1418,11 +1418,15 @@ document.addEventListener('DOMContentLoaded', function() {
   if (vmOverlay) vmOverlay.addEventListener('click', closeZoom);
 
   // ===============================
-  // 9. DÉTAILS PANEL
+  // 9. DÉTAILS PANEL (MODIFIÉ FLUIDE)
   // ===============================
   
   window.closeDetails = function() {
-    if (detailsPanel) detailsPanel.classList.remove('active');
+    if (detailsPanel) {
+        detailsPanel.classList.remove('active');
+        // On nettoie le style 'transform' après l'animation CSS pour éviter les bugs
+        setTimeout(() => { detailsPanel.style.transform = ''; }, 300);
+    }
     if(overlay) overlay.classList.remove('active');
     document.body.classList.remove('no-scroll');
     const v = detailsPanel ? detailsPanel.querySelector('video') : null;
@@ -1508,12 +1512,53 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 
-  let touchStart = 0;
+  // --- LOGIQUE SWIPE FLUIDE ---
+  let touchStartX = 0;
+  let currentTranslateX = 0;
+  let isDragging = false;
+
   if (detailsPanel) {
-      detailsPanel.addEventListener('touchstart', (e) => touchStart = e.changedTouches[0].screenX, {passive: true});
-      detailsPanel.addEventListener('touchend', (e) => {
-        if (e.changedTouches[0].screenX - touchStart > 100) closeDetails();
-      }, {passive: true});
+    // 1. Début du touch : on mémorise le point de départ
+    detailsPanel.addEventListener('touchstart', (e) => {
+      touchStartX = e.touches[0].clientX;
+      isDragging = true;
+      // On désactive la transition CSS pour que le panneau colle au doigt immédiatement
+      detailsPanel.style.transition = 'none';
+    }, {passive: true});
+
+    // 2. Mouvement : le panneau suit le doigt
+    detailsPanel.addEventListener('touchmove', (e) => {
+      if (!isDragging) return;
+      const touchCurrentX = e.touches[0].clientX;
+      const deltaX = touchCurrentX - touchStartX;
+
+      // On ne bouge que si on va vers la droite (fermeture)
+      if (deltaX > 0) {
+        currentTranslateX = deltaX;
+        detailsPanel.style.transform = `translateX(${deltaX}px)`;
+      }
+    }, {passive: true});
+
+    // 3. Fin du touch : on décide si on ferme ou on remet en place
+    detailsPanel.addEventListener('touchend', (e) => {
+      isDragging = false;
+      // On remet la transition douce pour l'animation de fin
+      detailsPanel.style.transition = 'transform 0.3s cubic-bezier(0.25, 1, 0.5, 1), right 0.3s cubic-bezier(0.25, 1, 0.5, 1)';
+
+      // SEUIL : Si on a glissé de plus de 100px vers la droite...
+      if (currentTranslateX > 100) {
+        // ... on ferme
+        closeDetails();
+        setTimeout(() => {
+          detailsPanel.style.transform = '';
+          currentTranslateX = 0;
+        }, 300);
+      } else {
+        // ... sinon, effet rebond (retour à la normale)
+        detailsPanel.style.transform = 'translateX(0)';
+        currentTranslateX = 0;
+      }
+    }, {passive: true});
   }
 
   // ===============================
