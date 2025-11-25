@@ -263,8 +263,9 @@ h2 {
   max-width: 500px; 
   
   /* FORCE LA HAUTEUR TOTALE MOBILE */
-  height: 100vh; /* Fallback */
-  height: 100dvh; /* Hauteur dynamique réelle */
+  /* Utilise 100dvh pour ignorer la barre d'adresse */
+  height: 100vh; 
+  height: 100dvh; 
   
   background: rgba(35, 25, 18, 0.98); 
   z-index: 2200; 
@@ -275,8 +276,8 @@ h2 {
   
   padding: 25px;
   
-  /* MARGE EN BAS GÉANTE POUR ÉVITER QUE LE TEXTE SOIT COUPÉ */
-  padding-bottom: 150px; 
+  /* MARGE EN BAS GÉANTE (200px) POUR ÉVITER QUE LE TEXTE SOIT COUPÉ */
+  padding-bottom: 200px !important; 
   
   border-left: 2px solid var(--gold); 
   box-shadow: -10px 0 40px rgba(0,0,0,0.9);
