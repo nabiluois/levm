@@ -1253,7 +1253,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   
   const detailsPanel = document.querySelector('.details-panel');
-  const cardsArray = Array.from(document.querySelectorAll('.carte-jeu')); // Liste chargée APRES le chargement de la page
+  const cardsArray = Array.from(document.querySelectorAll('.carte-jeu')); 
   
   // ===============================
   // 2. GESTION DU MENU & NAVIGATION
@@ -1261,7 +1261,6 @@ document.addEventListener('DOMContentLoaded', function() {
   function openMenu() {
     if (menu) {
       menu.classList.add('open');
-      // On n'affiche l'overlay que si le panneau détails n'est pas déjà ouvert
       if (!detailsPanel || !detailsPanel.classList.contains('active')) {
         overlay.classList.add('active');
         document.body.classList.add('no-scroll');
@@ -1272,7 +1271,6 @@ document.addEventListener('DOMContentLoaded', function() {
   function closeMenu() {
     if (menu) {
       menu.classList.remove('open');
-      // On ferme l'overlay SEULEMENT si le panneau détails est aussi fermé
       if (!detailsPanel || !detailsPanel.classList.contains('active')) {
         overlay.classList.remove('active');
         document.body.classList.remove('no-scroll');
@@ -1283,12 +1281,10 @@ document.addEventListener('DOMContentLoaded', function() {
   if (menuToggle) menuToggle.addEventListener('click', openMenu);
   if (closeBtn) closeBtn.addEventListener('click', closeMenu);
 
-  // Fermeture du menu au clic sur un lien
   document.querySelectorAll('.side-menu a').forEach(link => {
     link.addEventListener('click', () => closeMenu());
   });
 
-  // Clic sur l'overlay gère la fermeture intelligente
   overlay.addEventListener('click', () => {
     const isMenuOpen = menu && menu.classList.contains('open');
     const isDetailsOpen = detailsPanel && detailsPanel.classList.contains('active');
@@ -1302,7 +1298,6 @@ document.addEventListener('DOMContentLoaded', function() {
   // ===============================
   const themeBtn = document.getElementById('themeBtn');
 
-  // Appliquer le thème stocké au chargement
   if (localStorage.getItem('theme') === 'light') {
     document.body.classList.add('light-mode');
     if(themeBtn) themeBtn.textContent = '☀️';
@@ -1318,30 +1313,36 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // ===============================
-  // 4. FLIP CARTES (VERSION HYBRIDE : PATCH VIEUX IOS)
+  // 4. FLIP CARTES (VERSION HYBRIDE IOS - CORRECTIF ÉTENDU)
   // ===============================
   
-  // Fonction pour détecter si c'est une "vieille" version d'iOS (ex: < 15)
-  function isOldIOS() {
+  // Fonction pour détecter la version d'iOS
+  function getIOSVersion() {
     const ua = navigator.userAgent;
-    // Vérifie si c'est un iPhone, iPad ou iPod
     if (/iP(hone|od|ad)/.test(ua)) {
-      // Extrait la version (ex: "OS 12_1" -> 12.1)
       const match = ua.match(/OS (\d+)_/);
       if (match && match[1]) {
-        const version = parseInt(match[1], 10);
-        // Si la version est inférieure à 15, on considère que c'est "vieux"
-        return version < 15;
+        return parseInt(match[1], 10);
       }
+      return true; // iOS détecté mais version inconnue -> on retourne true pour appliquer le patch
     }
-    return false; // Android, PC, ou iOS récent
+    // Détection iPad iPadOS (qui se fait passer pour un Mac)
+    if (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) {
+      return true;
+    }
+    return false; 
   }
 
-  const useManualScroll = isOldIOS();
+  const iosVersion = getIOSVersion();
+  
+  // CHANGEMENT ICI : On applique le patch manuel à TOUS les appareils iOS détectés.
+  // iosVersion sera soit un nombre (ex: 15), soit true, soit false.
+  // Si ce n'est pas false, c'est un iPhone/iPad, donc on active le scroll manuel.
+  const useManualScroll = iosVersion !== false;
 
   document.querySelectorAll('.carte-jeu').forEach(carte => {
     
-    // --- PATCH IOS : SCROLL MANUEL (UNIQUEMENT SI VIEUX IOS DETECTÉ) ---
+    // --- PATCH IOS : SCROLL MANUEL ---
     if (useManualScroll) {
       const backFace = carte.querySelector('.carte-back');
       if (backFace) {
@@ -1352,15 +1353,16 @@ document.addEventListener('DOMContentLoaded', function() {
         }, { passive: false });
 
         backFace.addEventListener('touchmove', (e) => {
+          // Si pas de scroll nécessaire, on arrête
           if (backFace.scrollHeight <= backFace.clientHeight) return;
 
           const y = e.touches[0].pageY;
           const delta = startY - y;
           
-          // On force le scroll
+          // Force le scroll
           backFace.scrollTop += delta;
           
-          // On bloque le body
+          // Empêche la page de bouger pour éviter le conflit
           if (e.cancelable) e.preventDefault();
           e.stopPropagation();
 
@@ -1368,10 +1370,9 @@ document.addEventListener('DOMContentLoaded', function() {
         }, { passive: false });
       }
     }
-    // ----------------------------------
+    // -----------------
 
     carte.addEventListener('click', function(e) {
-      // 1. Si on clique sur le bouton détails, on ne retourne pas
       if (e.target.closest('.btn-details')) return;
       
       e.stopPropagation();
@@ -1379,12 +1380,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
       const isAlreadyFlipped = this.classList.contains('flipped');
       
-      // 2. Reset : on remet les autres cartes face visible
       document.querySelectorAll('.carte-jeu.flipped').forEach(c => {
         if (c !== this) c.classList.remove('flipped');
       });
 
-      // 3. Toggle carte actuelle
       if (!isAlreadyFlipped) {
         this.classList.add('flipped');
       } else {
@@ -1394,7 +1393,7 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
   // ===============================
-  // 5. ANIMATION AU SCROLL (Apparition)
+  // 5. ANIMATION AU SCROLL
   // ===============================
   const observer = new IntersectionObserver((entries) => {
     entries.forEach((entry) => {
@@ -1408,7 +1407,7 @@ document.addEventListener('DOMContentLoaded', function() {
   document.querySelectorAll('.carte-jeu, .carte-vm').forEach(el => observer.observe(el));
 
   // ===============================
-  // 6. RECHERCHE RAPIDE (TOP BAR)
+  // 6. RECHERCHE RAPIDE
   // ===============================
   const quickSearchInput = document.getElementById('quickSearch');
 
@@ -1418,10 +1417,8 @@ document.addEventListener('DOMContentLoaded', function() {
       const searchTerms = term.split(" ");
 
       cardsArray.forEach(card => {
-        // Recherche sécurisée sur le h3
         const h3 = card.querySelector('h3');
         const title = h3 ? h3.textContent.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") : "";
-        
         const matches = searchTerms.every(word => title.includes(word));
         
         if (matches) {
@@ -1433,7 +1430,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
       });
 
-      // Masquer les titres de section vides
       document.querySelectorAll('section:not(#event-cards)').forEach(sec => {
         const hasVisibleCards = Array.from(sec.querySelectorAll('.carte-jeu')).some(c => c.style.display !== 'none');
         const h2 = sec.querySelector('h2');
@@ -1460,7 +1456,6 @@ document.addEventListener('DOMContentLoaded', function() {
     document.body.classList.add('no-scroll');
   }
   
-  // Gestion des clics VM
   document.querySelectorAll('.carte-vm').forEach(card => {
       card.addEventListener('click', (e) => {
           e.stopPropagation();
@@ -1473,21 +1468,15 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // ===============================
-  // 9. DÉTAILS PANEL (PANINI - AVEC VIDÉO)
+  // 9. DÉTAILS PANEL (AVEC VIDÉO)
   // ===============================
-  
-  // Structure interne si manquante
   if (detailsPanel && !detailsPanel.querySelector('.details-content')) {
     detailsPanel.innerHTML = '<div class="details-content"></div>';
   }
 
   function openDetails(cardData) {
-    // Petit retour haptique
     if (navigator.vibrate) navigator.vibrate(15);
-    
     const content = detailsPanel.querySelector('.details-content') || detailsPanel;
-    
-    // MAGIE : On transforme le nom de l'image en nom de vidéo
     const videoSrc = cardData.image.replace(/\.(png|jpg|jpeg|webp)$/i, '.mp4');
 
     content.innerHTML = `
@@ -1496,7 +1485,6 @@ document.addEventListener('DOMContentLoaded', function() {
         <button class="close-details" onclick="closeDetails()">✕</button>
       </div>
       
-      <!-- LECTEUR VIDÉO -->
       <video 
         class="details-video" 
         src="${videoSrc}" 
@@ -1507,7 +1495,6 @@ document.addEventListener('DOMContentLoaded', function() {
         playsinline 
         webkit-playsinline
       >
-        <!-- Fallback Image -->
         <img src="${cardData.image}" alt="${cardData.title}" class="details-image">
       </video>
 
@@ -1522,18 +1509,14 @@ document.addEventListener('DOMContentLoaded', function() {
     detailsPanel.scrollTop = 0;
   }
 
-  // Fonction globale pour le bouton X dans le HTML généré
   window.closeDetails = function() {
     if (detailsPanel) detailsPanel.classList.remove('active');
-    
-    // On retire l'overlay seulement si le menu n'est pas ouvert
     if (!menu || !menu.classList.contains('open')) {
       if(overlay) overlay.classList.remove('active');
       document.body.classList.remove('no-scroll');
     }
   };
 
-  // Clic sur bouton "Détails" dans les cartes
   document.addEventListener('click', (e) => {
     if (e.target.closest('.btn-details')) {
       e.stopPropagation();
@@ -1543,12 +1526,10 @@ document.addEventListener('DOMContentLoaded', function() {
       const img = carte.querySelector('.carte-front img');
       const p = carte.querySelector('.carte-back p');
 
-      if (!h3 || !img) return; // Sécurité
+      if (!h3 || !img) return; 
 
       const title = h3.textContent.trim();
       const image = img.src;
-      
-      // Recherche dans les données globales (si paniniRoles existe) ou fallback sur le DOM
       const panini = (typeof paniniRoles !== 'undefined') ? paniniRoles.find(r => r.title.includes(title) || r.id === title) : null;
       
       let cardData;
@@ -1562,7 +1543,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 
-  // SWIPE FERMETURE (Mobile)
   let touchStart = 0;
   if (detailsPanel) {
       detailsPanel.addEventListener('touchstart', (e) => touchStart = e.changedTouches[0].screenX, {passive: true});
@@ -1572,7 +1552,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // ===============================
-  // 10. PIED DE PAGE (FOOTER GLOBAL)
+  // 10. PIED DE PAGE
   // ===============================
   const pageFooter = document.createElement('footer');
   pageFooter.innerHTML = `
