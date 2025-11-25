@@ -1238,13 +1238,12 @@ Mi-démon, mi-vampire… 100% problème. Le Démon Vampire n’est pas une créa
 ];
 
 document.addEventListener('DOMContentLoaded', function() {
+  
   // ===============================
-  // 1. VARIABLES GLOBALES
+  // 1. INITIALISATION & VARIABLES
   // ===============================
-  const menu = document.querySelector('.side-menu');
-  const menuToggle = document.querySelector('.menu-toggle');
-  const closeBtn = document.querySelector('.close-menu');
-  // Création ou récupération de l'overlay
+  
+  // Overlay commun
   let overlay = document.querySelector('.details-overlay');
   if (!overlay) {
     overlay = document.createElement('div');
@@ -1253,51 +1252,17 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   
   const detailsPanel = document.querySelector('.details-panel');
-  const cardsArray = Array.from(document.querySelectorAll('.carte-jeu')); 
+  if (detailsPanel && !detailsPanel.querySelector('.details-content')) {
+    detailsPanel.innerHTML = '<div class="details-content"></div>';
+  }
   
-  // ===============================
-  // 2. GESTION DU MENU & NAVIGATION
-  // ===============================
-  function openMenu() {
-    if (menu) {
-      menu.classList.add('open');
-      if (!detailsPanel || !detailsPanel.classList.contains('active')) {
-        overlay.classList.add('active');
-        document.body.classList.add('no-scroll');
-      }
-    }
-  }
-
-  function closeMenu() {
-    if (menu) {
-      menu.classList.remove('open');
-      if (!detailsPanel || !detailsPanel.classList.contains('active')) {
-        overlay.classList.remove('active');
-        document.body.classList.remove('no-scroll');
-      }
-    }
-  }
-
-  if (menuToggle) menuToggle.addEventListener('click', openMenu);
-  if (closeBtn) closeBtn.addEventListener('click', closeMenu);
-
-  document.querySelectorAll('.side-menu a').forEach(link => {
-    link.addEventListener('click', () => closeMenu());
-  });
-
-  overlay.addEventListener('click', () => {
-    const isMenuOpen = menu && menu.classList.contains('open');
-    const isDetailsOpen = detailsPanel && detailsPanel.classList.contains('active');
-
-    if (isMenuOpen) closeMenu();
-    if (isDetailsOpen) closeDetails();
-  });
+  const cardsArray = Array.from(document.querySelectorAll('.carte-jeu')); 
 
   // ===============================
-  // 3. GESTION DU THÈME
+  // 2. GESTION DU THÈME
   // ===============================
   const themeBtn = document.getElementById('themeBtn');
-
+  
   if (localStorage.getItem('theme') === 'light') {
     document.body.classList.add('light-mode');
     if(themeBtn) themeBtn.textContent = '☀️';
@@ -1313,87 +1278,28 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // ===============================
-  // 4. FLIP CARTES (VERSION HYBRIDE IOS - CORRECTIF ÉTENDU)
+  // 3. FLIP CARTES (SANS PATCH MANUEL IOS)
   // ===============================
-  
-  // Fonction pour détecter la version d'iOS
-  function getIOSVersion() {
-    const ua = navigator.userAgent;
-    if (/iP(hone|od|ad)/.test(ua)) {
-      const match = ua.match(/OS (\d+)_/);
-      if (match && match[1]) {
-        return parseInt(match[1], 10);
-      }
-      return true; // iOS détecté mais version inconnue -> on retourne true pour appliquer le patch
-    }
-    // Détection iPad iPadOS (qui se fait passer pour un Mac)
-    if (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) {
-      return true;
-    }
-    return false; 
-  }
-
-  const iosVersion = getIOSVersion();
-  
-  // CHANGEMENT ICI : On applique le patch manuel à TOUS les appareils iOS détectés.
-  // iosVersion sera soit un nombre (ex: 15), soit true, soit false.
-  // Si ce n'est pas false, c'est un iPhone/iPad, donc on active le scroll manuel.
-  const useManualScroll = iosVersion !== false;
-
   document.querySelectorAll('.carte-jeu').forEach(carte => {
-    
-    // --- PATCH IOS : SCROLL MANUEL ---
-    if (useManualScroll) {
-      const backFace = carte.querySelector('.carte-back');
-      if (backFace) {
-        let startY = 0;
-
-        backFace.addEventListener('touchstart', (e) => {
-          startY = e.touches[0].pageY;
-        }, { passive: false });
-
-        backFace.addEventListener('touchmove', (e) => {
-          // Si pas de scroll nécessaire, on arrête
-          if (backFace.scrollHeight <= backFace.clientHeight) return;
-
-          const y = e.touches[0].pageY;
-          const delta = startY - y;
-          
-          // Force le scroll
-          backFace.scrollTop += delta;
-          
-          // Empêche la page de bouger pour éviter le conflit
-          if (e.cancelable) e.preventDefault();
-          e.stopPropagation();
-
-          startY = y;
-        }, { passive: false });
-      }
-    }
-    // -----------------
-
     carte.addEventListener('click', function(e) {
       if (e.target.closest('.btn-details')) return;
-      
       e.stopPropagation();
+      
       if (navigator.vibrate) navigator.vibrate(50);
 
       const isAlreadyFlipped = this.classList.contains('flipped');
       
+      // Reset des autres cartes
       document.querySelectorAll('.carte-jeu.flipped').forEach(c => {
         if (c !== this) c.classList.remove('flipped');
       });
 
-      if (!isAlreadyFlipped) {
-        this.classList.add('flipped');
-      } else {
-        this.classList.remove('flipped');
-      }
+      this.classList.toggle('flipped');
     });
   });
 
   // ===============================
-  // 5. ANIMATION AU SCROLL
+  // 4. ANIMATION AU SCROLL
   // ===============================
   const observer = new IntersectionObserver((entries) => {
     entries.forEach((entry) => {
@@ -1407,10 +1313,9 @@ document.addEventListener('DOMContentLoaded', function() {
   document.querySelectorAll('.carte-jeu, .carte-vm').forEach(el => observer.observe(el));
 
   // ===============================
-  // 6. RECHERCHE RAPIDE
+  // 5. RECHERCHE RAPIDE
   // ===============================
   const quickSearchInput = document.getElementById('quickSearch');
-
   if (quickSearchInput) {
     quickSearchInput.addEventListener('input', function() {
       const term = this.value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
@@ -1429,7 +1334,8 @@ document.addEventListener('DOMContentLoaded', function() {
           card.classList.remove('visible');
         }
       });
-
+      
+      // Masquer les sections vides
       document.querySelectorAll('section:not(#event-cards)').forEach(sec => {
         const hasVisibleCards = Array.from(sec.querySelectorAll('.carte-jeu')).some(c => c.style.display !== 'none');
         const h2 = sec.querySelector('h2');
@@ -1439,7 +1345,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // ===============================
-  // 8. ZOOM CARTES VM
+  // 6. ZOOM CARTES VM
   // ===============================
   const vmOverlay = document.getElementById('vm-overlay');
   
@@ -1463,21 +1369,31 @@ document.addEventListener('DOMContentLoaded', function() {
       });
   });
 
-  if (vmOverlay) {
-      vmOverlay.addEventListener('click', closeZoom);
-  }
+  if (vmOverlay) vmOverlay.addEventListener('click', closeZoom);
 
   // ===============================
-  // 9. DÉTAILS PANEL (AVEC VIDÉO)
+  // 7. DÉTAILS PANEL (SÉCURISÉ + FALLBACK VIDEO)
   // ===============================
-  if (detailsPanel && !detailsPanel.querySelector('.details-content')) {
-    detailsPanel.innerHTML = '<div class="details-content"></div>';
-  }
+  
+  window.closeDetails = function() {
+    if (detailsPanel) detailsPanel.classList.remove('active');
+    if(overlay) overlay.classList.remove('active');
+    document.body.classList.remove('no-scroll');
+    const v = detailsPanel ? detailsPanel.querySelector('video') : null;
+    if(v) v.pause();
+  };
+
+  overlay.addEventListener('click', function() {
+    if(detailsPanel.classList.contains('active')) closeDetails();
+  });
 
   function openDetails(cardData) {
     if (navigator.vibrate) navigator.vibrate(15);
     const content = detailsPanel.querySelector('.details-content') || detailsPanel;
+    
+    // Fallback automatique si la vidéo n'existe pas
     const videoSrc = cardData.image.replace(/\.(png|jpg|jpeg|webp)$/i, '.mp4');
+    const uniqueId = 'fallback-' + Math.random().toString(36).substr(2, 9);
 
     content.innerHTML = `
       <div class="details-header">
@@ -1485,18 +1401,25 @@ document.addEventListener('DOMContentLoaded', function() {
         <button class="close-details" onclick="closeDetails()">✕</button>
       </div>
       
-      <video 
-        class="details-video" 
-        src="${videoSrc}" 
-        poster="${cardData.image}" 
-        autoplay 
-        loop 
-        muted 
-        playsinline 
-        webkit-playsinline
-      >
-        <img src="${cardData.image}" alt="${cardData.title}" class="details-image">
-      </video>
+      <div class="media-wrapper" style="position:relative; min-height:200px;">
+          <video 
+            class="details-video" 
+            src="${videoSrc}" 
+            poster="${cardData.image}" 
+            autoplay loop muted playsinline webkit-playsinline
+            style="display:block;"
+            onerror="this.style.display='none'; document.getElementById('${uniqueId}').style.display='block';"
+          >
+          </video>
+          
+          <img 
+            id="${uniqueId}"
+            src="${cardData.image}" 
+            alt="${cardData.title}" 
+            class="details-image" 
+            style="display:none;"
+          >
+      </div>
 
       <div class="details-section">
         ${cardData.description || ''}
@@ -1509,18 +1432,11 @@ document.addEventListener('DOMContentLoaded', function() {
     detailsPanel.scrollTop = 0;
   }
 
-  window.closeDetails = function() {
-    if (detailsPanel) detailsPanel.classList.remove('active');
-    if (!menu || !menu.classList.contains('open')) {
-      if(overlay) overlay.classList.remove('active');
-      document.body.classList.remove('no-scroll');
-    }
-  };
-
   document.addEventListener('click', (e) => {
     if (e.target.closest('.btn-details')) {
       e.stopPropagation();
       e.preventDefault();
+      
       const carte = e.target.closest('.carte-jeu');
       const h3 = carte.querySelector('.carte-back h3');
       const img = carte.querySelector('.carte-front img');
@@ -1530,15 +1446,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
       const title = h3.textContent.trim();
       const image = img.src;
-      const panini = (typeof paniniRoles !== 'undefined') ? paniniRoles.find(r => r.title.includes(title) || r.id === title) : null;
+      const desc = p ? p.innerHTML : "Pas de description.";
       
-      let cardData;
-      if (panini) {
-        cardData = { ...panini, image: panini.image || image };
-      } else {
-        const desc = p ? p.textContent : "Pas de description.";
-        cardData = { title: title, image: image, description: `<p>${desc}</p>` };
-      }
+      const cardData = { title: title, image: image, description: desc };
       openDetails(cardData);
     }
   });
@@ -1552,7 +1462,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // ===============================
-  // 10. PIED DE PAGE
+  // 8. PIED DE PAGE
   // ===============================
   const pageFooter = document.createElement('footer');
   pageFooter.innerHTML = `
@@ -1562,5 +1472,16 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
   `;
   document.body.appendChild(pageFooter);
+
+  // ===============================
+  // 9. PWA SERVICE WORKER
+  // ===============================
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js')
+        .then(reg => console.log('Service Worker enregistré'))
+        .catch(err => console.log('Erreur SW', err));
+    });
+  }
 
 }); // FIN DOMContentLoaded

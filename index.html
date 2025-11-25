@@ -14,34 +14,28 @@
 </head>
 <body>
 
-  <div class="top-bar">
-    <button class="menu-toggle" aria-label="Ouvrir le menu">☰</button>
-    <div class="search-wrapper">
-      <input type="text" id="quickSearch" placeholder="🔍 Rechercher un rôle..." aria-label="Recherche rapide">
-    </div>
-    <button id="themeBtn" aria-label="Changer le thème">🌙</button>
-  </div>
-
- <nav class="side-menu" role="navigation" aria-label="Menu principal">
-    <button class="close-menu" aria-label="Fermer le menu">×</button>
+  <header class="main-header">
     
-    <div class="menu-header">
-      <h3>Navigation</h3>
+    <div class="header-top">
+      <div class="search-wrapper">
+        <input type="text" id="quickSearch" placeholder="🔍 Rechercher un rôle..." aria-label="Recherche rapide">
+      </div>
+      <button id="themeBtn" aria-label="Changer le thème">🌙</button>
     </div>
 
-    <div class="menu-links">
-      <a href="#village">Village</a>
-      <a href="#loups">Loups</a>
-      <a href="#solo">Solo</a>
-      <a href="#vampires">Vampires</a>
-      <a href="#event-cards">Cartes VM</a>
-    </div>
+    <nav class="nav-shortcuts">
+      <a href="#village" class="nav-btn">Village</a>
+      <a href="#loups" class="nav-btn">Loups</a>
+      <a href="#solo" class="nav-btn">Solo</a>
+      <a href="#vampires" class="nav-btn">Vampires</a>
+      <a href="#event-cards" class="nav-btn">Cartes VM</a>
+    </nav>
 
-    <div class="menu-footer">
-      <strong>© 2026 Le Village Maudit</strong><br>
-      <em>by Nabil & Joelson</em>
-    </div>
-  </nav>
+  </header>
+
+  <script src="script.js"></script>
+</body>
+</html>
 
   <section id="village">
     <h2>🏘️ LE VILLAGE</h2>
