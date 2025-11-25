@@ -1280,11 +1280,33 @@ document.addEventListener('DOMContentLoaded', function() {
   // 3. GESTION DES MODALES
   // ===============================
   
+  // Fonction personnalisée pour l'ouverture des modales (incluant l'intelligence pour les bugs)
   window.openModal = function(modalId) {
     const modal = document.getElementById(modalId);
     if(modal) {
       modal.classList.add('active');
       if(extraMenu && extraMenu.classList.contains('open')) toggleExtraMenu();
+
+      // INTELLIGENCE : Pré-remplissage du formulaire de bug
+      if (modalId === 'modal-bug') {
+        // 1. URL actuelle
+        const linkInput = document.getElementById('bug-link');
+        if(linkInput) linkInput.value = window.location.href;
+
+        // 2. Infos Navigateur
+        const ua = navigator.userAgent;
+        let browserInfo = "Inconnu";
+        if(ua.includes("Chrome")) browserInfo = "Chrome / Android Webview";
+        else if(ua.includes("Safari") && !ua.includes("Chrome")) browserInfo = "Safari / iOS";
+        else if(ua.includes("Firefox")) browserInfo = "Firefox";
+        
+        const browserInput = document.getElementById('bug-browser');
+        if(browserInput) browserInput.value = browserInfo;
+
+        // 3. Infos Appareil (Plateforme)
+        const deviceInput = document.getElementById('bug-device');
+        if(deviceInput) deviceInput.value = navigator.platform; 
+      }
     }
   };
 
@@ -1299,40 +1321,65 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 
-  // GESTION ENVOI FORMULAIRE VIA FORMSUBMIT (AJAX)
+  // GESTION ENVOI PROPOSITION RÔLE
   window.submitRole = function(e) {
     e.preventDefault();
-    
     const form = e.target;
     const submitBtn = form.querySelector('.btn-submit');
     const originalText = submitBtn.textContent;
 
-    // 1. Indiquer que ça charge
     submitBtn.textContent = "Envoi en cours...";
     submitBtn.disabled = true;
 
-    // 2. Récupérer les données
     const formData = new FormData(form);
 
-    // 3. Envoyer à FormSubmit (contact@lacourduroi.fr)
     fetch("https://formsubmit.co/ajax/contact@lacourduroi.fr", {
         method: "POST",
         body: formData
     })
     .then(response => response.json())
     .then(data => {
-        // Succès
         alert("📜 Proposition scellée et envoyée au Conseil des Anciens !\nMerci pour ta contribution.");
         closeModal('modal-propose');
         form.reset();
     })
     .catch(error => {
-        // Erreur
         alert("Oups ! Le corbeau s'est perdu en chemin. Réessaie plus tard.");
         console.error('Erreur:', error);
     })
     .finally(() => {
-        // Remettre le bouton normal
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+    });
+  };
+
+  // GESTION ENVOI RAPPORT BUG
+  window.submitBug = function(e) {
+    e.preventDefault();
+    const form = e.target;
+    const submitBtn = form.querySelector('.btn-submit');
+    const originalText = submitBtn.textContent;
+
+    submitBtn.textContent = "Envoi du rapport...";
+    submitBtn.disabled = true;
+
+    const formData = new FormData(form);
+
+    fetch("https://formsubmit.co/ajax/contact@lacourduroi.fr", {
+        method: "POST",
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        alert("🐛 Rapport envoyé ! Merci de nous aider à chasser les bugs.");
+        closeModal('modal-bug');
+        form.reset();
+    })
+    .catch(error => {
+        alert("Erreur lors de l'envoi. Tu peux nous contacter directement par mail.");
+        console.error('Erreur:', error);
+    })
+    .finally(() => {
         submitBtn.textContent = originalText;
         submitBtn.disabled = false;
     });
