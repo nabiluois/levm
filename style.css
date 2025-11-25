@@ -127,7 +127,7 @@ body.light-mode .close-details, body.light-mode .close-extra, body.light-mode .c
 }
 
 /* ============================================
-   MENU LATÉRAL (EXTRA MENU) - MODIFIÉ
+   MENU LATÉRAL (EXTRA MENU) - AVEC BULLES
    ============================================ */
 .extra-menu {
   position: fixed; top: 0; left: -300px; width: 280px;
@@ -147,19 +147,76 @@ body.light-mode .close-details, body.light-mode .close-extra, body.light-mode .c
   box-shadow: 10px 0 30px rgba(0,0,0,0.8);
 }
 .extra-menu.open { left: 0; }
+
 .extra-menu-overlay {
   display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
   background: rgba(0,0,0,0.7); z-index: 2900; backdrop-filter: blur(2px);
 }
 .extra-menu-overlay.active { display: block; }
-.extra-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--gold); padding-bottom: 15px; margin-bottom: 20px; }
+
+.extra-header { 
+  display: flex; justify-content: space-between; align-items: center; 
+  border-bottom: 1px solid var(--gold); 
+  padding-bottom: 15px; margin-bottom: 30px; 
+}
 .extra-header h3 { font-family: 'Pirata One'; color: var(--gold); font-size: 1.5em; margin: 0; }
+
 .close-extra { background: none; border: none; color: var(--gold); font-size: 1.5em; cursor: pointer; }
-.extra-links { list-style: none; padding: 0; }
-.extra-links li { margin-bottom: 15px; }
-.extra-links a { color: #f5e6b3; text-decoration: none; font-size: 1.2em; display: block; padding: 10px; border-radius: 8px; transition: 0.2s; }
-.extra-links a:hover { background: rgba(212, 175, 55, 0.15); color: var(--gold); }
+
+/* STYLE DES BULLES (LINKS) */
+.extra-links { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 15px; } /* Gap gère l'espace entre les bulles */
+.extra-links li { margin: 0; }
+
+.extra-links a { 
+  /* Mise en forme Bulle */
+  display: flex; 
+  align-items: center; 
+  justify-content: flex-start; /* Texte aligné à gauche */
+  padding: 15px 20px;
+  
+  background: linear-gradient(145deg, #2a1f15, #1a120b); /* Dégradé subtil */
+  border: 1px solid rgba(212, 175, 55, 0.4); /* Bordure dorée fine */
+  border-radius: 50px; /* Coins très arrondis pour l'effet bulle */
+  
+  color: #f5e6b3; 
+  text-decoration: none; 
+  font-family: 'Pirata One', serif; 
+  font-size: 1.3em; 
+  letter-spacing: 0.5px;
+  
+  box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* EFFET AU SURVOL (HOVER) */
+.extra-links a:hover { 
+  background: linear-gradient(145deg, #3e2f23, #2a1f15);
+  border-color: var(--gold); 
+  transform: translateY(-3px); /* La bulle monte un peu */
+  box-shadow: 0 6px 15px rgba(212, 175, 55, 0.15); /* Lueur dorée */
+  color: var(--gold);
+}
+
+/* EFFET AU CLIC (ACTIVE) */
+.extra-links a:active {
+  transform: scale(0.96); /* Effet d'enfoncement */
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
 .extra-footer { margin-top: auto; text-align: center; font-size: 0.8em; opacity: 0.5; color: var(--gold); }
+
+/* GESTION MODE CLAIR POUR LES BULLES */
+body.light-mode .extra-links a {
+    background: linear-gradient(145deg, #fffcf5, #f0e6d2);
+    border-color: #8a6e2f;
+    color: #3e2f23 !important;
+    box-shadow: 0 4px 6px rgba(138, 110, 47, 0.15);
+}
+body.light-mode .extra-links a:hover {
+    background: #fff;
+    border-color: #b8860b;
+    box-shadow: 0 6px 15px rgba(138, 110, 47, 0.25);
+}
 
 /* ============================================
    MODALES (POP-UPS) - MODIFIÉ

@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -15,10 +14,8 @@
 </head>
 <body>
 
-  <!-- HEADER -->
   <header class="main-header">
     
-    <!-- Étage 1 : Burger + Recherche + Thème -->
     <div class="header-top">
       <button class="burger-btn" aria-label="Menu options">☰</button>
 
@@ -29,7 +26,6 @@
       <button id="themeBtn" aria-label="Changer le thème">🌙</button>
     </div>
 
-    <!-- Étage 2 : Navigation Rapide -->
     <nav class="nav-shortcuts">
       <a href="#village" class="nav-btn">Village</a>
       <a href="#loups" class="nav-btn">Loups</a>
@@ -40,7 +36,6 @@
 
   </header>
 
-  <!-- MENU LATÉRAL (EXTRA) -->
   <div class="extra-menu-overlay"></div>
   <nav class="extra-menu">
     <div class="extra-header">
@@ -52,12 +47,13 @@
       <li><a href="#" onclick="openModal('modal-propose')">✍️ Proposer un Rôle</a></li>
       <li><a href="#" onclick="alert('Fonctionnalité bientôt disponible !')">🐛 Signaler un Bug</a></li>
     </ul>
+    
     <div class="extra-footer">
-      <em>Le Village Maudit v1.0</em>
+      <strong>© 2026 Le Village Maudit</strong><br>
+      <em>by Nabil & Joelson</em>
     </div>
   </nav>
 
-  <!-- MODALE 1 : PROPOSER UN RÔLE -->
   <div id="modal-propose" class="modal">
     <div class="modal-content">
       <span class="close-modal" onclick="closeModal('modal-propose')">✕</span>
@@ -85,7 +81,6 @@
           <textarea rows="5" placeholder="Quel est son but ? Que fait-il la nuit ?" required></textarea>
         </div>
 
-        <!-- NOUVEAUX CHAMPS OPTIONNELS -->
         <div class="form-group">
           <label>Ton Nom ou Pseudo <span style="font-size:0.8em; opacity:0.7">(Optionnel)</span></label>
           <input type="text" placeholder="Pour te créditer">
@@ -101,7 +96,6 @@
     </div>
   </div>
 
-  <!-- MODALE 2 : RÈGLES (LE PACTE DU VILLAGE) -->
   <div id="modal-regles" class="modal">
     <div class="modal-content">
       <span class="close-modal" onclick="closeModal('modal-regles')">✕</span>
