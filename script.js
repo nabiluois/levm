@@ -1299,11 +1299,43 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 
+  // GESTION ENVOI FORMULAIRE VIA FORMSUBMIT (AJAX)
   window.submitRole = function(e) {
     e.preventDefault();
-    alert("📜 Proposition scellée et envoyée au Conseil des Anciens !\nMerci pour ta contribution.");
-    closeModal('modal-propose');
-    e.target.reset();
+    
+    const form = e.target;
+    const submitBtn = form.querySelector('.btn-submit');
+    const originalText = submitBtn.textContent;
+
+    // 1. Indiquer que ça charge
+    submitBtn.textContent = "Envoi en cours...";
+    submitBtn.disabled = true;
+
+    // 2. Récupérer les données
+    const formData = new FormData(form);
+
+    // 3. Envoyer à FormSubmit (contact@lacourduroi.fr)
+    fetch("https://formsubmit.co/ajax/contact@lacourduroi.fr", {
+        method: "POST",
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Succès
+        alert("📜 Proposition scellée et envoyée au Conseil des Anciens !\nMerci pour ta contribution.");
+        closeModal('modal-propose');
+        form.reset();
+    })
+    .catch(error => {
+        // Erreur
+        alert("Oups ! Le corbeau s'est perdu en chemin. Réessaie plus tard.");
+        console.error('Erreur:', error);
+    })
+    .finally(() => {
+        // Remettre le bouton normal
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+    });
   };
 
   // ===============================

@@ -61,14 +61,17 @@
       <p>Une idée de rôle ? Décris-la ici. Si le Conseil valide, elle rejoindra le jeu !</p>
       
       <form id="roleForm" onsubmit="submitRole(event)">
+        <input type="hidden" name="_captcha" value="false">
+        <input type="hidden" name="_subject" value="🐺 Nouveau Rôle Proposé !">
+        
         <div class="form-group">
           <label>Nom du Rôle</label>
-          <input type="text" placeholder="Ex: Le Forgeron Fou" required>
+          <input type="text" name="role_name" placeholder="Ex: Le Forgeron Fou" required>
         </div>
         
         <div class="form-group">
           <label>Camp</label>
-          <select>
+          <select name="camp">
             <option>Village</option>
             <option>Loup-Garou</option>
             <option>Solo</option>
@@ -78,17 +81,17 @@
 
         <div class="form-group">
           <label>Description & Pouvoirs</label>
-          <textarea rows="5" placeholder="Quel est son but ? Que fait-il la nuit ?" required></textarea>
+          <textarea name="description" rows="5" placeholder="Quel est son but ? Que fait-il la nuit ?" required></textarea>
         </div>
 
         <div class="form-group">
           <label>Ton Nom ou Pseudo <span style="font-size:0.8em; opacity:0.7">(Optionnel)</span></label>
-          <input type="text" placeholder="Pour te créditer">
+          <input type="text" name="pseudo" placeholder="Pour te créditer">
         </div>
 
         <div class="form-group">
           <label>Email <span style="font-size:0.8em; opacity:0.7">(Optionnel)</span></label>
-          <input type="email" placeholder="Pour te contacter si besoin">
+          <input type="email" name="email" placeholder="Pour te contacter si besoin">
         </div>
 
         <button type="submit" class="btn-submit">Envoyer au Conseil</button>
@@ -141,6 +144,10 @@
       </div>
     </div>
   </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
 
   <!-- CONTENU PRINCIPAL -->
   <!-- ... Vos sections #village, #loups, etc. ... -->
