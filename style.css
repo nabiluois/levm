@@ -279,3 +279,37 @@ h2 {
   box-shadow: 0 5px 15px rgba(0,0,0,0.6); object-fit: cover; display: block; background-color: #000;
 }
 .details-section { font-size: 1.1em; color: #f5e6b3; }
+
+/* ============================================
+   EFFET DE BRILLANCE (SHINE EFFECT)
+   ============================================ */
+
+/* Création de la barre lumineuse (invisible au début) */
+.carte-front::after, .carte-vm::after {
+  content: ''; 
+  position: absolute; 
+  top: 0; 
+  left: -100%; /* On le place en dehors de la carte, à gauche */
+  width: 50%; 
+  height: 100%;
+  
+  /* Le dégradé blanc transparent */
+  background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.5), transparent);
+  
+  /* On penche la barre pour le style */
+  transform: skewX(-25deg); 
+  
+  /* Le retour à la position initiale est instantané */
+  transition: 0s; 
+  
+  /* IMPORTANT : Permet de cliquer à travers la lumière */
+  pointer-events: none; 
+  z-index: 10;
+}
+
+/* Animation quand on passe la souris */
+.carte-jeu:hover .carte-front::after, 
+.carte-vm:hover::after {
+  left: 200%; /* La lumière traverse jusqu'à droite */
+  transition: 0.7s ease-in-out; /* Vitesse du passage */
+}
