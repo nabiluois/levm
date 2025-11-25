@@ -1,3 +1,4 @@
+
 // ===============================
 // PANINI : RÔLES DÉTAILLÉS
 // ===============================
@@ -1318,9 +1319,27 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // ===============================
-  // 4. FLIP CARTES (VERSION ROBUSTE)
+  // 4. FLIP CARTES (VERSION ROBUSTE + PATCH IOS)
   // ===============================
   document.querySelectorAll('.carte-jeu').forEach(carte => {
+    
+    // --- PATCH IOS : SCROLL INTERNE ---
+    // Sur iOS, le scroll dans un élément rotateY(180deg) bug souvent.
+    // On force l'événement tactile à rester dans la carte (stopPropagation).
+    const backFace = carte.querySelector('.carte-back');
+    if (backFace) {
+      // Évite que le "toucher" remonte au body
+      backFace.addEventListener('touchstart', (e) => {
+        e.stopPropagation();
+      }, { passive: true });
+      
+      // Évite que le "glisser" remonte au body
+      backFace.addEventListener('touchmove', (e) => {
+        e.stopPropagation();
+      }, { passive: true });
+    }
+    // ----------------------------------
+
     carte.addEventListener('click', function(e) {
       // 1. Si on clique sur le bouton détails, on ne retourne pas
       if (e.target.closest('.btn-details')) return;
@@ -1523,5 +1542,18 @@ document.addEventListener('DOMContentLoaded', function() {
         if (e.changedTouches[0].screenX - touchStart > 100) closeDetails();
       }, {passive: true});
   }
+
+  // ===============================
+  // 10. PIED DE PAGE (FOOTER GLOBAL)
+  // ===============================
+  // Ajout dynamique du footer tout en bas de la page
+  const pageFooter = document.createElement('footer');
+  pageFooter.innerHTML = `
+    <div style="text-align: center; padding: 40px 20px 60px; color: var(--gold); opacity: 0.7; font-family: 'Almendra', serif;">
+      <strong>© 2026 Le Village Maudit</strong><br>
+      <em style="font-size: 0.9em;">by Nabil & Joelson</em>
+    </div>
+  `;
+  document.body.appendChild(pageFooter);
 
 }); // FIN DOMContentLoaded
