@@ -1393,73 +1393,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // ===============================
-  // 7. RECHERCHE CLASSIQUE (MENU BURGER)
-  // ===============================
-  const searchInput = document.getElementById('searchInput');
-  const suggestionsBox = document.getElementById('searchSuggestions');
 
-  if (searchInput && suggestionsBox) {
-    searchInput.addEventListener('input', function() {
-      const value = this.value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
-      
-      if (value === '') { 
-        suggestionsBox.innerHTML = ''; 
-        return; 
-      }
-
-      // Filtrer les cartes
-      const suggestions = cardsArray
-        .filter(card => {
-          const h3 = card.querySelector('.carte-back h3');
-          if (!h3) return false;
-          const title = h3.textContent.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-          return title.includes(value);
-        })
-        .map(card => card.querySelector('.carte-back h3').textContent)
-        .slice(0, 10); // Limite à 10 résultats
-
-      // Afficher les résultats
-      if (suggestions.length > 0) {
-        suggestionsBox.innerHTML = suggestions.map(sug => `<div>${sug}</div>`).join('');
-        
-        // Clic sur un résultat
-        suggestionsBox.querySelectorAll('div').forEach(div => {
-          div.addEventListener('click', () => {
-            const clickedTitle = div.textContent;
-            searchInput.value = clickedTitle;
-            suggestionsBox.innerHTML = '';
-            
-            // Trouver et aller à la carte
-            const targetCard = cardsArray.find(c => {
-               const h3 = c.querySelector('.carte-back h3');
-               return h3 && h3.textContent === clickedTitle;
-            });
-            
-            if (targetCard) {
-              closeMenu();
-              
-              // Assurer que la section est visible (si une autre recherche était en cours)
-              targetCard.style.display = '';
-              const parentSection = targetCard.closest('section');
-              if(parentSection) {
-                  const h2 = parentSection.querySelector('h2');
-                  if(h2) h2.style.display = '';
-              }
-
-              // Scroll et Flip
-              targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-              setTimeout(() => {
-                if (!targetCard.classList.contains('flipped')) targetCard.classList.add('flipped');
-              }, 800);
-            }
-          });
-        });
-      } else {
-        suggestionsBox.innerHTML = '<div style="opacity:0.6; padding:10px;">Aucun résultat</div>';
-      }
-    });
-  }
 
   // ===============================
   // 8. ZOOM CARTES VM

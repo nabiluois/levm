@@ -116,8 +116,6 @@ body.light-mode .close-details { color: #1a120b; border-color: #1a120b; }
 }
 .menu-links a:hover { background: rgba(212, 175, 55, 0.15); border-color: var(--gold); }
 
-/* Recherche Menu Cachée */
-.side-menu .search-container { display: none !important; }
 
 /* Footer en bas */
 .menu-footer {
