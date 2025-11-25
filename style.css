@@ -359,12 +359,13 @@ h2 {
 }
 
 /* ============================================
-   EFFET DE BRILLANCE (SIMPLE & EFFICACE)
+   EFFET DE BRILLANCE (VAGUE NATURELLE)
    ============================================ */
 @keyframes shine {
   0% { left: -100%; opacity: 0; }
-  50% { opacity: 1; }
-  100% { left: 200%; opacity: 0; }
+  20% { opacity: 0.8; } /* Pic de luminosité */
+  40% { left: 200%; opacity: 0; } /* Fin du passage */
+  100% { left: 200%; opacity: 0; } /* Pause longue */
 }
 
 .carte-front::after, .carte-vm::after {
@@ -372,25 +373,46 @@ h2 {
   position: absolute; 
   top: 0; 
   left: -100%; 
-  width: 50%; 
+  width: 60%; /* Légèrement plus large pour un passage plus doux */
   height: 100%;
-  background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.6), transparent);
+  background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.5), transparent);
   transform: skewX(-25deg); 
   pointer-events: none; 
   z-index: 10;
 }
 
-/* SUR PC : Au survol */
+/* SUR PC : Au survol (inchangé) */
 @media (hover: hover) {
   .carte-jeu:hover .carte-front::after, 
   .carte-vm:hover::after {
-    animation: shine 0.7s;
+    /* Animation plus rapide et vive au survol souris */
+    animation: shine 0.7s ease-in-out; 
   }
 }
 
-/* SUR MOBILE : Animation auto toutes les 5s */
+/* SUR MOBILE : Vague décalée et apaisée */
 @media (hover: none) {
   .carte-front::after, .carte-vm::after {
-    animation: shine 5s infinite;
+    /* Cycle long de 8 secondes pour éviter l'effet stroboscopique */
+    animation: shine 8s infinite ease-in-out;
+  }
+
+  /* --- LE SECRET DU DÉCALAGE --- */
+  
+  /* 1. Les cartes paires (2, 4, 6...) attendent 4 secondes */
+  .carte-jeu:nth-child(even) .carte-front::after,
+  .carte-vm:nth-child(even)::after {
+    animation-delay: 4s;
+  }
+
+  /* 2. Une carte sur 3 attend 2 secondes (casse la symétrie) */
+  .carte-jeu:nth-child(3n) .carte-front::after,
+  .carte-vm:nth-child(3n)::after {
+    animation-delay: 2s;
+  }
+  
+  /* 3. Une carte sur 5 attend 6 secondes (ajoute de l'aléatoire apparent) */
+  .carte-jeu:nth-child(5n) .carte-front::after {
+    animation-delay: 6s;
   }
 }
