@@ -281,35 +281,43 @@ h2 {
 .details-section { font-size: 1.1em; color: #f5e6b3; }
 
 /* ============================================
-   EFFET DE BRILLANCE (SHINE EFFECT)
+   EFFET DE BRILLANCE (ANIMATION UNIVERSELLE)
    ============================================ */
 
-/* Création de la barre lumineuse (invisible au début) */
+/* 1. On définit le mouvement de la lumière */
+@keyframes shine-sweep {
+  0% { left: -100%; opacity: 0; }
+  10% { opacity: 1; }
+  100% { left: 200%; opacity: 0; }
+}
+
+/* 2. La barre lumineuse (invisible par défaut) */
 .carte-front::after, .carte-vm::after {
   content: ''; 
   position: absolute; 
   top: 0; 
-  left: -100%; /* On le place en dehors de la carte, à gauche */
+  left: -100%; 
   width: 50%; 
   height: 100%;
-  
-  /* Le dégradé blanc transparent */
-  background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.5), transparent);
-  
-  /* On penche la barre pour le style */
+  background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.6), transparent);
   transform: skewX(-25deg); 
-  
-  /* Le retour à la position initiale est instantané */
-  transition: 0s; 
-  
-  /* IMPORTANT : Permet de cliquer à travers la lumière */
   pointer-events: none; 
   z-index: 10;
+  opacity: 0; /* Caché au départ */
 }
 
-/* Animation quand on passe la souris */
-.carte-jeu:hover .carte-front::after, 
-.carte-vm:hover::after {
-  left: 200%; /* La lumière traverse jusqu'à droite */
-  transition: 0.7s ease-in-out; /* Vitesse du passage */
+/* 3. CAS PC : On lance l'animation au SURVOL de la souris */
+@media (hover: hover) {
+  .carte-jeu:hover .carte-front::after, 
+  .carte-vm:hover::after {
+    animation: shine-sweep 0.7s ease-in-out;
+  }
+}
+
+/* 4. CAS MOBILE & APPARITION : On lance l'animation quand la carte devient VISIBLE */
+/* Grâce au Javascript, la classe .visible s'ajoute quand on scrolle dessus */
+.carte-jeu.visible .carte-front::after,
+.carte-vm.visible::after {
+  /* Animation de 1 seconde, avec un petit délai de 0.2s pour que l'œil ait le temps de voir */
+  animation: shine-sweep 1s ease-in-out 0.2s backwards;
 }
