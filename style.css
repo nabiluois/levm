@@ -303,8 +303,7 @@ h2 {
   display: block; 
   background-color: #000;
   
-  /* SUR MOBILE : Limite la hauteur pour voir le texte tout de suite */
-  max-height: 45vh; 
+  /* Suppression de la limite de hauteur pour garder la taille d'origine */
 }
 .details-section { 
   font-size: 1.1em; 
