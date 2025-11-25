@@ -130,19 +130,15 @@ body.light-mode .close-details { color: #1a120b; border-color: #1a120b; }
 /* ============================================
    TITRES NÉONS, GRILLE & SÉPARATEURS
    ============================================ */
-/* CORRECTIF SÉPARATEURS : Plus de position absolute qui traverse les cartes */
 section:not(#event-cards), .category {
   display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;
   margin: 0 auto 50px auto; max-width: 1400px; padding: 0 12px;
-  /* Le séparateur est maintenant une image de fond en bas */
   padding-bottom: 60px;
   background-image: linear-gradient(90deg, transparent, var(--gold), transparent);
   background-size: 60% 1px; /* Largeur 60%, hauteur 1px */
   background-repeat: no-repeat;
   background-position: bottom center;
 }
-
-/* J'ai supprimé le bloc section::after qui posait problème */
 
 h2 {
   grid-column: 1 / -1; text-align: center; font-size: 1.8em; font-family: 'Pirata One', serif;
@@ -212,12 +208,10 @@ h2 {
 .carte-back h3 { font-family: 'Pirata One'; color: var(--gold); text-align: center; margin-bottom: 10px; font-size: 1.3em; text-shadow: 0 2px 4px #000; }
 .carte-back p { font-size: 0.95em; line-height: 1.5; flex: 1; white-space: pre-line; text-shadow: 0 1px 2px #000; }
 
-/* CORRECTIF BOUTON COUPÉ : On empêche le bouton de rétrécir */
 .btn-details { 
   background: linear-gradient(135deg, #d4af37, #b8941f); 
   color: #1a120b; border: none; padding: 10px; border-radius: 6px; 
   font-weight: bold; 
-  /* Marge en haut pour pousser, marge en bas pour ne pas être coupé */
   margin-top: 15px; 
   margin-bottom: 5px;
   width: 100%; 
@@ -226,7 +220,6 @@ h2 {
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
-  /* SÉCURITÉ : Le bouton ne doit jamais être écrasé par le texte */
   flex-shrink: 0; 
 }
 
@@ -270,7 +263,6 @@ h2 {
   position: relative; opacity: 1;
   background: #1a1510; 
   border: 2px solid rgba(212, 175, 55, 0.3);
-  /* Profondeur interne */
   box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 4px 10px rgba(0,0,0,0.4);
   transition: transform 0.3s ease;
   padding: 0;
@@ -318,5 +310,19 @@ h2 {
 .details-header { display: flex; justify-content: space-between; margin-bottom: 25px; border-bottom: 1px solid var(--gold); padding-bottom: 15px; }
 .details-title { font-family: 'Pirata One'; color: var(--gold); font-size: 2em; margin: 0; text-shadow: 0 2px 5px #000; }
 .close-details { background: none; border: 1px solid var(--gold); color: inherit; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 1.5em; }
-.details-image { width: 100%; border-radius: 12px; margin-bottom: 25px; border: 2px solid var(--gold); box-shadow: 0 5px 15px rgba(0,0,0,0.6); }
+
+/* MISE A JOUR POUR VIDEO ET IMAGE */
+.details-video, .details-image { 
+  width: 100%; 
+  border-radius: 12px; 
+  margin-bottom: 25px; 
+  border: 2px solid var(--gold); 
+  box-shadow: 0 5px 15px rgba(0,0,0,0.6); 
+  
+  /* Assure que la vidéo remplit bien le cadre */
+  object-fit: cover; 
+  display: block;
+  background-color: #000; /* Fond noir propre pendant le chargement */
+}
+
 .details-section { font-size: 1.1em; color: #f5e6b3; }

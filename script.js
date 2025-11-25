@@ -1393,8 +1393,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-
-
   // ===============================
   // 8. ZOOM CARTES VM
   // ===============================
@@ -1426,7 +1424,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // ===============================
-  // 9. DÉTAILS PANEL (PANINI)
+  // 9. DÉTAILS PANEL (PANINI - AVEC VIDÉO)
   // ===============================
   
   // Structure interne si manquante
@@ -1434,16 +1432,38 @@ document.addEventListener('DOMContentLoaded', function() {
     detailsPanel.innerHTML = '<div class="details-content"></div>';
   }
 
+  // === NOUVELLE FONCTION APPLIQUÉE ICI ===
   function openDetails(cardData) {
+    // Petit retour haptique
     if (navigator.vibrate) navigator.vibrate(15);
+    
     const content = detailsPanel.querySelector('.details-content') || detailsPanel;
     
+    // MAGIE : On transforme le nom de l'image en nom de vidéo
+    // On remplace .png, .jpg ou .webp par .mp4
+    const videoSrc = cardData.image.replace(/\.(png|jpg|jpeg|webp)$/i, '.mp4');
+
     content.innerHTML = `
       <div class="details-header">
         <h2 class="details-title">${cardData.title}</h2>
         <button class="close-details" onclick="closeDetails()">✕</button>
       </div>
-      <img src="${cardData.image}" alt="${cardData.title}" class="details-image">
+      
+      <!-- LECTEUR VIDÉO -->
+      <video 
+        class="details-video" 
+        src="${videoSrc}" 
+        poster="${cardData.image}" 
+        autoplay 
+        loop 
+        muted 
+        playsinline 
+        webkit-playsinline
+      >
+        <!-- Fallback Image -->
+        <img src="${cardData.image}" alt="${cardData.title}" class="details-image">
+      </video>
+
       <div class="details-section">
         ${cardData.description || ''}
       </div>
