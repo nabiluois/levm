@@ -1,4 +1,5 @@
 
+<!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
@@ -19,7 +20,6 @@
     
     <!-- Étage 1 : Burger + Recherche + Thème -->
     <div class="header-top">
-      <!-- BOUTON BURGER (NOUVEAU) -->
       <button class="burger-btn" aria-label="Menu options">☰</button>
 
       <div class="search-wrapper">
@@ -62,7 +62,7 @@
     <div class="modal-content">
       <span class="close-modal" onclick="closeModal('modal-propose')">✕</span>
       <h2>Le Grimoire des Créations</h2>
-      <p>Tu as une idée de rôle géniale ? Décris-la ici. Si elle est retenue par le Conseil, elle sera ajoutée au jeu !</p>
+      <p>Une idée de rôle ? Décris-la ici. Si le Conseil valide, elle rejoindra le jeu !</p>
       
       <form id="roleForm" onsubmit="submitRole(event)">
         <div class="form-group">
@@ -73,9 +73,9 @@
         <div class="form-group">
           <label>Camp</label>
           <select>
-            <option>Villageois</option>
+            <option>Village</option>
             <option>Loup-Garou</option>
-            <option>Solitaire</option>
+            <option>Solo</option>
             <option>Autre</option>
           </select>
         </div>
@@ -83,6 +83,17 @@
         <div class="form-group">
           <label>Description & Pouvoirs</label>
           <textarea rows="5" placeholder="Quel est son but ? Que fait-il la nuit ?" required></textarea>
+        </div>
+
+        <!-- NOUVEAUX CHAMPS OPTIONNELS -->
+        <div class="form-group">
+          <label>Ton Nom ou Pseudo <span style="font-size:0.8em; opacity:0.7">(Optionnel)</span></label>
+          <input type="text" placeholder="Pour te créditer">
+        </div>
+
+        <div class="form-group">
+          <label>Email <span style="font-size:0.8em; opacity:0.7">(Optionnel)</span></label>
+          <input type="email" placeholder="Pour te contacter si besoin">
         </div>
 
         <button type="submit" class="btn-submit">Envoyer au Conseil</button>
@@ -108,7 +119,7 @@
     </div>
   </div>
 
-  <!-- CONTENU PRINCIPAL (Exemple : À adapter selon votre contenu réel de cartes) -->
+  <!-- CONTENU PRINCIPAL -->
   <!-- ... Vos sections #village, #loups, etc. ... -->
 
   <script src="script.js"></script>
