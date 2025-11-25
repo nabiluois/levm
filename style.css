@@ -3,8 +3,11 @@
    ============================================ */
 :root {
   --safe-top: env(safe-area-inset-top, 20px);
+  
+  /* Hauteur augmentée (180px) pour le menu sur 2 lignes */
   --header-height-mobile: 180px; 
   --header-height-desktop: 80px;
+  
   --bg-dark: #1a120b; 
   --text-dark: #f5e6b3;
   --bg-light: #f5e6d3;
@@ -14,7 +17,7 @@
 
 * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
-/* Scrollbar */
+/* Scrollbar globale */
 body::-webkit-scrollbar { width: 10px; }
 body::-webkit-scrollbar-track { background: #0f0a06; }
 body::-webkit-scrollbar-thumb {
@@ -56,7 +59,7 @@ body.light-mode .details-section, body.light-mode .extra-links a, body.light-mod
 body.light-mode .close-details, body.light-mode .close-extra, body.light-mode .close-modal { color: #1a120b; border-color: #1a120b; }
 
 /* ============================================
-   HEADER & NAVIGATION
+   HEADER & NAVIGATION (MODE WRAP)
    ============================================ */
 .main-header {
   position: fixed; top: 0; left: 0; width: 100%;
@@ -71,10 +74,9 @@ body.light-mode .close-details, body.light-mode .close-extra, body.light-mode .c
 
 .header-top {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 10px 15px 5px 15px; gap: 10px; width: 100%;
+  padding: 10px 15px 5px 15px; gap: 15px; width: 100%;
 }
 
-/* Bouton Burger */
 .burger-btn {
   width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
@@ -102,6 +104,8 @@ body.light-mode .close-details, body.light-mode .close-extra, body.light-mode .c
   gap: 8px; padding: 5px 10px 15px 10px;
   overflow-x: visible; white-space: normal;
 }
+.nav-shortcuts::-webkit-scrollbar { display: none; }
+
 .nav-btn {
   display: inline-block; padding: 6px 14px; border-radius: 18px;
   border: 1px solid rgba(212, 175, 55, 0.3); color: var(--gold);
@@ -156,14 +160,34 @@ body.light-mode .close-details, body.light-mode .close-extra, body.light-mode .c
   justify-content: center; align-items: center; padding: 20px; backdrop-filter: blur(5px);
 }
 .modal.active { display: flex; animation: fadeIn 0.3s; }
+
+/* --- CORRECTION CROIX MASQUÉE SUR MOBILE --- */
 .modal-content {
   background: linear-gradient(145deg, #2a1f15 0%, #120c08 100%);
-  border: 2px solid var(--gold); border-radius: 15px; padding: 25px;
+  border: 2px solid var(--gold); border-radius: 15px; 
+  /* Ajout de padding-top plus grand pour laisser la place à la croix */
+  padding: 40px 25px 25px 25px;
   width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto;
   position: relative; box-shadow: 0 0 30px rgba(212, 175, 55, 0.2);
 }
-.close-modal { position: absolute; top: 15px; right: 20px; color: var(--gold); font-size: 1.5em; cursor: pointer; }
-.modal h2 { margin-top: 0; color: var(--gold); text-align: center; border: none; box-shadow: none; background: none; padding: 0; }
+
+.close-modal { 
+  position: absolute; 
+  top: 10px; 
+  right: 15px; 
+  color: var(--gold); 
+  font-size: 1.8em; 
+  cursor: pointer; 
+  z-index: 10; /* Assure que la croix est au-dessus du texte */
+  padding: 5px; /* Zone de clic plus large */
+  background: rgba(0,0,0,0.2); /* Petit fond pour lisibilité si texte dessous */
+  border-radius: 50%;
+  width: 40px; height: 40px;
+  display: flex; align-items: center; justify-content: center;
+  line-height: 1;
+}
+
+.modal h2 { margin-top: 0; color: var(--gold); text-align: center; border: none; box-shadow: none; background: none; padding: 0; margin-bottom: 20px; }
 
 /* FORMULAIRE STYLE */
 .form-group { margin-bottom: 15px; }
@@ -177,13 +201,12 @@ body.light-mode .close-details, body.light-mode .close-extra, body.light-mode .c
   width: 100%; padding: 12px; background: var(--gold); color: #1a120b;
   border: none; border-radius: 8px; font-family: 'Pirata One'; font-size: 1.2em; cursor: pointer; margin-top: 10px;
 }
-/* RÈGLES STYLE */
 .rules-content ul { padding-left: 20px; }
 .rules-content li { margin-bottom: 10px; color: #f5e6b3; }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
 /* ============================================
-   TITRES, GRILLES & CARTE (Code existant conservé)
+   TITRES, GRILLES & CARTE
    ============================================ */
 section:not(#event-cards), .category {
   display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;
