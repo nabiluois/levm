@@ -162,7 +162,7 @@ body.light-mode .close-details { color: #1a120b; border-color: #1a120b; }
 }
 
 /* ============================================
-   TITRES & GRILLES
+   TITRES & GRILLES & SCROLL ANCHOR
    ============================================ */
 section:not(#event-cards), .category {
   display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;
@@ -172,6 +172,17 @@ section:not(#event-cards), .category {
   background-size: 60% 1px; 
   background-repeat: no-repeat;
   background-position: bottom center;
+  
+  /* --- CORRECTION ANCRE (SCROLL) --- */
+  /* Permet de s'arrêter PILE au-dessus du titre, en compensant la hauteur du header */
+  scroll-margin-top: calc(var(--header-height-mobile) + 20px);
+}
+
+/* Ajustement pour Desktop */
+@media (min-width: 768px) {
+  section:not(#event-cards), .category {
+    scroll-margin-top: calc(var(--header-height-desktop) + 20px);
+  }
 }
 
 h2 {
