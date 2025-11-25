@@ -1318,44 +1318,9 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // ===============================
-  // 4. FLIP CARTES (VERSION ROBUSTE + PATCH IOS MANUEL)
+  // 4. FLIP CARTES (VERSION NATIVE - SANS PATCH)
   // ===============================
   document.querySelectorAll('.carte-jeu').forEach(carte => {
-    
-    // --- PATCH IOS : SCROLL MANUEL FORCÉ ---
-    // Sur iOS, le scroll natif dans un élément rotateY(180deg) est souvent cassé.
-    // Cette solution force le scroll via JS pour garantir que le texte bouge.
-    const backFace = carte.querySelector('.carte-back');
-    if (backFace) {
-      let startY = 0;
-
-      // On capture la position du doigt au début
-      backFace.addEventListener('touchstart', (e) => {
-        startY = e.touches[0].pageY;
-      }, { passive: false });
-
-      // On gère le mouvement nous-mêmes
-      backFace.addEventListener('touchmove', (e) => {
-        // Si le contenu est plus petit que la carte, pas besoin de scroller
-        if (backFace.scrollHeight <= backFace.clientHeight) return;
-
-        // Calcul du mouvement
-        const y = e.touches[0].pageY;
-        const delta = startY - y;
-        
-        // 1. On applique le scroll manuellement sur l'élément
-        backFace.scrollTop += delta;
-        
-        // 2. On empêche le scroll de la page principale (body)
-        if (e.cancelable) e.preventDefault();
-        e.stopPropagation();
-
-        // Mise à jour pour le prochain mouvement
-        startY = y;
-      }, { passive: false });
-    }
-    // ----------------------------------
-
     carte.addEventListener('click', function(e) {
       // 1. Si on clique sur le bouton détails, on ne retourne pas
       if (e.target.closest('.btn-details')) return;
@@ -1467,7 +1432,6 @@ document.addEventListener('DOMContentLoaded', function() {
     detailsPanel.innerHTML = '<div class="details-content"></div>';
   }
 
-  // === NOUVELLE FONCTION : DÉTAILS AVEC VIDÉO ===
   function openDetails(cardData) {
     // Petit retour haptique
     if (navigator.vibrate) navigator.vibrate(15);
@@ -1475,7 +1439,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const content = detailsPanel.querySelector('.details-content') || detailsPanel;
     
     // MAGIE : On transforme le nom de l'image en nom de vidéo
-    // On remplace .png, .jpg ou .webp par .mp4
     const videoSrc = cardData.image.replace(/\.(png|jpg|jpeg|webp)$/i, '.mp4');
 
     content.innerHTML = `
@@ -1484,6 +1447,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <button class="close-details" onclick="closeDetails()">✕</button>
       </div>
       
+      <!-- LECTEUR VIDÉO -->
       <video 
         class="details-video" 
         src="${videoSrc}" 
@@ -1494,6 +1458,7 @@ document.addEventListener('DOMContentLoaded', function() {
         playsinline 
         webkit-playsinline
       >
+        <!-- Fallback Image -->
         <img src="${cardData.image}" alt="${cardData.title}" class="details-image">
       </video>
 
@@ -1560,7 +1525,6 @@ document.addEventListener('DOMContentLoaded', function() {
   // ===============================
   // 10. PIED DE PAGE (FOOTER GLOBAL)
   // ===============================
-  // Ajout dynamique du footer tout en bas de la page
   const pageFooter = document.createElement('footer');
   pageFooter.innerHTML = `
     <div style="text-align: center; padding: 40px 20px 60px; color: var(--gold); opacity: 0.7; font-family: 'Almendra', serif;">
