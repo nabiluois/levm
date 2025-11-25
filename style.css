@@ -3,8 +3,9 @@
    ============================================ */
 :root {
   --safe-top: env(safe-area-inset-top, 20px);
-  /* On augmente la hauteur du header car il y a maintenant 2 lignes sur mobile */
-  --header-height-mobile: 130px; 
+  
+  /* Hauteur augmentée (180px) pour le menu sur 2 lignes */
+  --header-height-mobile: 180px; 
   --header-height-desktop: 80px;
   
   --bg-dark: #1a120b; 
@@ -34,7 +35,6 @@ body {
   color: var(--text-dark);
   line-height: 1.6;
   overflow-x: hidden;
-  /* Padding dynamique pour ne pas cacher le contenu sous le header */
   padding-top: calc(var(--header-height-mobile) + 20px); 
   min-height: 100vh;
   transition: background 0.5s ease;
@@ -58,7 +58,7 @@ body.light-mode .details-section { color: #000000 !important; }
 body.light-mode .close-details { color: #1a120b; border-color: #1a120b; }
 
 /* ============================================
-   HEADER & NAVIGATION (NOUVEAU)
+   HEADER & NAVIGATION (MODE WRAP / 2 LIGNES)
    ============================================ */
 .main-header {
   position: fixed; top: 0; left: 0; width: 100%;
@@ -94,30 +94,39 @@ body.light-mode .close-details { color: #1a120b; border-color: #1a120b; }
   font-size: 1.2em; cursor: pointer;
 }
 
-/* Ligne du bas : Navigation Scrollable */
+/* Ligne du bas : Navigation (SANS SCROLL - TOUT VISIBLE) */
 .nav-shortcuts {
   display: flex;
-  gap: 10px;
-  overflow-x: auto; /* Scroll horizontal */
-  white-space: nowrap;
-  padding: 5px 15px 12px 15px;
-  -webkit-overflow-scrolling: touch; 
-  scrollbar-width: none; 
+  /* Autorise le retour à la ligne */
+  flex-wrap: wrap; 
+  /* Centre les boutons */
+  justify-content: center; 
+  
+  gap: 8px; 
+  padding: 5px 10px 15px 10px;
+  
+  /* Désactive le scroll */
+  overflow-x: visible; 
+  white-space: normal; 
+  mask-image: none;
+  -webkit-mask-image: none;
 }
 .nav-shortcuts::-webkit-scrollbar { display: none; }
 
 .nav-btn {
   display: inline-block;
-  padding: 8px 16px;
-  border-radius: 20px;
+  padding: 6px 14px;
+  border-radius: 18px;
   border: 1px solid rgba(212, 175, 55, 0.3);
   color: var(--gold);
   text-decoration: none;
   font-family: 'Pirata One', serif;
-  font-size: 1.1em;
+  font-size: 1em;
   background: rgba(0,0,0,0.3);
   transition: all 0.2s ease;
   flex-shrink: 0; 
+  /* Petite marge pour espacer les lignes */
+  margin-bottom: 4px;
 }
 
 .nav-btn:hover, .nav-btn.active {
@@ -138,7 +147,18 @@ body.light-mode .close-details { color: #1a120b; border-color: #1a120b; }
   }
   
   .header-top { width: auto; flex: 1; order: 2; padding: 0; }
-  .nav-shortcuts { width: auto; order: 1; padding: 0; margin-right: 20px; overflow: visible; }
+  
+  /* Sur PC, on remet sur une ligne */
+  .nav-shortcuts { 
+    width: auto; order: 1; padding: 0; margin-right: 20px; 
+    flex-wrap: nowrap; 
+  }
+  
+  .nav-btn {
+    padding: 8px 16px; 
+    font-size: 1.1em;
+    margin-bottom: 0;
+  }
 }
 
 /* ============================================
@@ -253,7 +273,7 @@ h2 {
 @media (min-width: 1200px) { section:not(#event-cards), .category { grid-template-columns: repeat(5, 1fr); } }
 
 /* ============================================
-   PANEL DETAILS (CORRIGÉ POUR MOBILE)
+   PANEL DETAILS (CORRIGÉ : TEXTE + VIDÉO)
    ============================================ */
 .details-panel {
   position: fixed; 
@@ -276,7 +296,8 @@ h2 {
   
   padding: 25px;
   
-  /* MARGE EN BAS GÉANTE (200px) POUR ÉVITER QUE LE TEXTE SOIT COUPÉ */
+  /* MARGE EN BAS GÉANTE (200px) */
+  /* Pour s'assurer que le texte dépasse la barre du navigateur */
   padding-bottom: 200px !important; 
   
   border-left: 2px solid var(--gold); 
@@ -291,7 +312,7 @@ h2 {
 .details-title { font-family: 'Pirata One'; color: var(--gold); font-size: 2em; margin: 0; text-shadow: 0 2px 5px #000; }
 .close-details { background: none; border: 1px solid var(--gold); color: inherit; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 1.5em; }
 
-/* STYLE MEDIA OPTIMISÉ MOBILE */
+/* STYLE MEDIA (TAILLE ORIGINALE) */
 .media-wrapper { width: 100%; margin-bottom: 25px; }
 .details-video, .details-image { 
   width: 100%; 
@@ -303,7 +324,7 @@ h2 {
   display: block; 
   background-color: #000;
   
-  /* Suppression de la limite de hauteur pour garder la taille d'origine */
+  /* Pas de limite de hauteur ici pour garder les grandes vidéos */
 }
 .details-section { 
   font-size: 1.1em; 
@@ -313,13 +334,12 @@ h2 {
 }
 
 /* ============================================
-   EFFET DE BRILLANCE (VAGUE NATURELLE)
+   EFFET DE BRILLANCE (SIMPLE & EFFICACE)
    ============================================ */
 @keyframes shine {
   0% { left: -100%; opacity: 0; }
-  20% { opacity: 0.8; } /* Pic de luminosité */
-  40% { left: 200%; opacity: 0; } /* Fin du passage */
-  100% { left: 200%; opacity: 0; } /* Pause longue */
+  50% { opacity: 1; }
+  100% { left: 200%; opacity: 0; }
 }
 
 .carte-front::after, .carte-vm::after {
@@ -327,46 +347,25 @@ h2 {
   position: absolute; 
   top: 0; 
   left: -100%; 
-  width: 60%; /* Légèrement plus large pour un passage plus doux */
+  width: 50%; 
   height: 100%;
-  background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.5), transparent);
+  background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.6), transparent);
   transform: skewX(-25deg); 
   pointer-events: none; 
   z-index: 10;
 }
 
-/* SUR PC : Au survol (inchangé) */
+/* SUR PC : Au survol */
 @media (hover: hover) {
   .carte-jeu:hover .carte-front::after, 
   .carte-vm:hover::after {
-    /* Animation plus rapide et vive au survol souris */
-    animation: shine 0.7s ease-in-out; 
+    animation: shine 0.7s;
   }
 }
 
-/* SUR MOBILE : Vague décalée et apaisée */
+/* SUR MOBILE : Animation auto toutes les 5s */
 @media (hover: none) {
   .carte-front::after, .carte-vm::after {
-    /* Cycle long de 8 secondes pour éviter l'effet stroboscopique */
-    animation: shine 8s infinite ease-in-out;
-  }
-
-  /* --- LE SECRET DU DÉCALAGE --- */
-  
-  /* 1. Les cartes paires (2, 4, 6...) attendent 4 secondes */
-  .carte-jeu:nth-child(even) .carte-front::after,
-  .carte-vm:nth-child(even)::after {
-    animation-delay: 4s;
-  }
-
-  /* 2. Une carte sur 3 attend 2 secondes (casse la symétrie) */
-  .carte-jeu:nth-child(3n) .carte-front::after,
-  .carte-vm:nth-child(3n)::after {
-    animation-delay: 2s;
-  }
-  
-  /* 3. Une carte sur 5 attend 6 secondes (ajoute de l'aléatoire apparent) */
-  .carte-jeu:nth-child(5n) .carte-front::after {
-    animation-delay: 6s;
+    animation: shine 5s infinite;
   }
 }
