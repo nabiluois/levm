@@ -1280,33 +1280,12 @@ document.addEventListener('DOMContentLoaded', function() {
   // 3. GESTION DES MODALES
   // ===============================
   
-  // Fonction personnalisée pour l'ouverture des modales (incluant l'intelligence pour les bugs)
+  // Fonction standard pour l'ouverture des modales (Sans pré-remplissage)
   window.openModal = function(modalId) {
     const modal = document.getElementById(modalId);
     if(modal) {
       modal.classList.add('active');
       if(extraMenu && extraMenu.classList.contains('open')) toggleExtraMenu();
-
-      // INTELLIGENCE : Pré-remplissage du formulaire de bug
-      if (modalId === 'modal-bug') {
-        // 1. URL actuelle
-        const linkInput = document.getElementById('bug-link');
-        if(linkInput) linkInput.value = window.location.href;
-
-        // 2. Infos Navigateur
-        const ua = navigator.userAgent;
-        let browserInfo = "Inconnu";
-        if(ua.includes("Chrome")) browserInfo = "Chrome / Android Webview";
-        else if(ua.includes("Safari") && !ua.includes("Chrome")) browserInfo = "Safari / iOS";
-        else if(ua.includes("Firefox")) browserInfo = "Firefox";
-        
-        const browserInput = document.getElementById('bug-browser');
-        if(browserInput) browserInput.value = browserInfo;
-
-        // 3. Infos Appareil (Plateforme)
-        const deviceInput = document.getElementById('bug-device');
-        if(deviceInput) deviceInput.value = navigator.platform; 
-      }
     }
   };
 
@@ -1320,6 +1299,42 @@ document.addEventListener('DOMContentLoaded', function() {
       if (e.target === modal) modal.classList.remove('active');
     });
   });
+
+  // =======================================================
+  // NOUVELLE GESTION DES NOTIFICATIONS (REMPLACE ALERT)
+  // =======================================================
+  
+  window.showNotification = function(title, message) {
+    const notif = document.getElementById('custom-notification');
+    const notifTitle = document.getElementById('notif-title');
+    const notifMsg = document.getElementById('notif-message');
+    
+    if(notif && notifTitle && notifMsg) {
+        notifTitle.textContent = title;
+        notifMsg.innerHTML = message.replace(/\n/g, '<br>'); // Gère les sauts de ligne
+        notif.classList.add('active');
+    } else {
+        // Fallback si le HTML n'est pas encore mis à jour
+        alert(message);
+    }
+  };
+
+  window.closeNotification = function() {
+    const notif = document.getElementById('custom-notification');
+    if(notif) notif.classList.remove('active');
+  };
+
+  // Fermer la notif en cliquant à côté
+  const notifOverlay = document.getElementById('custom-notification');
+  if(notifOverlay) {
+      notifOverlay.addEventListener('click', (e) => {
+          if(e.target === notifOverlay) window.closeNotification();
+      });
+  }
+
+  // ===============================
+  // GESTION ENVOI FORMULAIRES
+  // ===============================
 
   // GESTION ENVOI PROPOSITION RÔLE
   window.submitRole = function(e) {
@@ -1339,12 +1354,12 @@ document.addEventListener('DOMContentLoaded', function() {
     })
     .then(response => response.json())
     .then(data => {
-        alert("📜 Proposition scellée et envoyée au Conseil des Anciens !\nMerci pour ta contribution.");
+        showNotification("📜 Proposition Reçue !", "Ta proposition a été scellée et envoyée au Conseil des Anciens.<br>Merci pour ta contribution.");
         closeModal('modal-propose');
         form.reset();
     })
     .catch(error => {
-        alert("Oups ! Le corbeau s'est perdu en chemin. Réessaie plus tard.");
+        showNotification("⚠️ Erreur", "Oups ! Le corbeau s'est perdu en chemin. Réessaie plus tard.");
         console.error('Erreur:', error);
     })
     .finally(() => {
@@ -1371,12 +1386,12 @@ document.addEventListener('DOMContentLoaded', function() {
     })
     .then(response => response.json())
     .then(data => {
-        alert("🐛 Rapport envoyé ! Merci de nous aider à chasser les bugs.");
+        showNotification("🐛 Rapport Envoyé !", "Merci de nous aider à chasser les bugs du Village.");
         closeModal('modal-bug');
         form.reset();
     })
     .catch(error => {
-        alert("Erreur lors de l'envoi. Tu peux nous contacter directement par mail.");
+        showNotification("⚠️ Erreur", "Erreur lors de l'envoi. Tu peux nous contacter directement par mail.");
         console.error('Erreur:', error);
     })
     .finally(() => {
@@ -1497,7 +1512,7 @@ document.addEventListener('DOMContentLoaded', function() {
   if (vmOverlay) vmOverlay.addEventListener('click', closeZoom);
 
   // ===============================
-  // 9. DÉTAILS PANEL (MODIFIÉ FLUIDE)
+  // 9. DÉTAILS PANEL (FLUIDE)
   // ===============================
   
   window.closeDetails = function() {
