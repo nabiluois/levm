@@ -4,7 +4,7 @@
 :root {
   --safe-top: env(safe-area-inset-top, 20px);
   /* On augmente la hauteur du header car il y a maintenant 2 lignes sur mobile */
-  --header-height-mobile: 120px; 
+  --header-height-mobile: 130px; 
   --header-height-desktop: 80px;
   
   --bg-dark: #1a120b; 
@@ -58,7 +58,7 @@ body.light-mode .details-section { color: #000000 !important; }
 body.light-mode .close-details { color: #1a120b; border-color: #1a120b; }
 
 /* ============================================
-   HEADER & NAVIGATION (REFONTE TOTALE)
+   HEADER & NAVIGATION (NOUVEAU)
    ============================================ */
 .main-header {
   position: fixed; top: 0; left: 0; width: 100%;
@@ -75,7 +75,7 @@ body.light-mode .close-details { color: #1a120b; border-color: #1a120b; }
 /* Ligne du haut : Recherche + Theme */
 .header-top {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 10px 15px; gap: 15px;
+  padding: 10px 15px 5px 15px; gap: 15px;
   width: 100%;
 }
 
@@ -98,13 +98,13 @@ body.light-mode .close-details { color: #1a120b; border-color: #1a120b; }
 .nav-shortcuts {
   display: flex;
   gap: 10px;
-  overflow-x: auto; /* Permet le scroll horizontal */
+  overflow-x: auto; /* Scroll horizontal */
   white-space: nowrap;
-  padding: 0 15px 12px 15px; /* Padding bas pour l'esthétique */
-  -webkit-overflow-scrolling: touch; /* Scroll fluide iOS */
-  scrollbar-width: none; /* Cache scrollbar Firefox */
+  padding: 5px 15px 12px 15px;
+  -webkit-overflow-scrolling: touch; 
+  scrollbar-width: none; 
 }
-.nav-shortcuts::-webkit-scrollbar { display: none; /* Cache scrollbar Chrome/Safari */ }
+.nav-shortcuts::-webkit-scrollbar { display: none; }
 
 .nav-btn {
   display: inline-block;
@@ -117,7 +117,7 @@ body.light-mode .close-details { color: #1a120b; border-color: #1a120b; }
   font-size: 1.1em;
   background: rgba(0,0,0,0.3);
   transition: all 0.2s ease;
-  flex-shrink: 0; /* Empêche l'écrasement des boutons */
+  flex-shrink: 0; 
 }
 
 .nav-btn:hover, .nav-btn.active {
@@ -127,22 +127,18 @@ body.light-mode .close-details { color: #1a120b; border-color: #1a120b; }
   border-color: var(--gold);
 }
 
-/* RESPONSIVE DESKTOP : Tout sur une ligne */
+/* RESPONSIVE DESKTOP */
 @media (min-width: 768px) {
   body { padding-top: calc(var(--header-height-desktop) + 40px); }
   
   .main-header {
     flex-direction: row; align-items: center;
     height: var(--header-height-desktop);
-    padding: 0 20px;
-    padding-top: var(--safe-top);
+    padding: 0 20px; padding-top: var(--safe-top);
   }
   
   .header-top { width: auto; flex: 1; order: 2; padding: 0; }
-  .nav-shortcuts { 
-    width: auto; order: 1; padding: 0; margin-right: 20px; 
-    overflow: visible; 
-  }
+  .nav-shortcuts { width: auto; order: 1; padding: 0; margin-right: 20px; overflow: visible; }
 }
 
 /* ============================================
@@ -160,21 +156,17 @@ section:not(#event-cards), .category {
 
 h2 {
   grid-column: 1 / -1; text-align: center; font-size: 1.8em; font-family: 'Pirata One', serif;
-  background: rgba(40, 28, 20, 0.95); 
-  color: var(--gold); 
-  padding: 15px 40px; 
-  border-radius: 50px;
-  margin: 40px auto 30px auto; 
-  width: max-content; 
+  background: rgba(40, 28, 20, 0.95); color: var(--gold); 
+  padding: 15px 40px; border-radius: 50px;
+  margin: 40px auto 30px auto; width: max-content; 
   border: 3px double var(--gold); 
   text-shadow: 0 0 5px rgba(212, 175, 55, 0.8), 0 0 15px rgba(212, 175, 55, 0.5);
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.6), inset 0 0 20px rgba(0,0,0,0.7);
-  position: relative;
-  letter-spacing: 1px;
+  position: relative; letter-spacing: 1px;
 }
 
 /* ============================================
-   CARTES JEU & VM (Code inchangé)
+   CARTES JEU & VM
    ============================================ */
 .carte-jeu {
   position: relative; width: 100%; aspect-ratio: 2/3; perspective: 1000px; cursor: pointer;
@@ -233,7 +225,7 @@ h2 {
 .carte-jeu:hover .carte-inner { transform: translateY(-10px); }
 .carte-jeu.flipped:hover .carte-inner { transform: rotateY(180deg) translateY(-10px); }
 
-/* CARTES VM & STYLE DETAILS */
+/* CARTES VM */
 #event-cards { display: block; padding: 0 10px 80px 10px; max-width: 1400px; margin: 0 auto; }
 .event-subtitle { display: block; width: 100%; text-align: center; font-family: 'Pirata One', serif; font-size: 1.6em; margin: 40px 0 20px 0; grid-column: 1 / -1; }
 .gold-title { color: gold; text-shadow: 0 0 15px gold; }
@@ -260,38 +252,75 @@ h2 {
 @media (min-width: 800px) { section:not(#event-cards), .category { grid-template-columns: repeat(4, 1fr); gap: 25px; } }
 @media (min-width: 1200px) { section:not(#event-cards), .category { grid-template-columns: repeat(5, 1fr); } }
 
-/* PANEL DETAILS */
+/* ============================================
+   PANEL DETAILS (CORRIGÉ POUR MOBILE)
+   ============================================ */
 .details-panel {
-  position: fixed; top: 0; right: -100%; width: 100%; max-width: 500px; height: 100vh;
-  background: rgba(35, 25, 18, 0.98); z-index: 2200; overflow-y: auto;
-  transition: right 0.3s cubic-bezier(0.25, 1, 0.5, 1); padding: 25px;
-  border-left: 2px solid var(--gold); box-shadow: -10px 0 40px rgba(0,0,0,0.9);
+  position: fixed; 
+  top: 0; 
+  right: -100%; 
+  width: 100%; 
+  max-width: 500px; 
+  
+  /* FORCE LA HAUTEUR TOTALE MOBILE */
+  height: 100vh; /* Fallback */
+  height: 100dvh; /* Hauteur dynamique réelle */
+  
+  background: rgba(35, 25, 18, 0.98); 
+  z-index: 2200; 
+  
+  /* ACTIVE LE SCROLL VERTICAL */
+  overflow-y: auto; 
+  -webkit-overflow-scrolling: touch; 
+  
+  padding: 25px;
+  
+  /* MARGE EN BAS GÉANTE POUR ÉVITER QUE LE TEXTE SOIT COUPÉ */
+  padding-bottom: 150px; 
+  
+  border-left: 2px solid var(--gold); 
+  box-shadow: -10px 0 40px rgba(0,0,0,0.9);
+  transition: right 0.3s cubic-bezier(0.25, 1, 0.5, 1);
 }
+
 .details-panel.active { right: 0; }
 .details-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2150; backdrop-filter: blur(3px); }
 .details-overlay.active { display: block; }
 .details-header { display: flex; justify-content: space-between; margin-bottom: 25px; border-bottom: 1px solid var(--gold); padding-bottom: 15px; }
 .details-title { font-family: 'Pirata One'; color: var(--gold); font-size: 2em; margin: 0; text-shadow: 0 2px 5px #000; }
 .close-details { background: none; border: 1px solid var(--gold); color: inherit; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 1.5em; }
+
+/* STYLE MEDIA OPTIMISÉ MOBILE */
 .media-wrapper { width: 100%; margin-bottom: 25px; }
 .details-video, .details-image { 
-  width: 100%; border-radius: 12px; margin-bottom: 0; border: 2px solid var(--gold); 
-  box-shadow: 0 5px 15px rgba(0,0,0,0.6); object-fit: cover; display: block; background-color: #000;
+  width: 100%; 
+  border-radius: 12px; 
+  margin-bottom: 20px; 
+  border: 2px solid var(--gold); 
+  box-shadow: 0 5px 15px rgba(0,0,0,0.6); 
+  object-fit: cover; 
+  display: block; 
+  background-color: #000;
+  
+  /* SUR MOBILE : Limite la hauteur pour voir le texte tout de suite */
+  max-height: 45vh; 
 }
-.details-section { font-size: 1.1em; color: #f5e6b3; }
+.details-section { 
+  font-size: 1.1em; 
+  color: #f5e6b3; 
+  line-height: 1.6;
+  display: block; 
+}
 
 /* ============================================
-   EFFET DE BRILLANCE (ANIMATION UNIVERSELLE)
+   EFFET DE BRILLANCE (SIMPLE & EFFICACE)
    ============================================ */
-
-/* 1. On définit le mouvement de la lumière */
-@keyframes shine-sweep {
+@keyframes shine {
   0% { left: -100%; opacity: 0; }
-  10% { opacity: 1; }
+  50% { opacity: 1; }
   100% { left: 200%; opacity: 0; }
 }
 
-/* 2. La barre lumineuse (invisible par défaut) */
 .carte-front::after, .carte-vm::after {
   content: ''; 
   position: absolute; 
@@ -303,21 +332,19 @@ h2 {
   transform: skewX(-25deg); 
   pointer-events: none; 
   z-index: 10;
-  opacity: 0; /* Caché au départ */
 }
 
-/* 3. CAS PC : On lance l'animation au SURVOL de la souris */
+/* SUR PC : Au survol */
 @media (hover: hover) {
   .carte-jeu:hover .carte-front::after, 
   .carte-vm:hover::after {
-    animation: shine-sweep 0.7s ease-in-out;
+    animation: shine 0.7s;
   }
 }
 
-/* 4. CAS MOBILE & APPARITION : On lance l'animation quand la carte devient VISIBLE */
-/* Grâce au Javascript, la classe .visible s'ajoute quand on scrolle dessus */
-.carte-jeu.visible .carte-front::after,
-.carte-vm.visible::after {
-  /* Animation de 1 seconde, avec un petit délai de 0.2s pour que l'œil ait le temps de voir */
-  animation: shine-sweep 1s ease-in-out 0.2s backwards;
+/* SUR MOBILE : Animation auto toutes les 5s */
+@media (hover: none) {
+  .carte-front::after, .carte-vm::after {
+    animation: shine 5s infinite;
+  }
 }
