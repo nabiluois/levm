@@ -734,12 +734,12 @@ Le loup-garou incarne l'un des rôles de l'équipe des loups-garous. Il connaît
   image: "le_loup_garou_rouge.png",
   description: `
 <span style="font-size:1.2em;">🩸 <strong>Le Loup-Garou Rouge</strong></span><br>
-Le plus coriace de la meute, mais fragile dans son secret, il lie sa vie à celle d’un allié.<br><br>
+Le plus coriace de la meute, mais fragile dans son secret, il lie sa vie à celle d’un autre.<br><br>
 <span style="font-size:1.2em;">🎯 <strong>Objectif</strong></span><br>
 Survivre et éliminer tous les paysans.<br>
 Tu gagnes si tous les paysans (rôles solos spéciaux) sont éliminés.<br><br>
 <span style="font-size:1.2em;">🛠️ <strong>Pouvoir</strong></span><br>
-Tu es appelé en premier chaque nuit, avant les autres loups-garous.<br>
+tu et appelé seul en premier la premiere nuit, avant les autres loups-garous.<br>
 Tu choisis un joueur (loup ou paysan) à qui tu donnes ton cœur.<br>
 Tant que ce joueur est en vie, tu es immortel : aucune attaque ne peut te tuer.<br>
 Si ce joueur meurt, tu redeviens vulnérable.<br><br>
@@ -748,7 +748,7 @@ Si ce joueur meurt, tu redeviens vulnérable.<br><br>
 - Camoufle ta nature : essaie que ton “cœur” soit une cible dure à éliminer pour le village.<br>
 - Communique avec la meute pour optimiser vos stratégies.<br><br>
 <span style="font-size:1.2em;">📜 <strong>Description</strong></span><br>
-Le Loup-Garou Rouge est le plus coriace des loups, mais aussi le plus fragile. Il est appelé seul en premier chaque nuit et donne son cœur au joueur de son choix. Tant que ce joueur est en vie, le Loup-Garou Rouge est immortel.
+Le Loup-Garou Rouge est le plus coriace des loups, mais aussi le plus fragile. Il est appelé seul en premier la premiere nuit et donne son cœur au joueur de son choix. Tant que ce joueur est en vie, le Loup-Garou Rouge est immortel.
 `
 },
 {
