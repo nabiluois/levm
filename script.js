@@ -1343,15 +1343,21 @@ document.addEventListener('DOMContentLoaded', function() {
     submitBtn.disabled = true;
 
     const formData = new FormData(form);
-    // On force le format JSON ici (plus fiable que l'URL /ajax/ pour les formulaires complexes)
-    formData.append("_format", "json");
+    formData.append("_captcha", "false");
+    formData.append("_template", "table");
 
-    // NOTE: J'ai retiré "/ajax/" de l'URL pour une meilleure compatibilité
+    // Utilisation de l'URL standard + Header JSON pour éviter les erreurs de redirect
     fetch("https://formsubmit.co/contact@lacourduroi.fr", {
         method: "POST",
-        body: formData
+        body: formData,
+        headers: { 
+            'Accept': 'application/json' 
+        }
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) throw new Error("Erreur serveur");
+        return response.json();
+    })
     .then(data => {
         showNotification("📜 Proposition Reçue !", "Ta proposition a été scellée et envoyée au Conseil des Anciens.<br>Merci pour ta contribution.");
         closeModal('modal-propose');
@@ -1380,22 +1386,28 @@ document.addEventListener('DOMContentLoaded', function() {
     submitBtn.disabled = true;
 
     const formData = new FormData(form);
-    // CORRECTION MAJEURE : On force le JSON via FormData et non via l'URL
-    // L'URL "/ajax/" supprime souvent les fichiers. L'URL standard les garde.
-    formData.append("_format", "json");
+    formData.append("_captcha", "false");
+    formData.append("_template", "table");
 
+    // Utilisation de l'URL standard + Header JSON pour supporter les fichiers
     fetch("https://formsubmit.co/contact@lacourduroi.fr", {
         method: "POST",
-        body: formData
+        body: formData,
+        headers: { 
+            'Accept': 'application/json' 
+        }
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) throw new Error("Erreur serveur ou fichier trop lourd");
+        return response.json();
+    })
     .then(data => {
         showNotification("🐛 Rapport Envoyé !", "Merci de nous aider à chasser les bugs du Village.");
         closeModal('modal-bug');
         form.reset();
     })
     .catch(error => {
-        showNotification("⚠️ Erreur", "Erreur lors de l'envoi. Tu peux nous contacter directement par mail.");
+        showNotification("⚠️ Erreur", "Le rapport n'a pas pu partir. L'image est peut-être trop lourde ?");
         console.error('Erreur:', error);
     })
     .finally(() => {
