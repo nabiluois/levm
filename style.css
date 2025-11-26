@@ -619,3 +619,64 @@ body.light-mode .rule-text h3 {
 body.light-mode .rule-text p {
   color: #3e2f23;
 }
+/* ============================================
+   AMÉLIORATION TEXTE (PANINI & DÉTAILS)
+   ============================================ */
+
+/* 1. Texte au dos des cartes (Flip) - Plus lisible */
+.carte-back p {
+  font-family: 'Almendra', serif;
+  font-size: 1.1em; /* Un peu plus grand */
+  line-height: 1.5;
+  color: #fff8e7; /* Blanc cassé plus lumineux */
+  text-align: center;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.9); /* Ombre forte pour contraste */
+  
+  /* Petit fond subtil pour détacher le texte du fond de la carte */
+  background: radial-gradient(circle, rgba(0,0,0,0.4) 0%, transparent 80%);
+  padding: 10px;
+  border-radius: 8px;
+}
+
+/* 2. Texte dans le Panneau de Détails (Le "Panini" sous l'image/vidéo) */
+.details-section {
+  font-family: 'Almendra', serif;
+  font-size: 1.25em; /* Texte plus grand pour le confort */
+  line-height: 1.6;
+  color: #f5e6b3;
+  text-align: justify; /* Texte justifié pour faire "livre" */
+  
+  /* Création d'un bloc style "Parchemin sombre" */
+  background: rgba(10, 5, 2, 0.5); /* Fond très sombre mais transparent */
+  border: 1px solid rgba(212, 175, 55, 0.2); /* Fine bordure dorée */
+  padding: 25px; /* De l'espace autour du texte */
+  border-radius: 12px;
+  box-shadow: inset 0 0 30px rgba(0,0,0,0.8); /* Ombre interne pour la profondeur */
+  
+  margin-top: 15px;
+  position: relative;
+}
+
+/* LA TOUCHE MAGIQUE : La Lettrine (Première lettre en gros) */
+.details-section::first-letter {
+  font-family: 'Pirata One', serif;
+  font-size: 3.8em; /* Très grande lettre */
+  float: left;
+  line-height: 0.7;
+  margin-right: 12px;
+  margin-top: 8px;
+  padding-left: 5px;
+  color: var(--gold); /* En Or */
+  text-shadow: 0 2px 10px rgba(0,0,0,0.8); /* Ombre portée */
+}
+
+/* Petit ornement en bas du texte pour finir en beauté */
+.details-section::after {
+  content: '✦';
+  display: block;
+  text-align: center;
+  color: var(--gold);
+  font-size: 1.5em;
+  margin-top: 20px;
+  opacity: 0.6;
+}
