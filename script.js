@@ -1670,4 +1670,33 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
+// ===============================
+  // 12. GESTION DES SLIDES (RÈGLES DE BASE)
+  // ===============================
+  let currentSlideIndex = 0;
+  const slides = document.querySelectorAll('.slide');
+  const slideCounter = document.getElementById('slide-counter');
+
+  window.changeSlide = function(direction) {
+    // Masquer le slide actuel
+    slides[currentSlideIndex].classList.remove('active');
+    
+    // Calculer le nouvel index
+    currentSlideIndex += direction;
+    
+    // Boucle (si on dépasse la fin, on revient au début, et inversement)
+    if (currentSlideIndex >= slides.length) currentSlideIndex = 0;
+    if (currentSlideIndex < 0) currentSlideIndex = slides.length - 1;
+    
+    // Afficher le nouveau slide
+    slides[currentSlideIndex].classList.add('active');
+    
+    // Mettre à jour le compteur
+    if(slideCounter) slideCounter.textContent = `${currentSlideIndex + 1} / ${slides.length}`;
+    
+    // Remonter en haut du contenu
+    const container = document.querySelector('.slides-container');
+    if(container) container.scrollTop = 0;
+  };
+  
 }); // FIN DOMContentLoaded

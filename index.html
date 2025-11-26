@@ -8,6 +8,7 @@
   <title>Le Village Maudit</title>
   <link href="https://fonts.googleapis.com/css2?family=Almendra&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Pirata+One&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
   <link href="style.css" rel="stylesheet">
   <link href="manifest.json" rel="manifest">
   <link rel="apple-touch-icon" href="icon.png">
@@ -43,6 +44,7 @@
       <button class="close-extra">✕</button>
     </div>
     <ul class="extra-links">
+      <li><a href="#" onclick="openModal('modal-regles-base')" style="border-color: #ff6b6b; color:#ff6b6b;">📖 Règles de base</a></li>
       <li><a href="#" onclick="openModal('modal-regles')">📜 Le Pacte (Règles)</a></li>
       <li><a href="#" onclick="openModal('modal-propose')">✍️ Proposer un Rôle</a></li>
       <li><a href="#" onclick="openModal('modal-bug')">🐛 Signaler un Bug</a></li>
@@ -53,6 +55,235 @@
       <em>by Nabil & Joelson</em>
     </div>
   </nav>
+
+  <div id="modal-regles-base" class="modal">
+    <div class="modal-content modal-large">
+      <span class="close-modal" onclick="closeModal('modal-regles-base')">✕</span>
+      
+      <div class="slides-container">
+        
+        <div class="slide active">
+           <h2 class="slide-title">Règles Mécaniques de Base</h2>
+           <h3 class="slide-subtitle">du Village Maudit</h3>
+           <p class="slide-text">Découvrez les secrets et les pouvoirs qui vous attendent dans ce jeu de déduction sociale.</p>
+           <div class="separator-ornament">⚔️ LE VM ⚔️</div>
+           <div class="slide-nav-hint">Swipe ou clique pour la suite ➜</div>
+        </div>
+
+        <div class="slide">
+           <h2 class="slide-title">Distribution des Rôles</h2>
+           
+           <div class="step-box">
+             <div class="step-num">1</div>
+             <div class="step-content">
+               <strong>Le Maître du Jeu (MJ) distribue les cartes</strong>
+               <p>Le MJ distribue secrètement une carte personnage face cachée à chaque joueur.</p>
+             </div>
+           </div>
+
+           <div class="step-box">
+             <div class="step-num">2</div>
+             <div class="step-content">
+               <strong>Chaque joueur découvre son rôle</strong>
+               <p>Les joueurs doivent prendre connaissance de leur rôle en toute discrétion.</p>
+             </div>
+           </div>
+
+           <div class="step-box">
+             <div class="step-num">3</div>
+             <div class="step-content">
+               <strong>En cas de doute</strong>
+               <p>Si un joueur a des questions, il doit consulter le site ou demander discrètement au MJ.</p>
+             </div>
+           </div>
+
+           <div class="quote-box">
+             "Chaque joueur doit garder son rôle secret afin de ne pas révéler son identité aux autres participants."
+           </div>
+        </div>
+
+        <div class="slide">
+          <h2 class="slide-title">Nuit 0 - Phase d'Information</h2>
+          
+          <div class="info-card">
+            <i class="fas fa-moon"></i>
+            <div>
+              <strong>Phase Préparatoire</strong>
+              <p>Après la distribution, le MJ annonce que le village s'endort. Tout le monde ferme les yeux.</p>
+            </div>
+          </div>
+
+          <div class="info-card">
+            <i class="fas fa-user-tie"></i>
+            <div>
+              <strong>Rôle du MJ</strong>
+              <p>Le MJ appelle tous les rôles un par un pour identifier les joueurs.</p>
+            </div>
+          </div>
+
+          <div class="info-card warning">
+            <i class="fas fa-exclamation-circle"></i>
+            <div>
+              <strong>Info Cruciale</strong>
+              <p>Cette phase sert au MJ à s'organiser. Ce n'est pas une vraie nuit de jeu.</p>
+            </div>
+          </div>
+
+           <div class="roles-grid-mini">
+             <span><i class="fas fa-child"></i> Orphelin</span>
+             <span><i class="fas fa-user-secret"></i> LG Rouge</span>
+             <span><i class="fas fa-bullseye"></i> Target</span>
+             <span><i class="fas fa-ghost"></i> LG Maudit</span>
+           </div>
+        </div>
+
+        <div class="slide">
+          <h2 class="slide-title">Actions Spéciales Nuit 0</h2>
+          
+          <div class="role-action-card">
+            <h4><i class="fas fa-child"></i> L'Orphelin</h4>
+            <p>Forme un couple stable entre deux joueurs <strong>dès la Nuit 0</strong>.</p>
+          </div>
+
+          <div class="role-action-card">
+            <h4><i class="fas fa-heart-broken"></i> Le Loup-Garou Rouge</h4>
+            <p>Donne son cœur à un joueur <strong>dès la Nuit 0</strong>. Tant que ce joueur vit, le LG Rouge est immortel.</p>
+          </div>
+
+          <div class="role-action-card">
+            <h4><i class="fas fa-bullseye"></i> Target</h4>
+            <p>Désigne secrètement une "cible miroir" <strong>dès la Nuit 0</strong> qui subira tout à sa place.</p>
+          </div>
+
+          <div class="role-action-card">
+            <h4><i class="fas fa-ghost"></i> Le Loup-Garou Maudit</h4>
+            <p>Désigne un Mentor (non informé) <strong>dès la Nuit 0</strong>. Tant que le Mentor vit, le LG Maudit est un simple paysan.</p>
+          </div>
+        </div>
+
+        <div class="slide">
+          <h2 class="slide-title">Élection du Maire - Jour 0</h2>
+          
+          <ul class="steps-list">
+            <li><strong>1. Réveil :</strong> Après la Nuit 0, le MJ organise l'élection.</li>
+            <li><strong>2. Vote :</strong> Les joueurs choisissent un leader.</li>
+            <li><strong>3. Pouvoirs :</strong> Le maire a des pouvoirs spécifiques le Jour 1.</li>
+            <li><strong>4. Permanent :</strong> Ensuite, il tranche les égalités lors des votes.</li>
+          </ul>
+
+          <div class="visual-center">
+            <i class="fas fa-crown gold-icon-large"></i>
+            <p>Le Maire Élu</p>
+          </div>
+        </div>
+
+        <div class="slide">
+          <h2 class="slide-title">Pouvoirs du Maire</h2>
+          
+          <div class="mayor-power-main">
+            <i class="fas fa-balance-scale"></i>
+            <p><strong>Pouvoir de décision :</strong> En cas d'égalité, c'est lui qui tranche.</p>
+          </div>
+
+          <div class="powers-grid">
+            <div class="power-item">
+              <i class="fas fa-gavel"></i>
+              <strong>Dictature</strong>
+              <p>Éliminer directement un joueur.</p>
+            </div>
+            <div class="power-item">
+              <i class="fas fa-vote-yea"></i>
+              <strong>Démocratie</strong>
+              <p>Lancer un vote classique.</p>
+            </div>
+            <div class="power-item">
+              <i class="fas fa-shield-alt"></i>
+              <strong>Paix</strong>
+              <p>Ne tuer personne ce jour-là.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="slide">
+          <h2 class="slide-title">Début du Cycle de Jeu</h2>
+          <p class="slide-text">Après le Jour 0, la <strong>Nuit 1</strong> débute. Le cycle classique commence.</p>
+          
+          <div class="cycle-visual">
+            <div class="phase">
+              <i class="fas fa-moon"></i>
+              <span>Nuit 1</span>
+              <small>Action secrète</small>
+            </div>
+            <div class="arrow">➜</div>
+            <div class="phase">
+              <i class="fas fa-sun"></i>
+              <span>Jour 1</span>
+              <small>Débat & Vote</small>
+            </div>
+          </div>
+
+          <div class="features-list">
+             <div class="feature"><i class="fas fa-gavel"></i> Accusations</div>
+             <div class="feature"><i class="fas fa-chess"></i> Bluffs</div>
+             <div class="feature"><i class="fas fa-user-slash"></i> Éliminations</div>
+          </div>
+        </div>
+
+        <div class="slide">
+          <h2 class="slide-title">Cartes Événements</h2>
+          
+          <div class="rules-block">
+            <h3><i class="fas fa-sitemap"></i> Moment de la Pioche</h3>
+            <ul>
+              <li>Uniquement après les morts de nuit ?</li>
+              <li>Uniquement après les morts de jour ?</li>
+              <li>Après les deux ? (Au choix du MJ)</li>
+            </ul>
+          </div>
+
+          <div class="rules-block">
+             <h3><i class="fas fa-exclamation-triangle"></i> Règle d'Or</h3>
+             <p>Les cartes ne sont accessibles qu'aux joueurs <strong>après leur élimination</strong>. Un vivant ne pioche jamais.</p>
+          </div>
+        </div>
+
+        <div class="slide">
+          <h2 class="slide-title">Catégories de Cartes</h2>
+          
+          <div class="card-type gold">
+            <i class="fas fa-crown"></i>
+            <div>
+              <strong>Cartes OR (Tour 1-3)</strong>
+              <p>Résurrection, retour à la partie.</p>
+            </div>
+          </div>
+
+          <div class="card-type silver">
+            <i class="fas fa-medal"></i>
+            <div>
+              <strong>Cartes ARGENT (Tour 4-6)</strong>
+              <p>Influence, effets positifs/négatifs.</p>
+            </div>
+          </div>
+
+          <div class="card-type bronze">
+            <i class="fas fa-award"></i>
+            <div>
+              <strong>Cartes BRONZE (Tour 7+)</strong>
+              <p>Bonus prochaine partie, avantages.</p>
+            </div>
+          </div>
+        </div>
+
+      </div> <div class="slides-nav">
+        <button onclick="changeSlide(-1)">❮ Précédent</button>
+        <span id="slide-counter">1 / 9</span>
+        <button onclick="changeSlide(1)">Suivant ❯</button>
+      </div>
+
+    </div>
+  </div>
+
 
   <div id="modal-propose" class="modal">
     <div class="modal-content">

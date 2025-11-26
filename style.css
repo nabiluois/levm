@@ -448,3 +448,164 @@ h2 { grid-column: 1 / -1; text-align: center; font-size: 1.8em; font-family: 'Pi
   cursor: pointer;
   width: 100%;
 }
+
+/* ============================================
+   STYLES POUR LA MODALE RÈGLES DE BASE (SLIDES)
+   ============================================ */
+
+.modal-large {
+  max-width: 600px;
+  height: 85vh; /* Plus grand pour les slides */
+  display: flex;
+  flex-direction: column;
+  padding: 0; /* On gère le padding dans les slides */
+  overflow: hidden; /* Important pour cacher les slides inactifs */
+}
+
+/* Close button repositionné pour cette modale spécifique */
+.modal-large .close-modal {
+  top: 15px;
+  right: 15px;
+  background: rgba(0,0,0,0.8);
+  z-index: 100;
+}
+
+.slides-container {
+  flex: 1;
+  position: relative;
+  width: 100%;
+  overflow-y: auto; /* Permet le scroll SI le contenu dépasse */
+  padding: 40px 20px 20px 20px;
+}
+
+.slide {
+  display: none; /* Caché par défaut */
+  flex-direction: column;
+  align-items: center;
+  animation: fadeIn 0.4s ease;
+}
+
+.slide.active {
+  display: flex;
+}
+
+.slides-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  background: rgba(0,0,0,0.5);
+  border-top: 1px solid var(--gold);
+}
+
+.slides-nav button {
+  background: none;
+  border: 1px solid var(--gold);
+  color: var(--gold);
+  padding: 8px 15px;
+  border-radius: 20px;
+  font-family: 'Pirata One';
+  cursor: pointer;
+}
+.slides-nav button:hover { background: var(--gold); color: #000; }
+#slide-counter { color: #f5e6b3; font-family: 'Almendra'; }
+
+/* TYPOGRAPHIE SLIDES */
+.slide-title {
+  font-family: 'Pirata One';
+  color: var(--gold);
+  font-size: 1.8em;
+  text-align: center;
+  margin-bottom: 10px;
+  width: 100%;
+  border: none; background: none; box-shadow: none; padding: 0;
+}
+.slide-subtitle {
+  font-family: 'Almendra';
+  color: #f5e6b3;
+  font-size: 1.2em;
+  margin-bottom: 20px;
+  opacity: 0.8;
+}
+.slide-text { font-size: 1.1em; text-align: center; margin-bottom: 20px; }
+
+/* COMPOSANTS VISUELS */
+.step-box {
+  background: rgba(255,255,255,0.05);
+  border-left: 3px solid var(--gold);
+  padding: 15px;
+  margin-bottom: 15px;
+  width: 100%;
+  border-radius: 0 10px 10px 0;
+  display: flex;
+  gap: 15px;
+}
+.step-num {
+  font-family: 'Pirata One'; font-size: 1.5em; color: var(--gold);
+  min-width: 30px; display: flex; align-items: center; justify-content: center;
+}
+.step-content strong { color: var(--gold); display: block; margin-bottom: 5px; }
+
+.info-card {
+  background: rgba(74, 14, 78, 0.4); /* Teinte violette sombre pour rappeler tes images */
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  padding: 15px;
+  border-radius: 10px;
+  margin-bottom: 15px;
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
+}
+.info-card i { font-size: 1.5em; color: var(--gold); margin-top: 5px; }
+.info-card.warning { border-color: #ff6b6b; background: rgba(255, 107, 107, 0.1); }
+.info-card.warning i { color: #ff6b6b; }
+
+.role-action-card {
+  width: 100%;
+  background: #1a120b;
+  border: 1px solid #5a4633;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+.role-action-card h4 { color: var(--gold); margin-bottom: 5px; font-family: 'Pirata One'; }
+.role-action-card i { margin-right: 8px; }
+
+.mayor-power-main {
+  text-align: center;
+  background: rgba(212, 175, 55, 0.1);
+  border: 2px solid var(--gold);
+  padding: 20px;
+  border-radius: 15px;
+  margin-bottom: 20px;
+  width: 100%;
+}
+.mayor-power-main i { font-size: 3em; margin-bottom: 10px; color: var(--gold); }
+
+.powers-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; width: 100%; }
+.power-item { background: #120c08; padding: 10px; border-radius: 8px; text-align: center; font-size: 0.9em; border: 1px solid #333; }
+.power-item i { font-size: 1.5em; color: var(--gold); margin-bottom: 5px; display: block; }
+
+.cycle-visual {
+  display: flex; justify-content: space-around; align-items: center; width: 100%; margin: 20px 0;
+  background: rgba(0,0,0,0.3); padding: 20px; border-radius: 50px;
+}
+.phase { display: flex; flex-direction: column; align-items: center; color: var(--gold); }
+.phase i { font-size: 2.5em; margin-bottom: 10px; }
+.arrow { font-size: 2em; color: #5a4633; }
+
+.card-type {
+  width: 100%; padding: 15px; margin-bottom: 15px; border-radius: 10px;
+  display: flex; align-items: center; gap: 15px; color: #1a120b; font-weight: bold;
+}
+.card-type.gold { background: linear-gradient(135deg, #d4af37, #f5e6b3); }
+.card-type.silver { background: linear-gradient(135deg, #c0c0c0, #e0e0e0); }
+.card-type.bronze { background: linear-gradient(135deg, #cd7f32, #e6b450); }
+.card-type i { font-size: 2em; opacity: 0.7; }
+
+.quote-box {
+  font-style: italic; color: #aaa; text-align: center; border-top: 1px solid #555; padding-top: 20px; margin-top: 10px;
+}
+.separator-ornament { font-family: 'Pirata One'; color: var(--gold); margin: 20px 0; font-size: 1.5em; }
+.slide-nav-hint { font-size: 0.8em; opacity: 0.5; margin-top: auto; }
