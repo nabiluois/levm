@@ -822,3 +822,88 @@ body.light-mode .card-type {
   border: 1px solid #aaa;
   color: #000;
 }
+
+/* ============================================
+   FIX PAGE 7 : CYCLE DE JEU (MODE CLAIR)
+   ============================================ */
+
+/* 1. Le conteneur du cycle (Nuit -> Jour) */
+body.light-mode .cycle-visual {
+  background: rgba(255, 255, 255, 0.5); /* Fond blanc cassé au lieu de gris sombre */
+  border: 2px solid #b8860b; /* Bordure Or foncé */
+}
+
+/* 2. Les textes "Nuit 1" et "Jour 1" */
+body.light-mode .phase {
+  color: #3e2f23; /* Marron foncé (remplace le jaune illisible) */
+  font-weight: bold;
+}
+
+/* 3. Les icônes Soleil/Lune */
+body.light-mode .phase i {
+  color: #b8860b; /* Or foncé / Ocre */
+  text-shadow: none;
+}
+
+/* 4. La flèche entre les deux */
+body.light-mode .arrow {
+  color: #5a4633;
+}
+
+/* 5. Les petites boîtes en dessous (Accusations, Bluffs...) */
+body.light-mode .feature {
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid #b8860b;
+  color: #3e2f23; /* Texte foncé */
+  font-weight: bold;
+  
+  /* On s'assure que ce soit bien lisible */
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  margin-bottom: 10px;
+  padding: 10px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Icônes dans les boîtes */
+body.light-mode .feature i {
+  color: #d35400; /* Orange foncé pour bien ressortir */
+}
+
+/* ============================================
+   FIX PANINI (DÉTAILS) EN MODE CLAIR
+   ============================================ */
+
+body.light-mode .details-section {
+  /* On remplace le fond sombre par un fond parchemin clair */
+  background: rgba(255, 252, 245, 0.95); 
+  
+  /* Texte marron foncé pour le contraste */
+  color: #3e2f23; 
+  
+  /* Bordure dorée plus soutenue */
+  border: 2px solid #b8860b; 
+  
+  /* Ombre plus douce et dorée */
+  box-shadow: 0 5px 20px rgba(138, 110, 47, 0.2);
+}
+
+/* Ajustement des lignes de séparation entre les paragraphes */
+body.light-mode .details-section p, 
+body.light-mode .details-section br + br {
+  border-bottom-color: rgba(184, 134, 11, 0.3);
+}
+
+/* Titre dans le panneau de détails */
+body.light-mode .details-title {
+  color: #5a4633;
+  text-shadow: none;
+}
+
+/* Bouton fermer en mode clair */
+body.light-mode .close-details {
+  border-color: #5a4633;
+  color: #5a4633;
+}
