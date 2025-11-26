@@ -95,7 +95,7 @@ Chaque matin, si Cerbère se trouve à droite ou à gauche d'un loup-garou, Cerb
   title: "🪢 Le Condamné",
   image: "le_condamne.png",
   description: `
-<span style="font-size:1.2em;">🪢 <strong>Le Condamné — L’Ultime Révélateur</strong></span><br>
+<span style="font-size:1.2em;">🪢 <strong>Le Condamné</strong></span><br>
 Un paysan en sursis : avant de déclencher son dernier secret, il doit sentir si le village est prêt à lui accorder une seconde chance.<br><br>
 <span style="font-size:1.2em;">🎯 <strong>Objectif</strong></span><br>
 Aider les paysans à éliminer tous les loups-garous (et, le cas échéant, les rôles solos) et survivre si possible.<br><br>
