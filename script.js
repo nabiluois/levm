@@ -1342,32 +1342,24 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const formData = new FormData(form);
 
-    // NOTE : On garde l'URL standard
     fetch("https://formsubmit.co/contact@lacourduroi.fr", {
         method: "POST",
         body: formData
     })
     .then(response => {
-        // MODIFICATION ICI : On vérifie juste si c'est OK (status 200)
-        // On ne tente PAS de lire le JSON (.json()) car c'est ça qui plantait
         if (response.ok) {
-            return true; // Succès !
+            return true;
         } else {
             throw new Error("Erreur serveur");
         }
     })
     .then(() => {
-        // Si on arrive ici, c'est que le message est parti
         showNotification("📜 Proposition Reçue !", "Ta proposition a été scellée et envoyée au Conseil des Anciens.<br>Merci pour ta contribution.");
         closeModal('modal-propose');
         form.reset();
     })
     .catch(error => {
-        // On ne montre l'erreur que si le réseau a vraiment planté
         console.error('Erreur:', error);
-        // Fallback : Parfois FormSubmit renvoie une erreur "opaque" mais le mail part quand même.
-        // Pour ne pas frustrer l'utilisateur, on peut afficher un message ambigu ou vérifier le type d'erreur.
-        // Ici on laisse l'erreur s'afficher si vraiment ça n'a pas marché (ex: pas internet).
         showNotification("⚠️ Oups", "Une erreur technique est survenue, mais il est possible que ton message soit passé. Vérifie ta connexion.");
     })
     .finally(() => {
@@ -1395,7 +1387,6 @@ document.addEventListener('DOMContentLoaded', function() {
         body: formData
     })
     .then(response => {
-        // MODIFICATION ICI : On vérifie juste si c'est OK
         if (response.ok) {
             return true;
         } else {
