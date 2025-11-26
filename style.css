@@ -620,63 +620,84 @@ body.light-mode .rule-text p {
   color: #3e2f23;
 }
 /* ============================================
-   AMÉLIORATION TEXTE (PANINI & DÉTAILS)
+   AMÉLIORATION TEXTE (PANINI & DÉTAILS) - VERSION CORRIGÉE
    ============================================ */
 
-/* 1. Texte au dos des cartes (Flip) - Plus lisible */
+/* 1. Texte au dos des cartes (Flip) */
 .carte-back p {
   font-family: 'Almendra', serif;
-  font-size: 1.1em; /* Un peu plus grand */
+  font-size: 1.05em;
   line-height: 1.5;
-  color: #fff8e7; /* Blanc cassé plus lumineux */
-  text-align: center;
-  text-shadow: 0 2px 4px rgba(0,0,0,0.9); /* Ombre forte pour contraste */
+  color: #fffce6; /* Blanc crème très clair */
+  text-align: left; /* Alignement gauche pour éviter les trous */
   
-  /* Petit fond subtil pour détacher le texte du fond de la carte */
-  background: radial-gradient(circle, rgba(0,0,0,0.4) 0%, transparent 80%);
-  padding: 10px;
+  /* Fond semi-transparent pour détacher le texte */
+  background: rgba(20, 14, 10, 0.85); 
+  padding: 12px;
   border-radius: 8px;
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  
+  /* Permet au texte de ne pas coller aux bords */
+  margin: 5px 0;
 }
 
-/* 2. Texte dans le Panneau de Détails (Le "Panini" sous l'image/vidéo) */
+/* 2. Texte dans le Panneau de Détails (Le "Panini") */
 .details-section {
   font-family: 'Almendra', serif;
-  font-size: 1.25em; /* Texte plus grand pour le confort */
-  line-height: 1.6;
-  color: #f5e6b3;
-  text-align: justify; /* Texte justifié pour faire "livre" */
+  font-size: 1.2em; /* Taille confortable */
+  line-height: 1.8; /* Lignes bien espacées (aéré) */
+  color: #fffce6; /* Contraste fort pour la lecture */
+  text-align: left; /* Lecture plus fluide sur mobile */
   
-  /* Création d'un bloc style "Parchemin sombre" */
-  background: rgba(10, 5, 2, 0.5); /* Fond très sombre mais transparent */
-  border: 1px solid rgba(212, 175, 55, 0.2); /* Fine bordure dorée */
-  padding: 25px; /* De l'espace autour du texte */
+  /* Création d'un bloc style "Parchemin Premium" */
+  background: linear-gradient(180deg, rgba(30, 20, 15, 0.95), rgba(20, 10, 5, 0.98));
+  border: 2px solid var(--gold); /* Bordure solide */
+  padding: 25px 20px; /* Espace interne */
   border-radius: 12px;
-  box-shadow: inset 0 0 30px rgba(0,0,0,0.8); /* Ombre interne pour la profondeur */
+  box-shadow: 0 10px 25px rgba(0,0,0,0.7);
   
-  margin-top: 15px;
+  margin-top: 20px;
   position: relative;
 }
 
-/* LA TOUCHE MAGIQUE : La Lettrine (Première lettre en gros) */
+/* LA LETTRINE CORRIGÉE (Plus d'écrasement) */
 .details-section::first-letter {
   font-family: 'Pirata One', serif;
-  font-size: 3.8em; /* Très grande lettre */
+  font-size: 3.2em; /* Taille maîtrisée */
   float: left;
-  line-height: 0.7;
-  margin-right: 12px;
-  margin-top: 8px;
-  padding-left: 5px;
-  color: var(--gold); /* En Or */
-  text-shadow: 0 2px 10px rgba(0,0,0,0.8); /* Ombre portée */
+  line-height: 0.8; /* Hauteur réduite pour éviter de pousser le bas */
+  
+  /* Marges cruciales pour repousser le texte */
+  margin-right: 12px; 
+  margin-bottom: -2px; 
+  padding: 4px 8px 4px 0;
+  
+  color: var(--gold);
+  text-shadow: 0 2px 5px rgba(0,0,0,1);
 }
 
-/* Petit ornement en bas du texte pour finir en beauté */
-.details-section::after {
-  content: '✦';
+/* Séparateur décoratif en haut du texte */
+.details-section::before {
+  content: '✦ Description ✦';
   display: block;
   text-align: center;
+  font-family: 'Pirata One', serif;
   color: var(--gold);
-  font-size: 1.5em;
+  font-size: 1.2em;
+  margin-bottom: 15px;
+  opacity: 0.8;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.3);
+  padding-bottom: 10px;
+  width: 100%;
+  clear: both; /* Sécurité */
+}
+
+/* Petit ornement en bas */
+.details-section::after {
+  content: '⚔️';
+  display: block;
+  text-align: center;
   margin-top: 20px;
-  opacity: 0.6;
+  font-size: 1.2em;
+  opacity: 0.5;
 }
