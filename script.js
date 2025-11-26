@@ -1283,18 +1283,25 @@ document.addEventListener('DOMContentLoaded', function() {
     const modal = document.getElementById(modalId);
     if(modal) {
       modal.classList.add('active');
+      document.body.classList.add('no-scroll'); // Bloque scroll body
       if(extraMenu && extraMenu.classList.contains('open')) toggleExtraMenu();
     }
   };
 
   window.closeModal = function(modalId) {
     const modal = document.getElementById(modalId);
-    if(modal) modal.classList.remove('active');
+    if(modal) {
+      modal.classList.remove('active');
+      document.body.classList.remove('no-scroll'); // Débloque scroll body
+    }
   };
 
   document.querySelectorAll('.modal').forEach(modal => {
     modal.addEventListener('click', (e) => {
-      if (e.target === modal) modal.classList.remove('active');
+      if (e.target === modal) {
+         modal.classList.remove('active');
+         document.body.classList.remove('no-scroll');
+      }
     });
   });
 
@@ -1670,7 +1677,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-// ===============================
+  // ===============================
   // 12. GESTION DES SLIDES (RÈGLES DE BASE)
   // ===============================
   let currentSlideIndex = 0;
@@ -1698,5 +1705,5 @@ document.addEventListener('DOMContentLoaded', function() {
     const container = document.querySelector('.slides-container');
     if(container) container.scrollTop = 0;
   };
-  
+
 }); // FIN DOMContentLoaded

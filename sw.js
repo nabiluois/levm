@@ -1,4 +1,4 @@
-const CACHE_NAME = 'village-maudit-v3.5';
+const CACHE_NAME = 'village-maudit-v3.6';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
