@@ -1258,7 +1258,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const cardsArray = Array.from(document.querySelectorAll('.carte-jeu')); 
 
   // ===============================
-  // 2. GESTION MENU BURGER (EXTRA)
+  // 2. GESTION MENU BURGER
   // ===============================
   const burgerBtn = document.querySelector('.burger-btn');
   const extraMenu = document.querySelector('.extra-menu');
@@ -1298,9 +1298,9 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 
-  // =======================================================
+  // ===============================
   // GESTION DES NOTIFICATIONS
-  // =======================================================
+  // ===============================
   
   window.showNotification = function(title, message) {
     const notif = document.getElementById('custom-notification');
@@ -1342,23 +1342,33 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const formData = new FormData(form);
 
-    // Envoi SIMPLE sans headers compliqués (Le HTML gère le json via input hidden)
+    // NOTE : On garde l'URL standard
     fetch("https://formsubmit.co/contact@lacourduroi.fr", {
         method: "POST",
         body: formData
     })
     .then(response => {
-        if (!response.ok) throw new Error("Erreur serveur");
-        return response.json();
+        // MODIFICATION ICI : On vérifie juste si c'est OK (status 200)
+        // On ne tente PAS de lire le JSON (.json()) car c'est ça qui plantait
+        if (response.ok) {
+            return true; // Succès !
+        } else {
+            throw new Error("Erreur serveur");
+        }
     })
-    .then(data => {
-        showNotification("📜 Proposition Reçue !", "Ta proposition a été envoyée au Conseil.<br>Merci pour ta contribution.");
+    .then(() => {
+        // Si on arrive ici, c'est que le message est parti
+        showNotification("📜 Proposition Reçue !", "Ta proposition a été scellée et envoyée au Conseil des Anciens.<br>Merci pour ta contribution.");
         closeModal('modal-propose');
         form.reset();
     })
     .catch(error => {
-        showNotification("⚠️ Erreur", "Impossible d'envoyer le message. Vérifie ta connexion ou tes spams pour l'activation.");
+        // On ne montre l'erreur que si le réseau a vraiment planté
         console.error('Erreur:', error);
+        // Fallback : Parfois FormSubmit renvoie une erreur "opaque" mais le mail part quand même.
+        // Pour ne pas frustrer l'utilisateur, on peut afficher un message ambigu ou vérifier le type d'erreur.
+        // Ici on laisse l'erreur s'afficher si vraiment ça n'a pas marché (ex: pas internet).
+        showNotification("⚠️ Oups", "Une erreur technique est survenue, mais il est possible que ton message soit passé. Vérifie ta connexion.");
     })
     .finally(() => {
         submitBtn.textContent = originalText;
@@ -1380,23 +1390,26 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const formData = new FormData(form);
 
-    // Envoi SIMPLE sans headers compliqués
     fetch("https://formsubmit.co/contact@lacourduroi.fr", {
         method: "POST",
         body: formData
     })
     .then(response => {
-        if (!response.ok) throw new Error("Erreur serveur");
-        return response.json();
+        // MODIFICATION ICI : On vérifie juste si c'est OK
+        if (response.ok) {
+            return true;
+        } else {
+            throw new Error("Erreur serveur");
+        }
     })
-    .then(data => {
-        showNotification("🐛 Rapport Envoyé !", "Merci de nous aider à chasser les bugs.");
+    .then(() => {
+        showNotification("🐛 Rapport Envoyé !", "Merci de nous aider à chasser les bugs du Village.");
         closeModal('modal-bug');
         form.reset();
     })
     .catch(error => {
-        showNotification("⚠️ Erreur", "L'envoi a échoué. L'image est peut-être trop lourde ?");
         console.error('Erreur:', error);
+        showNotification("⚠️ Oups", "Erreur technique lors de l'envoi. Vérifie ta connexion internet.");
     })
     .finally(() => {
         submitBtn.textContent = originalText;
@@ -1430,15 +1443,12 @@ document.addEventListener('DOMContentLoaded', function() {
     carte.addEventListener('click', function(e) {
       if (e.target.closest('.btn-details')) return;
       e.stopPropagation();
-      
       if (navigator.vibrate) navigator.vibrate(50);
 
       const isAlreadyFlipped = this.classList.contains('flipped');
-      
       document.querySelectorAll('.carte-jeu.flipped').forEach(c => {
         if (c !== this) c.classList.remove('flipped');
       });
-
       this.classList.toggle('flipped');
     });
   });
@@ -1516,9 +1526,8 @@ document.addEventListener('DOMContentLoaded', function() {
   if (vmOverlay) vmOverlay.addEventListener('click', closeZoom);
 
   // ===============================
-  // 9. DÉTAILS PANEL (FLUIDE)
+  // 9. DÉTAILS PANEL
   // ===============================
-  
   window.closeDetails = function() {
     if (detailsPanel) {
         detailsPanel.classList.remove('active');
