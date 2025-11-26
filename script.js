@@ -1276,14 +1276,29 @@ document.addEventListener('DOMContentLoaded', function() {
   if(extraOverlay) extraOverlay.addEventListener('click', toggleExtraMenu);
 
   // ===============================
-  // 3. GESTION DES MODALES
+  // 3. GESTION DES MODALES (CORRIGÉ SCROLL MOBILE)
   // ===============================
   
+  // Variable pour mémoriser où on était dans la page
+  let scrollPosition = 0;
+
   window.openModal = function(modalId) {
     const modal = document.getElementById(modalId);
     if(modal) {
+      // 1. On sauvegarde la position actuelle du scroll
+      scrollPosition = window.scrollY;
+      
+      // 2. On affiche la modale
       modal.classList.add('active');
-      document.body.classList.add('no-scroll'); // Bloque scroll body
+      
+      // 3. VERROUILLAGE TOTAL DU SCROLL (Technique du Body Fixed)
+      // C'est la seule façon fiable à 100% sur iPhone/Android
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollPosition}px`;
+      document.body.style.width = '100%';
+      document.body.style.overflow = 'hidden';
+
+      // Fermer le menu burger si ouvert
       if(extraMenu && extraMenu.classList.contains('open')) toggleExtraMenu();
     }
   };
@@ -1292,16 +1307,23 @@ document.addEventListener('DOMContentLoaded', function() {
     const modal = document.getElementById(modalId);
     if(modal) {
       modal.classList.remove('active');
-      document.body.classList.remove('no-scroll'); // Débloque scroll body
+      
+      // 4. DÉVERROUILLAGE ET RESTAURATION DE LA POSITION
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.width = '';
+      document.body.style.overflow = '';
+      
+      // On remet l'utilisateur exactement où il était
+      window.scrollTo(0, scrollPosition);
     }
   };
 
+  // Fermeture en cliquant en dehors
   document.querySelectorAll('.modal').forEach(modal => {
     modal.addEventListener('click', (e) => {
-      if (e.target === modal) {
-         modal.classList.remove('active');
-         document.body.classList.remove('no-scroll');
-      }
+      // Si on clique sur le fond gris (et pas le contenu)
+      if (e.target === modal) window.closeModal(modal.id);
     });
   });
 

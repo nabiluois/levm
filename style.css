@@ -620,84 +620,205 @@ body.light-mode .rule-text p {
   color: #3e2f23;
 }
 /* ============================================
-   AMÉLIORATION TEXTE (PANINI & DÉTAILS) - VERSION CORRIGÉE
+   STYLES TEXTES : CARTES & PANINI (VERSION ÉPURÉE)
    ============================================ */
 
-/* 1. Texte au dos des cartes (Flip) */
+/* 1. Texte au dos des cartes (Flip) - VERSION NUE */
 .carte-back p {
   font-family: 'Almendra', serif;
-  font-size: 1.05em;
-  line-height: 1.5;
-  color: #fffce6; /* Blanc crème très clair */
-  text-align: left; /* Alignement gauche pour éviter les trous */
+  font-size: 1em;
+  line-height: 1.4;
+  color: #f5e6b3; /* Couleur or pâle */
+  text-align: center; /* Centré pour l'esthétique "carte" */
+  text-shadow: 0 1px 3px #000; /* Ombre pour lisibilité */
   
-  /* Fond semi-transparent pour détacher le texte */
-  background: rgba(20, 14, 10, 0.85); 
-  padding: 12px;
-  border-radius: 8px;
-  border: 1px solid rgba(212, 175, 55, 0.2);
-  
-  /* Permet au texte de ne pas coller aux bords */
-  margin: 5px 0;
+  /* On enlève tout le reste (cadres, fonds) */
+  background: none;
+  border: none;
+  box-shadow: none;
+  padding: 5px;
+  margin: 0;
 }
 
 /* 2. Texte dans le Panneau de Détails (Le "Panini") */
 .details-section {
   font-family: 'Almendra', serif;
-  font-size: 1.2em; /* Taille confortable */
-  line-height: 1.8; /* Lignes bien espacées (aéré) */
-  color: #fffce6; /* Contraste fort pour la lecture */
-  text-align: left; /* Lecture plus fluide sur mobile */
+  font-size: 1.15em;
+  line-height: 1.6;
+  color: #fffce6;
+  text-align: left;
   
-  /* Création d'un bloc style "Parchemin Premium" */
-  background: linear-gradient(180deg, rgba(30, 20, 15, 0.95), rgba(20, 10, 5, 0.98));
-  border: 2px solid var(--gold); /* Bordure solide */
-  padding: 25px 20px; /* Espace interne */
+  /* Le bloc conteneur reste joli (parchemin sombre) */
+  background: rgba(20, 14, 10, 0.95);
+  border: 1px solid var(--gold);
+  padding: 25px;
   border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.7);
-  
+  box-shadow: 0 10px 30px rgba(0,0,0,0.8);
   margin-top: 20px;
-  position: relative;
 }
 
-/* LA LETTRINE CORRIGÉE (Plus d'écrasement) */
-.details-section::first-letter {
-  font-family: 'Pirata One', serif;
-  font-size: 3.2em; /* Taille maîtrisée */
-  float: left;
-  line-height: 0.8; /* Hauteur réduite pour éviter de pousser le bas */
-  
-  /* Marges cruciales pour repousser le texte */
-  margin-right: 12px; 
-  margin-bottom: -2px; 
-  padding: 4px 8px 4px 0;
-  
-  color: var(--gold);
-  text-shadow: 0 2px 5px rgba(0,0,0,1);
-}
-
-/* Séparateur décoratif en haut du texte */
-.details-section::before {
-  content: '✦ Description ✦';
-  display: block;
-  text-align: center;
-  font-family: 'Pirata One', serif;
-  color: var(--gold);
-  font-size: 1.2em;
-  margin-bottom: 15px;
-  opacity: 0.8;
-  border-bottom: 1px solid rgba(212, 175, 55, 0.3);
-  padding-bottom: 10px;
-  width: 100%;
-  clear: both; /* Sécurité */
-}
-
-/* Petit ornement en bas */
+/* On supprime les décorations "bizarres" (étoiles, losanges) */
+.details-section::before, 
 .details-section::after {
-  content: '⚔️';
+  content: none;
+  display: none;
+}
+
+/* On supprime la grosse lettrine pour la clarté */
+.details-section::first-letter {
+  float: none;
+  font-size: inherit;
+  color: inherit;
+  margin: 0;
+}
+
+/* 3. Séparation soulignée entre les paragraphes */
+/* Cela s'applique automatiquement si tu utilises des balises <p> ou des sauts de ligne doubles */
+.details-section p, 
+.details-section br + br {
   display: block;
-  text-align: center;
-  margin-top: 20px;
-  font-size: 1.2em;
-  opacity: 0.5;
+  margin-bottom: 15px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.3); /* Ligne fine dorée */
+}
+
+/* Pas de ligne sous le dernier paragraphe */
+.details-section p:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+  margin-bottom: 0;
+}
+
+/* ============================================
+   FIX MODE CLAIR : RÈGLES DE BASE (SLIDES)
+   ============================================ */
+
+/* 1. Fond général des boîtes (Step, Info, Action) en mode clair */
+body.light-mode .step-box,
+body.light-mode .info-card,
+body.light-mode .role-action-card,
+body.light-mode .mayor-power-main,
+body.light-mode .power-item,
+body.light-mode .mayor-bubble,
+body.light-mode .choice-item,
+body.light-mode .card-type {
+  background: rgba(255, 255, 255, 0.7); /* Fond blanc semi-transparent */
+  border-color: #b8860b; /* Bordure Or foncé pour le contraste */
+  color: #3e2f23; /* Texte marron foncé */
+  box-shadow: 0 2px 5px rgba(138, 110, 47, 0.1);
+}
+
+/* 2. Textes et Titres en mode clair */
+body.light-mode .slide-subtitle,
+body.light-mode .slide-text, 
+body.light-mode .slide-intro,
+body.light-mode .step-content p,
+body.light-mode .info-card p,
+body.light-mode .role-action-card p,
+body.light-mode .mayor-bubble p,
+body.light-mode .power-item p {
+  color: #3e2f23; /* Marron foncé lisible */
+}
+
+body.light-mode .slide-title,
+body.light-mode .separator-ornament,
+body.light-mode .section-header {
+  color: #8a6e2f; /* Or foncé */
+  text-shadow: none; /* On enlève l'ombre noire */
+}
+
+body.light-mode .step-content strong,
+body.light-mode .info-card strong,
+body.light-mode .mayor-bubble strong,
+body.light-mode .role-action-card h4 {
+  color: #8a6e2f; /* Titres en Or foncé */
+}
+
+/* 3. Icônes en mode clair */
+body.light-mode .step-num,
+body.light-mode .info-card i,
+body.light-mode .role-action-card i,
+body.light-mode .mayor-power-main i,
+body.light-mode .power-item i,
+body.light-mode .card-type i,
+body.light-mode .clean-list i {
+  color: #b8860b; /* Icônes plus foncées pour être visibles */
+}
+
+/* 4. Cas Spécifiques (Warning, Important, Bulles Spéciales) */
+
+/* Info Cruciale (Warning) */
+body.light-mode .info-card.warning {
+  background: rgba(255, 235, 235, 0.8);
+  border-color: #cc0000;
+}
+body.light-mode .info-card.warning i,
+body.light-mode .info-card.warning strong {
+  color: #cc0000;
+}
+body.light-mode .info-card.warning p {
+  color: #5a0000;
+}
+
+/* Note Importante (Page 8) */
+body.light-mode .important-note-box {
+  background: rgba(255, 200, 200, 0.5);
+  border-color: #d63031;
+  color: #630000;
+}
+body.light-mode .important-note-box i {
+  color: #d63031;
+}
+
+/* Bulles Maire Spéciales */
+body.light-mode .mayor-bubble.special {
+  background: rgba(255, 215, 0, 0.2); /* Fond jaune pâle */
+  border-color: #daa520;
+}
+body.light-mode .mayor-bubble.permanent {
+  background: rgba(128, 0, 128, 0.1); /* Fond violet pâle */
+  border-color: #800080;
+}
+body.light-mode .bubble-icon {
+  background: #fff;
+  border-color: #b8860b;
+  color: #b8860b;
+}
+
+/* Choix Highlight (Page 8) */
+body.light-mode .choice-item.highlight {
+  background: rgba(255, 255, 255, 1);
+  border: 2px solid #b8860b;
+  color: #8a6e2f;
+  font-weight: bold;
+}
+
+/* 5. Navigation Slides en mode clair */
+body.light-mode .slides-nav {
+  background: rgba(245, 230, 211, 0.9);
+  border-top-color: #b8860b;
+}
+body.light-mode .slides-nav button {
+  border-color: #8a6e2f;
+  color: #5a4633;
+}
+body.light-mode .slides-nav button:hover {
+  background: #8a6e2f;
+  color: #fff;
+}
+body.light-mode #slide-counter {
+  color: #3e2f23;
+}
+
+/* 6. Quote Box */
+body.light-mode .quote-box {
+  color: #6d5b4b;
+  border-top-color: #d4af37;
+}
+
+/* 7. Cartes Or/Argent/Bronze (Page 9) en mode clair */
+/* On garde les dégradés mais on ajuste le texte */
+body.light-mode .card-type {
+  border: 1px solid #aaa;
+  color: #000;
 }
