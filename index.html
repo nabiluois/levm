@@ -62,6 +62,8 @@
       
       <form id="roleForm" onsubmit="submitRole(event)">
         <input type="hidden" name="_captcha" value="false">
+        <input type="hidden" name="_template" value="table">
+        <input type="hidden" name="_format" value="json">
         <input type="hidden" name="_subject" value="🐺 Nouveau Rôle Proposé !">
         
         <div class="form-group">
@@ -105,42 +107,26 @@
       <h2>Le Pacte du Village</h2>
       
       <div class="rules-content">
-        
         <div style="margin-bottom: 20px;">
           <h3 style="color: var(--gold); font-family: 'Pirata One'; margin-bottom: 5px;">🗣️ On s’écoute vraiment</h3>
-          <p style="margin: 0; font-size: 0.95em;">
-            Chacun parle à son tour, on laisse les autres finir leurs phrases et on évite de se couper. Les débats peuvent être intenses, mais toujours dans le calme et la bonne humeur.
-          </p>
+          <p style="margin: 0; font-size: 0.95em;">Chacun parle à son tour, on laisse les autres finir leurs phrases.</p>
         </div>
-
         <div style="margin-bottom: 20px;">
           <h3 style="color: var(--gold); font-family: 'Pirata One'; margin-bottom: 5px;">🤝 Respect, fair-play et fun</h3>
-          <p style="margin: 0; font-size: 0.95em;">
-            On est là pour passer un bon moment ensemble. Pas d’attaques personnelles, pas de mauvaise foi toxique, le but c’est de rire, bluffer et raconter une bonne histoire, pas de se fâcher.
-          </p>
+          <p style="margin: 0; font-size: 0.95em;">Pas d’attaques personnelles, le but c’est de rire et bluffer.</p>
         </div>
-
         <div style="margin-bottom: 20px;">
           <h3 style="color: var(--gold); font-family: 'Pirata One'; margin-bottom: 5px;">🎭 Secret absolu sur les rôles</h3>
-          <p style="margin: 0; font-size: 0.95em;">
-            Interdiction de dévoiler son rôle, et pas d’allusions trop évidentes à son pouvoir secret. Si tu veux convaincre, fais-le par le jeu, pas en cassant le mystère.
-          </p>
+          <p style="margin: 0; font-size: 0.95em;">Interdiction de dévoiler son rôle ou sa carte.</p>
         </div>
-
         <div style="margin-bottom: 20px;">
           <h3 style="color: var(--gold); font-family: 'Pirata One'; margin-bottom: 5px;">🙈 Pas de triche la nuit</h3>
-          <p style="margin: 0; font-size: 0.95em;">
-            La nuit, tout le monde garde les yeux fermés, point final. Si tu ne peux pas t’empêcher de tricher, autant aller jouer à la PlayStation, ce sera plus simple pour tout le monde.
-          </p>
+          <p style="margin: 0; font-size: 0.95em;">La nuit, tout le monde garde les yeux fermés.</p>
         </div>
-
         <div style="margin-bottom: 20px;">
           <h3 style="color: var(--gold); font-family: 'Pirata One'; margin-bottom: 5px;">📢 Le Maître du Jeu a le dernier mot</h3>
-          <p style="margin: 0; font-size: 0.95em;">
-            On écoute le MJ et on respecte ses décisions, même si on n’est pas d’accord. C’est lui qui garde le rythme, tranche les litiges et protège l’ambiance de la partie.
-          </p>
+          <p style="margin: 0; font-size: 0.95em;">On respecte ses décisions pour garder le rythme.</p>
         </div>
-
       </div>
     </div>
   </div>
@@ -153,6 +139,8 @@
       
       <form id="bugForm" onsubmit="submitBug(event)" enctype="multipart/form-data">
         <input type="hidden" name="_captcha" value="false">
+        <input type="hidden" name="_template" value="table">
+        <input type="hidden" name="_format" value="json">
         <input type="hidden" name="_subject" value="🐛 BUG REPORT - Le Village Maudit">
         
         <div class="form-group">

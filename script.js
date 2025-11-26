@@ -1243,7 +1243,6 @@ document.addEventListener('DOMContentLoaded', function() {
   // 1. INITIALISATION & VARIABLES
   // ===============================
   
-  // Overlay pour les détails des cartes
   let overlay = document.querySelector('.details-overlay');
   if (!overlay) {
     overlay = document.createElement('div');
@@ -1280,7 +1279,6 @@ document.addEventListener('DOMContentLoaded', function() {
   // 3. GESTION DES MODALES
   // ===============================
   
-  // Fonction standard pour l'ouverture des modales (Sans pré-remplissage)
   window.openModal = function(modalId) {
     const modal = document.getElementById(modalId);
     if(modal) {
@@ -1301,7 +1299,7 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
   // =======================================================
-  // NOUVELLE GESTION DES NOTIFICATIONS (REMPLACE ALERT)
+  // GESTION DES NOTIFICATIONS
   // =======================================================
   
   window.showNotification = function(title, message) {
@@ -1343,28 +1341,23 @@ document.addEventListener('DOMContentLoaded', function() {
     submitBtn.disabled = true;
 
     const formData = new FormData(form);
-    formData.append("_captcha", "false");
-    formData.append("_template", "table");
 
-    // Utilisation de l'URL standard + Header JSON pour éviter les erreurs de redirect
+    // Envoi SIMPLE sans headers compliqués (Le HTML gère le json via input hidden)
     fetch("https://formsubmit.co/contact@lacourduroi.fr", {
         method: "POST",
-        body: formData,
-        headers: { 
-            'Accept': 'application/json' 
-        }
+        body: formData
     })
     .then(response => {
         if (!response.ok) throw new Error("Erreur serveur");
         return response.json();
     })
     .then(data => {
-        showNotification("📜 Proposition Reçue !", "Ta proposition a été scellée et envoyée au Conseil des Anciens.<br>Merci pour ta contribution.");
+        showNotification("📜 Proposition Reçue !", "Ta proposition a été envoyée au Conseil.<br>Merci pour ta contribution.");
         closeModal('modal-propose');
         form.reset();
     })
     .catch(error => {
-        showNotification("⚠️ Erreur", "Oups ! Le corbeau s'est perdu en chemin. Réessaie plus tard.");
+        showNotification("⚠️ Erreur", "Impossible d'envoyer le message. Vérifie ta connexion ou tes spams pour l'activation.");
         console.error('Erreur:', error);
     })
     .finally(() => {
@@ -1374,7 +1367,7 @@ document.addEventListener('DOMContentLoaded', function() {
   };
 
   // ===============================
-  // GESTION ENVOI RAPPORT BUG (CORRIGÉ POUR IMAGES)
+  // GESTION ENVOI RAPPORT BUG
   // ===============================
   window.submitBug = function(e) {
     e.preventDefault();
@@ -1386,28 +1379,23 @@ document.addEventListener('DOMContentLoaded', function() {
     submitBtn.disabled = true;
 
     const formData = new FormData(form);
-    formData.append("_captcha", "false");
-    formData.append("_template", "table");
 
-    // Utilisation de l'URL standard + Header JSON pour supporter les fichiers
+    // Envoi SIMPLE sans headers compliqués
     fetch("https://formsubmit.co/contact@lacourduroi.fr", {
         method: "POST",
-        body: formData,
-        headers: { 
-            'Accept': 'application/json' 
-        }
+        body: formData
     })
     .then(response => {
-        if (!response.ok) throw new Error("Erreur serveur ou fichier trop lourd");
+        if (!response.ok) throw new Error("Erreur serveur");
         return response.json();
     })
     .then(data => {
-        showNotification("🐛 Rapport Envoyé !", "Merci de nous aider à chasser les bugs du Village.");
+        showNotification("🐛 Rapport Envoyé !", "Merci de nous aider à chasser les bugs.");
         closeModal('modal-bug');
         form.reset();
     })
     .catch(error => {
-        showNotification("⚠️ Erreur", "Le rapport n'a pas pu partir. L'image est peut-être trop lourde ?");
+        showNotification("⚠️ Erreur", "L'envoi a échoué. L'image est peut-être trop lourde ?");
         console.error('Erreur:', error);
     })
     .finally(() => {
