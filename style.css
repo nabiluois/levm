@@ -540,3 +540,27 @@ h2 {
   vertical-align: middle;
   filter: drop-shadow(0 0 5px rgba(255, 199, 44, 0.8)); /* Lueur jaune */
 }
+
+/* ============================================
+   FIX MOBILE : TITRES LONGS SUR 1 LIGNE
+   ============================================ */
+@media (max-width: 768px) {
+  h2 {
+    /* 1. Force le texte à rester sur une seule ligne */
+    white-space: nowrap;
+    
+    /* 2. Réduit l'espace à l'intérieur du bouton sur les côtés 
+       (on passe de 35px à 15px pour gagner de la place pour le texte) */
+    padding-left: 15px;
+    padding-right: 15px;
+    
+    /* Sécurité pour que le bouton ne dépasse jamais de l'écran */
+    max-width: 95%;
+    overflow: hidden; /* Cache si ça dépasse vraiment */
+  }
+
+  .section-icon {
+    /* 3. Rapproche l'icône du texte (on passe de 15px à 6px) */
+    margin-right: 6px;
+  }
+}
