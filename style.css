@@ -559,8 +559,8 @@ h2 {
     overflow: hidden; /* Cache si ça dépasse vraiment */
   }
 
-  .section-icon {
+.section-icon {
     /* 3. Rapproche l'icône du texte (on passe de 15px à 6px) */
     margin-right: 6px;
   }
-}
+} /* Fin du @media */
