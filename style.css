@@ -594,4 +594,21 @@ h2 {
     height: 1.2em !important;
     width: auto !important;
 }
+/* =======================================================
+   CORRECTIF MOBILE : Croix de fermeture plus haute
+   ======================================================= */
+@media (max-width: 768px) {
+  .close-modal {
+    top: 5px !important;    /* Remonte la croix tout en haut */
+    right: 5px !important;  /* La décale vers le coin */
+    width: 32px !important; /* Légèrement plus petite pour gagner de la place */
+    height: 32px !important;
+    line-height: 30px !important; /* Centre bien la croix */
+  }
+  
+  /* On s'assure que le contenu du pop-up a assez d'espace en haut */
+  .modal-content {
+    padding-top: 45px !important; 
+  }
+}
 } /* Fin du @media */
