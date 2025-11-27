@@ -28,26 +28,53 @@
     </div>
 
     <nav class="nav-shortcuts">
-      <a href="#village" class="nav-btn">Village</a>
-      <a href="#loups" class="nav-btn">Loups</a>
-      <a href="#solo" class="nav-btn">Solo</a>
-      <a href="#vampires" class="nav-btn">Vampires</a>
-      <a href="#event-cards" class="nav-btn">Cartes VM</a>
+      <a href="#village" class="nav-btn" aria-label="Village">
+        <img src="village.svg" alt="Village">
+      </a>
+      <a href="#loups" class="nav-btn" aria-label="Loups">
+        <img src="loup.svg" alt="Loups">
+      </a>
+      <a href="#solo" class="nav-btn" aria-label="Solo">
+        <img src="solo.svg" alt="Solo">
+      </a>
+      <a href="#vampires" class="nav-btn" aria-label="Vampires">
+        <img src="vampires.svg" alt="Vampires">
+      </a>
+      <a href="#event-cards" class="nav-btn" aria-label="Cartes VM">
+        <img src="cartes_vm.svg" alt="Cartes VM">
+      </a>
     </nav>
 
   </header>
 
   <div class="extra-menu-overlay"></div>
+  
   <nav class="extra-menu">
     <div class="extra-header">
       <h3>Menu du Village</h3>
       <button class="close-extra">✕</button>
     </div>
     <ul class="extra-links">
-      <li><a href="#" onclick="openModal('modal-regles-base')" style="border-color: #ff6b6b; color:#ff6b6b;">📖 Règles de base</a></li>
-      <li><a href="#" onclick="openModal('modal-regles')">📜 Le Pacte Maudit</a></li>
-      <li><a href="#" onclick="openModal('modal-propose')">✍️ Proposer un Rôle</a></li>
-      <li><a href="#" onclick="openModal('modal-bug')">🐛 Signaler un Bug</a></li>
+      <li>
+        <a href="#" onclick="openModal('modal-regles-base')" style="border-color: #ff6b6b; color:#ff6b6b;">
+          <img src="regle_de_base.svg" alt="Règles" class="menu-icon"> Règles de base
+        </a>
+      </li>
+      <li>
+        <a href="#" onclick="openModal('modal-regles')">
+          <img src="le_pacte_maudit.svg" alt="Pacte" class="menu-icon"> Le Pacte Maudit
+        </a>
+      </li>
+      <li>
+        <a href="#" onclick="openModal('modal-propose')">
+          <img src="forge_un_role.svg" alt="Forge" class="menu-icon"> forge un Rôle
+        </a>
+      </li>
+      <li>
+        <a href="#" onclick="openModal('modal-bug')">
+          <img src="bug.svg" alt="Bug" class="menu-icon"> Signaler un Bug
+        </a>
+      </li>
     </ul>
     
     <div class="extra-footer">
@@ -422,6 +449,66 @@
       </div>
     </div>
   </div>
+
+  <div id="modal-bug" class="modal">
+    <div class="modal-content">
+      <span class="close-modal" onclick="closeModal('modal-bug')">✕</span>
+      <h2 style="color: #ff6b6b; border-color: #ff6b6b;">🐛 Signaler un Bug</h2>
+      <p>Oups ! Quelque chose ne va pas ? Aide-nous à réparer le Village.</p>
+      
+      <form id="bugForm" onsubmit="submitBug(event)" enctype="multipart/form-data">
+        <input type="hidden" name="_captcha" value="false">
+        <input type="hidden" name="_template" value="table">
+        <input type="hidden" name="_format" value="json">
+        <input type="hidden" name="_subject" value="🐛 BUG REPORT - Le Village Maudit">
+        
+        <div class="form-group">
+          <label>Décris ton problème</label>
+          <textarea name="description" rows="4" placeholder="Que s'est-il passé exactement ?" required></textarea>
+        </div>
+        
+        <div class="form-group">
+          <label>Lien de la page concernée <span style="font-size:0.8em; opacity:0.7">(Optionnel)</span></label>
+          <input type="text" name="page_link" id="bug-link" placeholder="Ex: https://...">
+        </div>
+
+        <div class="form-group">
+          <label>Preuve visuelle (Screenshot)</label>
+          <input type="file" name="attachment" accept="image/*">
+          <small style="color:var(--gold); opacity:0.7; font-size:0.8em;">(Max 2 Mo conseillé)</small>
+        </div>
+
+        <div class="form-group">
+          <label>Ton Appareil & Système</label>
+          <input type="text" name="device_os" id="bug-device" placeholder="Ex: iPhone 12, iOS 16..." required>
+        </div>
+
+        <div class="form-group">
+          <label>Ton Navigateur</label>
+          <input type="text" name="browser" id="bug-browser" placeholder="Ex: Chrome, Safari..." required>
+        </div>
+
+        <div class="form-group">
+          <label>Ton Email</label>
+          <input type="email" name="email" placeholder="Pour te tenir au courant" required>
+        </div>
+
+        <button type="submit" class="btn-submit" style="background: #ff6b6b; color: #fff;">Envoyer le Rapport</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="custom-notification" class="notification-overlay">
+    <div class="notification-box">
+      <h3 id="notif-title">Message du Conseil</h3>
+      <p id="notif-message">Opération réussie !</p>
+      <button onclick="closeNotification()">Compris</button>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
 
   <div id="modal-bug" class="modal">
     <div class="modal-content">
