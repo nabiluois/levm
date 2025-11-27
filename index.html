@@ -510,62 +510,6 @@
 </body>
 </html>
 
-  <div id="modal-bug" class="modal">
-    <div class="modal-content">
-      <span class="close-modal" onclick="closeModal('modal-bug')">✕</span>
-      <h2 style="color: #ff6b6b; border-color: #ff6b6b;">🐛 Signaler un Bug</h2>
-      <p>Oups ! Quelque chose ne va pas ? Aide-nous à réparer le Village.</p>
-      
-      <form id="bugForm" onsubmit="submitBug(event)" enctype="multipart/form-data">
-        <input type="hidden" name="_captcha" value="false">
-        <input type="hidden" name="_template" value="table">
-        <input type="hidden" name="_format" value="json">
-        <input type="hidden" name="_subject" value="🐛 BUG REPORT - Le Village Maudit">
-        
-        <div class="form-group">
-          <label>Décris ton problème</label>
-          <textarea name="description" rows="4" placeholder="Que s'est-il passé exactement ?" required></textarea>
-        </div>
-        
-        <div class="form-group">
-          <label>Lien de la page concernée <span style="font-size:0.8em; opacity:0.7">(Optionnel)</span></label>
-          <input type="text" name="page_link" id="bug-link" placeholder="Ex: https://...">
-        </div>
-
-        <div class="form-group">
-          <label>Preuve visuelle (Screenshot)</label>
-          <input type="file" name="attachment" accept="image/*">
-          <small style="color:var(--gold); opacity:0.7; font-size:0.8em;">(Max 2 Mo conseillé)</small>
-        </div>
-
-        <div class="form-group">
-          <label>Ton Appareil & Système</label>
-          <input type="text" name="device_os" id="bug-device" placeholder="Ex: iPhone 12, iOS 16..." required>
-        </div>
-
-        <div class="form-group">
-          <label>Ton Navigateur</label>
-          <input type="text" name="browser" id="bug-browser" placeholder="Ex: Chrome, Safari..." required>
-        </div>
-
-        <div class="form-group">
-          <label>Ton Email</label>
-          <input type="email" name="email" placeholder="Pour te tenir au courant" required>
-        </div>
-
-        <button type="submit" class="btn-submit" style="background: #ff6b6b; color: #fff;">Envoyer le Rapport</button>
-      </form>
-    </div>
-  </div>
-
-  <div id="custom-notification" class="notification-overlay">
-    <div class="notification-box">
-      <h3 id="notif-title">Message du Conseil</h3>
-      <p id="notif-message">Opération réussie !</p>
-      <button onclick="closeNotification()">Compris</button>
-    </div>
-  </div>
-
   <script src="script.js"></script>
 </body>
 </html>
