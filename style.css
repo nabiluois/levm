@@ -563,4 +563,35 @@ h2 {
     /* 3. Rapproche l'icône du texte (on passe de 15px à 6px) */
     margin-right: 6px;
   }
+
+  /* =======================================================
+   CORRECTIF TITRES POP-UP (Annule le style bouton)
+   ======================================================= */
+.modal h2, 
+.modal-content h2,
+.slide-title {
+    white-space: normal !important; /* Autorise le texte à passer à la ligne */
+    overflow: visible !important;   /* Affiche tout le texte qui dépasse */
+    display: block !important;      /* Utilise toute la largeur disponible */
+    width: 100% !important;         /* Force la largeur à 100% */
+    max-width: 100% !important;     /* Empêche le blocage de largeur */
+    text-align: center !important;  /* Garde le texte centré */
+    line-height: 1.2 !important;    /* Espacement correct entre les lignes */
+    
+    /* On retire le style "bouton" spécifique à l'accueil */
+    background: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin-bottom: 20px !important;
+}
+
+/* Petit ajustement spécifique pour l'image (l'icône) dans le titre du Bug */
+.modal h2 img.section-icon {
+    display: inline-block !important;
+    vertical-align: middle !important;
+    margin-right: 10px !important;
+    height: 1.2em !important;
+    width: auto !important;
+}
 } /* Fin du @media */
