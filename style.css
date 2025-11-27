@@ -610,5 +610,59 @@ h2 {
   .modal-content {
     padding-top: 45px !important; 
   }
+}/* =======================================================
+   CORRECTIF FINAL V3 : Texte plein écran (Scroll fluide)
+   ======================================================= */
+
+/* 1. Nettoyage des titres */
+.modal h2, 
+.modal-content h2,
+.slide-title {
+    border: none !important;
+    background: none !important;
+    box-shadow: none !important;
+    white-space: normal !important;
+    text-align: center !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    padding-bottom: 10px !important;
+}
+
+/* 2. La fenêtre des règles utilise tout l'espace */
+.modal-content.modal-large {
+    padding: 0 !important;
+    overflow: hidden !important; 
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+/* 3. La Croix : Fixe en haut à droite */
+.modal-large .close-modal {
+    position: absolute !important;
+    top: 10px !important;
+    right: 15px !important;
+    z-index: 500 !important; /* Très haut pour passer au-dessus du texte */
+    background: rgba(0,0,0,0.5) !important; /* Fond semi-transparent */
+    backdrop-filter: blur(2px);
+}
+
+/* 4. La zone de texte : Elle remplit TOUT l'espace jusqu'en haut */
+.slides-container {
+    margin-top: 0 !important;     /* On enlève la marge qui bloquait le texte ! */
+    height: 100% !important;      /* Utilise toute la hauteur */
+    width: 100% !important;
+    overflow-y: auto !important;
+    padding: 20px !important;
+    
+    /* On ajoute un espace en haut (padding) pour que le PREMIER titre 
+       ne soit pas caché par la croix au début, mais quand tu scrolles, 
+       le texte montera bien dans cette zone. */
+    padding-top: 50px !important; 
+
+    /* OPTIONNEL : Un dégradé très fin (juste 10%) pour que le texte s'efface 
+       doucement juste avant de toucher le bord doré, au lieu d'être coupé net */
+    mask-image: linear-gradient(to bottom, transparent 0%, black 10%, black 90%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 10%, black 90%, transparent 100%);
 }
 } /* Fin du @media */
