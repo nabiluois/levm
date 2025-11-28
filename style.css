@@ -729,46 +729,31 @@ body.light-mode .rule-text p { color: #3e2f23; }
 }
 
 /* =======================================================
-   CORRECTIF FINAL PANINI : Croix haute & Titre large
+   CORRECTIF FINAL PANINI : Titre Centré
    ======================================================= */
 
-/* 1. La Croix : On la sort du cadre et on la colle tout en haut */
-.close-details {
-  position: absolute !important;
-  top: 15px !important;        /* Tout en haut */
-  right: 15px !important;      /* Tout à droite */
-  z-index: 2500 !important;    /* Toujours au-dessus */
-  background: rgba(20, 14, 10, 0.8) !important; /* Petit fond sombre pour qu'elle soit lisible */
-  width: 40px !important;
-  height: 40px !important;
-  border-radius: 50% !important;
-}
-
-/* 2. Le Titre : On lui rend sa taille et on le descend */
 .details-panel h2 {
-  margin-top: 60px !important;      /* On le descend pour ne pas toucher la croix */
-  margin-bottom: 20px !important;
+  /* 1. Positionnement */
+  margin-top: 60px !important;      /* Espace en haut (pour la croix) */
+  margin-bottom: 20px !important;   /* Espace en bas (avant le texte) */
+  margin-left: auto !important;     /* CRUCIAL : Pousse depuis la gauche */
+  margin-right: auto !important;    /* CRUCIAL : Pousse depuis la droite */
   
-  /* On remet une taille de police normale et fixe */
-  font-size: 1.6em !important;      
+  /* 2. Dimensions */
+  width: fit-content !important;    /* La boîte s'adapte à la taille du texte */
+  max-width: 90% !important;        /* Ne touche jamais les bords de l'écran */
   
-  /* On garde la ligne unique */
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important; /* Met "..." si vraiment ça dépasse de l'écran */
-  
-  /* On lui donne toute la largeur disponible */
-  max-width: 95% !important;
-  padding: 12px 10px !important;
-  
-  /* Centrage */
+  /* 3. Contenu (Texte + Image) */
   display: flex !important;
-  justify-content: center !important;
+  justify-content: center !important; /* Centre le contenu dans la boîte */
   align-items: center !important;
-}
-
-/* 3. Ajustement de l'image dans le titre */
-.details-panel h2 img {
-  max-height: 1.2em !important; /* S'assure que l'icône ne casse pas la hauteur */
-  width: auto !important;
+  
+  /* 4. Style du texte */
+  font-size: 1.6em !important;      
+  white-space: nowrap !important;   /* Force une seule ligne */
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  
+  /* 5. Espacement interne */
+  padding: 12px 25px !important;    /* Un peu plus large sur les côtés */
 }
