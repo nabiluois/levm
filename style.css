@@ -727,3 +727,16 @@ body.light-mode .rule-text p { color: #3e2f23; }
   padding-bottom: 10px !important;
   margin-bottom: 10px !important;
 }
+
+/* =======================================================
+   CORRECTIF : Titres longs dans le Menu Panini (Détails)
+   ======================================================= */
+.details-panel h2 {
+  white-space: normal !important;   /* Autorise le texte à passer à la ligne */
+  overflow: visible !important;     /* Affiche tout le texte qui dépasse */
+  height: auto !important;          /* La hauteur s'adapte au contenu */
+  line-height: 1.1 !important;      /* Resserre légèrement les lignes */
+  padding: 15px 20px !important;    /* Ajuste l'espace intérieur */
+  max-width: 90% !important;        /* Empêche de toucher les bords de l'écran */
+  border-radius: 30px !important;   /* Adapte l'arrondi pour le multi-lignes */
+}
