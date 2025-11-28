@@ -639,3 +639,50 @@ body.light-mode .rule-text p { color: #3e2f23; }
     backdrop-filter: blur(2px);
   }
 }
+
+/* =======================================================
+   ANIMATION BOUTON DÉTAILS (Rebond)
+   ======================================================= */
+
+/* 1. Création de l'animation "Rebond + Lueur" */
+@keyframes btnBounce {
+  0%, 100% { 
+    transform: translateY(0); /* Position normale */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.4); /* Ombre normale */
+  }
+  50% { 
+    transform: translateY(-5px); /* Monte de 5 pixels */
+    box-shadow: 0 15px 25px rgba(212, 175, 55, 0.6); /* Grosse lueur dorée au sol */
+  }
+}
+
+/* 2. Application de l'animation au bouton */
+.btn-details {
+  /* On lance l'animation : durée 2s, en boucle (infinite), mouvement fluide (ease-in-out) */
+  animation: btnBounce 2s infinite ease-in-out !important;
+}
+
+/* 3. Quand on passe la souris dessus, on arrête le rebond pour montrer qu'on l'a attrapé */
+.btn-details:hover {
+  animation: none !important; /* Stop le rebond */
+  transform: scale(1.05) translateY(-2px) !important; /* Le bouton grossit un peu et reste figé */
+  box-shadow: 0 0 15px var(--gold) !important; /* Lueur fixe */
+}
+
+/* =======================================================
+   CORRECTIF TITRES ROGNÉS (Règles de base)
+   ======================================================= */
+
+/* 1. On donne plus de hauteur à la ligne du titre */
+.slide-title {
+    line-height: 1.5 !important;   /* Augmente l'espace entre les lignes pour que la police respire */
+    padding-top: 10px !important;  /* Ajoute une petite marge interne en haut pour l'ombre */
+    padding-bottom: 15px !important;
+    overflow: visible !important;  /* Autorise l'ombre à dépasser de la boîte du texte */
+    margin-bottom: 10px !important;
+}
+
+/* 2. On descend un peu plus le contenu global pour qu'il ne touche pas le "plafond" */
+.slides-container {
+    padding-top: 70px !important; /* On passe de 50px à 70px pour descendre le tout */
+}
