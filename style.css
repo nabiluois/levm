@@ -698,3 +698,32 @@ body.light-mode .rule-text p { color: #3e2f23; }
   display: inline-block !important;
   object-fit: contain !important;
 }
+
+/* =======================================================
+   AMÉLIORATION LISIBILITÉ VERSO DES CARTES (FLIP)
+   ======================================================= */
+
+.carte-back p {
+  /* 1. LA CLÉ : Respecte les "Entrées" de ton code HTML */
+  white-space: pre-line !important; 
+
+  /* 2. Alignement à gauche (plus facile à lire qu'au centre) */
+  text-align: left !important;
+
+  /* 3. On aère un peu les lignes */
+  line-height: 1.4 !important;
+  
+  /* 4. On ajuste la taille pour que tout rentre */
+  font-size: 0.95em !important;
+  
+  /* 5. Un peu d'espace sur les côtés */
+  padding: 0 5px !important;
+  width: 100% !important;
+}
+
+/* Petit bonus : On souligne le titre du rôle pour bien séparer */
+.carte-back h3 {
+  border-bottom: 1px solid rgba(212, 175, 55, 0.3);
+  padding-bottom: 10px !important;
+  margin-bottom: 10px !important;
+}
