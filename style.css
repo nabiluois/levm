@@ -686,3 +686,15 @@ body.light-mode .rule-text p { color: #3e2f23; }
 .slides-container {
     padding-top: 70px !important; /* On passe de 50px à 70px pour descendre le tout */
 }
+
+/* =======================================================
+   STYLE POUR LES EMOJIS SVG (Descriptions JS)
+   ======================================================= */
+.emoji-svg {
+  width: 1.3em !important;          /* Taille proportionnelle au texte */
+  height: 1.3em !important;
+  vertical-align: text-bottom !important; /* Aligne l'image sur la ligne d'écriture */
+  margin-right: 5px !important;     /* Petit espace avant le mot suivant */
+  display: inline-block !important;
+  object-fit: contain !important;
+}
