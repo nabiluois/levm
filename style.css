@@ -729,31 +729,63 @@ body.light-mode .rule-text p { color: #3e2f23; }
 }
 
 /* =======================================================
-   CORRECTIF FINAL PANINI : Titre Centré
+   CORRECTIF FINAL PANINI : Centrage Parfait & Espace Réduit
    ======================================================= */
 
+/* 1. On réinitialise le conteneur du titre pour permettre le centrage */
+.details-header {
+  display: block !important;      /* Annule l'ancien flex qui décalait tout */
+  text-align: center !important;  /* Centre le contenu global */
+  border-bottom: none !important; /* On retire la ligne du conteneur (si présente) */
+  padding-bottom: 0 !important;
+  margin-bottom: 0 !important;    /* On gère l'espace via le titre directement */
+}
+
+/* 2. La Croix : Remontée et collée au coin */
+.close-details {
+  position: absolute !important;
+  top: 10px !important;           /* Remonte la croix (moins d'espace haut) */
+  right: 10px !important;         /* Colle à droite */
+  z-index: 2500 !important;
+  background: rgba(20, 14, 10, 0.8) !important;
+  width: 40px !important;
+  height: 40px !important;
+  border-radius: 50% !important;
+}
+
+/* 3. Le Titre : Centré géométriquement et marges réduites */
 .details-panel h2 {
-  /* 1. Positionnement */
-  margin-top: 60px !important;      /* Espace en haut (pour la croix) */
-  margin-bottom: 20px !important;   /* Espace en bas (avant le texte) */
-  margin-left: auto !important;     /* CRUCIAL : Pousse depuis la gauche */
-  margin-right: auto !important;    /* CRUCIAL : Pousse depuis la droite */
+  /* ESPACEMENT VERTICAL (Réduit) */
+  margin-top: 35px !important;    /* On passe de 60px à 35px (Rapproche de la croix) */
+  margin-bottom: 15px !important; /* On passe de 20px à 15px (Rapproche du MP4) */
   
-  /* 2. Dimensions */
-  width: fit-content !important;    /* La boîte s'adapte à la taille du texte */
-  max-width: 90% !important;        /* Ne touche jamais les bords de l'écran */
+  /* CENTRAGE HORIZONTAL (Parfait) */
+  margin-left: auto !important;   /* Pousse gauche */
+  margin-right: auto !important;  /* Pousse droite */
+  transform: translateX(0) !important; /* Sécurité anti-décalage */
   
-  /* 3. Contenu (Texte + Image) */
+  /* DIMENSIONS */
+  width: fit-content !important;
+  max-width: 90% !important;
+  
+  /* CONTENU */
   display: flex !important;
-  justify-content: center !important; /* Centre le contenu dans la boîte */
+  justify-content: center !important;
   align-items: center !important;
   
-  /* 4. Style du texte */
+  /* STYLE */
   font-size: 1.6em !important;      
-  white-space: nowrap !important;   /* Force une seule ligne */
+  white-space: nowrap !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
-  
-  /* 5. Espacement interne */
-  padding: 12px 25px !important;    /* Un peu plus large sur les côtés */
+  padding: 10px 20px !important;  /* Padding légèrement réduit */
+}
+
+/* 4. L'image (MP4 ou PNG) en dessous */
+.media-wrapper, 
+.details-video, 
+.details-image {
+  margin-top: 0 !important;       /* Colle le média au titre */
+  margin-bottom: 15px !important; /* Espace après le média */
+  width: 100% !important;
 }
