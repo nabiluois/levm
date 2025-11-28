@@ -738,4 +738,28 @@ h2 {
   display: block;
   filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3)); /* Petite ombre pour le relief */
 }
+
+/* =======================================================
+   CORRECTIF : Icones du Pacte Maudit (Taille & Centrage)
+   ======================================================= */
+
+/* 1. On force le rond à rester fixe et centré */
+.rule-icon {
+  width: 50px !important;       /* Largeur fixe du rond */
+  height: 50px !important;      /* Hauteur fixe du rond */
+  padding: 12px !important;     /* AJOUT IMPORTANT : Crée de l'espace autour de l'image */
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 0 !important;      /* Supprime l'influence du texte */
+}
+
+/* 2. On contraint l'image à rester dans le rond */
+.pact-icon {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important; /* Garde les proportions sans déformer */
+  display: block !important;
+  margin: 0 !important;
+}
 } /* Fin du @media */
