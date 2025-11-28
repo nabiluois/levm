@@ -33,7 +33,7 @@ const paniniRoles = [
   <span style="font-size:1.2em;">
     <img src="Description.svg" class="emoji-svg" alt="Description"> <strong>Description</strong>
   </span><br>
-  Le paysan est un personnage qui incarne l'habitant basique d'un village. Son rôle est de découvrir l'identité des loup garous et de les éliminer avant qu'ils ne tuent tous les paysan. Il gagne lorsque tous les loup garous sont morts. Le paysan n'a aucun pouvoir spécial, si ce n'est de voter au conseil du village contre celui qu'il suspecte être loup garou.
+  Le paysan est un personnage qui incarne l'habitant basique d'un village. Son rôle est de découvrir l'identité des loups-garous et de les éliminer avant qu'ils ne tuent tous les paysans. Il gagne lorsque tous les loups-garous sont morts. Le paysan n'a aucun pouvoir spécial, si ce n'est de voter au conseil du village contre celui qu'il suspecte être loup-garou.
   `
 },
 {
@@ -108,7 +108,7 @@ const paniniRoles = [
     <img src="Description.svg" class="emoji-svg" alt="Description"> <strong>Description</strong>
   </span><br>
   L’homme à la hache est un paysan redoutable. La nuit, il meurt s’il est la cible des loups-garous ou s’il est touché par la potion empoisonnée de la sorcière mal utilisée.<br>
-  En revanche, si l’homme à la hache est éliminé lors du vote de jour, il peut retourner cette élimination contre l’un des opposants qui voulait sa mort, et survivre au bûcher. Après cela, il redevient un simple paysan.
+  En revanche, si l’homme à la hache est éliminé lors du vote de jour, il peut retourner cette élimination contre l’un des opposants qui voulait sa mort, et survit au bûcher. Après cela, il redevient un simple paysan.
   `
 },
 {
@@ -557,7 +557,7 @@ const paniniRoles = [
   <span style="font-size:1.2em;">
     <img src="Description.svg" class="emoji-svg" alt="Description"> <strong>Description</strong>
   </span><br>
-  Fille de joie de génération en génération, elle accumule les conquêtes et son bodycount est plus élevé que le PIB du Djibouti. Chaque nuit, cette paysanne au grand cœur peut, si elle le souhaite, aller dormir chez quelqu’un. Si elle dort chez un loup, elle meurt au réveil ; si elle dort chez une personne du village, elle reste en vie. Si elle dort chez quelqu’un (découche) et qu’elle est la cible des loups-garous pendant la nuit, elle ne meurt pas : son absence la protège.
+  Fille de joie de génération en génération, elle accumule les conquêtes et son bodycount est plus élevé que le PIB de Djibouti. Chaque nuit, cette paysanne au grand cœur peut, si elle le souhaite, aller dormir chez quelqu’un. Si elle dort chez un loup, elle meurt au réveil ; si elle dort chez une personne du village, elle reste en vie. Si elle dort chez quelqu’un (découche) et qu’elle est la cible des loups-garous pendant la nuit, elle ne meurt pas : son absence la protège.
   `
 },
 {
@@ -1191,7 +1191,7 @@ const paniniRoles = [
   <span style="font-size:1.2em;">
     <img src="Pouvoir.svg" class="emoji-svg" alt="Pouvoir"> <strong>Pouvoir</strong>
   </span><br>
-  tu et appelé seul en premier la premiere nuit, avant les autres loups-garous.<br>
+  tu es appelé seul en premier la premiere nuit, avant les autres loups-garous.<br>
   Tu choisis un joueur (loup ou paysan) à qui tu donnes ton cœur.<br>
   Tant que ce joueur est en vie, tu es immortel : aucune attaque ne peut te tuer.<br>
   Si ce joueur meurt, tu redeviens vulnérable.<br><br>
@@ -1206,7 +1206,7 @@ const paniniRoles = [
   <span style="font-size:1.2em;">
     <img src="Description.svg" class="emoji-svg" alt="Description"> <strong>Description</strong>
   </span><br>
-  Le Loup-Garou Rouge est le plus coriace des loups, mais aussi le plus fragile. Il est appelé seul en premier la premiere nuit et donne son cœur au joueur de son choix. Tant que ce joueur est en vie, le Loup-Garou Rouge est immortel.
+  Le Loup-Garou Rouge est le plus coriace des loups, mais aussi le plus fragile. Il est appelé seul en premier la première nuit et donne son cœur au joueur de son choix. Tant que ce joueur est en vie, le Loup-Garou Rouge est immortel.
   `
 },
 {
@@ -1247,7 +1247,7 @@ const paniniRoles = [
   <span style="font-size:1.2em;">
     <img src="Description.svg" class="emoji-svg" alt="Description"> <strong>Description</strong>
   </span><br>
-  Né sous une lune de sang, il vit encore parmi les humains… mais la malédiction dort, tapie dans son âme. Avant la première nuit, le Loup-Garou Maudit choisit secrètement un joueur : son Mentor. Ce joueur n’est pas informé de ce lien maudit. Tant que le Mentor est en vie, le Loup-Garou Maudit et un simple paysan. Mais si le Mentor vient à mourir — quelle qu’en soit la cause — la malédiction s’éveille : Le Loup-Garou Maudit se transforme et rejoint la meute des Loups-Garous. Dès la nuit suivante, il se réveille avec eux et agit comme un loup à part entière.
+  Né sous une lune de sang, il vit encore parmi les humains… mais la malédiction dort, tapie dans son âme. Avant la première nuit, le Loup-Garou Maudit choisit secrètement un joueur : son Mentor. Ce joueur n’est pas informé de ce lien maudit. Tant que le Mentor est en vie, le Loup-Garou Maudit est un simple paysan. Mais si le Mentor vient à mourir — quelle qu’en soit la cause — la malédiction s’éveille : Le Loup-Garou Maudit se transforme et rejoint la meute des Loups-Garous. Dès la nuit suivante, il se réveille avec eux et agit comme un loup à part entière.
   `
 },
 {
@@ -1468,7 +1468,7 @@ const paniniRoles = [
   <span style="font-size:1.2em;">
     <img src="Description.svg" class="emoji-svg" alt="Description"> <strong>Description</strong>
   </span><br>
-  Il a l’air doux, fragile… presque inoffensif. Et pourtant. L’Enfant Loup-Garou est indétectable : aux yeux des paysans, c’est un paysan comme les autres. Il passe tous les tests, résiste à toutes les vérifications. Même les meilleurs rôles défensifs ou les pouvoirs de contrôle ne voient que du feu.
+  Il a l’air doux, fragile… presque inoffensif. Et pourtant. L’Enfant Loup-Garou est indétectable : Aux yeux des paysans, c’est un paysan comme les autres. Il passe tous les tests, résiste à toutes les vérifications. Même les meilleurs rôles défensifs ou les pouvoirs de contrôle ne voient que du feu.
   `
 },
 {
