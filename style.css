@@ -729,33 +729,46 @@ body.light-mode .rule-text p { color: #3e2f23; }
 }
 
 /* =======================================================
-   CORRECTIF : Titres Panini sur 1 LIGNE (Adaptation taille)
+   CORRECTIF FINAL PANINI : Croix haute & Titre large
    ======================================================= */
-.details-panel h2 {
-  white-space: nowrap !important;   /* Force STRICTEMENT une seule ligne */
-  overflow: hidden !important;      /* Cache ce qui dépasse (sécurité) */
-  text-overflow: ellipsis;          /* Ajoute "..." si vraiment ça ne rentre pas */
-  
-  /* C'est ICI la magie : on réduit la police pour que ça rentre */
-  font-size: clamp(1.1rem, 4.5vw, 1.8rem) !important; 
-  
-  /* On réduit les marges intérieures pour donner plus de place au texte */
-  padding: 12px 15px !important;    
-  
-  /* On s'assure que la boîte ne dépasse pas de l'écran */
-  max-width: 90% !important;
-  margin-left: auto !important;
-  margin-right: auto !important;
-  
-  /* On aligne bien l'image et le texte */
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
+
+/* 1. La Croix : On la sort du cadre et on la colle tout en haut */
+.close-details {
+  position: absolute !important;
+  top: 15px !important;        /* Tout en haut */
+  right: 15px !important;      /* Tout à droite */
+  z-index: 2500 !important;    /* Toujours au-dessus */
+  background: rgba(20, 14, 10, 0.8) !important; /* Petit fond sombre pour qu'elle soit lisible */
+  width: 40px !important;
+  height: 40px !important;
+  border-radius: 50% !important;
 }
 
-/* Petite sécurité pour les très petits écrans (iPhone SE, etc.) */
-@media (max-width: 360px) {
-  .details-panel h2 {
-    font-size: 1rem !important; /* On réduit encore si l'écran est minuscule */
-  }
+/* 2. Le Titre : On lui rend sa taille et on le descend */
+.details-panel h2 {
+  margin-top: 60px !important;      /* On le descend pour ne pas toucher la croix */
+  margin-bottom: 20px !important;
+  
+  /* On remet une taille de police normale et fixe */
+  font-size: 1.6em !important;      
+  
+  /* On garde la ligne unique */
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important; /* Met "..." si vraiment ça dépasse de l'écran */
+  
+  /* On lui donne toute la largeur disponible */
+  max-width: 95% !important;
+  padding: 12px 10px !important;
+  
+  /* Centrage */
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+}
+
+/* 3. Ajustement de l'image dans le titre */
+.details-panel h2 img {
+  max-height: 1.2em !important; /* S'assure que l'icône ne casse pas la hauteur */
+  width: auto !important;
 }
