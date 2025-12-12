@@ -425,9 +425,12 @@ body.light-mode .close-details { border-color: #5a4633; color: #5a4633; }
 .power-item { background: #120c08; padding: 10px; border-radius: 8px; text-align: center; font-size: 0.9em; border: 1px solid #333; }
 .power-item i { font-size: 1.5em; color: var(--gold); margin-bottom: 5px; display: block; }
 
+/* MODIFICATION ICI : Centrage du texte sous les icônes */
 .cycle-visual { display: flex; justify-content: space-around; align-items: center; width: 100%; margin: 20px 0; background: rgba(0,0,0,0.3); padding: 20px; border-radius: 50px; }
-.phase { display: flex; flex-direction: column; align-items: center; color: var(--gold); }
+.phase { display: flex; flex-direction: column; align-items: center; text-align: center; color: var(--gold); flex: 1; }
+.phase small { display: block; font-size: 0.75em; opacity: 0.8; margin-top: 5px; line-height: 1.2; max-width: 120px; }
 .phase i { font-size: 2.5em; margin-bottom: 10px; }
+
 .arrow { font-size: 2em; color: #5a4633; }
 .features-list { display: flex; flex-direction: column; gap: 5px; width: 100%; }
 .feature { background: rgba(255,255,255,0.05); padding: 8px; border-radius: 5px; font-size: 0.9em; display: flex; align-items: center; gap: 10px; }
@@ -788,4 +791,12 @@ body.light-mode .rule-text p { color: #3e2f23; }
   margin-top: 0 !important;       /* Colle le média au titre */
   margin-bottom: 15px !important; /* Espace après le média */
   width: 100% !important;
+}
+
+/* =======================================================
+   CORRECTIF ESPACE BUG REPORT
+   ======================================================= */
+#modal-bug p {
+  margin-bottom: 30px !important; /* Ajoute l'espace demandé */
+  display: block;
 }
