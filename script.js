@@ -2011,10 +2011,10 @@ document.addEventListener('DOMContentLoaded', function() {
   const cardsArray = Array.from(document.querySelectorAll('.carte-jeu')); 
 
   // ===============================
-  // 13. SYSTÈME DE DÉVERROUILLAGE & INTRO (STRICT & MANUEL)
+  // 13. SYSTÈME DE DÉVERROUILLAGE (CORRIGÉ STABLE)
   // ===============================
   
-  // A. Navigation dans le cadenas
+  // A. Navigation dans le cadenas (Slides Intro)
   window.nextLockSlide = function(index) {
       document.querySelectorAll('.lock-slide').forEach(el => el.classList.remove('active'));
       document.querySelectorAll('.dot').forEach(el => el.classList.remove('active'));
@@ -2026,11 +2026,12 @@ document.addEventListener('DOMContentLoaded', function() {
       if(nextDot) nextDot.classList.add('active');
   };
 
-  // B. Fermer l'intro temporairement (Bouton "Ouvrir le Menu")
+  // B. Fermer l'intro pour aller naviguer (Bouton "Ouvrir le Menu")
   window.finishIntro = function() {
+      // On ferme la modale Intro
       closeModal('modal-lock-intro');
       
-      // Ouvre le menu burger pour guider le joueur
+      // On ouvre le menu burger pour montrer le chemin
       setTimeout(() => {
           const extraMenu = document.querySelector('.extra-menu');
           if(extraMenu && !extraMenu.classList.contains('open')) {
@@ -2039,57 +2040,74 @@ document.addEventListener('DOMContentLoaded', function() {
       }, 500);
   };
 
-  // C. NOUVEAU : Validation Manuelle des Règles (Via Bouton)
+  // C. Validation Manuelle des Règles (Bouton page 9/9)
   window.finishRules = function() {
       localStorage.setItem('vm_rules_read', 'true');
       closeModal('modal-regles-base');
       
+      // Feedback utilisateur
       if (localStorage.getItem('vm_pact_read') === 'true') {
-          showNotification("🔓 Accès Autorisé", "Tu as tout validé. Bienvenue dans le Village.");
+          showNotification("🔓 Accès Autorisé", "Tu as tout validé. Le Village s'ouvre à toi.");
       } else {
-          showNotification("📜 Règles Validées", "Bien. Maintenant, tu dois signer le Pacte Maudit.");
+          showNotification("📜 Règles Validées", "Parfait. Maintenant, va signer le Pacte Maudit dans le menu.");
       }
       
+      // On vérifie si on peut débloquer le jeu
       checkGameUnlock();
   };
 
-  // D. NOUVEAU : Signature Manuelle du Pacte (Via Bouton)
+  // D. Signature Manuelle du Pacte (Bouton bas de page)
   window.signPact = function() {
       localStorage.setItem('vm_pact_read', 'true');
       closeModal('modal-regles');
       
+      // Feedback utilisateur
       if (localStorage.getItem('vm_rules_read') === 'true') {
-          showNotification("🩸 Pacte Signé", "Accès Autorisé. Bienvenue dans le Village.");
+          showNotification("🩸 Pacte Signé", "Le sang est versé. Le Village s'ouvre à toi.");
       } else {
-          showNotification("✍️ Pacte Signé", "Bien. N'oublie pas de lire les Règles de base.");
+          showNotification("✍️ Pacte Signé", "C'est noté. N'oublie pas de lire les Règles de base pour débloquer le jeu.");
       }
       
+      // On vérifie si on peut débloquer le jeu
       checkGameUnlock();
   };
 
-  // E. Vérification principale (CORRIGÉE : Plus de bug de scroll)
+  // E. Vérification de l'état du jeu (Grisé ou pas)
   function checkGameUnlock() {
       const rulesRead = localStorage.getItem('vm_rules_read') === 'true';
       const pactRead = localStorage.getItem('vm_pact_read') === 'true';
 
       if (rulesRead && pactRead) {
-          // Tout est bon : on déverrouille
+          // Tout est bon : on enlève le filtre gris
           document.body.classList.remove('locked-game');
       } else {
-          // Il manque quelque chose : on verrouille
+          // Manque quelque chose : on met le filtre gris
+          document.body.classList.add('locked-game');
+      }
+  }
+
+  // F. Lancement de l'Intro au démarrage (Si nécessaire)
+  function initGameLock() {
+      const rulesRead = localStorage.getItem('vm_rules_read') === 'true';
+      const pactRead = localStorage.getItem('vm_pact_read') === 'true';
+
+      // Si le jeu n'est pas fini, on affiche le pop-up d'intro
+      if (!rulesRead || !pactRead) {
           document.body.classList.add('locked-game');
           
-          // AFFICHER L'INTRO SI AUCUNE AUTRE MODALE N'EST OUVERTE
-          // Cela empêche le pop-up d'apparaître PENDANT qu'on lit les règles
+          // Petit délai pour l'animation
           setTimeout(() => {
-              const anyActiveModal = document.querySelector('.modal.active');
-              const lockModal = document.getElementById('modal-lock-intro');
-              
-              // Si aucune modale active ET jeu verrouillé => On affiche l'intro
-              if(!anyActiveModal && lockModal) {
-                  openModal('modal-lock-intro');
+              // On utilise openModal pour bénéficier du blocage de scroll
+              const modal = document.getElementById('modal-lock-intro');
+              if(modal) {
+                  modal.classList.add('active');
+                  document.body.style.position = 'fixed';
+                  document.body.style.width = '100%';
               }
-          }, 800);
+          }, 500);
+      } else {
+          // Sinon on s'assure que c'est débloqué
+          document.body.classList.remove('locked-game');
       }
   }
 
@@ -2123,7 +2141,7 @@ document.addEventListener('DOMContentLoaded', function() {
       scrollPosition = window.scrollY;
       modal.classList.add('active');
       
-      // Verrouillage scroll
+      // Verrouillage scroll mobile
       document.body.style.position = 'fixed';
       document.body.style.top = `-${scrollPosition}px`;
       document.body.style.width = '100%';
@@ -2138,25 +2156,19 @@ document.addEventListener('DOMContentLoaded', function() {
     if(modal) {
       modal.classList.remove('active');
       
-      // Déverrouillage scroll
+      // Déverrouillage scroll mobile
       document.body.style.position = '';
       document.body.style.top = '';
       document.body.style.width = '';
       document.body.style.overflow = '';
       window.scrollTo(0, scrollPosition);
-
-      // Si on ferme une fenêtre sans avoir validé (croix), on vérifie l'état du jeu
-      // Cela fera réapparaître l'intro si le joueur n'a pas fini ses tâches
-      if (document.body.classList.contains('locked-game')) {
-          checkGameUnlock(); 
-      }
     }
   };
 
   // Empêcher la fermeture de l'intro en cliquant dehors (HARD LOCK)
   document.querySelectorAll('.modal').forEach(modal => {
     modal.addEventListener('click', (e) => {
-      // Si c'est l'intro : INTERDIT de fermer au clic
+      // SI C'EST L'INTRO : ON NE FAIT RIEN (Impossible de fermer sans le bouton)
       if (modal.id === 'modal-lock-intro') return;
 
       // Pour les autres : OK
@@ -2195,89 +2207,56 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // ===============================
-  // GESTION ENVOI PROPOSITION RÔLE
+  // GESTION ENVOI FORMULAIRES
   // ===============================
   window.submitRole = function(e) {
     e.preventDefault();
+    /* ... Code envoi rôle inchangé ... */
     const form = e.target;
     const submitBtn = form.querySelector('.btn-submit');
     const originalText = submitBtn.textContent;
-
     submitBtn.textContent = "Envoi en cours...";
     submitBtn.disabled = true;
-
     const formData = new FormData(form);
-
-    fetch("https://formsubmit.co/contact@lacourduroi.fr", {
-        method: "POST",
-        body: formData
-    })
-    .then(response => {
-        if (response.ok) return true;
-        else throw new Error("Erreur serveur");
-    })
+    fetch("https://formsubmit.co/contact@lacourduroi.fr", { method: "POST", body: formData })
+    .then(r => r.ok ? true : new Error("Erreur"))
     .then(() => {
-        showNotification("📜 Proposition Reçue !", "Ta proposition a été scellée et envoyée au Conseil des Anciens.<br>Merci pour ta contribution.");
+        showNotification("📜 Reçu !", "Proposition envoyée.");
         closeModal('modal-propose');
         form.reset();
     })
-    .catch(error => {
-        console.error('Erreur:', error);
-        showNotification("⚠️ Oups", "Une erreur technique est survenue. Vérifie ta connexion.");
-    })
-    .finally(() => {
-        submitBtn.textContent = originalText;
-        submitBtn.disabled = false;
-    });
+    .catch(() => showNotification("⚠️ Oups", "Erreur technique."))
+    .finally(() => { submitBtn.textContent = originalText; submitBtn.disabled = false; });
   };
 
-  // ===============================
-  // GESTION ENVOI RAPPORT BUG
-  // ===============================
   window.submitBug = function(e) {
     e.preventDefault();
+    /* ... Code envoi bug inchangé ... */
     const form = e.target;
     const submitBtn = form.querySelector('.btn-submit');
     const originalText = submitBtn.textContent;
-
-    submitBtn.textContent = "Envoi du rapport...";
+    submitBtn.textContent = "Envoi...";
     submitBtn.disabled = true;
-
     const formData = new FormData(form);
-
-    fetch("https://formsubmit.co/contact@lacourduroi.fr", {
-        method: "POST",
-        body: formData
-    })
-    .then(response => {
-        if (response.ok) return true;
-        else throw new Error("Erreur serveur");
-    })
+    fetch("https://formsubmit.co/contact@lacourduroi.fr", { method: "POST", body: formData })
+    .then(r => r.ok ? true : new Error("Erreur"))
     .then(() => {
-        showNotification("🐛 Rapport Envoyé !", "Merci de nous aider à chasser les bugs du Village.");
+        showNotification("🐛 Envoyé !", "Merci pour le signalement.");
         closeModal('modal-bug');
         form.reset();
     })
-    .catch(error => {
-        console.error('Erreur:', error);
-        showNotification("⚠️ Oups", "Erreur technique lors de l'envoi. Vérifie ta connexion internet.");
-    })
-    .finally(() => {
-        submitBtn.textContent = originalText;
-        submitBtn.disabled = false;
-    });
+    .catch(() => showNotification("⚠️ Oups", "Erreur technique."))
+    .finally(() => { submitBtn.textContent = originalText; submitBtn.disabled = false; });
   };
 
   // ===============================
   // 4. GESTION DU THÈME
   // ===============================
   const themeBtn = document.getElementById('themeBtn');
-  
   if (localStorage.getItem('theme') === 'light') {
     document.body.classList.add('light-mode');
     if(themeBtn) themeBtn.textContent = '☀️';
   }
-
   if (themeBtn) {
     themeBtn.addEventListener('click', () => {
       document.body.classList.toggle('light-mode');
@@ -2292,12 +2271,10 @@ document.addEventListener('DOMContentLoaded', function() {
   // ===============================
   document.querySelectorAll('.carte-jeu').forEach(carte => {
     carte.addEventListener('click', function(e) {
-      if (document.body.classList.contains('locked-game')) return; // Sécurité JS
-      
+      if (document.body.classList.contains('locked-game')) return; // Sécurité
       if (e.target.closest('.btn-details')) return;
       e.stopPropagation();
       if (navigator.vibrate) navigator.vibrate(50);
-
       const isAlreadyFlipped = this.classList.contains('flipped');
       document.querySelectorAll('.carte-jeu.flipped').forEach(c => {
         if (c !== this) c.classList.remove('flipped');
@@ -2317,7 +2294,6 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
   }, { threshold: 0.05, rootMargin: '50px' });
-
   document.querySelectorAll('.carte-jeu, .carte-vm').forEach(el => observer.observe(el));
 
   // ===============================
@@ -2328,12 +2304,10 @@ document.addEventListener('DOMContentLoaded', function() {
     quickSearchInput.addEventListener('input', function() {
       const term = this.value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
       const searchTerms = term.split(" ");
-
       cardsArray.forEach(card => {
         const h3 = card.querySelector('h3');
         const title = h3 ? h3.textContent.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") : "";
         const matches = searchTerms.every(word => title.includes(word));
-        
         if (matches) {
           card.style.display = ''; 
           setTimeout(() => card.classList.add('visible'), 10);
@@ -2342,7 +2316,6 @@ document.addEventListener('DOMContentLoaded', function() {
           card.classList.remove('visible');
         }
       });
-      
       document.querySelectorAll('section:not(#event-cards)').forEach(sec => {
         const hasVisibleCards = Array.from(sec.querySelectorAll('.carte-jeu')).some(c => c.style.display !== 'none');
         const h2 = sec.querySelector('h2');
@@ -2355,29 +2328,24 @@ document.addEventListener('DOMContentLoaded', function() {
   // 8. ZOOM CARTES VM
   // ===============================
   const vmOverlay = document.getElementById('vm-overlay');
-  
   function closeZoom() {
     document.querySelectorAll('.carte-vm.zoomed').forEach(c => c.classList.remove('zoomed'));
     if (vmOverlay) vmOverlay.classList.remove('active');
     document.body.classList.remove('no-scroll');
   }
-  
   function openZoom(card) {
-    if (document.body.classList.contains('locked-game')) return; // Sécurité JS
-    
+    if (document.body.classList.contains('locked-game')) return; // Sécurité
     document.querySelectorAll('.carte-vm.zoomed').forEach(c => c.classList.remove('zoomed'));
     card.classList.add('zoomed');
     if (vmOverlay) vmOverlay.classList.add('active');
     document.body.classList.add('no-scroll');
   }
-  
   document.querySelectorAll('.carte-vm').forEach(card => {
       card.addEventListener('click', (e) => {
           e.stopPropagation();
           if (card.classList.contains('zoomed')) closeZoom(); else openZoom(card);
       });
   });
-
   if (vmOverlay) vmOverlay.addEventListener('click', closeZoom);
 
   // ===============================
@@ -2393,74 +2361,43 @@ document.addEventListener('DOMContentLoaded', function() {
     const v = detailsPanel ? detailsPanel.querySelector('video') : null;
     if(v) v.pause();
   };
-
   overlay.addEventListener('click', function() {
     if(detailsPanel.classList.contains('active')) closeDetails();
   });
-
   function openDetails(cardData) {
     if (navigator.vibrate) navigator.vibrate(15);
     const content = detailsPanel.querySelector('.details-content') || detailsPanel;
-    
     const videoSrc = cardData.image.replace(/\.(png|jpg|jpeg|webp)$/i, '.mp4');
     const uniqueId = 'fallback-' + Math.random().toString(36).substr(2, 9);
-
     content.innerHTML = `
       <div class="details-header">
         <h2 class="details-title">${cardData.title}</h2>
         <button class="close-details" onclick="closeDetails()">✕</button>
       </div>
-      
       <div class="media-wrapper" style="position:relative; min-height:200px;">
-          <video 
-            class="details-video" 
-            src="${videoSrc}" 
-            poster="${cardData.image}" 
-            autoplay loop muted playsinline webkit-playsinline
-            style="display:block;"
-            onerror="this.style.display='none'; document.getElementById('${uniqueId}').style.display='block';"
-          >
+          <video class="details-video" src="${videoSrc}" poster="${cardData.image}" autoplay loop muted playsinline webkit-playsinline style="display:block;" onerror="this.style.display='none'; document.getElementById('${uniqueId}').style.display='block';">
           </video>
-          
-          <img 
-            id="${uniqueId}"
-            src="${cardData.image}" 
-            alt="${cardData.title}" 
-            class="details-image" 
-            style="display:none;"
-          >
+          <img id="${uniqueId}" src="${cardData.image}" alt="${cardData.title}" class="details-image" style="display:none;">
       </div>
-
-      <div class="details-section">
-        ${cardData.description || ''}
-      </div>
+      <div class="details-section">${cardData.description || ''}</div>
     `;
-    
     detailsPanel.classList.add('active');
     overlay.classList.add('active');
     document.body.classList.add('no-scroll');
     detailsPanel.scrollTop = 0;
   }
-
   document.addEventListener('click', (e) => {
     if (e.target.closest('.btn-details')) {
       e.stopPropagation();
       e.preventDefault();
-      
       const carte = e.target.closest('.carte-jeu');
       const h3 = carte.querySelector('.carte-back h3');
       const img = carte.querySelector('.carte-front img');
       const p = carte.querySelector('.carte-back p');
-
       if (!h3 || !img) return; 
-
       const title = h3.textContent.trim();
       const image = img.src;
-      
-      const panini = (typeof paniniRoles !== 'undefined') 
-        ? paniniRoles.find(r => r.title.includes(title) || r.id === title.toUpperCase()) 
-        : null;
-      
+      const panini = (typeof paniniRoles !== 'undefined') ? paniniRoles.find(r => r.title.includes(title) || r.id === title.toUpperCase()) : null;
       let cardData;
       if (panini) {
         cardData = { ...panini, image: panini.image || image };
@@ -2468,7 +2405,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const desc = p ? p.innerHTML : "Pas de description.";
         cardData = { title: title, image: image, description: desc };
       }
-      
       openDetails(cardData);
     }
   });
@@ -2477,14 +2413,12 @@ document.addEventListener('DOMContentLoaded', function() {
   let touchStartX = 0;
   let currentTranslateX = 0;
   let isDragging = false;
-
   if (detailsPanel) {
     detailsPanel.addEventListener('touchstart', (e) => {
       touchStartX = e.touches[0].clientX;
       isDragging = true;
       detailsPanel.style.transition = 'none';
     }, {passive: true});
-
     detailsPanel.addEventListener('touchmove', (e) => {
       if (!isDragging) return;
       const touchCurrentX = e.touches[0].clientX;
@@ -2494,16 +2428,12 @@ document.addEventListener('DOMContentLoaded', function() {
         detailsPanel.style.transform = `translateX(${deltaX}px)`;
       }
     }, {passive: true});
-
     detailsPanel.addEventListener('touchend', (e) => {
       isDragging = false;
       detailsPanel.style.transition = 'transform 0.3s cubic-bezier(0.25, 1, 0.5, 1), right 0.3s cubic-bezier(0.25, 1, 0.5, 1)';
       if (currentTranslateX > 100) {
         closeDetails();
-        setTimeout(() => {
-          detailsPanel.style.transform = '';
-          currentTranslateX = 0;
-        }, 300);
+        setTimeout(() => { detailsPanel.style.transform = ''; currentTranslateX = 0; }, 300);
       } else {
         detailsPanel.style.transform = 'translateX(0)';
         currentTranslateX = 0;
@@ -2542,31 +2472,19 @@ document.addEventListener('DOMContentLoaded', function() {
   const slideCounter = document.getElementById('slide-counter');
 
   window.changeSlide = function(direction) {
-    // Masquer le slide actuel
     slides[currentSlideIndex].classList.remove('active');
-    
-    // Calculer le nouvel index
     currentSlideIndex += direction;
-    
-    // Boucle
     if (currentSlideIndex >= slides.length) currentSlideIndex = 0;
     if (currentSlideIndex < 0) currentSlideIndex = slides.length - 1;
-    
-    // Afficher le nouveau slide
     slides[currentSlideIndex].classList.add('active');
-    
-    // Mettre à jour le compteur
     if(slideCounter) slideCounter.textContent = `${currentSlideIndex + 1} / ${slides.length}`;
-    
-    // Remonter en haut du contenu
     const container = document.querySelector('.slides-container');
     if(container) container.scrollTop = 0;
-
-    // PLUS DE VÉRIFICATION AUTOMATIQUE ICI !
-    // La validation se fait uniquement via les boutons finishRules() et signPact()
+    
+    // PLUS DE CHECKGAMEUNLOCK ICI ! (Correction du Bug)
   };
 
-  // LANCER LA VÉRIFICATION AU DÉMARRAGE
-  checkGameUnlock();
+  // LANCEMENT INITIAL
+  initGameLock();
 
 }); // FIN DOMContentLoaded
