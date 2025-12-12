@@ -2011,7 +2011,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const cardsArray = Array.from(document.querySelectorAll('.carte-jeu')); 
 
   // ===============================
-  // 13. SYSTÈME DE DÉVERROUILLAGE & INTRO (NOUVEAU)
+  // 13. SYSTÈME DE DÉVERROUILLAGE & INTRO (STRICT)
   // ===============================
   
   // A. Changer les slides du cadenas
@@ -2026,15 +2026,12 @@ document.addEventListener('DOMContentLoaded', function() {
       if(nextDot) nextDot.classList.add('active');
   };
 
-  // B. Finir l'intro (Bouton Final)
+  // B. Finir l'intro (Bouton Final "Ouvrir le Menu")
   window.finishIntro = function() {
-      // 1. On enregistre que c'est vu pour toujours
-      localStorage.setItem('vm_intro_completed', 'true');
-      
-      // 2. On ferme le pop-up
+      // 1. On ferme simplement le pop-up pour cette session
       closeModal('modal-lock-intro');
       
-      // 3. On ouvre le menu burger pour guider le joueur
+      // 2. On ouvre le menu burger pour guider le joueur immédiatement
       setTimeout(() => {
           const extraMenu = document.querySelector('.extra-menu');
           if(extraMenu && !extraMenu.classList.contains('open')) {
@@ -2043,25 +2040,27 @@ document.addEventListener('DOMContentLoaded', function() {
       }, 500);
   };
 
-  // C. Vérification principale
+  // C. Vérification principale (LOGIQUE STRICTE)
   function checkGameUnlock() {
       const rulesRead = localStorage.getItem('vm_rules_read') === 'true';
       const pactRead = localStorage.getItem('vm_pact_read') === 'true';
 
       if (rulesRead && pactRead) {
+          // Tout est lu : on déverrouille tout
           document.body.classList.remove('locked-game');
       } else {
+          // Manque quelque chose : on verrouille
           document.body.classList.add('locked-game');
           
-          // Si l'intro n'est pas "complétée" (bouton final cliqué), on l'affiche
-          if (localStorage.getItem('vm_intro_completed') !== 'true') {
-              setTimeout(() => {
-                  const modal = document.getElementById('modal-lock-intro');
-                  if(modal) {
-                      openModal('modal-lock-intro');
-                  }
-              }, 800);
-          }
+          // FORCER L'AFFICHAGE DU POP-UP À CHAQUE CHARGEMENT
+          // Tant que les conditions (rulesRead && pactRead) ne sont pas remplies.
+          setTimeout(() => {
+              const modal = document.getElementById('modal-lock-intro');
+              // On l'ouvre seulement s'il n'est pas déjà actif (pour éviter conflits)
+              if(modal && !modal.classList.contains('active')) {
+                  openModal('modal-lock-intro');
+              }
+          }, 800);
       }
   }
 
@@ -2084,7 +2083,7 @@ document.addEventListener('DOMContentLoaded', function() {
   if(extraOverlay) extraOverlay.addEventListener('click', toggleExtraMenu);
 
   // ===============================
-  // 3. GESTION DES MODALES (CORRIGÉ SCROLL MOBILE + DÉTECTION PACTE)
+  // 3. GESTION DES MODALES (SCROLL & SÉCURITÉ)
   // ===============================
   
   let scrollPosition = 0;
@@ -2124,18 +2123,18 @@ document.addEventListener('DOMContentLoaded', function() {
           if (localStorage.getItem('vm_rules_read') === 'true' && document.body.classList.contains('locked-game')) {
              showNotification("🔓 Accès Autorisé", "Tu connais les lois. Bienvenue dans le Village.");
           }
-          checkGameUnlock();
+          checkGameUnlock(); // Relance la vérif pour enlever le flou
       }
     }
   };
 
-  // MODIFICATION : Empêcher la fermeture en cliquant dehors pour l'intro
+  // SÉCURITÉ : Empêcher la fermeture en cliquant dehors pour l'intro
   document.querySelectorAll('.modal').forEach(modal => {
     modal.addEventListener('click', (e) => {
-      // SI C'EST L'INTRO : ON NE FAIT RIEN (HARD LOCK)
+      // HARD LOCK : Si c'est l'intro, on interdit la fermeture au clic
       if (modal.id === 'modal-lock-intro') return;
 
-      // SINON : Comportement normal
+      // Sinon comportement normal
       if (e.target === modal) window.closeModal(modal.id);
     });
   });
@@ -2539,9 +2538,11 @@ document.addEventListener('DOMContentLoaded', function() {
     if(container) container.scrollTop = 0;
 
     // --- LOGIQUE DE DÉVERROUILLAGE (RÈGLES) ---
+    // Si on arrive sur la dernière slide (index = length - 1)
     if (currentSlideIndex === slides.length - 1) {
         localStorage.setItem('vm_rules_read', 'true');
         
+        // Petit feedback si c'était la dernière étape
         if (localStorage.getItem('vm_pact_read') === 'true' && document.body.classList.contains('locked-game')) {
             showNotification("🔓 Accès Autorisé", "Tu connais les lois. Bienvenue dans le Village.");
         }
