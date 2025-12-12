@@ -958,3 +958,41 @@ body.locked-game .notification-overlay {
 body.light-mode .lock-content { background: #fffcf5; border-color: #b8860b; }
 body.light-mode .lock-slide p, body.light-mode .lock-step { color: #3e2f23; }
 body.light-mode .lock-steps { background: rgba(0,0,0,0.05); border-color: #b8860b; }
+
+/* =======================================================
+   16. BOUTONS DE VALIDATION (NOUVEAU)
+   ======================================================= */
+.btn-validate {
+    display: block;
+    width: 100%;
+    margin-top: 25px;
+    padding: 15px;
+    font-family: 'Pirata One', serif;
+    font-size: 1.4em;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #1a120b;
+    background: linear-gradient(135deg, #d4af37, #b8941f);
+    border: 2px solid #8a6e2f;
+    border-radius: 12px;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+    transition: all 0.3s ease;
+}
+
+.btn-validate:hover {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 6px 20px rgba(212, 175, 55, 0.5);
+    background: linear-gradient(135deg, #f5e6b3, #d4af37);
+}
+
+.btn-validate:active {
+    transform: scale(0.98);
+}
+
+/* Light Mode Override */
+body.light-mode .btn-validate {
+    border-color: #b8860b;
+    box-shadow: 0 4px 15px rgba(184, 134, 11, 0.3);
+}
