@@ -800,3 +800,27 @@ body.light-mode .rule-text p { color: #3e2f23; }
   margin-bottom: 30px !important; /* Ajoute l'espace demandé */
   display: block;
 }
+
+/* =======================================================
+   14. SYSTÈME DE VERROUILLAGE (ONBOARDING)
+   ======================================================= */
+
+/* Quand le corps a la classe 'locked-game' */
+body.locked-game .carte-jeu, 
+body.locked-game .carte-vm,
+body.locked-game section h2 {
+    filter: grayscale(100%) opacity(0.1) blur(1px); /* Très gris et flou */
+    pointer-events: none; /* Impossible de cliquer */
+    user-select: none;
+    transition: all 1s ease;
+}
+
+/* On laisse les menus et boutons accessibles ! */
+body.locked-game header, 
+body.locked-game .extra-menu, 
+body.locked-game .modal,
+body.locked-game .notification-overlay {
+    filter: none;
+    pointer-events: auto;
+    opacity: 1;
+}

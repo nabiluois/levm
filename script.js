@@ -2011,6 +2011,38 @@ document.addEventListener('DOMContentLoaded', function() {
   const cardsArray = Array.from(document.querySelectorAll('.carte-jeu')); 
 
   // ===============================
+  // 13. FONCTION DE DÉVERROUILLAGE (DÉFINIE EN HAUT POUR ÊTRE ACCESSIBLE)
+  // ===============================
+  function checkGameUnlock() {
+      const rulesRead = localStorage.getItem('vm_rules_read') === 'true';
+      const pactRead = localStorage.getItem('vm_pact_read') === 'true';
+
+      if (rulesRead && pactRead) {
+          // Tout est bon : on déverrouille
+          document.body.classList.remove('locked-game');
+      } else {
+          // Il manque quelque chose : on verrouille
+          document.body.classList.add('locked-game');
+          
+          // Notification d'aide au premier chargement (si verrouillé)
+          if (!sessionStorage.getItem('intro_shown')) {
+              setTimeout(() => {
+                  showNotification(
+                      "🔒 Village Verrouillé", 
+                      `Bienvenue, Étranger.<br><br>
+                      Les cartes sont scellées par magie. Pour jouer, tu dois prouver tes connaissances :<br><br>
+                      1. Ouvre le <strong>Menu ☰</strong> (en haut à gauche).<br>
+                      2. Lis entièrement les <strong>Règles de base</strong> (jusqu'à la page 9).<br>
+                      3. Consulte <strong>Le Pacte Maudit</strong>.<br><br>
+                      Une fois fait, le jeu s'ouvrira à toi.`
+                  );
+                  sessionStorage.setItem('intro_shown', 'true');
+              }, 800);
+          }
+      }
+  }
+
+  // ===============================
   // 2. GESTION MENU BURGER
   // ===============================
   const burgerBtn = document.querySelector('.burger-btn');
@@ -2029,29 +2061,23 @@ document.addEventListener('DOMContentLoaded', function() {
   if(extraOverlay) extraOverlay.addEventListener('click', toggleExtraMenu);
 
   // ===============================
-  // 3. GESTION DES MODALES (CORRIGÉ SCROLL MOBILE)
+  // 3. GESTION DES MODALES (CORRIGÉ SCROLL MOBILE + DÉTECTION PACTE)
   // ===============================
   
-  // Variable pour mémoriser où on était dans la page
   let scrollPosition = 0;
 
   window.openModal = function(modalId) {
     const modal = document.getElementById(modalId);
     if(modal) {
-      // 1. On sauvegarde la position actuelle du scroll
       scrollPosition = window.scrollY;
-      
-      // 2. On affiche la modale
       modal.classList.add('active');
       
-      // 3. VERROUILLAGE TOTAL DU SCROLL (Technique du Body Fixed)
-      // C'est la seule façon fiable à 100% sur iPhone/Android
+      // Verrouillage du scroll
       document.body.style.position = 'fixed';
       document.body.style.top = `-${scrollPosition}px`;
       document.body.style.width = '100%';
       document.body.style.overflow = 'hidden';
 
-      // Fermer le menu burger si ouvert
       if(extraMenu && extraMenu.classList.contains('open')) toggleExtraMenu();
     }
   };
@@ -2061,21 +2087,29 @@ document.addEventListener('DOMContentLoaded', function() {
     if(modal) {
       modal.classList.remove('active');
       
-      // 4. DÉVERROUILLAGE ET RESTAURATION DE LA POSITION
+      // Déverrouillage du scroll
       document.body.style.position = '';
       document.body.style.top = '';
       document.body.style.width = '';
       document.body.style.overflow = '';
-      
-      // On remet l'utilisateur exactement où il était
       window.scrollTo(0, scrollPosition);
+
+      // --- LOGIQUE DE DÉVERROUILLAGE (PACTE) ---
+      // Si on ferme la modale du Pacte, on considère qu'il est lu
+      if (modalId === 'modal-regles') {
+          localStorage.setItem('vm_pact_read', 'true');
+          
+          // Petit feedback si c'était la dernière étape
+          if (localStorage.getItem('vm_rules_read') === 'true' && document.body.classList.contains('locked-game')) {
+             showNotification("🔓 Accès Autorisé", "Tu connais les lois. Bienvenue dans le Village.");
+          }
+          checkGameUnlock();
+      }
     }
   };
 
-  // Fermeture en cliquant en dehors
   document.querySelectorAll('.modal').forEach(modal => {
     modal.addEventListener('click', (e) => {
-      // Si on clique sur le fond gris (et pas le contenu)
       if (e.target === modal) window.closeModal(modal.id);
     });
   });
@@ -2090,11 +2124,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const notifMsg = document.getElementById('notif-message');
     
     if(notif && notifTitle && notifMsg) {
-        notifTitle.textContent = title;
+        notifTitle.innerHTML = title; // innerHTML autorisé pour les icônes
         notifMsg.innerHTML = message.replace(/\n/g, '<br>');
         notif.classList.add('active');
     } else {
-        alert(message);
+        alert(message.replace(/<br>/g, '\n').replace(/<\/?[^>]+(>|$)/g, ""));
     }
   };
 
@@ -2129,11 +2163,8 @@ document.addEventListener('DOMContentLoaded', function() {
         body: formData
     })
     .then(response => {
-        if (response.ok) {
-            return true;
-        } else {
-            throw new Error("Erreur serveur");
-        }
+        if (response.ok) return true;
+        else throw new Error("Erreur serveur");
     })
     .then(() => {
         showNotification("📜 Proposition Reçue !", "Ta proposition a été scellée et envoyée au Conseil des Anciens.<br>Merci pour ta contribution.");
@@ -2142,7 +2173,7 @@ document.addEventListener('DOMContentLoaded', function() {
     })
     .catch(error => {
         console.error('Erreur:', error);
-        showNotification("⚠️ Oups", "Une erreur technique est survenue, mais il est possible que ton message soit passé. Vérifie ta connexion.");
+        showNotification("⚠️ Oups", "Une erreur technique est survenue. Vérifie ta connexion.");
     })
     .finally(() => {
         submitBtn.textContent = originalText;
@@ -2169,11 +2200,8 @@ document.addEventListener('DOMContentLoaded', function() {
         body: formData
     })
     .then(response => {
-        if (response.ok) {
-            return true;
-        } else {
-            throw new Error("Erreur serveur");
-        }
+        if (response.ok) return true;
+        else throw new Error("Erreur serveur");
     })
     .then(() => {
         showNotification("🐛 Rapport Envoyé !", "Merci de nous aider à chasser les bugs du Village.");
@@ -2214,6 +2242,8 @@ document.addEventListener('DOMContentLoaded', function() {
   // ===============================
   document.querySelectorAll('.carte-jeu').forEach(carte => {
     carte.addEventListener('click', function(e) {
+      if (document.body.classList.contains('locked-game')) return; // Sécurité JS
+      
       if (e.target.closest('.btn-details')) return;
       e.stopPropagation();
       if (navigator.vibrate) navigator.vibrate(50);
@@ -2283,6 +2313,8 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   
   function openZoom(card) {
+    if (document.body.classList.contains('locked-game')) return; // Sécurité JS
+    
     document.querySelectorAll('.carte-vm.zoomed').forEach(c => c.classList.remove('zoomed'));
     card.classList.add('zoomed');
     if (vmOverlay) vmOverlay.classList.add('active');
@@ -2453,7 +2485,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // ===============================
-  // 12. GESTION DES SLIDES (RÈGLES DE BASE)
+  // 12. GESTION DES SLIDES (RÈGLES DE BASE + DÉTECTION LECTURE)
   // ===============================
   let currentSlideIndex = 0;
   const slides = document.querySelectorAll('.slide');
@@ -2466,7 +2498,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Calculer le nouvel index
     currentSlideIndex += direction;
     
-    // Boucle (si on dépasse la fin, on revient au début, et inversement)
+    // Boucle
     if (currentSlideIndex >= slides.length) currentSlideIndex = 0;
     if (currentSlideIndex < 0) currentSlideIndex = slides.length - 1;
     
@@ -2479,6 +2511,21 @@ document.addEventListener('DOMContentLoaded', function() {
     // Remonter en haut du contenu
     const container = document.querySelector('.slides-container');
     if(container) container.scrollTop = 0;
+
+    // --- LOGIQUE DE DÉVERROUILLAGE (RÈGLES) ---
+    // Si on arrive sur la dernière slide (index = length - 1)
+    if (currentSlideIndex === slides.length - 1) {
+        localStorage.setItem('vm_rules_read', 'true');
+        
+        // Petit feedback si c'était la dernière étape
+        if (localStorage.getItem('vm_pact_read') === 'true' && document.body.classList.contains('locked-game')) {
+            showNotification("🔓 Accès Autorisé", "Tu connais les lois. Bienvenue dans le Village.");
+        }
+        checkGameUnlock();
+    }
   };
+
+  // LANCER LA VÉRIFICATION AU DÉMARRAGE
+  checkGameUnlock();
 
 }); // FIN DOMContentLoaded
