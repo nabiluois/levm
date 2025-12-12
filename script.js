@@ -2011,10 +2011,10 @@ document.addEventListener('DOMContentLoaded', function() {
   const cardsArray = Array.from(document.querySelectorAll('.carte-jeu')); 
 
   // ===============================
-  // 13. SYSTÈME DE DÉVERROUILLAGE & INTRO (STRICT)
+  // 13. SYSTÈME DE DÉVERROUILLAGE & INTRO (STRICT & MANUEL)
   // ===============================
   
-  // A. Changer les slides du cadenas
+  // A. Navigation dans le cadenas
   window.nextLockSlide = function(index) {
       document.querySelectorAll('.lock-slide').forEach(el => el.classList.remove('active'));
       document.querySelectorAll('.dot').forEach(el => el.classList.remove('active'));
@@ -2026,12 +2026,11 @@ document.addEventListener('DOMContentLoaded', function() {
       if(nextDot) nextDot.classList.add('active');
   };
 
-  // B. Finir l'intro (Bouton Final "Ouvrir le Menu")
+  // B. Fermer l'intro temporairement (Bouton "Ouvrir le Menu")
   window.finishIntro = function() {
-      // 1. On ferme simplement le pop-up pour cette session
       closeModal('modal-lock-intro');
       
-      // 2. On ouvre le menu burger pour guider le joueur immédiatement
+      // Ouvre le menu burger pour guider le joueur
       setTimeout(() => {
           const extraMenu = document.querySelector('.extra-menu');
           if(extraMenu && !extraMenu.classList.contains('open')) {
@@ -2040,24 +2039,54 @@ document.addEventListener('DOMContentLoaded', function() {
       }, 500);
   };
 
-  // C. Vérification principale (LOGIQUE STRICTE)
+  // C. NOUVEAU : Validation Manuelle des Règles (Via Bouton)
+  window.finishRules = function() {
+      localStorage.setItem('vm_rules_read', 'true');
+      closeModal('modal-regles-base');
+      
+      if (localStorage.getItem('vm_pact_read') === 'true') {
+          showNotification("🔓 Accès Autorisé", "Tu as tout validé. Bienvenue dans le Village.");
+      } else {
+          showNotification("📜 Règles Validées", "Bien. Maintenant, tu dois signer le Pacte Maudit.");
+      }
+      
+      checkGameUnlock();
+  };
+
+  // D. NOUVEAU : Signature Manuelle du Pacte (Via Bouton)
+  window.signPact = function() {
+      localStorage.setItem('vm_pact_read', 'true');
+      closeModal('modal-regles');
+      
+      if (localStorage.getItem('vm_rules_read') === 'true') {
+          showNotification("🩸 Pacte Signé", "Accès Autorisé. Bienvenue dans le Village.");
+      } else {
+          showNotification("✍️ Pacte Signé", "Bien. N'oublie pas de lire les Règles de base.");
+      }
+      
+      checkGameUnlock();
+  };
+
+  // E. Vérification principale (CORRIGÉE : Plus de bug de scroll)
   function checkGameUnlock() {
       const rulesRead = localStorage.getItem('vm_rules_read') === 'true';
       const pactRead = localStorage.getItem('vm_pact_read') === 'true';
 
       if (rulesRead && pactRead) {
-          // Tout est lu : on déverrouille tout
+          // Tout est bon : on déverrouille
           document.body.classList.remove('locked-game');
       } else {
-          // Manque quelque chose : on verrouille
+          // Il manque quelque chose : on verrouille
           document.body.classList.add('locked-game');
           
-          // FORCER L'AFFICHAGE DU POP-UP À CHAQUE CHARGEMENT
-          // Tant que les conditions (rulesRead && pactRead) ne sont pas remplies.
+          // AFFICHER L'INTRO SI AUCUNE AUTRE MODALE N'EST OUVERTE
+          // Cela empêche le pop-up d'apparaître PENDANT qu'on lit les règles
           setTimeout(() => {
-              const modal = document.getElementById('modal-lock-intro');
-              // On l'ouvre seulement s'il n'est pas déjà actif (pour éviter conflits)
-              if(modal && !modal.classList.contains('active')) {
+              const anyActiveModal = document.querySelector('.modal.active');
+              const lockModal = document.getElementById('modal-lock-intro');
+              
+              // Si aucune modale active ET jeu verrouillé => On affiche l'intro
+              if(!anyActiveModal && lockModal) {
                   openModal('modal-lock-intro');
               }
           }, 800);
@@ -2083,7 +2112,7 @@ document.addEventListener('DOMContentLoaded', function() {
   if(extraOverlay) extraOverlay.addEventListener('click', toggleExtraMenu);
 
   // ===============================
-  // 3. GESTION DES MODALES (SCROLL & SÉCURITÉ)
+  // 3. GESTION DES MODALES
   // ===============================
   
   let scrollPosition = 0;
@@ -2094,7 +2123,7 @@ document.addEventListener('DOMContentLoaded', function() {
       scrollPosition = window.scrollY;
       modal.classList.add('active');
       
-      // Verrouillage du scroll
+      // Verrouillage scroll
       document.body.style.position = 'fixed';
       document.body.style.top = `-${scrollPosition}px`;
       document.body.style.width = '100%';
@@ -2109,32 +2138,28 @@ document.addEventListener('DOMContentLoaded', function() {
     if(modal) {
       modal.classList.remove('active');
       
-      // Déverrouillage du scroll
+      // Déverrouillage scroll
       document.body.style.position = '';
       document.body.style.top = '';
       document.body.style.width = '';
       document.body.style.overflow = '';
       window.scrollTo(0, scrollPosition);
 
-      // --- LOGIQUE DE DÉVERROUILLAGE (PACTE) ---
-      if (modalId === 'modal-regles') {
-          localStorage.setItem('vm_pact_read', 'true');
-          
-          if (localStorage.getItem('vm_rules_read') === 'true' && document.body.classList.contains('locked-game')) {
-             showNotification("🔓 Accès Autorisé", "Tu connais les lois. Bienvenue dans le Village.");
-          }
-          checkGameUnlock(); // Relance la vérif pour enlever le flou
+      // Si on ferme une fenêtre sans avoir validé (croix), on vérifie l'état du jeu
+      // Cela fera réapparaître l'intro si le joueur n'a pas fini ses tâches
+      if (document.body.classList.contains('locked-game')) {
+          checkGameUnlock(); 
       }
     }
   };
 
-  // SÉCURITÉ : Empêcher la fermeture en cliquant dehors pour l'intro
+  // Empêcher la fermeture de l'intro en cliquant dehors (HARD LOCK)
   document.querySelectorAll('.modal').forEach(modal => {
     modal.addEventListener('click', (e) => {
-      // HARD LOCK : Si c'est l'intro, on interdit la fermeture au clic
+      // Si c'est l'intro : INTERDIT de fermer au clic
       if (modal.id === 'modal-lock-intro') return;
 
-      // Sinon comportement normal
+      // Pour les autres : OK
       if (e.target === modal) window.closeModal(modal.id);
     });
   });
@@ -2510,7 +2535,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // ===============================
-  // 12. GESTION DES SLIDES (RÈGLES DE BASE + DÉTECTION LECTURE)
+  // 12. GESTION DES SLIDES
   // ===============================
   let currentSlideIndex = 0;
   const slides = document.querySelectorAll('.slide');
@@ -2537,17 +2562,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const container = document.querySelector('.slides-container');
     if(container) container.scrollTop = 0;
 
-    // --- LOGIQUE DE DÉVERROUILLAGE (RÈGLES) ---
-    // Si on arrive sur la dernière slide (index = length - 1)
-    if (currentSlideIndex === slides.length - 1) {
-        localStorage.setItem('vm_rules_read', 'true');
-        
-        // Petit feedback si c'était la dernière étape
-        if (localStorage.getItem('vm_pact_read') === 'true' && document.body.classList.contains('locked-game')) {
-            showNotification("🔓 Accès Autorisé", "Tu connais les lois. Bienvenue dans le Village.");
-        }
-        checkGameUnlock();
-    }
+    // PLUS DE VÉRIFICATION AUTOMATIQUE ICI !
+    // La validation se fait uniquement via les boutons finishRules() et signPact()
   };
 
   // LANCER LA VÉRIFICATION AU DÉMARRAGE
