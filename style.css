@@ -824,3 +824,137 @@ body.locked-game .notification-overlay {
     pointer-events: auto;
     opacity: 1;
 }
+
+/* =======================================================
+   15. MODALE INTRO (LOCK SLIDER)
+   ======================================================= */
+
+/* Conteneur plus petit et centré */
+.lock-content {
+  max-width: 380px !important;
+  min-height: 450px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  background: linear-gradient(145deg, #1a120b 0%, #0f0804 100%);
+  border: 2px solid var(--gold);
+  padding: 30px 20px !important;
+}
+
+.lock-slide {
+  display: none; /* Caché par défaut */
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  animation: fadeIn 0.5s ease;
+}
+.lock-slide.active { display: flex; }
+
+/* Icônes Stylées */
+.lock-icon-wrapper {
+  margin-bottom: 20px;
+  position: relative;
+}
+.lock-main-icon {
+  font-size: 4em;
+  color: #5a4633;
+  filter: drop-shadow(0 0 10px rgba(0,0,0,0.5));
+  transition: all 0.5s ease;
+}
+.gold-glow { color: var(--gold); filter: drop-shadow(0 0 15px rgba(212, 175, 55, 0.4)); }
+.red-glow { color: #ff6b6b; filter: drop-shadow(0 0 15px rgba(255, 107, 107, 0.4)); }
+
+/* Typographie */
+.lock-slide h2 {
+  font-family: 'Pirata One', serif;
+  color: var(--gold);
+  font-size: 2em !important;
+  margin-bottom: 15px !important;
+  border: none !important;
+  background: none !important;
+  box-shadow: none !important;
+}
+.lock-slide p {
+  font-family: 'Almendra', serif;
+  color: #f5e6b3;
+  font-size: 1.1em;
+  line-height: 1.4;
+  margin-bottom: 25px;
+}
+
+/* Liste des étapes (Page 2) */
+.lock-steps {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 15px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  border: 1px solid rgba(212, 175, 55, 0.2);
+}
+.lock-step {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  text-align: left;
+  font-size: 0.95em;
+  color: #fff;
+}
+.lock-step:last-child { margin-bottom: 0; }
+.step-badge {
+  background: var(--gold);
+  color: #000;
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: bold;
+  font-family: sans-serif;
+  font-size: 0.8em;
+  flex-shrink: 0;
+}
+
+/* Boutons */
+.btn-lock-next {
+  background: transparent;
+  border: 1px solid var(--gold);
+  color: var(--gold);
+  padding: 10px 25px;
+  border-radius: 25px;
+  font-family: 'Pirata One', serif;
+  font-size: 1.2em;
+  cursor: pointer;
+  transition: all 0.3s;
+  margin-top: auto;
+}
+.btn-lock-next:hover {
+  background: var(--gold);
+  color: #000;
+}
+.btn-lock-next.finish {
+  background: linear-gradient(135deg, #d4af37, #b8941f);
+  color: #000;
+  border: none;
+  box-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
+  width: 100%;
+}
+
+/* Points de navigation */
+.lock-dots {
+  display: flex;
+  gap: 8px;
+  margin-top: 25px;
+}
+.dot {
+  width: 8px; height: 8px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 50%;
+  transition: all 0.3s;
+}
+.dot.active { background: var(--gold); transform: scale(1.2); }
+
+/* Mode Clair Adaptations */
+body.light-mode .lock-content { background: #fffcf5; border-color: #b8860b; }
+body.light-mode .lock-slide p, body.light-mode .lock-step { color: #3e2f23; }
+body.light-mode .lock-steps { background: rgba(0,0,0,0.05); border-color: #b8860b; }

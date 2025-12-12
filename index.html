@@ -525,6 +525,53 @@
     </div>
   </div>
 
+  <div id="modal-lock-intro" class="modal" style="z-index: 6000;">
+    <div class="modal-content lock-content">
+      
+      <div class="lock-slide active" id="lock-slide-0">
+        <div class="lock-icon-wrapper">
+          <i class="fas fa-lock lock-main-icon"></i>
+        </div>
+        <h2>Village Scellé</h2>
+        <p>Halte, Étranger ! Une brume magique recouvre le village.<br>Les habitants ne se révèlent pas à n'importe qui.</p>
+        <button class="btn-lock-next" onclick="nextLockSlide(1)">Comment entrer ? ➜</button>
+      </div>
+
+      <div class="lock-slide" id="lock-slide-1">
+        <div class="lock-icon-wrapper">
+          <i class="fas fa-book-open lock-main-icon gold-glow"></i>
+        </div>
+        <h2>Le Rituel</h2>
+        <p>Pour dissiper le brouillard, tu dois prouver ta connaissance des lois :</p>
+        <div class="lock-steps">
+          <div class="lock-step">
+            <span class="step-badge">1</span> Lire les <strong>Règles</strong> (9 pages)
+          </div>
+          <div class="lock-step">
+            <span class="step-badge">2</span> Signer le <strong>Pacte Maudit</strong>
+          </div>
+        </div>
+        <button class="btn-lock-next" onclick="nextLockSlide(2)">J'ai compris ➜</button>
+      </div>
+
+      <div class="lock-slide" id="lock-slide-2">
+        <div class="lock-icon-wrapper">
+          <i class="fas fa-dungeon lock-main-icon red-glow"></i>
+        </div>
+        <h2>À toi de jouer</h2>
+        <p>Tout se trouve dans le <strong>Menu</strong> (en haut à gauche).</p>
+        <p style="font-size: 0.9em; opacity: 0.8;">Une fois ces deux tâches accomplies, les cartes se révèleront automatiquement.</p>
+        <button class="btn-lock-next finish" onclick="finishIntro()">Ouvrir le Menu ☰</button>
+      </div>
+
+      <div class="lock-dots">
+        <span class="dot active" id="dot-0"></span>
+        <span class="dot" id="dot-1"></span>
+        <span class="dot" id="dot-2"></span>
+      </div>
+
+    </div>
+  </div>
   <script src="script.js"></script>
 </body>
 </html>
