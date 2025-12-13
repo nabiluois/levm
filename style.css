@@ -940,6 +940,44 @@ body.locked-game .notification-overlay {
   width: 100%;
 }
 
+/* Navigation Double (Précédent / Suivant) - NOUVEAU */
+.lock-nav-buttons {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    gap: 15px;
+    margin-top: auto; /* Pousse vers le bas */
+}
+
+/* Style du bouton Précédent */
+.btn-lock-prev {
+    background: transparent;
+    border: 1px solid rgba(212, 175, 55, 0.5);
+    color: var(--gold);
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    font-size: 1.2em;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+    flex-shrink: 0; /* Ne s'écrase pas */
+}
+
+.btn-lock-prev:hover {
+    background: rgba(212, 175, 55, 0.2);
+    border-color: var(--gold);
+}
+
+/* Ajustement du bouton Suivant pour qu'il prenne la place restante */
+.lock-nav-buttons .btn-lock-next {
+    flex-grow: 1; /* Prend tout l'espace disponible */
+    margin-top: 0; /* Annule la marge précédente */
+}
+
 /* Points de navigation */
 .lock-dots {
   display: flex;
@@ -995,4 +1033,17 @@ body.light-mode .lock-steps { background: rgba(0,0,0,0.05); border-color: #b8860
 body.light-mode .btn-validate {
     border-color: #b8860b;
     box-shadow: 0 4px 15px rgba(184, 134, 11, 0.3);
+}
+
+/* ============================================
+   17. BLOCAGE MENU SI VERROUILLÉ
+   ============================================ */
+/* Tant que le jeu est verrouillé (locked-game), on grise ces deux liens */
+body.locked-game .extra-links a[onclick*="modal-propose"],
+body.locked-game .extra-links a[onclick*="modal-bug"] {
+    opacity: 0.3;
+    filter: grayscale(100%);
+    pointer-events: none; /* Empêche le clic */
+    cursor: not-allowed;
+    border-color: #555;
 }

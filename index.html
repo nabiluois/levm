@@ -70,7 +70,7 @@
         </a>
       </li>
       <li>
-        <a href="#" onclick="openModal('modal-regles')">
+        <a href="#" onclick="openModal('modal-regles')" style="border-color: #ff6b6b; color:#ff6b6b;">
           <img src="Le_pacte_maudit.svg" alt="Pacte" class="menu-icon"> Le Pacte Maudit
         </a>
       </li>
@@ -557,7 +557,10 @@
             <span class="step-badge">2</span> Signer le <strong>Pacte Maudit</strong>
           </div>
         </div>
-        <button class="btn-lock-next" onclick="nextLockSlide(2)">J'ai compris ➜</button>
+        <div class="lock-nav-buttons">
+            <button class="btn-lock-prev" onclick="nextLockSlide(0)">❮</button>
+            <button class="btn-lock-next" onclick="nextLockSlide(2)">J'ai compris ➜</button>
+        </div>
       </div>
 
       <div class="lock-slide" id="lock-slide-2">
@@ -567,7 +570,10 @@
         <h2>À toi de jouer</h2>
         <p>Tout se trouve dans le <strong>Menu</strong> (en haut à gauche).</p>
         <p style="font-size: 0.9em; opacity: 0.8;">Une fois ces deux tâches accomplies, les cartes se révèleront automatiquement.</p>
-        <button class="btn-lock-next finish" onclick="finishIntro()">Ouvrir le Menu ☰</button>
+        <div class="lock-nav-buttons">
+             <button class="btn-lock-prev" onclick="nextLockSlide(1)">❮</button>
+             <button class="btn-lock-next finish" onclick="finishIntro()">Ouvrir le Menu ☰</button>
+        </div>
       </div>
 
       <div class="lock-dots">
