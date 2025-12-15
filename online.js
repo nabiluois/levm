@@ -1,5 +1,5 @@
 // ============================================
-// SYSTEME EN LIGNE - LE VILLAGE MAUDIT (V15 - RESURRECTION & CARTE ÉPURÉE)
+// SYSTEME EN LIGNE - LE VILLAGE MAUDIT (V16 - FIX BOUTON MORT & CENTRAGE)
 // ============================================
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -235,13 +235,16 @@ function updateAdminUI(players) {
             let buttonsHtml = "";
             let draftBadge = "";
 
+            // STYLE SPECIAL POUR FORCER LE CLIC SUR LES BOUTONS MEME SI "DEAD"
+            // On ajoute pointer-events: auto, opacity: 1, et filter: none
+            const forceClickStyle = "pointer-events: auto; opacity: 1; filter: none; cursor: pointer; position:relative; z-index:100;";
+
             if (isDraft) {
-                // --- MODE BROUILLON ---
                 draftBadge = `<div style="background:#e67e22; color:white; font-size:0.7em; padding:2px 6px; border-radius:4px; position:absolute; top:5px; right:5px; z-index:10; font-family:sans-serif;">PROVISOIRE</div>`;
                 
                 buttonsHtml = `
                     <button class="btn-admin-mini" 
-                        style="background:#3498db; color:white; width:100%; border:none; padding:10px; border-radius:5px; cursor:pointer; font-family:'Pirata One'; font-size:1.1em; pointer-events: auto; margin-top:5px; position:relative; z-index:100;" 
+                        style="background:#3498db; color:white; width:100%; border:none; padding:10px; border-radius:5px; font-family:'Pirata One'; font-size:1.1em; margin-top:5px; ${forceClickStyle}" 
                         onclick="event.stopPropagation(); window.openResurrectModal('${id}')">
                         🔄 CHANGER
                     </button>
@@ -251,13 +254,15 @@ function updateAdminUI(players) {
                 buttonsHtml = `<span style="font-size:0.8em; opacity:0.5;">...</span>`;
             } 
             else if (isDead) {
-                // --- JOUEUR MORT : Options événement + REVIENT ---
+                // --- JOUEUR MORT : BOUTONS FORCÉS ---
                 buttonsHtml = `<div class="admin-actions">`;
-                if(detectedEvents.gold.length > 0) buttonsHtml += `<button class="btn-admin-mini" style="background:gold; color:black;" onclick="event.stopPropagation(); window.adminDraw('${id}', 'gold')">OR</button>`;
-                if(detectedEvents.silver.length > 0) buttonsHtml += `<button class="btn-admin-mini" style="background:silver; color:black;" onclick="event.stopPropagation(); window.adminDraw('${id}', 'silver')">ARG</button>`;
-                if(detectedEvents.bronze.length > 0) buttonsHtml += `<button class="btn-admin-mini" style="background:#cd7f32; color:black;" onclick="event.stopPropagation(); window.adminDraw('${id}', 'bronze')">BRZ</button>`;
+                
+                if(detectedEvents.gold.length > 0) buttonsHtml += `<button class="btn-admin-mini" style="background:gold; color:black; ${forceClickStyle}" onclick="event.stopPropagation(); window.adminDraw('${id}', 'gold')">OR</button>`;
+                if(detectedEvents.silver.length > 0) buttonsHtml += `<button class="btn-admin-mini" style="background:silver; color:black; ${forceClickStyle}" onclick="event.stopPropagation(); window.adminDraw('${id}', 'silver')">ARG</button>`;
+                if(detectedEvents.bronze.length > 0) buttonsHtml += `<button class="btn-admin-mini" style="background:#cd7f32; color:black; ${forceClickStyle}" onclick="event.stopPropagation(); window.adminDraw('${id}', 'bronze')">BRZ</button>`;
+                
                 buttonsHtml += `</div>
-                    <button class="btn-admin-mini" style="background:#2ecc71; color:white; width:100%; margin-top:5px;" onclick="event.stopPropagation(); window.openResurrectModal('${id}')">♻️ REVIENT</button>
+                    <button class="btn-admin-mini" style="background:#2ecc71; color:white; width:100%; margin-top:5px; ${forceClickStyle}" onclick="event.stopPropagation(); window.openResurrectModal('${id}')">♻️ REVIENT</button>
                 `;
             } else {
                 buttonsHtml = `<div class="admin-actions"><button class="btn-admin-mini" style="background:#c0392b; color:white; width:100%;" onclick="event.stopPropagation(); window.adminKill('${id}')">💀 MORT</button></div>`;
@@ -347,20 +352,16 @@ window.openResurrectModal = function(playerId) {
     window.openModal('modal-role-selector');
 };
 
-// C'est ici que la magie de la Résurrection opère
 window.assignRoleToPlayer = function(roleId) {
     if(!targetResurrectId) return;
 
     if (isDraftMode) {
-        // Mode Brouillon
         update(ref(db, `games/${currentGameCode}/players/${targetResurrectId}`), { 
             draftRole: roleId 
         });
         window.closeModal('modal-role-selector');
     } else {
-        // Mode Jeu (RESURRECTION)
         if(confirm("Cela va changer le rôle du joueur et le ramener à la vie. Continuer ?")) {
-            // On met status 'alive', le nouveau role, et on efface les cartes événements
             update(ref(db, `games/${currentGameCode}/players/${targetResurrectId}`), { 
                 status: 'alive', role: roleId, drawnCard: null 
             });
@@ -483,17 +484,14 @@ function listenForPlayerUpdates() {
         const data = snapshot.val();
         if (!data) return;
 
-        // GESTION DU ROLE (Normal ou Résurrection)
         if (data.role) {
             myCurrentRoleId = data.role; 
             
-            // Si le rôle change (nouvelle partie ou résurrection)
             if (data.role !== lastRole) {
                 lastRole = data.role;
-                revealRole(data.role); // Affiche la carte (Dos face à nous)
+                revealRole(data.role);
             }
 
-            // Affiche le lobby normal
             const lobbyStatus = document.getElementById('player-lobby-status');
             if(lobbyStatus) {
                 lobbyStatus.innerHTML = `
@@ -506,19 +504,17 @@ function listenForPlayerUpdates() {
             }
         }
 
-        // GESTION DE LA MORT
         if (data.status === 'dead') {
             internalShowNotification("💀 TU ES MORT", "Attends de voir si le destin t'offre une carte...");
             document.getElementById('player-lobby-status').innerHTML = `<h3 style="color:#c0392b;">TU ES MORT 💀</h3>`;
         }
 
-        // GESTION DES CARTES EVENEMENTS
         if (data.drawnCard && data.drawnCard.image !== lastCardImg) {
             lastCardImg = data.drawnCard.image;
             internalShowCard({
                 title: `CARTE ${data.drawnCard.category}`,
                 image: data.drawnCard.image,
-                description: `` // Pas de texte
+                description: `` 
             });
         }
     });
@@ -530,7 +526,7 @@ window.showMyRoleAgain = function() {
 };
 
 // ============================================
-// F. FONCTIONS D'AFFICHAGE (CARTE 100% IMAGE)
+// F. FONCTIONS D'AFFICHAGE (CENTRAGE & SANS TEXTE)
 // ============================================
 
 function revealRole(roleId) {
@@ -551,15 +547,17 @@ function internalShowCard(data) {
     
     if(!panel || !overlay) return;
 
+    // J'utilise ici justify-content:center pour le vertical
+    // Et j'ajoute un petit padding-top si besoin pour le visuel sur mobile
     panel.innerHTML = `
-        <div id="online-content-wrapper" style="height:100%; display:flex; flex-direction:column; justify-content:center; align-items:center;">
+        <div id="online-content-wrapper" style="height:100%; display:flex; flex-direction:column; justify-content:center; align-items:center; box-sizing:border-box;">
             
             <button class="close-details" onclick="window.internalCloseDetails()" 
                 style="position:absolute; top:20px; right:20px; z-index:100; background:rgba(0,0,0,0.6); color:white; border:1px solid gold; border-radius:50%; width:40px; height:40px; font-size:20px; cursor:pointer;">
                 ✕
             </button>
 
-            <div class="scene-flip" onclick="this.classList.toggle('is-flipped')" style="margin:0;">
+            <div class="scene-flip" onclick="this.classList.toggle('is-flipped')" style="margin: 0;">
                 <div class="card-object">
                     
                     <div class="card-face face-front">
