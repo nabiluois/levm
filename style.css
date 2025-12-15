@@ -1740,3 +1740,46 @@ body.light-mode #online-mode-link {
     box-shadow: 0 2px 5px rgba(0,0,0,0.5);
     z-index: 20;
 }
+
+/* =======================================================
+   34. FINALISATION MOBILE (LARGEUR & ICÔNES)
+   ======================================================= */
+
+/* 1. Fenêtre de sélection plus large sur mobile */
+#modal-role-selector .modal-content {
+    max-width: 98% !important; /* Utilise toute la largeur */
+    width: 98% !important;
+    padding: 10px !important;
+}
+
+/* 2. Bouton Valider plus compact */
+.btn-validate-small {
+    padding: 8px 15px !important;
+    font-size: 1.1em !important;
+    margin-bottom: 10px !important;
+    width: 100%;
+    margin-top: 5px !important;
+}
+
+/* 3. Style des icônes dans le Dashboard (Village/Loup/Solo) */
+.stat-icon {
+    width: 24px;
+    height: 24px;
+    vertical-align: middle;
+    margin-right: 4px;
+    filter: drop-shadow(0 0 2px rgba(255,255,255,0.3));
+    position: relative;
+    top: -2px;
+}
+
+/* 4. Ajustement grille sélection */
+.admin-grid-container {
+    grid-template-columns: repeat(3, 1fr) !important; /* 3 colonnes pour voir plus */
+    gap: 6px !important;
+}
+
+@media (max-width: 380px) {
+    .admin-grid-container {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+}

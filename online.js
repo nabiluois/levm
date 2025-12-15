@@ -1,5 +1,5 @@
 // ============================================
-// SYSTEME EN LIGNE - LE VILLAGE MAUDIT (V25 - DASHBOARD & QUANTITÉS)
+// SYSTEME EN LIGNE - LE VILLAGE MAUDIT (V26 - DASHBOARD SVG & LAYOUT)
 // ============================================
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -31,7 +31,7 @@ let detectedRoles = [];
 let detectedEvents = { gold: [], silver: [], bronze: [] };
 let isDraftMode = false; 
 
-// Stockage de la sélection (Tableau d'IDs)
+// Stockage de la sélection
 let distributionSelection = [];
 
 // ============================================
@@ -194,10 +194,9 @@ function setupAdminListeners() {
 }
 
 // ============================================
-// C. LOGIQUE DE SÉLECTION (DASHBOARD & QUANTITÉS)
+// C. LOGIQUE DE SÉLECTION (DASHBOARD & SVG)
 // ============================================
 
-// 1. Mise à jour du Dashboard
 function updateDistributionDashboard() {
     const countVillage = distributionSelection.filter(id => {
         const r = detectedRoles.find(role => role.id === id);
@@ -209,20 +208,22 @@ function updateDistributionDashboard() {
         return r && r.category === 'loups';
     }).length;
 
-    const countSolo = distributionSelection.length - countVillage - countLoup;
+    const countSolo = distributionSelection.filter(id => {
+        const r = detectedRoles.find(role => role.id === id);
+        return r && r.category === 'solo';
+    }).length;
 
     document.getElementById('count-village').innerText = countVillage;
     document.getElementById('count-loup').innerText = countLoup;
     document.getElementById('count-solo').innerText = countSolo;
     document.getElementById('total-distrib').innerText = distributionSelection.length;
 
-    // Liste des noms (facultatif mais utile)
+    // Liste des noms
     const names = distributionSelection.map(id => {
         const r = detectedRoles.find(role => role.id === id);
         return r ? r.title : id;
     });
     
-    // On groupe les noms (ex: Paysan x3)
     const groupedNames = {};
     names.forEach(name => { groupedNames[name] = (groupedNames[name] || 0) + 1; });
     const textList = Object.entries(groupedNames).map(([k, v]) => v > 1 ? `${k} x${v}` : k).join(', ');
@@ -230,7 +231,6 @@ function updateDistributionDashboard() {
     document.getElementById('summary-list').innerText = textList || "Aucun rôle sélectionné.";
 }
 
-// 2. Génération de la grille
 window.generateResurrectionGrid = function(mode = 'single') {
     const grid = document.getElementById('admin-role-grid');
     if(!grid) return;
@@ -239,23 +239,23 @@ window.generateResurrectionGrid = function(mode = 'single') {
     grid.style.display = "block"; 
     grid.innerHTML = "";
     
-    // TABLEAU DE BORD (En mode Multi)
+    // DASHBOARD AVEC ICÔNES SVG (ICI)
     if (mode === 'multi') {
         const dashboard = document.createElement('div');
         dashboard.className = "selection-dashboard";
         dashboard.innerHTML = `
             <div class="dashboard-stats">
-                <div class="stat-item stat-village">🏡 <span id="count-village">0</span></div>
-                <div class="stat-item stat-loup">🐺 <span id="count-loup">0</span></div>
-                <div class="stat-item stat-solo">🎭 <span id="count-solo">0</span></div>
+                <div class="stat-item stat-village"><img src="Village.svg" class="stat-icon"><span id="count-village">0</span></div>
+                <div class="stat-item stat-loup"><img src="Loup.svg" class="stat-icon"><span id="count-loup">0</span></div>
+                <div class="stat-item stat-solo"><img src="Solo.svg" class="stat-icon"><span id="count-solo">0</span></div>
             </div>
             <div class="dashboard-list" id="summary-list">...</div>
-            <button class="btn-validate" style="margin-top:5px; padding:10px; background:#2ecc71;" onclick="window.validateDistribution()">
+            <button class="btn-validate btn-validate-small" style="background:#2ecc71;" onclick="window.validateDistribution()">
                 ✅ VALIDER LA SÉLECTION (<span id="total-distrib">0</span>)
             </button>
         `;
         grid.appendChild(dashboard);
-        setTimeout(updateDistributionDashboard, 50); // Init
+        setTimeout(updateDistributionDashboard, 50); 
     }
 
     const categoriesOrder = { 'village': '🏡 VILLAGE', 'loups': '🐺 LOUPS', 'solo': '🎭 SOLOS', 'vampires': '🧛 VAMPIRES' };
@@ -268,9 +268,9 @@ window.generateResurrectionGrid = function(mode = 'single') {
             grid.appendChild(titleDiv);
 
             const catGrid = document.createElement('div');
-            catGrid.className = "admin-grid-container"; // Nouvelle classe CSS
+            catGrid.className = "admin-grid-container"; 
             catGrid.style.display = "grid";
-            catGrid.style.gridTemplateColumns = "repeat(2, 1fr)"; 
+            // NOTE : Le CSS force 3 colonnes maintenant
             
             rolesInCat.sort((a, b) => a.title.localeCompare(b.title));
 
@@ -278,14 +278,12 @@ window.generateResurrectionGrid = function(mode = 'single') {
                 const div = document.createElement('div');
                 div.className = "role-select-item";
                 
-                // --- LOGIQUE MULTI-SÉLECTION ---
                 if (mode === 'multi') {
                     div.classList.add('multi-mode');
                     const count = distributionSelection.filter(id => id === role.id).length;
                     
                     if (count > 0) {
                         div.classList.add('selected');
-                        // Badge de quantité
                         if (count > 1 || role.id.includes('paysan') || role.id.includes('loup')) {
                             div.innerHTML += `<div class="qty-badge">x${count}</div>`;
                         }
@@ -293,7 +291,7 @@ window.generateResurrectionGrid = function(mode = 'single') {
                 }
 
                 div.style.cssText += "cursor:pointer; text-align:center; padding:5px; border-radius:8px; position:relative; background:rgba(255,255,255,0.05);";
-                div.innerHTML += `<img src="${role.image}" loading="lazy" style="width:100%; height:auto; border-radius:6px;"><span style="display:block; font-size:0.85em; color:#ddd;">${role.title}</span>`;
+                div.innerHTML += `<img src="${role.image}" loading="lazy" style="width:100%; height:auto; border-radius:6px;"><span style="display:block; font-size:0.85em; color:#ddd; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${role.title}</span>`;
                 
                 div.onclick = function() { 
                     if (mode === 'multi') {
@@ -309,15 +307,13 @@ window.generateResurrectionGrid = function(mode = 'single') {
     }
 };
 
-// 3. LOGIQUE DES QUANTITÉS (PROMPTS)
 function handleMultiSelection(roleId, divElement) {
     let currentCount = distributionSelection.filter(id => id === roleId).length;
     let newCount = 0;
 
-    // Rôles Spéciaux à Quantité
     if (roleId === 'le_paysan' || roleId === 'le_loup_garou') {
         let input = prompt(`Combien de ${roleId === 'le_paysan' ? 'Paysans' : 'Loups'} ? (0 - 10)`, currentCount || 0);
-        if (input === null) return; // Annuler
+        if (input === null) return; 
         newCount = parseInt(input);
         if (isNaN(newCount) || newCount < 0) newCount = 0;
         if (newCount > 10) newCount = 10;
@@ -330,23 +326,17 @@ function handleMultiSelection(roleId, divElement) {
         if (newCount > 2) newCount = 2;
     } 
     else {
-        // Rôle Standard (On/Off)
         newCount = currentCount > 0 ? 0 : 1;
     }
 
-    // Mise à jour du tableau distributionSelection
-    // 1. On retire toutes les occurrences de ce rôle
     distributionSelection = distributionSelection.filter(id => id !== roleId);
     
-    // 2. On ajoute le bon nombre
     for(let i=0; i<newCount; i++) {
         distributionSelection.push(roleId);
     }
 
-    // Mise à jour visuelle immédiate (Badge)
     if (newCount > 0) {
         divElement.classList.add('selected');
-        // Gestion du badge DOM
         let badge = divElement.querySelector('.qty-badge');
         if (!badge) {
             badge = document.createElement('div');
@@ -364,7 +354,7 @@ function handleMultiSelection(roleId, divElement) {
 }
 
 window.validateDistribution = function() {
-    window.updateRoleCount(); // Met à jour le bouton principal
+    window.updateRoleCount(); 
     window.closeModal('modal-role-selector');
 };
 
@@ -372,9 +362,7 @@ window.validateDistribution = function() {
 window.openDistributionSelector = function() {
     window.generateResurrectionGrid('multi');
     const modalTitle = document.querySelector('#modal-role-selector h2');
-    if(modalTitle) {
-        modalTitle.style.display = 'none'; // On cache le titre car on a le dashboard
-    }
+    if(modalTitle) modalTitle.style.display = 'none'; 
     const modal = document.getElementById('modal-role-selector');
     if(modal) modal.style.zIndex = "20000"; 
     window.openModal('modal-role-selector');
@@ -411,8 +399,8 @@ window.openEventSelector = function(playerId, category) {
     }
 
     const randomBtn = document.createElement('button');
-    randomBtn.className = "btn-validate";
-    randomBtn.style.cssText = "width:100%; margin-bottom:20px; background:linear-gradient(135deg, #2980b9, #3498db); border-color:#2980b9;";
+    randomBtn.className = "btn-validate btn-validate-small";
+    randomBtn.style.cssText = "margin-bottom:20px; background:linear-gradient(135deg, #2980b9, #3498db); border-color:#2980b9;";
     randomBtn.innerText = "🎲 DONNER UNE ALÉATOIRE";
     randomBtn.onclick = function() { window.adminDraw(playerId, category, true); };
     grid.appendChild(randomBtn);
@@ -646,6 +634,7 @@ function revealRolesToEveryone() {
     });
 }
 
+// CÔTÉ JOUEUR
 function joinGame() {
     const pseudo = document.getElementById('join-pseudo').value.trim();
     const code = document.getElementById('join-code').value.toUpperCase().trim();
