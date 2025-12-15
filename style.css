@@ -1230,3 +1230,16 @@ body.locked-game .extra-links a[onclick*="modal-bug"] {
     letter-spacing: 8px !important;
   }
 }
+
+/* ============================================
+   VERROUILLAGE MODE EN LIGNE
+   ============================================ */
+/* Ajoute l'ID du lien Online à la liste des éléments grisés */
+body.locked-game #online-mode-link {
+    opacity: 0.3;
+    filter: grayscale(100%);
+    pointer-events: none; /* Empêche le clic */
+    cursor: not-allowed;
+    border-color: #555 !important;
+    color: #888 !important;
+}

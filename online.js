@@ -1,15 +1,19 @@
 // ============================================
-// SYSTEME EN LIGNE - LE VILLAGE MAUDIT (V3 - VISUEL TOTAL)
+// SYSTEME EN LIGNE - LE VILLAGE MAUDIT (V4 - SÉCURISÉ & VISUEL)
 // ============================================
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getDatabase, ref, set, push, onValue, update, get, child } 
+import { getDatabase, ref, set, push, onValue, update, get, child, remove } 
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
 // 1. CONFIGURATION
 const firebaseConfig = {
   apiKey: "AIzaSyDbOZGB_e-v82n3eZaXq3_Eq8GHW0OLkXo",
   authDomain: "le-village-maudit.firebaseapp.com",
+  
+  // L'adresse de ta base de données
+  databaseURL: "https://le-village-maudit-default-rtdb.europe-west1.firebasedatabase.app", 
+  
   projectId: "le-village-maudit",
   storageBucket: "le-village-maudit.firebasestorage.app",
   messagingSenderId: "383628308052",
@@ -20,9 +24,10 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
+// Variables Globales
 let currentGameCode = null;
 let myPlayerId = null;
-let targetResurrectId = null; // Stocke l'ID du joueur qu'on veut ressusciter
+let targetResurrectId = null;
 
 const VM_CARDS = {
     gold: ['or1.png', 'or2.png', 'or3.png', 'or4.png', 'or5.png', 'or6.png', 'or7.png', 'or8.png', 'or9.png', 'or10.png'],
@@ -31,18 +36,31 @@ const VM_CARDS = {
 };
 
 // ============================================
-// A. GESTION DOM
+// A. GESTION DU MENU ET SÉCURITÉ
 // ============================================
-document.addEventListener('DOMContentLoaded', () => {
-    const btnOnline = document.getElementById('btn-online-mode');
-    if(btnOnline) btnOnline.addEventListener('click', () => window.openModal('modal-online-menu'));
 
+document.addEventListener('DOMContentLoaded', () => {
+    // On attache les événements aux boutons existants
     const btnJoin = document.getElementById('btn-join-action');
     if(btnJoin) btnJoin.addEventListener('click', joinGame);
 
     const btnDistribute = document.getElementById('btn-distribute');
     if(btnDistribute) btnDistribute.addEventListener('click', distributeRoles);
 });
+
+// --- NOUVEAU : PROTECTION PAR MOT DE PASSE ---
+window.checkAdminPassword = function() {
+    const password = prompt("🔐 Mot de passe MJ :");
+    
+    // MODIFIE "1234" ICI SI TU VEUX UN AUTRE CODE
+    if(password === "080147") {
+        window.initCreateGame(); // Lance la création
+        window.openModal('modal-create-game'); // Ouvre le salon admin
+        window.closeModal('modal-online-menu'); // Ferme le menu
+    } else if (password !== null) {
+        alert("⛔ Accès refusé ! Seul le MJ peut créer une partie.");
+    }
+};
 
 // ============================================
 // B. ADMIN (MJ) - LOGIQUE VISUELLE
@@ -67,10 +85,9 @@ window.initCreateGame = function() {
     });
 
     generateRoleChecklist();
-    generateResurrectionGrid(); // Prépare la grille des images
+    generateResurrectionGrid(); 
 };
 
-// NOUVELLE FONCTION D'AFFICHAGE (VISUEL)
 function updateAdminUI(players) {
     const listDiv = document.getElementById('player-list-admin');
     if(!listDiv) return;
@@ -84,7 +101,7 @@ function updateAdminUI(players) {
         Object.entries(players).forEach(([id, p]) => {
             
             // 1. Déterminer l'image à afficher
-            let cardImage = "icon.png"; // Image par défaut (dos de carte ou logo)
+            let cardImage = "icon.png"; 
             let roleTitle = "En attente...";
             
             if(p.role && window.paniniRoles) {
@@ -139,7 +156,7 @@ function updateAdminUI(players) {
     checkDistributionReady(count);
 }
 
-// Actions directes
+// Actions directes Admin
 window.adminKill = function(playerId) {
     if(confirm("Valider la mort ?")) {
         update(ref(db, `games/${currentGameCode}/players/${playerId}`), { status: 'dead' });
@@ -160,7 +177,6 @@ window.adminDraw = function(playerId, category) {
 // C. LOGIQUE DE RESSURECTION VISUELLE
 // ============================================
 
-// 1. Prépare la grille d'images dans la modale (une seule fois au début)
 function generateResurrectionGrid() {
     const grid = document.getElementById('admin-role-grid');
     if(!grid || !window.paniniRoles) return;
@@ -176,13 +192,11 @@ function generateResurrectionGrid() {
     });
 }
 
-// 2. Ouvre la modale et stocke l'ID du joueur
 window.openResurrectModal = function(playerId) {
     targetResurrectId = playerId;
     window.openModal('modal-role-selector');
 };
 
-// 3. Quand on clique sur une image
 window.confirmResurrection = function(roleId) {
     if(!targetResurrectId) return;
 
@@ -197,7 +211,7 @@ window.confirmResurrection = function(roleId) {
 };
 
 // ============================================
-// D. DISTRIBUTION & LISTE (Reste identique mais nécessaire)
+// D. DISTRIBUTION & LISTE
 // ============================================
 
 function generateRoleChecklist() {
