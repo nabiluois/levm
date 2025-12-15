@@ -25,35 +25,21 @@
 <body>
 
   <header class="main-header">
-    
     <div class="header-top">
       <button class="burger-btn" aria-label="Menu options">☰</button>
-
       <div class="search-wrapper">
         <input type="text" id="quickSearch" placeholder="🔍 Rechercher un rôle..." aria-label="Recherche rapide">
       </div>
-      
       <button id="themeBtn" aria-label="Changer le thème">🌙</button>
     </div>
 
     <nav class="nav-shortcuts">
-      <a href="#village" class="nav-btn" aria-label="Village">
-        <img src="Village.svg" alt="Village">
-      </a>
-      <a href="#loups" class="nav-btn" aria-label="Loups">
-        <img src="Loup.svg" alt="Loups">
-      </a>
-      <a href="#solo" class="nav-btn" aria-label="Solo">
-        <img src="Solo.svg" alt="Solo">
-      </a>
-      <a href="#vampires" class="nav-btn" aria-label="Vampires">
-        <img src="Vampires.svg" alt="Vampires">
-      </a>
-      <a href="#event-cards" class="nav-btn" aria-label="Cartes VM">
-        <img src="Cartes_vm.svg" alt="Cartes VM">
-      </a>
+      <a href="#village" class="nav-btn" aria-label="Village"><img src="Village.svg" alt="Village"></a>
+      <a href="#loups" class="nav-btn" aria-label="Loups"><img src="Loup.svg" alt="Loups"></a>
+      <a href="#solo" class="nav-btn" aria-label="Solo"><img src="Solo.svg" alt="Solo"></a>
+      <a href="#vampires" class="nav-btn" aria-label="Vampires"><img src="Vampires.svg" alt="Vampires"></a>
+      <a href="#event-cards" class="nav-btn" aria-label="Cartes VM"><img src="Cartes_vm.svg" alt="Cartes VM"></a>
     </nav>
-
   </header>
 
   <div class="extra-menu-overlay"></div>
@@ -64,38 +50,126 @@
       <button class="close-extra">✕</button>
     </div>
     <ul class="extra-links">
-      <li>
-        <a href="#" onclick="openModal('modal-regles-base')" style="border-color: #ff6b6b; color:#ff6b6b;">
-          <img src="Regle_de_base.svg" alt="Règles" class="menu-icon"> Règles de base
-        </a>
-      </li>
-      <li>
-        <a href="#" onclick="openModal('modal-regles')" style="border-color: #ff6b6b; color:#ff6b6b;">
-          <img src="Le_pacte_maudit.svg" alt="Pacte" class="menu-icon"> Le Pacte Maudit
-        </a>
-      </li>
-      <li>
-        <a href="#" onclick="openModal('modal-propose')">
-          <img src="Forge_un_role.svg" alt="Forge" class="menu-icon"> Forge un Rôle
-        </a>
-      </li>
-      <li>
-        <a href="#" onclick="openModal('modal-bug')">
-          <img src="Bug.svg" alt="Bug" class="menu-icon"> Signaler un Bug
-        </a>
-      </li>
+      <li><a href="#" onclick="openModal('modal-regles-base')" style="border-color: #ff6b6b; color:#ff6b6b;"><img src="Regle_de_base.svg" alt="Règles" class="menu-icon"> Règles de base</a></li>
+      <li><a href="#" onclick="openModal('modal-regles')" style="border-color: #ff6b6b; color:#ff6b6b;"><img src="Le_pacte_maudit.svg" alt="Pacte" class="menu-icon"> Le Pacte Maudit</a></li>
+      <li><a href="#" onclick="openModal('modal-propose')"><img src="Forge_un_role.svg" alt="Forge" class="menu-icon"> Forge un Rôle</a></li>
+      <li><a href="#" onclick="openModal('modal-bug')"><img src="Bug.svg" alt="Bug" class="menu-icon"> Signaler un Bug</a></li>
     </ul>
-    
-    <div class="extra-footer">
-      <strong>© 2026 Le Village Maudit</strong><br>
-      <em>by Nabil & Joelson</em>
-    </div>
+    <div class="extra-footer"><strong>© 2026 Le Village Maudit</strong><br><em>by Nabil & Joelson</em></div>
   </nav>
+
+  <section id="village">
+    <h2><img src="Village.svg" class="section-icon" alt="Village"> LE VILLAGE</h2>
+    <div class="carte-jeu"><div class="carte-inner"><div class="carte-front"><img src="le_paysan.png" alt="LE PAYSAN" loading="lazy"></div><div class="carte-back"><h3>LE PAYSAN</h3><p>Le paysan est un personnage qui incarne l'habitant basique d'un village...</p><button class="btn-details"><img src="Details.svg" alt="Détails"></button></div></div></div>
+    <div class="carte-jeu"><div class="carte-inner"><div class="carte-front"><img src="la_sorciere.png" alt="LA SORCIÈRE" loading="lazy"></div><div class="carte-back"><h3>LA SORCIÈRE</h3><p>La sorcière possède deux potions...</p><button class="btn-details"><img src="Details.svg" alt="Détails"></button></div></div></div>
+    <div class="carte-jeu"><div class="carte-inner"><div class="carte-front"><img src="l_homme_a_la_hache.png" alt="L’HOMME À LA HACHE" loading="lazy"></div><div class="carte-back"><h3>L’HOMME À LA HACHE</h3><p>L’homme à la hache est un paysan redoutable...</p><button class="btn-details"><img src="Details.svg" alt="Détails"></button></div></div></div>
+    <div class="carte-jeu"><div class="carte-inner"><div class="carte-front"><img src="cerbere.png" alt="CERBÈRE" loading="lazy"></div><div class="carte-back"><h3>CERBÈRE</h3><p>Chaque matin, si Cerbère se trouve à droite ou à gauche d'un loup-garou...</p><button class="btn-details"><img src="Details.svg" alt="Détails"></button></div></div></div>
+    <div class="carte-jeu"><div class="carte-inner"><div class="carte-front"><img src="le_condamne.png" alt="LE CONDAMNÉ" loading="lazy"></div><div class="carte-back"><h3>LE CONDAMNÉ</h3><p>Chaque nuit est une pendaison différée...</p><button class="btn-details"><img src="Details.svg" alt="Détails"></button></div></div></div>
+    <div class="carte-jeu"><div class="carte-inner"><div class="carte-front"><img src="le_mentaliste.png" alt="LE MENTALISTE" loading="lazy"></div><div class="carte-back"><h3>LE MENTALISTE</h3><p>Chaque nuit, le Mentaliste désigne deux joueurs de son choix...</p><button class="btn-details"><img src="Details.svg" alt="Détails"></button></div></div></div>
+    <div class="carte-jeu"><div class="carte-inner"><div class="carte-front"><img src="l_insomniaque.png" alt="L’INSOMNIAQUE" loading="lazy"></div><div class="carte-back"><h3>L’INSOMNIAQUE</h3><p>Chaque matin, si l'insomniaque se trouve à droite ou à gauche...</p><button class="btn-details"><img src="Details.svg" alt="Détails"></button></div></div></div>
+    <div class="carte-jeu"><div class="carte-inner"><div class="carte-front"><img src="l_orphelin.png" alt="L’ORPHELIN" loading="lazy"></div><div class="carte-back"><h3>L’ORPHELIN</h3><p>Son plus grand rêve, c'est d'avoir des parents qu'il n'a jamais eus...</p><button class="btn-details"><img src="Details.svg" alt="Détails"></button></div></div></div>
+    <div class="carte-jeu"><div class="carte-inner"><div class="carte-front"><img src="le_traqueur.png" alt="LE TRAQUEUR" loading="lazy"></div><div class="carte-back"><h3>LE TRAQUEUR</h3><p>Fin limier, le Traqueur suit la piste des Loups-Garous...</p><button class="btn-details"><img src="Details.svg" alt="Détails"></button></div></div></div>
+    <div class="carte-jeu"><div class="carte-inner"><div class="carte-front"><img src="le_don_juan.png" alt="LE DON JUAN" loading="lazy"></div><div class="carte-back"><h3>LE DON JUAN</h3><p>Séducteur légendaire, il n’a qu’une arme : le charme...</p><button class="btn-details"><img src="Details.svg" alt="Détails"></button></div></div></div>
+    <div class="carte-jeu"><div class="carte-inner"><div class="carte-front"><img src="la_cameriste.png" alt="LA CAMÉRISTE" loading="lazy"></div><div class="carte-back"><h3>LA CAMERISTE</h3><p>Une fois dans la partie, juste avant que le MJ ne révèle le rôle...</p><button class="btn-details"><img src="Details.svg" alt="Détails"></button></div></div></div>
+    <div class="carte-jeu"><div class="carte-inner"><div class="carte-front"><img src="la_balance.png" alt="LA BALANCE" loading="lazy"></div><div class="carte-back"><h3>LA BALANCE</h3><p>Personne n'aime les balances ici sauf, dans le Village Maudit...</p><button class="btn-details"><img src="Details.svg" alt="Détails"></button></div></div></div>
+    <div class="carte-jeu"><div class="carte-inner"><div class="carte-front"><img src="le_chuchoteur.png" alt="LE CHUCHOTEUR" loading="lazy"></div><div class="carte-back"><h3>LE CHUCHOTEUR</h3><p>Empêcher quelqu'un de parler, surtout quand le village commence à avoir des soupçons...</p><button class="btn-details"><img src="Details.svg" alt="Détails"></button></div></div></div>
+    <div class="carte-jeu"><div class="carte-inner"><div class="carte-front"><img src="la_fille.png" alt="LA FILLE" loading="lazy"></div><div class="carte-back"><h3>LA FILLE</h3><p>Paysanne de père en fille : tant que le Bûcheron est en vie...</p><button class="btn-details"><img src="Details.svg" alt="Détails"></button></div></div></div>
+    <div class="carte-jeu"><div class="carte-inner"><div class="carte-front"><img src="la_dame_de_complaisance.png" alt="LA DAME DE COMPLAISANCE" loading="lazy"></div><div class="carte-back"><h3>LA DAME DE COMPLAISANCE</h3><p>Fille de joie de génération en génération...</p><button class="btn-details"><img src="Details.svg" alt="Détails"></button></div></div></div>
+    <div class="carte-jeu"><div class="carte-inner"><div class="carte-front"><img src="target.png" alt="TARGET" loading="lazy"></div><div class="carte-back"><h3>TARGET</h3><p>Il est traqué, pisté, visé de toutes parts...</p><button class="btn-details"><img src="Details.svg" alt="Détails"></button></div></div></div>
+    <div class="carte-jeu"><div class="carte-inner"><div class="carte-front"><img src="le_milliardaire.png" alt="LE MILLIARDAIRE" loading="lazy"></div><div class="carte-back"><h3>LE MILLIARDAIRE</h3><p>Riche. Arrogant. Imbu de lui-même. Et surtout... intouchable...</p><button class="btn-details"><img src="Details.svg" alt="Détails"></button></div></div></div>
+    <div class="carte-jeu"><div class="carte-inner"><div class="carte-front"><img src="le_bienfaiteur.png" alt="LE BIENFAITEUR" loading="lazy"></div><div class="carte-back"><h3>LE BIENFAITEUR</h3><p>Chaque nuit, le Bienfaiteur protège une personne...</p><button class="btn-details"><img src="Details.svg" alt="Détails"></button></div></div></div>
+    <div class="carte-jeu"><div class="carte-inner"><div class="carte-front"><img src="le_devoreur_d_ames.png" alt="LE DÉVOREUR D’ÂMES" loading="lazy"></div><div class="carte-back"><h3>LE DÉVOREUR D’ÂMES</h3><p>Lorsqu’il meurt, il choisit un joueur encore en vie...</p><button class="btn-details"><img src="Details.svg" alt="Détails"></button></div></div></div>
+    <div class="carte-jeu"><div class="carte-inner"><div class="carte-front"><img src="le_bucheron.png" alt="LE BUCHERON" loading="lazy"></div><div class="carte-back"><h3>LE BUCHERON</h3><p>Le Bûcheron, dès qu’il meurt, que ce soit la nuit...</p><button class="btn-details"><img src="Details.svg" alt="Détails"></button></div></div></div>
+    <div class="carte-jeu"><div class="carte-inner"><div class="carte-front"><img src="le_fossoyeur.png" alt="LE FOSSOYEUR" loading="lazy"></div><div class="carte-back"><h3>LE FOSSOYEUR</h3><p>Une fois par partie, le Fossoyeur peut plonger sa pelle dans la tombe...</p><button class="btn-details"><img src="Details.svg" alt="Détails"></button></div></div></div>
+    <div class="carte-jeu"><div class="carte-inner"><div class="carte-front"><img src="le_voyant.png" alt="LE VOYANT" loading="lazy"></div><div class="carte-back"><h3>LE VOYANT</h3><p>Chaque nuit le voyant est appelé par le maître du jeu...</p><button class="btn-details"><img src="Details.svg" alt="Détails"></button></div></div></div>
+    <div class="carte-jeu"><div class="carte-inner"><div class="carte-front"><img src="olaf_et_pilaf.png" alt="OLAF ET PILAF" loading="lazy"></div><div class="carte-back"><h3>OLAF ET PILAF</h3><p>Paysan, cette carte se décline en deux exemplaires identiques...</p><button class="btn-details"><img src="Details.svg" alt="Détails"></button></div></div></div>
+    <div class="carte-jeu"><div class="carte-inner"><div class="carte-front"><img src="le_marabout.png" alt="LE MARABOUT" loading="lazy"></div><div class="carte-back"><h3>LE MARABOUT</h3><p>Chaque nuit, le Marabout place sa poupée vaudou chez un joueur...</p><button class="btn-details"><img src="Details.svg" alt="Détails"></button></div></div></div>
+    <div class="carte-jeu"><div class="carte-inner"><div class="carte-front"><img src="le_detective.png" alt="LE DETECTIVE" loading="lazy"></div><div class="carte-back"><h3>LE DETECTIVE</h3><p>Le Détective est un rôle compliqué à optimiser...</p><button class="btn-details"><img src="Details.svg" alt="Détails"></button></div></div></div>
+    <div class="carte-jeu"><div class="carte-inner"><div class="carte-front"><img src="le_chat.png" alt="LE CHAT" loading="lazy"></div><div class="carte-back"><h3>LE CHAT</h3><p>Chaque nuit, ce mystérieux félin s’étire...</p><button class="btn-details"><img src="Details.svg" alt="Détails"></button></div></div></div>
+    <div class="carte-jeu"><div class="carte-inner"><div class="carte-front"><img src="l_ivrogne.png" alt="L’IVROGNE" loading="lazy"></div><div class="carte-back"><h3>L’IVROGNE</h3><p>L’ivrogne est un personnage clé de la partie...</p><button class="btn-details"><img src="Details.svg" alt="Détails"></button></div></div></div>
+    <div class="carte-jeu"><div class="carte-inner"><div class="carte-front"><img src="le_petit_rigolo.png" alt="LE PETIT RIGOLO" loading="lazy"></div><div class="carte-back"><h3>LE PETIT RIGOLO</h3><p>Chaque nuit qui passe, le village sombre petit à petit...</p><button class="btn-details"><img src="Details.svg" alt="Détails"></button></div></div></div>
+    <div class="carte-jeu"><div class="carte-inner"><div class="carte-front"><img src="uchronie.png" alt="UCHRONIE" loading="lazy"></div><div class="carte-back"><h3>UCHRONIE</h3><p>Uchronie est un voyageur interdimensionnel...</p><button class="btn-details"><img src="Details.svg" alt="Détails"></button></div></div></div>
+    <div class="carte-jeu"><div class="carte-inner"><div class="carte-front"><img src="le_clodo.png" alt="LE CLODO" loading="lazy"></div><div class="carte-back"><h3>LE CLODO</h3><p>Trois fois dans la partie, le Clodo peut, pendant la nuit...</p><button class="btn-details"><img src="Details.svg" alt="Détails"></button></div></div></div>
+  </section>
+
+  <section id="loups">
+    <h2><img src="Loup.svg" class="section-icon" alt="Loup"> LES LOUPS-GAROUS</h2>
+    <div class="carte-jeu"><div class="carte-inner"><div class="carte-front"><img src="le_loup_garou.png" alt="LE LOUP-GAROU" loading="lazy"></div><div class="carte-back"><h3>LE LOUP-GAROU</h3><p>Le loup-garou incarne l'un des rôles de l'équipe des loups-garous...</p><button class="btn-details"><img src="Details.svg" alt="Détails"></button></div></div></div>
+    <div class="carte-jeu"><div class="carte-inner"><div class="carte-front"><img src="le_loup_garou_rouge.png" alt="LE LOUP-GAROU ROUGE" loading="lazy"></div><div class="carte-back"><h3>LE LOUP-GAROU ROUGE</h3><p>Le Loup-Garou Rouge est le plus coriace des loups...</p><button class="btn-details"><img src="Details.svg" alt="Détails"></button></div></div></div>
+    <div class="carte-jeu"><div class="carte-inner"><div class="carte-front"><img src="le_loup_garou_maudit.png" alt="LE LOUP-GAROU MAUDIT" loading="lazy"></div><div class="carte-back"><h3>LE LOUP-GAROU MAUDIT</h3><p>Né sous une lune de sang, il vit encore parmi les humains...</p><button class="btn-details"><img src="Details.svg" alt="Détails"></button></div></div></div>
+    <div class="carte-jeu"><div class="carte-inner"><div class="carte-front"><img src="le_loup_garou_alpha.png" alt="LE LOUP-GAROU ALPHA" loading="lazy"></div><div class="carte-back"><h3>LE LOUP-GAROU ALPHA</h3><p>Contrairement à ses compères velus, l’Alpha sait manier la courtoisie...</p><button class="btn-details"><img src="Details.svg" alt="Détails"></button></div></div></div>
+    <div class="carte-jeu"><div class="carte-inner"><div class="carte-front"><img src="loup_garou_voyant.png" alt="LOUP-GAROU VOYANT" loading="lazy"></div><div class="carte-back"><h3>LOUP-GAROU VOYANT</h3><p>Le Loup-Garou Voyant possède la double capacité de manger avec la meute...</p><button class="btn-details"><img src="Details.svg" alt="Détails"></button></div></div></div>
+    <div class="carte-jeu"><div class="carte-inner"><div class="carte-front"><img src="le_loup_garou_bavard.png" alt="LE LOUP GAROU BAVARD" loading="lazy"></div><div class="carte-back"><h3>LE LOUP GAROU BAVARD</h3><p>Pouvoir (ou malédiction ?) : Langue bien pendue...</p><button class="btn-details"><img src="Details.svg" alt="Détails"></button></div></div></div>
+    <div class="carte-jeu"><div class="carte-inner"><div class="carte-front"><img src="le_loup_garou_faineant.png" alt="LE LOUP GAROU FAINEANT" loading="lazy"></div><div class="carte-back"><h3>LE LOUP GAROU FAINEANT</h3><p>Dormir, c’est sa grande passion. Comploter ? Trop fatiguant...</p><button class="btn-details"><img src="Details.svg" alt="Détails"></button></div></div></div>
+    <div class="carte-jeu"><div class="carte-inner"><div class="carte-front"><img src="le_papa_des_loups.png" alt="LE PAPA DES LOUPS" loading="lazy"></div><div class="carte-back"><h3>LE PAPA DES LOUPS</h3><p>Le Papa des Loups détient un pouvoir unique et sinistre...</p><button class="btn-details"><img src="Details.svg" alt="Détails"></button></div></div></div>
+    <div class="carte-jeu"><div class="carte-inner"><div class="carte-front"><img src="l_enfant_loup_garou.png" alt="L'ENFANT LOUP-GAROU" loading="lazy"></div><div class="carte-back"><h3>L'ENFANT LOUP-GAROU</h3><p>Il a l’air doux, fragile… presque inoffensif. Et pourtant...</p><button class="btn-details"><img src="Details.svg" alt="Détails"></button></div></div></div>
+  </section>
+
+  <section id="solo">
+    <h2><img src="Solo.svg" class="section-icon" alt="Solo"> RÔLES SOLO</h2>
+    <div class="carte-jeu"><div class="carte-inner"><div class="carte-front"><img src="la_bete_immonde.png" alt="LA BÊTE IMMONDE" loading="lazy"></div><div class="carte-back"><h3>LA BÊTE IMMONDE</h3><p>Le cauchemar des Loups, enfin de la partie...</p><button class="btn-details"><img src="Details.svg" alt="Détails"></button></div></div></div>
+    <div class="carte-jeu"><div class="carte-inner"><div class="carte-front"><img src="l_avocat_du_diable.png" alt="L'AVOCAT DU DIABLE" loading="lazy"></div><div class="carte-back"><h3>L'AVOCAT DU DIABLE</h3><p>Le crime n’existe pas sans preuve… mais les preuves, lui, il les invente...</p><button class="btn-details"><img src="Details.svg" alt="Détails"></button></div></div></div>
+    <div class="carte-jeu"><div class="carte-inner"><div class="carte-front"><img src="la_valkyrie.png" alt="LA VALKYRIE" loading="lazy"></div><div class="carte-back"><h3>LA VALKYRIE</h3><p>Il s'agit d'un rôle presque "obligatoire" à placer durant les parties...</p><button class="btn-details"><img src="Details.svg" alt="Détails"></button></div></div></div>
+    <div class="carte-jeu"><div class="carte-inner"><div class="carte-front"><img src="le_clown.png" alt="LE CLOWN" loading="lazy"></div><div class="carte-back"><h3>LE CLOWN</h3><p>"Lorsqu’un clown entre dans un village, il ne devient pas roi..."</p><button class="btn-details"><img src="Details.svg" alt="Détails"></button></div></div></div>
+    <div class="carte-jeu"><div class="carte-inner"><div class="carte-front"><img src="le_diable.png" alt="LE DIABLE" loading="lazy"></div><div class="carte-back"><h3>LE DIABLE</h3><p>Le Diable choisit son camp en fonction du déroulement de la partie...</p><button class="btn-details"><img src="Details.svg" alt="Détails"></button></div></div></div>
+    <div class="carte-jeu"><div class="carte-inner"><div class="carte-front"><img src="le_gourou.png" alt="LE GOUROU" loading="lazy"></div><div class="carte-back"><h3>LE GOUROU</h3><p>Le Gourou est un rôle solo. Il se réveille en dernier...</p><button class="btn-details"><img src="Details.svg" alt="Détails"></button></div></div></div>
+    <div class="carte-jeu"><div class="carte-inner"><div class="carte-front"><img src="le_chevalier_de_la_mort.png" alt="LE CHEVALIER DE LA MORT" loading="lazy"></div><div class="carte-back"><h3>LE CHEVALIER DE LA MORT</h3><p>Ce rôle n’est pas fait pour les parties classiques...</p><button class="btn-details"><img src="Details.svg" alt="Détails"></button></div></div></div>
+    <div class="carte-jeu"><div class="carte-inner"><div class="carte-front"><img src="le_serial_killer.png" alt="LE SERIAL KILLER" loading="lazy"></div><div class="carte-back"><h3>LE SERIAL KILLER</h3><p>Il ne parle pas. Il ne pactise pas. Il tue...</p><button class="btn-details"><img src="Details.svg" alt="Détails"></button></div></div></div>
+    <div class="carte-jeu"><div class="carte-inner"><div class="carte-front"><img src="le_loup_garou_sauvage.png" alt="LE LOUP-GAROU SAUVAGE" loading="lazy"></div><div class="carte-back"><h3>LE LOUP-GAROU SAUVAGE</h3><p>Le Loup-Garou Sauvage n’obéit pas aux règles de la meute...</p><button class="btn-details"><img src="Details.svg" alt="Détails"></button></div></div></div>
+    <div class="carte-jeu"><div class="carte-inner"><div class="carte-front"><img src="les_jumeaux_explosifs.png" alt="LES JUMEAUX EXPLOSIFS" loading="lazy"></div><div class="carte-back"><h3>LES JUMEAUX EXPLOSIFS</h3><p>Deux joueurs, un seul but : faire péter la partie...</p><button class="btn-details"><img src="Details.svg" alt="Détails"></button></div></div></div>
+  </section>
+
+  <section id="vampires">
+    <h2><img src="Vampires.svg" class="section-icon" alt="Vampires"> LES VAMPIRES</h2>
+    <div class="carte-jeu"><div class="carte-inner"><div class="carte-front"><img src="dracula.png" alt="DRACULA" loading="lazy"></div><div class="carte-back"><h3>DRACULA</h3><p>Le roi des suceurs de sang ne porte pas ce nom pour rien...</p><button class="btn-details"><img src="Details.svg" alt="Détails"></button></div></div></div>
+    <div class="carte-jeu"><div class="carte-inner"><div class="carte-front"><img src="la_succube.png" alt="LA SUCCUBE" loading="lazy"></div><div class="carte-back"><h3>LA SUCCUBE</h3><p>La Succube ne se contente pas de charmer, elle copie...</p><button class="btn-details"><img src="Details.svg" alt="Détails"></button></div></div></div>
+    <div class="carte-jeu"><div class="carte-inner"><div class="carte-front"><img src="le_chasseur_de_vampires.png" alt="LE CHASSEUR DE VAMPIRES" loading="lazy"></div><div class="carte-back"><h3>LE CHASSEUR DE VAMPIRES</h3><p>Silencieux. Déterminé. Et équipé d’ail dans toutes ses poches...</p><button class="btn-details"><img src="Details.svg" alt="Détails"></button></div></div></div>
+    <div class="carte-jeu"><div class="carte-inner"><div class="carte-front"><img src="le_demon_vampire.png" alt="LE DÉMON VAMPIRE" loading="lazy"></div><div class="carte-back"><h3>LE DÉMON VAMPIRE</h3><p>Mi-démon, mi-vampire… 100% problème...</p><button class="btn-details"><img src="Details.svg" alt="Détails"></button></div></div></div>
+  </section>
+
+  <section id="event-cards">
+    <h2><img src="Cartes_vm.svg" class="section-icon" alt="Cartes VM"> CARTES VM</h2>
+    <h3 class="event-subtitle gold-title">GOLD</h3>
+    <div class="category">
+      <div class="carte-vm gold"><img src="or1.png" alt="RÉSURRECTION TOTALE" loading="lazy"></div>
+      <div class="carte-vm gold"><img src="or2.png" alt="RÉSURRECTION LIBRE" loading="lazy"></div>
+      <div class="carte-vm gold"><img src="or3.png" alt="VOILE DU SILENCE" loading="lazy"></div>
+      <div class="carte-vm gold"><img src="or4.png" alt="MALÉDICTION X" loading="lazy"></div>
+      <div class="carte-vm gold"><img src="or5.png" alt="HÉRITAGE SACRÉ" loading="lazy"></div>
+      <div class="carte-vm gold"><img src="or6.png" alt="RÉVÉLATION SINGULIÈRE" loading="lazy"></div>
+      <div class="carte-vm gold"><img src="or7.png" alt="BOOST INSTANTANÉ" loading="lazy"></div>
+      <div class="carte-vm gold"><img src="or8.png" alt="MIMÉTISME PARFAIT" loading="lazy"></div>
+      <div class="carte-vm gold"><img src="or9.png" alt="CIBLE MARQUÉE" loading="lazy"></div>
+      <div class="carte-vm gold"><img src="or10.png" alt="TRANSMISSION INTÉGRALE" loading="lazy"></div>
+    </div>
+    <h3 class="event-subtitle silver-title">SILVER</h3>
+    <div class="category">
+      <div class="carte-vm silver"><img src="ar1.png" alt="SPECTRE BAVARD" loading="lazy"></div>
+      <div class="carte-vm silver"><img src="ar2.png" alt="SMILE OR DIE" loading="lazy"></div>
+      <div class="carte-vm silver"><img src="ar3.png" alt="CHIFOUMI FATAL" loading="lazy"></div>
+      <div class="carte-vm silver"><img src="ar4.png" alt="SILENCE DANS LA SALLE" loading="lazy"></div>
+      <div class="carte-vm silver"><img src="ar5.png" alt="PARI SPECTRAL" loading="lazy"></div>
+      <div class="carte-vm silver"><img src="ar6.png" alt="VOTE CIBLÉ" loading="lazy"></div>
+      <div class="carte-vm silver"><img src="ar7.png" alt="CHARME INTOUCHABLE" loading="lazy"></div>
+      <div class="carte-vm silver"><img src="ar8.png" alt="DOUBLE CHEF" loading="lazy"></div>
+      <div class="carte-vm silver"><img src="ar9.png" alt="HOMMAGE OBLIGATOIRE" loading="lazy"></div>
+      <div class="carte-vm silver"><img src="ar10.png" alt="JUGEMENT RETARDÉ" loading="lazy"></div>
+    </div>
+    <h3 class="event-subtitle bronze-title">BRONZE</h3>
+    <div class="category">
+      <div class="carte-vm bronze"><img src="br1.png" alt="PROTECTION ANTICIPÉE" loading="lazy"></div>
+      <div class="carte-vm bronze"><img src="br2.png" alt="DESTIN CHOISI" loading="lazy"></div>
+      <div class="carte-vm bronze"><img src="br3.png" alt="ÉCHANGE FATAL" loading="lazy"></div>
+      <div class="carte-vm bronze"><img src="br4.png" alt="TROU DIMENSIONNEL" loading="lazy"></div>
+      <div class="carte-vm bronze"><img src="br5.png" alt="CHANGEMENT DE RÈGNE" loading="lazy"></div>
+      <div class="carte-vm bronze"><img src="br6.png" alt="VOILE DU SILENCE" loading="lazy"></div>
+      <div class="carte-vm bronze"><img src="br7.png" alt="INFORMATION PRÉOCCUPANTE" loading="lazy"></div>
+    </div>
+  </section>
 
   <div id="modal-regles-base" class="modal">
     <div class="modal-content modal-large">
       <span class="close-modal" onclick="closeModal('modal-regles-base')">✕</span>
-      
       <div class="slides-container">
         
         <div class="slide active">
@@ -108,185 +182,58 @@
 
         <div class="slide">
            <h2 class="slide-title">Distribution des Rôles</h2>
-           
-           <div class="step-box">
-             <div class="step-num">1</div>
-             <div class="step-content">
-               <strong>Le Maître du Jeu (MJ) distribue les cartes</strong>
-               <p>Le MJ distribue secrètement une carte personnage face cachée à chaque joueur.</p>
-             </div>
-           </div>
-
-           <div class="step-box">
-             <div class="step-num">2</div>
-             <div class="step-content">
-               <strong>Chaque joueur découvre son rôle</strong>
-               <p>Les joueurs doivent prendre connaissance de leur rôle en toute discrétion.</p>
-             </div>
-           </div>
-
-           <div class="step-box">
-             <div class="step-num">3</div>
-             <div class="step-content">
-               <strong>En cas de doute</strong>
-               <p>Si un joueur a des questions, il doit consulter le site ou demander discrètement au MJ.</p>
-             </div>
-           </div>
-
-           <div class="quote-box">
-             "Chaque joueur doit garder son rôle secret afin de ne pas révéler son identité aux autres participants."
-           </div>
+           <div class="step-box"><div class="step-num">1</div><div class="step-content"><strong>Le Maître du Jeu (MJ) distribue les cartes</strong><p>Le MJ distribue secrètement une carte personnage face cachée à chaque joueur.</p></div></div>
+           <div class="step-box"><div class="step-num">2</div><div class="step-content"><strong>Chaque joueur découvre son rôle</strong><p>Les joueurs doivent prendre connaissance de leur rôle en toute discrétion.</p></div></div>
+           <div class="step-box"><div class="step-num">3</div><div class="step-content"><strong>En cas de doute</strong><p>Si un joueur a des questions, il doit consulter le site ou demander discrètement au MJ.</p></div></div>
+           <div class="quote-box">"Chaque joueur doit garder son rôle secret afin de ne pas révéler son identité aux autres participants."</div>
         </div>
 
         <div class="slide">
           <h2 class="slide-title">Nuit 0 - Phase d'Information</h2>
-          
-          <div class="info-card">
-            <img src="Preparatoir.svg" class="info-icon" alt="Préparatoire">
-            <div>
-              <strong>Phase Préparatoire</strong>
-              <p>Après la distribution, le MJ annonce que le village s'endort. Tout le monde ferme les yeux.</p>
-            </div>
-          </div>
-
-          <div class="info-card">
-            <img src="Mj.svg" class="info-icon" alt="MJ">
-            <div>
-              <strong>Rôle du MJ</strong>
-              <p>Le MJ appelle tous les rôles un par un pour identifier les joueurs.</p>
-            </div>
-          </div>
-
-          <div class="info-card warning">
-            <i class="fas fa-exclamation-circle"></i>
-            <div>
-              <strong>Info Cruciale</strong>
-              <p>Cette phase sert au MJ à s'organiser, identifier rôles & joueurs et d’assurer une organisation fluide pour le reste de la partie.</p>
-            </div>
-          </div>
+          <div class="info-card"><img src="Preparatoir.svg" class="info-icon" alt="Préparatoire"><div><strong>Phase Préparatoire</strong><p>Après la distribution, le MJ annonce que le village s'endort. Tout le monde ferme les yeux.</p></div></div>
+          <div class="info-card"><img src="Mj.svg" class="info-icon" alt="MJ"><div><strong>Rôle du MJ</strong><p>Le MJ appelle tous les rôles un par un pour identifier les joueurs.</p></div></div>
+          <div class="info-card warning"><i class="fas fa-exclamation-circle"></i><div><strong>Info Cruciale</strong><p>Cette phase sert au MJ à s'organiser, identifier rôles & joueurs et d’assurer une organisation fluide pour le reste de la partie.</p></div></div>
         </div>
 
         <div class="slide">
           <h2 class="slide-title">Actions Spéciales Nuit 0</h2>
-          
-          <div class="role-action-card">
-            <h4><img src="l_orphelin1.svg" class="role-icon-small" alt="Orphelin"> L'Orphelin</h4>
-            <p>Forme un couple stable entre deux joueurs <strong>dès la Nuit 0</strong>.</p>
-          </div>
-
-          <div class="role-action-card">
-            <h4><img src="le_loup_garou_rouge1.svg" class="role-icon-small" alt="LG Rouge"> Le Loup-Garou Rouge</h4>
-            <p>Donne son cœur à un joueur <strong>dès la Nuit 0</strong>. Tant que ce joueur vit, le LG Rouge est immortel.</p>
-          </div>
-
-          <div class="role-action-card">
-            <h4><img src="target1.svg" class="role-icon-small" alt="Target"> Target</h4>
-            <p>Désigne secrètement une "cible miroir" <strong>dès la Nuit 0</strong> qui subira tout à sa place.</p>
-          </div>
-
-          <div class="role-action-card">
-            <h4><img src="le_loup_garou_maudit1.svg" class="role-icon-small" alt="LG Maudit"> Le Loup-Garou Maudit</h4>
-            <p>Désigne un Mentor (non informé) <strong>dès la Nuit 0</strong>. Tant que le Mentor vit, le LG Maudit est un simple paysan.</p>
-          </div>
+          <div class="role-action-card"><h4><img src="l_orphelin1.svg" class="role-icon-small" alt="Orphelin"> L'Orphelin</h4><p>Forme un couple stable entre deux joueurs <strong>dès la Nuit 0</strong>.</p></div>
+          <div class="role-action-card"><h4><img src="le_loup_garou_rouge1.svg" class="role-icon-small" alt="LG Rouge"> Le Loup-Garou Rouge</h4><p>Donne son cœur à un joueur <strong>dès la Nuit 0</strong>. Tant que ce joueur vit, le LG Rouge est immortel.</p></div>
+          <div class="role-action-card"><h4><img src="target1.svg" class="role-icon-small" alt="Target"> Target</h4><p>Désigne secrètement une "cible miroir" <strong>dès la Nuit 0</strong> qui subira tout à sa place.</p></div>
+          <div class="role-action-card"><h4><img src="le_loup_garou_maudit1.svg" class="role-icon-small" alt="LG Maudit"> Le Loup-Garou Maudit</h4><p>Désigne un Mentor (non informé) <strong>dès la Nuit 0</strong>. Tant que le Mentor vit, le LG Maudit est un simple paysan.</p></div>
         </div>
 
         <div class="slide">
           <h2 class="slide-title">Élection du Maire - Jour 0</h2>
-          
           <div class="mayor-timeline">
-            <div class="mayor-bubble">
-              <div class="bubble-icon"><i class="fas fa-sun"></i></div>
-              <div class="bubble-content">
-                <strong>1. Le Réveil</strong>
-                <p>Après la Nuit 0, le MJ organise immédiatement l'élection.</p>
-              </div>
-            </div>
-
+            <div class="mayor-bubble"><div class="bubble-icon"><i class="fas fa-sun"></i></div><div class="bubble-content"><strong>1. Le Réveil</strong><p>Après la Nuit 0, le MJ organise immédiatement l'élection.</p></div></div>
             <div class="timeline-connector"></div>
-
-            <div class="mayor-bubble">
-              <div class="bubble-icon">
-                <img src="Vote.svg" class="timeline-icon" alt="Vote">
-              </div>
-              <div class="bubble-content">
-                <strong>2. Le Vote</strong>
-                <p>Les joueurs débattent et choisissent un leader pour la communauté.</p>
-              </div>
-            </div>
-
+            <div class="mayor-bubble"><div class="bubble-icon"><img src="Vote.svg" class="timeline-icon" alt="Vote"></div><div class="bubble-content"><strong>2. Le Vote</strong><p>Les joueurs débattent et choisissent un leader pour la communauté.</p></div></div>
             <div class="timeline-connector"></div>
-
-            <div class="mayor-bubble special">
-              <div class="bubble-icon">
-                <img src="Power.svg" class="timeline-icon" alt="Pouvoirs">
-              </div>
-              <div class="bubble-content">
-                <strong>3. Pouvoirs (Jour 1)</strong>
-                <p>Le nouveau maire dispose de pouvoirs <em>exclusifs</em> pour ce premier jour.</p>
-              </div>
-            </div>
-
+            <div class="mayor-bubble special"><div class="bubble-icon"><img src="Power.svg" class="timeline-icon" alt="Pouvoirs"></div><div class="bubble-content"><strong>3. Pouvoirs (Jour 1)</strong><p>Le nouveau maire dispose de pouvoirs <em>exclusifs</em> pour ce premier jour.</p></div></div>
             <div class="timeline-connector"></div>
-
-            <div class="mayor-bubble permanent">
-              <div class="bubble-icon">
-                <img src="Permanant.svg" class="timeline-icon" alt="Permanent">
-              </div>
-              <div class="bubble-content">
-                <strong>4. Rôle Permanent</strong>
-                <p>Pour le reste de la partie, il tranche toutes les égalités lors des votes.</p>
-              </div>
-            </div>
+            <div class="mayor-bubble permanent"><div class="bubble-icon"><img src="Permanant.svg" class="timeline-icon" alt="Permanent"></div><div class="bubble-content"><strong>4. Rôle Permanent</strong><p>Pour le reste de la partie, il tranche toutes les égalités lors des votes.</p></div></div>
           </div>
         </div>
 
         <div class="slide">
           <h2 class="slide-title">Pouvoirs du Maire</h2>
-          
-          <div class="mayor-power-main">
-            <img src="King.svg" class="custom-king-icon" alt="King">
-            <p><strong>Pouvoir de décision :</strong> En cas d'égalité, c'est toujours lui qui tranche.</p>
-          </div>
-
+          <div class="mayor-power-main"><img src="King.svg" class="custom-king-icon" alt="King"><p><strong>Pouvoir de décision :</strong> En cas d'égalité, c'est toujours lui qui tranche.</p></div>
           <div class="powers-grid">
-            <div class="power-item">
-              <img src="Dictature.svg" class="power-icon" alt="Dictature">
-              <strong>Dictature</strong>
-              <p>Éliminer directement un joueur.</p>
-            </div>
-            
-            <div class="power-item">
-              <img src="Democratie.svg" class="power-icon" alt="Démocratie">
-              <strong>Démocratie</strong>
-              <p>Lancer un vote classique.</p>
-            </div>
-            
-            <div class="power-item">
-              <img src="Paix.svg" class="power-icon" alt="Paix">
-              <strong>Paix</strong>
-              <p>Ne tuer personne ce jour-là.</p>
-            </div>
+            <div class="power-item"><img src="Dictature.svg" class="power-icon" alt="Dictature"><strong>Dictature</strong><p>Éliminer directement un joueur.</p></div>
+            <div class="power-item"><img src="Democratie.svg" class="power-icon" alt="Démocratie"><strong>Démocratie</strong><p>Lancer un vote classique.</p></div>
+            <div class="power-item"><img src="Paix.svg" class="power-icon" alt="Paix"><strong>Paix</strong><p>Ne tuer personne ce jour-là.</p></div>
           </div>
         </div>
 
         <div class="slide">
           <h2 class="slide-title">Début du Cycle de Jeu</h2>
           <p class="slide-text">Après le Jour 0, la <strong>Nuit 1</strong> débute. Le cycle classique commence.</p>
-          
           <div class="cycle-visual">
-            <div class="phase">
-              <i class="fas fa-moon"></i>
-              <span>Nuit 1</span>
-              <small>Action secrète</small>
-            </div>
+            <div class="phase"><i class="fas fa-moon"></i><span>Nuit 1</span><small>Action secrète</small></div>
             <div class="arrow">➜</div>
-            <div class="phase">
-              <i class="fas fa-sun"></i>
-              <span>Jour 1</span>
-              <small>Débat & Action du maire</small>
-            </div>
+            <div class="phase"><i class="fas fa-sun"></i><span>Jour 1</span><small>Débat & Action du maire</small></div>
           </div>
-
           <div class="features-list">
              <div class="feature"><i class="fas fa-gavel"></i> Accusations</div>
              <div class="feature"><i class="fas fa-chess"></i> Bluffs</div>
@@ -296,9 +243,7 @@
 
         <div class="slide">
           <h2 class="slide-title">Mise en place des Cartes Evenements</h2>
-          
           <p class="slide-intro">C’est le MJ qui décide comment les cartes Événements sont introduites.</p>
-
           <div class="rules-section">
             <h3 class="section-header"><i class="fas fa-hourglass-half"></i> Quand piocher ?</h3>
             <div class="choice-grid">
@@ -307,7 +252,6 @@
               <div class="choice-item highlight">Après les <strong>Deux</strong></div>
             </div>
           </div>
-
           <div class="rules-section">
              <h3 class="section-header"><i class="fas fa-sync-alt"></i> À quelle fréquence ?</h3>
              <ul class="clean-list">
@@ -316,7 +260,6 @@
                <li><i class="fas fa-star"></i> Lors de moments clés</li>
              </ul>
           </div>
-
           <div class="important-note-box">
              <i class="fas fa-skull"></i>
              <p><strong>IMPORTANT :</strong> Les cartes ne sont accessibles qu'aux joueurs <u>après leur mort</u>. Un joueur en vie ne peut jamais piocher.</p>
@@ -325,33 +268,10 @@
 
         <div class="slide">
           <h2 class="slide-title">Catégories de Cartes</h2>
-          
-          <div class="card-type gold">
-            <i class="fas fa-crown"></i>
-            <div>
-              <strong>Carte OR (Tour 1-3)</strong>
-              <p>Résurrection ou réintégration du joueur dans la partie en cours.</p>
-            </div>
-          </div>
-
-          <div class="card-type silver">
-            <i class="fas fa-medal"></i>
-            <div>
-              <strong>Carte ARGENT (Tour 4-6)</strong>
-              <p>Influe fortement sur la partie (bonus ou malus aux joueurs en jeu).</p>
-            </div>
-          </div>
-
-          <div class="card-type bronze">
-            <i class="fas fa-award"></i>
-            <div>
-              <strong>Carte BRONZE (Tour 7+)</strong>
-              <p>Offre des bonus non négligeables utilisables lors de la prochaine partie.</p>
-            </div>
-          </div>
-
+          <div class="card-type gold"><i class="fas fa-crown"></i><div><strong>Carte OR (Tour 1-3)</strong><p>Résurrection ou réintégration du joueur dans la partie en cours.</p></div></div>
+          <div class="card-type silver"><i class="fas fa-medal"></i><div><strong>Carte ARGENT (Tour 4-6)</strong><p>Influe fortement sur la partie (bonus ou malus aux joueurs en jeu).</p></div></div>
+          <div class="card-type bronze"><i class="fas fa-award"></i><div><strong>Carte BRONZE (Tour 7+)</strong><p>Offre des bonus non négligeables utilisables lors de la prochaine partie.</p></div></div>
           <button class="btn-validate" onclick="finishRules()">✅ J'ai tout lu et compris</button>
-
         </div>
 
       </div> <div class="slides-nav">
@@ -359,53 +279,27 @@
         <span id="slide-counter">1 / 9</span>
         <button onclick="changeSlide(1)">Suivant ❯</button>
       </div>
-
     </div>
   </div>
-
 
   <div id="modal-propose" class="modal">
     <div class="modal-content">
       <span class="close-modal" onclick="closeModal('modal-propose')">✕</span>
       <h2>Le Laboratoire Maudit</h2>
       <p>Une idée de rôle ? Décris-la ici. Si le Conseil valide, elle rejoindra le jeu !</p>
-      
       <form id="roleForm" onsubmit="submitRole(event)">
         <input type="hidden" name="_captcha" value="false">
         <input type="hidden" name="_template" value="table">
         <input type="hidden" name="_format" value="json">
         <input type="hidden" name="_subject" value="🐺 Nouveau Rôle Proposé !">
-        
-        <div class="form-group">
-          <label>Nom du Rôle</label>
-          <input type="text" name="role_name" placeholder="Ex: Le Forgeron Fou" required>
-        </div>
-        
+        <div class="form-group"><label>Nom du Rôle</label><input type="text" name="role_name" placeholder="Ex: Le Forgeron Fou" required></div>
         <div class="form-group">
           <label>Camp</label>
-          <select name="camp">
-            <option>Village</option>
-            <option>Loup-Garou</option>
-            <option>Solo</option>
-            <option>Autre</option>
-          </select>
+          <select name="camp"><option>Village</option><option>Loup-Garou</option><option>Solo</option><option>Autre</option></select>
         </div>
-
-        <div class="form-group">
-          <label>Description & Pouvoirs</label>
-          <textarea name="description" rows="5" placeholder="Quel est son but ? Que fait-il la nuit ?" required></textarea>
-        </div>
-
-        <div class="form-group">
-          <label>Ton Nom ou Pseudo <span style="font-size:0.8em; opacity:0.7">(Optionnel)</span></label>
-          <input type="text" name="pseudo" placeholder="Pour te créditer">
-        </div>
-
-        <div class="form-group">
-          <label>Email <span style="font-size:0.8em; opacity:0.7">(Optionnel)</span></label>
-          <input type="email" name="email" placeholder="Pour te contacter si besoin">
-        </div>
-
+        <div class="form-group"><label>Description & Pouvoirs</label><textarea name="description" rows="5" placeholder="Quel est son but ? Que fait-il la nuit ?" required></textarea></div>
+        <div class="form-group"><label>Ton Nom ou Pseudo <span style="font-size:0.8em; opacity:0.7">(Optionnel)</span></label><input type="text" name="pseudo" placeholder="Pour te créditer"></div>
+        <div class="form-group"><label>Email <span style="font-size:0.8em; opacity:0.7">(Optionnel)</span></label><input type="email" name="email" placeholder="Pour te contacter si besoin"></div>
         <button type="submit" class="btn-submit">Envoyer au Conseil</button>
       </form>
     </div>
@@ -415,109 +309,34 @@
     <div class="modal-content">
       <span class="close-modal" onclick="closeModal('modal-regles')">✕</span>
       <h2>Le Pacte Maudit</h2>
-      
       <div class="rules-container-styled">
-        
-        <div class="rule-box">
-          <img src="Public.svg" class="pact-icon" alt="Public">
-          <div class="rule-text">
-            <h3>On s’écoute vraiment</h3>
-            <p>Chacun parle à son tour, on laisse les autres finir leurs phrases et on évite de se couper. Les débats peuvent être intenses, mais toujours dans le calme et la bonne humeur.</p>
-          </div>
-        </div>
-
-        <div class="rule-box">
-          <img src="Respect.svg" class="pact-icon" alt="Respect">
-          <div class="rule-text">
-            <h3>Respect, fair-play et fun</h3>
-            <p>On est là pour passer un bon moment ensemble. Pas d’attaques personnelles, pas de mauvaise foi toxique, le but c’est de rire, bluffer et raconter une bonne histoire, pas de se fâcher.</p>
-          </div>
-        </div>
-
-        <div class="rule-box">
-          <img src="Secret.svg" class="pact-icon" alt="Secret">
-          <div class="rule-text">
-            <h3>Secret absolu sur les rôles</h3>
-            <p>Interdiction de dévoiler son rôle, et pas d’allusions trop évidentes à son pouvoir secret. Si tu veux convaincre, fais-le par le jeu, pas en cassant le mystère.</p>
-          </div>
-        </div>
-
-        <div class="rule-box">
-          <img src="Triche.svg" class="pact-icon" alt="Triche">
-          <div class="rule-text">
-            <h3>Pas de triche la nuit</h3>
-            <p>La nuit, tout le monde garde les yeux fermés, point final. Si tu ne peux pas t’empêcher de tricher, autant aller jouer à la PlayStation, ce sera plus simple pour tout le monde.</p>
-          </div>
-        </div>
-
-        <div class="rule-box">
-          <img src="Carte.svg" class="pact-icon" alt="Carte">
-          <div class="rule-text">
-            <h3>Prends soin de ta carte</h3>
-            <p>Ta carte reste posée devant toi pour aider le MJ et éviter qu’elle s’abîme. Pas dans le sac, pas dans la poche… et encore moins sous tes fesses.</p>
-          </div>
-        </div>
-
-        <div class="rule-box">
-          <img src="Captain.svg" class="pact-icon" alt="Captain">
-          <div class="rule-text">
-            <h3>Le MJ a le dernier mot</h3>
-            <p>On écoute le MJ et on respecte ses décisions, même si on n’est pas d’accord. C’est lui qui garde le rythme, tranche les litiges et protège l’ambiance de la partie.</p>
-          </div>
-        </div>
-
+        <div class="rule-box"><img src="Public.svg" class="pact-icon" alt="Public"><div class="rule-text"><h3>On s’écoute vraiment</h3><p>Chacun parle à son tour, on laisse les autres finir leurs phrases...</p></div></div>
+        <div class="rule-box"><img src="Respect.svg" class="pact-icon" alt="Respect"><div class="rule-text"><h3>Respect, fair-play et fun</h3><p>On est là pour passer un bon moment ensemble...</p></div></div>
+        <div class="rule-box"><img src="Secret.svg" class="pact-icon" alt="Secret"><div class="rule-text"><h3>Secret absolu sur les rôles</h3><p>Interdiction de dévoiler son rôle...</p></div></div>
+        <div class="rule-box"><img src="Triche.svg" class="pact-icon" alt="Triche"><div class="rule-text"><h3>Pas de triche la nuit</h3><p>La nuit, tout le monde garde les yeux fermés...</p></div></div>
+        <div class="rule-box"><img src="Carte.svg" class="pact-icon" alt="Carte"><div class="rule-text"><h3>Prends soin de ta carte</h3><p>Ta carte reste posée devant toi...</p></div></div>
+        <div class="rule-box"><img src="Captain.svg" class="pact-icon" alt="Captain"><div class="rule-text"><h3>Le MJ a le dernier mot</h3><p>On écoute le MJ et on respecte ses décisions...</p></div></div>
       </div>
-
       <button class="btn-validate" onclick="signPact()">✍️ Je signe le Pacte</button>
-
     </div>
   </div>
 
   <div id="modal-bug" class="modal">
     <div class="modal-content">
       <span class="close-modal" onclick="closeModal('modal-bug')">✕</span>
-      <h2 style="color: #ff6b6b; border-color: #ff6b6b;">
-  <img src="Bug.svg" class="section-icon" alt="Bug" style="filter: drop-shadow(0 0 5px #ff6b6b);"> 
-  Signaler un Bug</h2>
+      <h2 style="color: #ff6b6b; border-color: #ff6b6b;"><img src="Bug.svg" class="section-icon" alt="Bug" style="filter: drop-shadow(0 0 5px #ff6b6b);"> Signaler un Bug</h2>
       <p>Oups ! Quelque chose ne va pas ? Aide-nous à réparer le Village.</p>
-      
       <form id="bugForm" onsubmit="submitBug(event)" enctype="multipart/form-data">
         <input type="hidden" name="_captcha" value="false">
         <input type="hidden" name="_template" value="table">
         <input type="hidden" name="_format" value="json">
         <input type="hidden" name="_subject" value="🐛 BUG REPORT - Le Village Maudit">
-        
-        <div class="form-group">
-          <label>Décris ton problème</label>
-          <textarea name="description" rows="4" placeholder="Que s'est-il passé exactement ?" required></textarea>
-        </div>
-        
-        <div class="form-group">
-          <label>Lien de la page concernée <span style="font-size:0.8em; opacity:0.7">(Optionnel)</span></label>
-          <input type="text" name="page_link" id="bug-link" placeholder="Ex: https://...">
-        </div>
-
-        <div class="form-group">
-          <label>Preuve visuelle (Screenshot)</label>
-          <input type="file" name="attachment" accept="image/*">
-          <small style="color:var(--gold); opacity:0.7; font-size:0.8em;">(Max 2 Mo conseillé)</small>
-        </div>
-
-        <div class="form-group">
-          <label>Ton Appareil & Système</label>
-          <input type="text" name="device_os" id="bug-device" placeholder="Ex: iPhone 12, iOS 16..." required>
-        </div>
-
-        <div class="form-group">
-          <label>Ton Navigateur</label>
-          <input type="text" name="browser" id="bug-browser" placeholder="Ex: Chrome, Safari..." required>
-        </div>
-
-        <div class="form-group">
-          <label>Ton Email</label>
-          <input type="email" name="email" placeholder="Pour te tenir au courant" required>
-        </div>
-
+        <div class="form-group"><label>Décris ton problème</label><textarea name="description" rows="4" placeholder="Que s'est-il passé exactement ?" required></textarea></div>
+        <div class="form-group"><label>Lien de la page concernée <span style="font-size:0.8em; opacity:0.7">(Optionnel)</span></label><input type="text" name="page_link" id="bug-link" placeholder="Ex: https://..."></div>
+        <div class="form-group"><label>Preuve visuelle (Screenshot)</label><input type="file" name="attachment" accept="image/*"><small style="color:var(--gold); opacity:0.7; font-size:0.8em;">(Max 2 Mo conseillé)</small></div>
+        <div class="form-group"><label>Ton Appareil & Système</label><input type="text" name="device_os" id="bug-device" placeholder="Ex: iPhone 12, iOS 16..." required></div>
+        <div class="form-group"><label>Ton Navigateur</label><input type="text" name="browser" id="bug-browser" placeholder="Ex: Chrome, Safari..." required></div>
+        <div class="form-group"><label>Ton Email</label><input type="email" name="email" placeholder="Pour te tenir au courant" required></div>
         <button type="submit" class="btn-submit" style="background: #ff6b6b; color: #fff;">Envoyer le Rapport</button>
       </form>
     </div>
@@ -533,40 +352,27 @@
 
   <div id="modal-lock-intro" class="modal" style="z-index: 6000;">
     <div class="modal-content lock-content">
-      
       <div class="lock-slide active" id="lock-slide-0">
-        <div class="lock-icon-wrapper">
-          <i class="fas fa-lock lock-main-icon"></i>
-        </div>
+        <div class="lock-icon-wrapper"><i class="fas fa-lock lock-main-icon"></i></div>
         <h2>Village Scellé</h2>
         <p>Halte, Étranger ! Une brume magique recouvre le village.<br>Les habitants ne se révèlent pas à n'importe qui.</p>
         <button class="btn-lock-next" onclick="nextLockSlide(1)">Comment entrer ? ➜</button>
       </div>
-
       <div class="lock-slide" id="lock-slide-1">
-        <div class="lock-icon-wrapper">
-          <i class="fas fa-book-open lock-main-icon gold-glow"></i>
-        </div>
+        <div class="lock-icon-wrapper"><i class="fas fa-book-open lock-main-icon gold-glow"></i></div>
         <h2>Le Rituel</h2>
         <p>Pour dissiper le brouillard, tu dois prouver ta connaissance des lois :</p>
         <div class="lock-steps">
-          <div class="lock-step">
-            <span class="step-badge">1</span> Lire les <strong>Règles</strong> (9 pages)
-          </div>
-          <div class="lock-step">
-            <span class="step-badge">2</span> Signer le <strong>Pacte Maudit</strong>
-          </div>
+          <div class="lock-step"><span class="step-badge">1</span> Lire les <strong>Règles</strong> (9 pages)</div>
+          <div class="lock-step"><span class="step-badge">2</span> Signer le <strong>Pacte Maudit</strong></div>
         </div>
         <div class="lock-nav-buttons">
             <button class="btn-lock-prev" onclick="nextLockSlide(0)">❮</button>
             <button class="btn-lock-next" onclick="nextLockSlide(2)">J'ai compris ➜</button>
         </div>
       </div>
-
       <div class="lock-slide" id="lock-slide-2">
-        <div class="lock-icon-wrapper">
-          <i class="fas fa-dungeon lock-main-icon red-glow"></i>
-        </div>
+        <div class="lock-icon-wrapper"><i class="fas fa-dungeon lock-main-icon red-glow"></i></div>
         <h2>À toi de jouer</h2>
         <p>Tout se trouve dans le <strong>Menu</strong> (en haut à gauche).</p>
         <p style="font-size: 0.9em; opacity: 0.8;">Une fois ces deux tâches accomplies, les cartes se révèleront automatiquement.</p>
@@ -575,16 +381,83 @@
              <button class="btn-lock-next finish" onclick="finishIntro()">Ouvrir le Menu ☰</button>
         </div>
       </div>
-
       <div class="lock-dots">
-        <span class="dot active" id="dot-0"></span>
-        <span class="dot" id="dot-1"></span>
-        <span class="dot" id="dot-2"></span>
+        <span class="dot active" id="dot-0"></span><span class="dot" id="dot-1"></span><span class="dot" id="dot-2"></span>
       </div>
-
     </div>
   </div>
+
+  <div id="vm-overlay" aria-hidden="true"></div>
+  <div class="details-panel"></div>
+  <div class="details-overlay"></div>
+
+  <button id="btn-online-mode" class="btn-validate" style="position:fixed; bottom:20px; right:20px; width:auto; padding:10px 20px; z-index:9000; box-shadow:0 0 20px black; border:2px solid gold;">
+    📡 Mode En Ligne
+  </button>
+
+  <div id="modal-online-menu" class="modal">
+    <div class="modal-content" style="text-align:center;">
+      <span class="close-modal" onclick="closeModal('modal-online-menu')">✕</span>
+      <h2 style="color:var(--gold);">Le Village Connecté</h2>
+      <p>Connectez vos téléphones pour distribuer les rôles.</p>
+      <button onclick="window.initCreateGame(); openModal('modal-create-game'); closeModal('modal-online-menu')" class="btn-submit" style="margin-bottom:15px; background:#27ae60; color:white;">👑 Créer une partie (MJ)</button>
+      <button onclick="openModal('modal-join-game'); closeModal('modal-online-menu')" class="btn-submit" style="background:#2980b9; color:white;">🎮 Rejoindre une partie</button>
+    </div>
+  </div>
+
+  <div id="modal-create-game" class="modal">
+    <div class="modal-content">
+      <span class="close-modal" onclick="closeModal('modal-create-game')">✕</span>
+      <h2 style="color:#27ae60;">Espace Maître du Jeu</h2>
+      <div style="text-align:center;">
+        <p>Code de la partie :</p>
+        <div id="game-code-display" style="font-size:3em; font-family:'Pirata One'; color:var(--gold); letter-spacing:5px;">...</div>
+        <p style="opacity:0.7;">En attente des joueurs...</p>
+        
+        <div id="player-list-admin" style="background:rgba(0,0,0,0.3); padding:10px; border-radius:8px; min-height:100px; margin:20px 0;"></div>
+        
+        <div class="form-group">
+          <label>Rôles sélectionnés : <span id="role-count" style="color:#fff;">0</span></label>
+          <div id="roles-selection-list" style="max-height:200px; overflow-y:scroll; text-align:left; background:rgba(0,0,0,0.3); padding:10px;"></div>
+        </div>
+        <button id="btn-distribute" class="btn-validate" style="background:grey;" disabled>🃏 Distribuer</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="modal-join-game" class="modal">
+    <div class="modal-content">
+      <span class="close-modal" onclick="closeModal('modal-join-game')">✕</span>
+      <h2 style="color:#2980b9;">Rejoindre</h2>
+      <div class="form-group"><label>Ton Pseudo</label><input type="text" id="join-pseudo" placeholder="Ex: Nabil"></div>
+      <div class="form-group"><label>Code Partie</label><input type="text" id="join-code" placeholder="Ex: ABCD" style="text-transform:uppercase; text-align:center;"></div>
+      <button id="btn-join-action" class="btn-submit" style="background:#2980b9;">Entrer</button>
+      <div id="player-lobby-status" style="display:none; text-align:center; margin-top:20px;">
+        <h3 style="color:var(--gold);">En attente du MJ...</h3>
+        <div style="font-size:2em;">⏳</div>
+        <p>Ne quitte pas cette page.</p>
+      </div>
+    </div>
+  </div>
+
+  <div id="modal-role-selector" class="modal">
+    <div class="modal-content" style="max-width:90%; height:90vh; display:flex; flex-direction:column;">
+      <span class="close-modal" onclick="closeModal('modal-role-selector')">✕</span>
+      <h2 style="color:var(--gold);">Choisis le Nouveau Rôle</h2>
+      <p style="text-align:center;">Clique sur une carte pour l'assigner au joueur.</p>
+      <div id="admin-role-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; overflow-y: auto; padding: 10px;"></div>
+    </div>
+  </div>
+
+  <script type="module" src="online.js"></script>
+
   <script src="script.js"></script>
+  
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => navigator.serviceWorker.register('sw.js'));
+    }
+  </script>
 </body>
 </html>
 

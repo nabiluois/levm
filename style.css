@@ -1047,3 +1047,160 @@ body.locked-game .extra-links a[onclick*="modal-bug"] {
     cursor: not-allowed;
     border-color: #555;
 }
+
+/* ============================================
+   18. INTERFACE ADMIN FIREBASE (AJOUT V3)
+   ============================================ */
+
+/* --- TABLEAU DE BORD MJ VISUEL --- */
+#player-list-admin {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); /* Cartes adaptatives */
+  gap: 15px;
+  background: transparent !important; /* On enlève le fond gris du conteneur */
+}
+
+.admin-player-card {
+  background: linear-gradient(145deg, #2a1f15, #120c08);
+  border: 1px solid #5a4633;
+  border-radius: 8px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.admin-player-card img {
+  width: 80px;
+  height: auto;
+  border-radius: 5px;
+  margin-bottom: 5px;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+}
+
+.admin-player-card strong {
+  color: var(--gold);
+  font-family: 'Pirata One', serif;
+  font-size: 1.1em;
+  margin-bottom: 5px;
+  line-height: 1.1;
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ÉTAT MORT */
+.admin-player-card.dead {
+  filter: grayscale(100%);
+  border-color: #c0392b;
+  opacity: 0.8;
+}
+.admin-player-card.dead strong {
+  text-decoration: line-through;
+  color: #c0392b;
+}
+
+/* BOUTONS D'ACTION ADMIN */
+.admin-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px;
+  width: 100%;
+  margin-top: auto; /* Pousse vers le bas */
+}
+
+.btn-admin-mini {
+  border: none;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 0.7em;
+  font-weight: bold;
+  cursor: pointer;
+  flex-grow: 1;
+}
+
+/* Grille de sélection (Resurrection) */
+.role-select-item {
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: transform 0.2s;
+  text-align: center;
+}
+.role-select-item:hover {
+  transform: scale(1.05);
+  border-color: var(--gold);
+  border-radius: 8px;
+}
+.role-select-item img {
+  width: 100%;
+  border-radius: 8px;
+  display: block;
+}
+.role-select-item span {
+  display: block;
+  font-size: 0.8em;
+  color: #aaa;
+  text-align: center;
+  margin-top: 2px;
+}
+
+/* ============================================
+   19. OPTIMISATION ADMIN MOBILE (DOIGTS)
+   ============================================ */
+@media (max-width: 768px) {
+  
+  /* 1. Grille : Force 2 joueurs par ligne (plus lisible) */
+  #player-list-admin {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
+  }
+
+  /* 2. Carte Joueur : Un peu plus compacte */
+  .admin-player-card {
+    padding: 6px !important;
+  }
+  
+  .admin-player-card img {
+    width: 50px !important; /* Image un peu réduite */
+    margin-bottom: 4px !important;
+  }
+
+  .admin-player-card strong {
+    font-size: 0.95em !important; /* Pseudo lisible */
+    margin-bottom: 6px !important;
+  }
+
+  /* 3. BOUTONS TACTILES (Le plus important !) */
+  /* On agrandit la zone de touche pour éviter les erreurs */
+  .btn-admin-mini {
+    padding: 10px 5px !important; /* Plus haut pour le doigt */
+    font-size: 0.8em !important;
+    margin-bottom: 2px !important;
+    touch-action: manipulation; /* Optimise la réactivité */
+  }
+  
+  /* Les boutons OR/ARG/BRZ prennent toute la largeur dispo */
+  .admin-actions {
+    gap: 3px !important;
+  }
+  
+  .admin-actions button {
+    flex: 1 !important; /* S'étirent équitablement */
+    min-width: 30% !important;
+  }
+  
+  /* Le Code de la partie un peu moins gros pour pas déborder */
+  #game-code-display {
+    font-size: 2.2em !important;
+  }
+  
+  /* Grille Résurrection : 3 colonnes sur mobile pour bien voir */
+  #admin-role-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+}
