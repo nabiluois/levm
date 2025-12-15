@@ -1449,3 +1449,25 @@ body.light-mode .carte-back p {
     overflow-x: hidden !important;
     box-sizing: border-box !important;
 }
+
+/* =======================================================
+   27. OPTIMISATION ESPACE TEXTE (BORDURES RÉDUITES)
+   ======================================================= */
+
+/* 1. On réduit la marge interne de la carte pour agrandir la zone de texte */
+.carte-back {
+    /* On passe de 15px à 8px. Le texte gagne de la place partout (Haut, Bas, Gauche, Droite) */
+    padding: 8px !important; 
+}
+
+/* 2. On s'assure que le texte profite de cet espace */
+.carte-back p {
+    /* Juste une micro marge de sécurité sur les côtés pour ne pas toucher le trait */
+    padding: 0 4px !important; 
+    
+    /* On agrandit un tout petit peu le texte pour la lisibilité */
+    font-size: 1em !important; 
+    
+    /* On resserre légèrement les lignes pour afficher plus de texte sans scroller */
+    line-height: 1.35 !important; 
+}
