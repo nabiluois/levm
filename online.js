@@ -1,5 +1,5 @@
 // ============================================
-// SYSTEME EN LIGNE - LE VILLAGE MAUDIT (V11 - BOUTONS SÉPARÉS)
+// SYSTEME EN LIGNE - LE VILLAGE MAUDIT (V12 - AUTO-FIX & CARTE CLIQUABLE)
 // ============================================
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -36,6 +36,7 @@ let isDraftMode = false;
 
 document.addEventListener('DOMContentLoaded', () => {
     scanContentFromHTML();
+    ensureAdminButtonsExist(); // <-- AUTO-FIX DU HTML
 
     const btnJoin = document.getElementById('btn-join-action');
     if(btnJoin) btnJoin.addEventListener('click', joinGame);
@@ -45,6 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if(btnDistribute) btnDistribute.addEventListener('click', distributeRoles);
 
     // BOUTON 2 : RÉVÉLER (Envoi final)
+    // On attache l'événement même si le bouton a été créé dynamiquement
     const btnReveal = document.getElementById('btn-reveal');
     if(btnReveal) btnReveal.addEventListener('click', revealRolesToEveryone);
 
@@ -55,10 +57,52 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+// --- NOUVEAU : FONCTION QUI RÉPARE LE HTML MANQUANT ---
+function ensureAdminButtonsExist() {
+    const btnDistribute = document.getElementById('btn-distribute');
+    let btnReveal = document.getElementById('btn-reveal');
+
+    // Si le bouton Distribuer existe mais pas le bouton Révéler
+    if (btnDistribute && !btnReveal) {
+        // On crée un conteneur pour les mettre côte à côte
+        const container = document.createElement('div');
+        container.className = "admin-buttons-container";
+        container.style.display = "flex";
+        container.style.gap = "10px";
+        container.style.marginTop = "15px";
+
+        // On insère le conteneur avant le bouton actuel
+        btnDistribute.parentNode.insertBefore(container, btnDistribute);
+
+        // On déplace le bouton Distribuer dans le conteneur
+        container.appendChild(btnDistribute);
+
+        // On crée le bouton Révéler
+        btnReveal = document.createElement('button');
+        btnReveal.id = "btn-reveal";
+        btnReveal.className = "btn-validate btn-distribute-big";
+        btnReveal.style.flex = "1";
+        btnReveal.style.background = "#27ae60"; // Vert
+        btnReveal.style.display = "none"; // Caché par défaut
+        btnReveal.innerText = "📢 RÉVÉLER";
+        
+        // On l'ajoute au conteneur
+        container.appendChild(btnReveal);
+
+        // On ajuste le style du bouton distribuer pour qu'ils soient égaux
+        btnDistribute.style.flex = "1";
+        btnDistribute.style.width = "auto";
+    }
+}
+
 function showResumeButton(code) {
     const menuContainer = document.querySelector('.modal-content'); 
     if(menuContainer) {
+        // Eviter les doublons
+        if(document.getElementById('btn-resume-admin')) return;
+
         const resumeBtn = document.createElement('button');
+        resumeBtn.id = "btn-resume-admin";
         resumeBtn.className = "btn-menu";
         resumeBtn.style.background = "linear-gradient(135deg, #8e44ad, #c0392b)";
         resumeBtn.style.border = "2px solid gold";
@@ -169,7 +213,6 @@ function launchAdminInterface() {
 function setupAdminListeners() {
     onValue(ref(db, 'games/' + currentGameCode + '/players'), (snapshot) => {
         const players = snapshot.val() || {};
-        // Vérifie si on est en mode brouillon (au moins 1 draftRole présent)
         isDraftMode = Object.values(players).some(p => p.draftRole);
         updateAdminUI(players);
     });
@@ -210,31 +253,39 @@ function updateAdminUI(players) {
             const cardClass = isDead ? "admin-player-card dead" : "admin-player-card";
             let buttonsHtml = "";
             let draftBadge = "";
+            let clickAction = ""; // Action au clic sur la carte entière
 
             if (isDraft) {
+                // --- MODE BROUILLON (Tout est cliquable) ---
                 draftBadge = `<div style="background:#e67e22; color:white; font-size:0.7em; padding:2px 6px; border-radius:4px; position:absolute; top:5px; right:5px; z-index:10; font-family:sans-serif;">PROVISOIRE</div>`;
+                
+                // On met l'action de clic sur TOUTE la carte
+                clickAction = `onclick="window.openResurrectModal('${id}')"`;
+                
                 buttonsHtml = `
-                    <button class="btn-admin-mini" style="background:#3498db; color:white; width:100%; border:none; padding:8px; border-radius:5px; cursor:pointer; font-family:'Pirata One'; font-size:1.1em;" 
-                    onclick="window.openResurrectModal('${id}')">🔄 CHANGER</button>
+                    <div style="background:#3498db; color:white; text-align:center; padding:5px; border-radius:5px; margin-top:5px; font-size:0.9em;">
+                        🔄 Tap pour changer
+                    </div>
                 `;
             } 
             else if (!currentRoleId) {
                 buttonsHtml = `<span style="font-size:0.8em; opacity:0.5;">...</span>`;
             } 
             else if (isDead) {
+                // Pour les morts, boutons spécifiques
                 buttonsHtml = `<div class="admin-actions">`;
-                if(detectedEvents.gold.length > 0) buttonsHtml += `<button class="btn-admin-mini" style="background:gold; color:black;" onclick="window.adminDraw('${id}', 'gold')">OR</button>`;
-                if(detectedEvents.silver.length > 0) buttonsHtml += `<button class="btn-admin-mini" style="background:silver; color:black;" onclick="window.adminDraw('${id}', 'silver')">ARG</button>`;
-                if(detectedEvents.bronze.length > 0) buttonsHtml += `<button class="btn-admin-mini" style="background:#cd7f32; color:black;" onclick="window.adminDraw('${id}', 'bronze')">BRZ</button>`;
+                if(detectedEvents.gold.length > 0) buttonsHtml += `<button class="btn-admin-mini" style="background:gold; color:black;" onclick="event.stopPropagation(); window.adminDraw('${id}', 'gold')">OR</button>`;
+                if(detectedEvents.silver.length > 0) buttonsHtml += `<button class="btn-admin-mini" style="background:silver; color:black;" onclick="event.stopPropagation(); window.adminDraw('${id}', 'silver')">ARG</button>`;
+                if(detectedEvents.bronze.length > 0) buttonsHtml += `<button class="btn-admin-mini" style="background:#cd7f32; color:black;" onclick="event.stopPropagation(); window.adminDraw('${id}', 'bronze')">BRZ</button>`;
                 buttonsHtml += `</div>
-                    <button class="btn-admin-mini" style="background:#2ecc71; color:white; width:100%; margin-top:5px;" onclick="window.openResurrectModal('${id}')">♻️ REVIENT</button>
+                    <button class="btn-admin-mini" style="background:#2ecc71; color:white; width:100%; margin-top:5px;" onclick="event.stopPropagation(); window.openResurrectModal('${id}')">♻️ REVIENT</button>
                 `;
             } else {
-                buttonsHtml = `<div class="admin-actions"><button class="btn-admin-mini" style="background:#c0392b; color:white; width:100%;" onclick="window.adminKill('${id}')">💀 MORT</button></div>`;
+                buttonsHtml = `<div class="admin-actions"><button class="btn-admin-mini" style="background:#c0392b; color:white; width:100%;" onclick="event.stopPropagation(); window.adminKill('${id}')">💀 MORT</button></div>`;
             }
 
             listDiv.innerHTML += `
-                <div class="${cardClass}" style="position:relative;">
+                <div class="${cardClass}" style="position:relative; cursor:pointer;" ${clickAction}>
                     ${draftBadge}
                     <img src="${cardImage}" alt="Role">
                     <strong>${p.name}</strong>
@@ -245,23 +296,22 @@ function updateAdminUI(players) {
         });
     }
     
-    // Mise à jour de l'état des deux boutons
     updateAdminButtons(count);
 }
 
-// NOUVELLE FONCTION DE GESTION DES DEUX BOUTONS
 function updateAdminButtons(playerCount) {
     const btnDistribute = document.getElementById('btn-distribute');
     const btnReveal = document.getElementById('btn-reveal');
     const selectedCount = document.querySelectorAll('.role-checkbox:checked').length;
 
+    if(!btnDistribute || !btnReveal) return; // Sécurité
+
     // 1. Bouton "PRÉPARER" (Gauche)
-    // Actif si on a assez de joueurs et de rôles sélectionnés
     if (playerCount > 0 && selectedCount === playerCount) {
         btnDistribute.disabled = false;
         btnDistribute.style.background = "linear-gradient(135deg, #d4af37, #b8941f)";
         btnDistribute.style.cursor = "pointer";
-        btnDistribute.innerHTML = isDraftMode ? "🃏 REMÉLANGER" : "🃏 PRÉPARER"; // Petit détail ergonomique
+        btnDistribute.innerHTML = isDraftMode ? "🃏 REMÉLANGER" : "🃏 PRÉPARER";
     } else {
         btnDistribute.disabled = true;
         btnDistribute.style.background = "grey";
@@ -270,11 +320,10 @@ function updateAdminButtons(playerCount) {
     }
 
     // 2. Bouton "RÉVÉLER" (Droite)
-    // Visible et Actif UNIQUEMENT si on est en mode Brouillon (Draft)
     if (isDraftMode) {
-        btnReveal.style.display = "block"; // On affiche le bouton
+        btnReveal.style.display = "block"; 
     } else {
-        btnReveal.style.display = "none";  // On le cache
+        btnReveal.style.display = "none";
     }
 }
 
@@ -326,13 +375,13 @@ window.assignRoleToPlayer = function(roleId) {
     if(!targetResurrectId) return;
 
     if (isDraftMode) {
-        // Mode Brouillon : Mise à jour silencieuse
+        // Mode Brouillon
         update(ref(db, `games/${currentGameCode}/players/${targetResurrectId}`), { 
             draftRole: roleId 
         });
         window.closeModal('modal-role-selector');
     } else {
-        // Mode Jeu : Mise à jour avec notification
+        // Mode Jeu
         if(confirm("Cela va changer le rôle du joueur immédiatement. Continuer ?")) {
             update(ref(db, `games/${currentGameCode}/players/${targetResurrectId}`), { 
                 status: 'alive', role: roleId, drawnCard: null 
