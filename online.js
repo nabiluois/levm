@@ -1,5 +1,5 @@
 // ============================================
-// SYSTEME EN LIGNE - LE VILLAGE MAUDIT (V16 - FIX BOUTON MORT & CENTRAGE)
+// SYSTEME EN LIGNE - LE VILLAGE MAUDIT (V17 - FIX COMPLET : BOUTON BLEU & QUITTER)
 // ============================================
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -98,25 +98,31 @@ function showResumeButton(code) {
     }
 }
 
+// SCAN AMÉLIORÉ (SÉCURITÉ)
 function scanContentFromHTML() {
     detectedRoles = [];
     detectedEvents = { gold: [], silver: [], bronze: [] };
 
+    // On scanne les cartes du jeu
     document.querySelectorAll('.carte-jeu').forEach((card) => {
         const imgTag = card.querySelector('.carte-front img');
-        const titleTag = card.querySelector('.carte-back h3');
+        // On récupère le titre même s'il est caché en CSS
+        const titleTag = card.querySelector('.carte-back h3'); 
+        
         if (imgTag && titleTag) {
             const imgSrc = imgTag.getAttribute('src');
             const id = imgSrc.split('/').pop().replace(/\.[^/.]+$/, "");
+            
             detectedRoles.push({
                 id: id,
-                title: titleTag.innerText,
+                title: titleTag.innerText.trim(), // Trim pour nettoyer les espaces
                 image: imgSrc,
                 description: card.querySelector('.carte-back p') ? card.querySelector('.carte-back p').innerHTML : ""
             });
         }
     });
 
+    // On scanne les cartes événements
     document.querySelectorAll('.carte-vm').forEach((card) => {
         const imgTag = card.querySelector('img');
         if (imgTag) {
@@ -126,6 +132,8 @@ function scanContentFromHTML() {
             else if (card.classList.contains('bronze')) detectedEvents.bronze.push(imgSrc);
         }
     });
+    
+    console.log("Rôles détectés au scan :", detectedRoles.length);
 }
 
 // Sécurité MJ
@@ -138,10 +146,10 @@ window.checkAdminPassword = function() {
     }
 };
 
+// FIX FLASH : On ne cache plus le dashboard avant le reload
 window.closeAdminPanel = function() {
     if(confirm("Quitter le mode Admin ?")) {
-        document.getElementById('admin-dashboard').style.display = 'none';
-        document.body.style.overflow = 'auto';
+        // Suppression de la ligne .style.display = 'none' pour éviter le flash
         localStorage.removeItem('adminGameCode');
         location.reload(); 
     }
@@ -188,7 +196,9 @@ function launchAdminInterface() {
 
     setupAdminListeners();
     generateRoleChecklist();
-    generateResurrectionGrid();
+    
+    // On appelle la fonction de grille si elle existe (sécurité)
+    if(window.generateResurrectionGrid) window.generateResurrectionGrid(); 
 }
 
 function setupAdminListeners() {
@@ -236,12 +246,12 @@ function updateAdminUI(players) {
             let draftBadge = "";
 
             // STYLE SPECIAL POUR FORCER LE CLIC SUR LES BOUTONS MEME SI "DEAD"
-            // On ajoute pointer-events: auto, opacity: 1, et filter: none
             const forceClickStyle = "pointer-events: auto; opacity: 1; filter: none; cursor: pointer; position:relative; z-index:100;";
 
             if (isDraft) {
                 draftBadge = `<div style="background:#e67e22; color:white; font-size:0.7em; padding:2px 6px; border-radius:4px; position:absolute; top:5px; right:5px; z-index:10; font-family:sans-serif;">PROVISOIRE</div>`;
                 
+                // BOUTON BLEU : Appelle openResurrectModal
                 buttonsHtml = `
                     <button class="btn-admin-mini" 
                         style="background:#3498db; color:white; width:100%; border:none; padding:10px; border-radius:5px; font-family:'Pirata One'; font-size:1.1em; margin-top:5px; ${forceClickStyle}" 
@@ -329,72 +339,91 @@ window.adminDraw = function(playerId, category) {
 };
 
 // ============================================
-// C. LOGIQUE DE CHANGEMENT DE RÔLE (MANUEL & RESURRECTION)
+// C. LOGIQUE DE CHANGEMENT DE RÔLE (CORRIGÉE & SÉCURISÉE)
 // ============================================
 
-// 1. Génère la grille des cartes dans la fenêtre (Modale)
-function generateResurrectionGrid() {
+// 1. Génération de la grille (Méthode Robuste avec onclick JS)
+window.generateResurrectionGrid = function() {
     const grid = document.getElementById('admin-role-grid');
-    // Sécurité : on vérifie que la grille existe et qu'on a bien scanné les rôles
-    if(!grid || detectedRoles.length === 0) return;
+    if(!grid) {
+        console.warn("Grille admin introuvable dans le DOM");
+        return;
+    }
     
+    // Si la liste est vide, on relance un scan forcé
+    if (detectedRoles.length === 0) {
+        console.log("Liste vide, relance du scan...");
+        scanContentFromHTML();
+    }
+
     grid.innerHTML = "";
     
-    // On trie les rôles par ordre alphabétique pour que tu trouves vite la carte
+    // Tri alphabétique pour faciliter la recherche
     const sortedRoles = [...detectedRoles].sort((a, b) => a.title.localeCompare(b.title));
 
     sortedRoles.forEach(role => {
-        grid.innerHTML += `
-            <div class="role-select-item" onclick="window.assignRoleToPlayer('${role.id}')" 
-                 style="cursor:pointer; text-align:center; padding:5px;">
-                <img src="${role.image}" loading="lazy" style="width:100%; border-radius:8px; border:2px solid transparent;">
-                <span style="display:block; font-size:0.8em; color:#aaa; margin-top:2px;">${role.title}</span>
-            </div>
+        // On crée l'élément HTML via JS pour attacher l'événement click proprement
+        const div = document.createElement('div');
+        div.className = "role-select-item";
+        div.style.cursor = "pointer";
+        div.style.textAlign = "center";
+        div.style.padding = "5px";
+        
+        div.innerHTML = `
+            <img src="${role.image}" loading="lazy" style="width:100%; border-radius:8px; border:2px solid transparent;">
+            <span style="display:block; font-size:0.8em; color:#aaa; margin-top:2px;">${role.title}</span>
         `;
+        
+        // Clic direct (Fix pour le bouton bleu qui ne marchait pas)
+        div.onclick = function() { 
+            window.assignRoleToPlayer(role.id); 
+        };
+        
+        grid.appendChild(div);
     });
-}
+};
 
-// 2. Fonction appelée par le bouton bleu "CHANGER"
+// 2. Fonction d'ouverture (Appelée par le bouton bleu)
 window.openResurrectModal = function(playerId) {
+    console.log("Ouverture modale pour le joueur :", playerId);
     targetResurrectId = playerId;
     
-    // 1. On remplit la grille avec les cartes
-    generateResurrectionGrid();
+    // 1. On remplit la grille
+    window.generateResurrectionGrid();
 
-    // 2. On change le titre de la fenêtre pour être clair
+    // 2. On change le titre
     const modalTitle = document.querySelector('#modal-role-selector h2');
     if(modalTitle) {
-        modalTitle.innerText = isDraftMode ? "♻️ CHANGER LA CARTE (Brouillon)" : "⚰️ RESSUSCITER / CHANGER";
+        modalTitle.innerText = isDraftMode ? "♻️ CHANGER LA CARTE" : "⚰️ RESSUSCITER / CHANGER";
     }
 
     // 3. On ouvre la fenêtre
     window.openModal('modal-role-selector');
 };
 
-// 3. Action quand tu cliques sur une image de la liste
+// 3. Assignation du rôle (Base de données)
 window.assignRoleToPlayer = function(roleId) {
     if(!targetResurrectId) return;
 
-    // CAS 1 : Mode Brouillon (Le jeu n'a pas commencé, bouton bleu)
+    console.log("Nouveau rôle choisi :", roleId);
+
     if (isDraftMode) {
-        // Mise à jour directe dans la base de données
+        // Mode brouillon : modification silencieuse
         update(ref(db, `games/${currentGameCode}/players/${targetResurrectId}`), { 
             draftRole: roleId 
         }).then(() => {
-            // On ferme la fenêtre, le changement se verra tout de suite sur ton écran
             window.closeModal('modal-role-selector');
         });
-    } 
-    // CAS 2 : Partie en cours (Bouton vert "REVIENT")
-    else {
-        if(confirm("Es-tu sûr de vouloir ressusciter/changer ce joueur avec ce rôle ?")) {
+    } else {
+        // Mode jeu : confirmation requise
+        if(confirm("Confirmer le changement de rôle ?")) {
             update(ref(db, `games/${currentGameCode}/players/${targetResurrectId}`), { 
                 status: 'alive', 
                 role: roleId, 
                 drawnCard: null 
             });
             window.closeModal('modal-role-selector');
-            internalShowNotification("Succès", "Le rôle a été changé !");
+            internalShowNotification("Succès", "Rôle modifié !");
         }
     }
 };
