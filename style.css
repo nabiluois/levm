@@ -1783,3 +1783,77 @@ body.light-mode #online-mode-link {
         grid-template-columns: repeat(2, 1fr) !important;
     }
 }
+
+/* =======================================================
+   35. FIX GRILLE & TABLEAU RÉCAPITULATIF (V27)
+   ======================================================= */
+
+/* 1. Correction de la Grille Pop-up (Tailles identiques) */
+.admin-grid-container {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important; /* 3 colonnes strictes */
+    gap: 8px !important;
+    padding: 5px !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+}
+
+.role-select-item {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+}
+
+.role-select-item img {
+    width: 100% !important;
+    height: auto !important;
+    display: block !important;
+    aspect-ratio: 2/3 !important; /* Force le format carte */
+    object-fit: cover !important;
+}
+
+/* 2. Tableau Récapitulatif (Écran Principal) */
+.summary-container {
+    display: flex;
+    justify-content: space-between;
+    background: rgba(0,0,0,0.3);
+    border: 1px solid #444;
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 15px;
+    font-size: 0.8em;
+}
+
+.summary-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border-right: 1px solid #444;
+    padding: 0 5px;
+}
+
+.summary-col:last-child {
+    border-right: none;
+}
+
+.summary-col img {
+    width: 20px;
+    height: 20px;
+    margin-bottom: 5px;
+}
+
+.summary-col strong {
+    color: var(--gold);
+    margin-bottom: 5px;
+    font-family: 'Pirata One';
+    font-size: 1.2em;
+}
+
+.summary-list-item {
+    color: #ccc;
+    font-size: 0.9em;
+    text-align: center;
+    line-height: 1.2;
+    margin-bottom: 2px;
+}
