@@ -1204,3 +1204,29 @@ body.locked-game .extra-links a[onclick*="modal-bug"] {
     grid-template-columns: repeat(3, 1fr) !important;
   }
 }
+
+/* ============================================
+   20. CORRECTIF LISIBILITÉ CODE PARTIE
+   ============================================ */
+#game-code-display {
+  /* On force une police système très lisible (pas de gothique ici) */
+  font-family: 'Verdana', 'Arial', sans-serif !important; 
+  font-weight: 900 !important; /* Très gras */
+  font-size: 3.5em !important; /* Très gros */
+  letter-spacing: 15px !important; /* Espacement large entre les lettres */
+  text-transform: uppercase;
+  color: #2ecc71 !important; /* Vert matrix bien visible (ou garde var(--gold) si tu préfères) */
+  background: rgba(0, 0, 0, 0.4);
+  padding: 10px;
+  border-radius: 10px;
+  border: 2px dashed #555;
+  margin: 15px 0 !important;
+}
+
+/* Ajustement mobile pour que le gros code ne dépasse pas */
+@media (max-width: 400px) {
+  #game-code-display {
+    font-size: 2.5em !important;
+    letter-spacing: 8px !important;
+  }
+}

@@ -53,6 +53,13 @@
       <li><a href="#" onclick="openModal('modal-regles-base')" style="border-color: #ff6b6b; color:#ff6b6b;"><img src="Regle_de_base.svg" alt="Règles" class="menu-icon"> Règles de base</a></li>
       <li><a href="#" onclick="openModal('modal-regles')" style="border-color: #ff6b6b; color:#ff6b6b;"><img src="Le_pacte_maudit.svg" alt="Pacte" class="menu-icon"> Le Pacte Maudit</a></li>
       <li><a href="#" onclick="openModal('modal-propose')"><img src="Forge_un_role.svg" alt="Forge" class="menu-icon"> Forge un Rôle</a></li>
+      
+      <li>
+        <a href="#" onclick="openModal('modal-online-menu')" style="border-color: #2ecc71; color:#2ecc71;">
+          <span class="menu-icon" style="font-size:1.5em; line-height:1;">📡</span> Mode En Ligne
+        </a>
+      </li>
+
       <li><a href="#" onclick="openModal('modal-bug')"><img src="Bug.svg" alt="Bug" class="menu-icon"> Signaler un Bug</a></li>
     </ul>
     <div class="extra-footer"><strong>© 2026 Le Village Maudit</strong><br><em>by Nabil & Joelson</em></div>
@@ -74,7 +81,7 @@
     <div class="carte-jeu"><div class="carte-inner"><div class="carte-front"><img src="la_balance.png" alt="LA BALANCE" loading="lazy"></div><div class="carte-back"><h3>LA BALANCE</h3><p>Personne n'aime les balances ici sauf, dans le Village Maudit...</p><button class="btn-details"><img src="Details.svg" alt="Détails"></button></div></div></div>
     <div class="carte-jeu"><div class="carte-inner"><div class="carte-front"><img src="le_chuchoteur.png" alt="LE CHUCHOTEUR" loading="lazy"></div><div class="carte-back"><h3>LE CHUCHOTEUR</h3><p>Empêcher quelqu'un de parler, surtout quand le village commence à avoir des soupçons...</p><button class="btn-details"><img src="Details.svg" alt="Détails"></button></div></div></div>
     <div class="carte-jeu"><div class="carte-inner"><div class="carte-front"><img src="la_fille.png" alt="LA FILLE" loading="lazy"></div><div class="carte-back"><h3>LA FILLE</h3><p>Paysanne de père en fille : tant que le Bûcheron est en vie...</p><button class="btn-details"><img src="Details.svg" alt="Détails"></button></div></div></div>
-    <div class="carte-jeu"><div class="carte-inner"><div class="carte-front"><img src="la_dame_de_complaisance.png" alt="LA DAME DE COMPLAISANCE" loading="lazy"></div><div class="carte-back"><h3>LA DAME DE COMPLAISANCE</h3><p>Fille de joie de génération en génération...</p><button class="btn-details"><img src="Details.svg" alt="Détails"></button></div></div></div>
+    <div class="carte-jeu"><div class="carte-inner"><div class="carte-front"><img src="la_dame_de_complaisance.png" alt="LA DAME DE COMPLAISANCE" loading="lazy"></div><div class="carte-back"><h3>LA DAME DE COMPLAISANCE</h3><p>Fille de joie de génération en génération, elle accumule les conquêtes...</p><button class="btn-details"><img src="Details.svg" alt="Détails"></button></div></div></div>
     <div class="carte-jeu"><div class="carte-inner"><div class="carte-front"><img src="target.png" alt="TARGET" loading="lazy"></div><div class="carte-back"><h3>TARGET</h3><p>Il est traqué, pisté, visé de toutes parts...</p><button class="btn-details"><img src="Details.svg" alt="Détails"></button></div></div></div>
     <div class="carte-jeu"><div class="carte-inner"><div class="carte-front"><img src="le_milliardaire.png" alt="LE MILLIARDAIRE" loading="lazy"></div><div class="carte-back"><h3>LE MILLIARDAIRE</h3><p>Riche. Arrogant. Imbu de lui-même. Et surtout... intouchable...</p><button class="btn-details"><img src="Details.svg" alt="Détails"></button></div></div></div>
     <div class="carte-jeu"><div class="carte-inner"><div class="carte-front"><img src="le_bienfaiteur.png" alt="LE BIENFAITEUR" loading="lazy"></div><div class="carte-back"><h3>LE BIENFAITEUR</h3><p>Chaque nuit, le Bienfaiteur protège une personne...</p><button class="btn-details"><img src="Details.svg" alt="Détails"></button></div></div></div>
@@ -391,10 +398,6 @@
   <div class="details-panel"></div>
   <div class="details-overlay"></div>
 
-  <button id="btn-online-mode" class="btn-validate" style="position:fixed; bottom:20px; right:20px; width:auto; padding:10px 20px; z-index:9000; box-shadow:0 0 20px black; border:2px solid gold;">
-    📡 Mode En Ligne
-  </button>
-
   <div id="modal-online-menu" class="modal">
     <div class="modal-content" style="text-align:center;">
       <span class="close-modal" onclick="closeModal('modal-online-menu')">✕</span>
@@ -413,9 +416,7 @@
         <p>Code de la partie :</p>
         <div id="game-code-display" style="font-size:3em; font-family:'Pirata One'; color:var(--gold); letter-spacing:5px;">...</div>
         <p style="opacity:0.7;">En attente des joueurs...</p>
-        
         <div id="player-list-admin" style="background:rgba(0,0,0,0.3); padding:10px; border-radius:8px; min-height:100px; margin:20px 0;"></div>
-        
         <div class="form-group">
           <label>Rôles sélectionnés : <span id="role-count" style="color:#fff;">0</span></label>
           <div id="roles-selection-list" style="max-height:200px; overflow-y:scroll; text-align:left; background:rgba(0,0,0,0.3); padding:10px;"></div>
