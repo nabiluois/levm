@@ -2079,3 +2079,152 @@ body.no-scroll {
     margin-bottom: 20px !important;
     border-bottom: 1px solid #555 !important;
 }
+
+/* =======================================================
+   42. FIX VIDÉO MENU PANINI (PLEIN CADRE)
+   ======================================================= */
+
+/* 1. On supprime les marges de la fenêtre pour que la vidéo colle aux bords */
+#modal-online-menu .modal-content {
+    padding: 0 !important;       /* Zéro marge interne */
+    overflow: hidden !important; /* Force la vidéo à suivre les coins arrondis */
+    display: flex;
+    flex-direction: column;
+}
+
+/* 2. La Vidéo (ou l'image d'en-tête) prend toute la largeur */
+#modal-online-menu .menu-header,
+#modal-online-menu video {
+    width: 100% !important;
+    height: auto !important;
+    display: block !important;   /* Supprime l'espace fantôme sous la vidéo */
+    margin: 0 !important;
+    border: none !important;
+    line-height: 0 !important;
+    border-radius: 0 !important; /* L'arrondi est géré par la fenêtre parente */
+}
+
+/* 3. On remet de l'espace (Padding) pour le contenu SOUS la vidéo */
+#modal-online-menu h2,
+#modal-online-menu .btn-menu,
+#modal-online-menu p,
+#modal-online-menu .extra-links {
+    width: 92% !important;       /* Largeur confortable */
+    margin-left: auto !important;
+    margin-right: auto !important;
+    /* On rajoute un peu d'espace vertical car on a supprimé le padding global */
+    margin-bottom: 10px !important; 
+}
+
+/* Petit espace spécifique au titre pour qu'il ne colle pas à la vidéo */
+#modal-online-menu h2 {
+    margin-top: 15px !important; 
+}
+
+/* =======================================================
+   43. FIX GLOBAL MODE CLAIR (ADMIN & POPUP)
+   ======================================================= */
+
+/* --- 1. FOND ET TEXTE GÉNÉRAL ADMIN --- */
+body.light-mode #admin-dashboard,
+body.light-mode .modal-content {
+    background: #f4f6f8 !important; /* Gris très clair élégant */
+    color: #333 !important;         /* Texte sombre */
+    border: 1px solid #d1d5db !important;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important;
+}
+
+/* Titres en mode clair */
+body.light-mode h2, 
+body.light-mode h3, 
+body.light-mode strong {
+    color: #1a1a1a !important;
+    text-shadow: none !important; /* On enlève le néon */
+    border-bottom-color: #ccc !important;
+}
+
+/* --- 2. POPUP "CHOISIR LES RÔLES" (GRILLE) --- */
+body.light-mode .role-select-item {
+    background: #ffffff !important;   /* Carte blanche */
+    border: 1px solid #e5e7eb !important; /* Bordure grise fine */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05) !important; /* Ombre douce */
+    border-radius: 8px !important;
+    transition: transform 0.2s !important;
+}
+
+body.light-mode .role-select-item span {
+    color: #4b5563 !important; /* Nom du rôle en gris foncé */
+    font-weight: bold !important;
+}
+
+/* Carte SÉLECTIONNÉE en mode clair */
+body.light-mode .role-select-item.selected {
+    border: 2px solid #2ecc71 !important; /* Bordure verte */
+    background: #ecfdf5 !important;       /* Fond vert très pâle */
+    box-shadow: 0 4px 10px rgba(46, 204, 113, 0.3) !important;
+}
+
+/* Pastille de quantité (Badge rouge) */
+body.light-mode .qty-badge {
+    border: 2px solid #fff !important; /* Bordure blanche pour détacher */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2) !important;
+}
+
+/* --- 3. TABLEAU RÉCAPITULATIF (DASHBOARD) --- */
+body.light-mode .summary-container {
+    background: #ffffff !important;
+    border: 1px solid #d1d5db !important;
+}
+
+body.light-mode .summary-col {
+    border-right: 1px solid #e5e7eb !important;
+}
+
+/* Bulles de noms en mode clair (Couleurs pastel lisibles) */
+body.light-mode .summary-col:nth-child(1) .summary-list-item { /* Village */
+    background: #d1fae5 !important; 
+    color: #065f46 !important; 
+    border: 1px solid #a7f3d0 !important;
+}
+
+body.light-mode .summary-col:nth-child(2) .summary-list-item { /* Loups */
+    background: #fee2e2 !important; 
+    color: #991b1b !important; 
+    border: 1px solid #fecaca !important;
+}
+
+body.light-mode .summary-col:nth-child(3) .summary-list-item { /* Solo */
+    background: #f3e8ff !important; 
+    color: #6b21a8 !important; 
+    border: 1px solid #e9d5ff !important;
+}
+
+/* --- 4. CARTES DES JOUEURS (LISTE) --- */
+body.light-mode .admin-player-card {
+    background: #ffffff !important;
+    border: 1px solid #e5e7eb !important;
+    color: #333 !important;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05) !important;
+}
+
+body.light-mode .admin-player-card div {
+    color: #666 !important; /* Sous-titre rôle */
+}
+
+/* Joueur MORT en mode clair */
+body.light-mode .admin-player-card.dead {
+    background: #f3f4f6 !important; /* Gris */
+    border: 1px solid #9ca3af !important;
+}
+
+body.light-mode .admin-player-card.dead strong {
+    color: #9ca3af !important; /* Nom grisé */
+    text-decoration: line-through !important;
+}
+
+/* --- 5. BOUTONS --- */
+body.light-mode .btn-validate,
+body.light-mode .btn-menu {
+    border: 1px solid rgba(0,0,0,0.1) !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+}
