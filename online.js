@@ -1,5 +1,5 @@
 // ============================================
-// SYSTEME EN LIGNE - LE VILLAGE MAUDIT (V17 - FIX COMPLET : BOUTON BLEU & QUITTER)
+// SYSTEME EN LIGNE - LE VILLAGE MAUDIT (V18 - FIX DOM & CLIC)
 // ============================================
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -103,10 +103,8 @@ function scanContentFromHTML() {
     detectedRoles = [];
     detectedEvents = { gold: [], silver: [], bronze: [] };
 
-    // On scanne les cartes du jeu
     document.querySelectorAll('.carte-jeu').forEach((card) => {
         const imgTag = card.querySelector('.carte-front img');
-        // On récupère le titre même s'il est caché en CSS
         const titleTag = card.querySelector('.carte-back h3'); 
         
         if (imgTag && titleTag) {
@@ -115,14 +113,13 @@ function scanContentFromHTML() {
             
             detectedRoles.push({
                 id: id,
-                title: titleTag.innerText.trim(), // Trim pour nettoyer les espaces
+                title: titleTag.innerText.trim(),
                 image: imgSrc,
                 description: card.querySelector('.carte-back p') ? card.querySelector('.carte-back p').innerHTML : ""
             });
         }
     });
 
-    // On scanne les cartes événements
     document.querySelectorAll('.carte-vm').forEach((card) => {
         const imgTag = card.querySelector('img');
         if (imgTag) {
@@ -136,7 +133,6 @@ function scanContentFromHTML() {
     console.log("Rôles détectés au scan :", detectedRoles.length);
 }
 
-// Sécurité MJ
 window.checkAdminPassword = function() {
     const password = prompt("🔐 Mot de passe MJ :");
     if(password === "1234") {
@@ -146,10 +142,8 @@ window.checkAdminPassword = function() {
     }
 };
 
-// FIX FLASH : On ne cache plus le dashboard avant le reload
 window.closeAdminPanel = function() {
     if(confirm("Quitter le mode Admin ?")) {
-        // Suppression de la ligne .style.display = 'none' pour éviter le flash
         localStorage.removeItem('adminGameCode');
         location.reload(); 
     }
@@ -197,7 +191,6 @@ function launchAdminInterface() {
     setupAdminListeners();
     generateRoleChecklist();
     
-    // On appelle la fonction de grille si elle existe (sécurité)
     if(window.generateResurrectionGrid) window.generateResurrectionGrid(); 
 }
 
@@ -209,11 +202,16 @@ function setupAdminListeners() {
     });
 }
 
+// ============================================
+// UPDATE UI (REFAIT AVEC DOM ELEMENT POUR CLIC SÛR)
+// ============================================
 function updateAdminUI(players) {
     const listDiv = document.getElementById('player-list-admin');
     if(!listDiv) return;
     
+    // On vide la liste
     listDiv.innerHTML = "";
+    
     const count = Object.keys(players).length;
     
     if(count === 0) {
@@ -221,6 +219,7 @@ function updateAdminUI(players) {
     } else {
         Object.entries(players).forEach(([id, p]) => {
             
+            // --- 1. Préparation des données ---
             let currentRoleId = p.role;
             let isDraft = false;
 
@@ -242,51 +241,98 @@ function updateAdminUI(players) {
 
             const isDead = p.status === 'dead';
             const cardClass = isDead ? "admin-player-card dead" : "admin-player-card";
-            let buttonsHtml = "";
-            let draftBadge = "";
 
-            // STYLE SPECIAL POUR FORCER LE CLIC SUR LES BOUTONS MEME SI "DEAD"
+            // --- 2. Création de la CARTE (DOM) ---
+            const cardDiv = document.createElement('div');
+            cardDiv.className = cardClass;
+            cardDiv.style.position = 'relative';
+
+            // HTML de base (Image + Nom)
+            let innerHTML = `
+                <img src="${cardImage}" alt="Role">
+                <strong>${p.name}</strong>
+                <div style="font-size:0.8em; color:#aaa; margin-bottom:5px;">${roleTitle}</div>
+            `;
+
+            if(isDraft) {
+                innerHTML = `<div style="background:#e67e22; color:white; font-size:0.7em; padding:2px 6px; border-radius:4px; position:absolute; top:5px; right:5px; z-index:10; font-family:sans-serif;">PROVISOIRE</div>` + innerHTML;
+            }
+
+            cardDiv.innerHTML = innerHTML;
+
+            // --- 3. Ajout des BOUTONS (DOM Elements avec Listeners directs) ---
+            
             const forceClickStyle = "pointer-events: auto; opacity: 1; filter: none; cursor: pointer; position:relative; z-index:100;";
 
             if (isDraft) {
-                draftBadge = `<div style="background:#e67e22; color:white; font-size:0.7em; padding:2px 6px; border-radius:4px; position:absolute; top:5px; right:5px; z-index:10; font-family:sans-serif;">PROVISOIRE</div>`;
+                // *** BOUTON BLEU (Celui qui posait problème) ***
+                const btnChange = document.createElement('button');
+                btnChange.className = "btn-admin-mini";
+                btnChange.style.cssText = `background:#3498db; color:white; width:100%; border:none; padding:10px; border-radius:5px; font-family:'Pirata One'; font-size:1.1em; margin-top:5px; ${forceClickStyle}`;
+                btnChange.innerText = "🔄 CHANGER";
                 
-                // BOUTON BLEU : Appelle openResurrectModal
-                buttonsHtml = `
-                    <button class="btn-admin-mini" 
-                        style="background:#3498db; color:white; width:100%; border:none; padding:10px; border-radius:5px; font-family:'Pirata One'; font-size:1.1em; margin-top:5px; ${forceClickStyle}" 
-                        onclick="event.stopPropagation(); window.openResurrectModal('${id}')">
-                        🔄 CHANGER
-                    </button>
-                `;
+                // Clic direct et infaillible
+                btnChange.onclick = function(e) {
+                    e.stopPropagation();
+                    console.log("Clic sur changer pour", id);
+                    window.openResurrectModal(id);
+                };
+                cardDiv.appendChild(btnChange);
             } 
             else if (!currentRoleId) {
-                buttonsHtml = `<span style="font-size:0.8em; opacity:0.5;">...</span>`;
+                // Pas de bouton (attente)
+                const waiting = document.createElement('span');
+                waiting.style.cssText = "font-size:0.8em; opacity:0.5;";
+                waiting.innerText = "...";
+                cardDiv.appendChild(waiting);
             } 
             else if (isDead) {
-                // --- JOUEUR MORT : BOUTONS FORCÉS ---
-                buttonsHtml = `<div class="admin-actions">`;
-                
-                if(detectedEvents.gold.length > 0) buttonsHtml += `<button class="btn-admin-mini" style="background:gold; color:black; ${forceClickStyle}" onclick="event.stopPropagation(); window.adminDraw('${id}', 'gold')">OR</button>`;
-                if(detectedEvents.silver.length > 0) buttonsHtml += `<button class="btn-admin-mini" style="background:silver; color:black; ${forceClickStyle}" onclick="event.stopPropagation(); window.adminDraw('${id}', 'silver')">ARG</button>`;
-                if(detectedEvents.bronze.length > 0) buttonsHtml += `<button class="btn-admin-mini" style="background:#cd7f32; color:black; ${forceClickStyle}" onclick="event.stopPropagation(); window.adminDraw('${id}', 'bronze')">BRZ</button>`;
-                
-                buttonsHtml += `</div>
-                    <button class="btn-admin-mini" style="background:#2ecc71; color:white; width:100%; margin-top:5px; ${forceClickStyle}" onclick="event.stopPropagation(); window.openResurrectModal('${id}')">♻️ REVIENT</button>
-                `;
+                // *** BOUTONS MORTS ***
+                const actionsDiv = document.createElement('div');
+                actionsDiv.className = "admin-actions";
+
+                const types = [
+                    { type: 'gold', color: 'gold', label: 'OR' },
+                    { type: 'silver', color: 'silver', label: 'ARG' },
+                    { type: 'bronze', color: '#cd7f32', label: 'BRZ' }
+                ];
+
+                types.forEach(t => {
+                    if(detectedEvents[t.type].length > 0) {
+                        const btn = document.createElement('button');
+                        btn.className = "btn-admin-mini";
+                        btn.style.cssText = `background:${t.color}; color:black; ${forceClickStyle}`;
+                        btn.innerText = t.label;
+                        btn.onclick = function(e) { e.stopPropagation(); window.adminDraw(id, t.type); };
+                        actionsDiv.appendChild(btn);
+                    }
+                });
+                cardDiv.appendChild(actionsDiv);
+
+                const btnRevive = document.createElement('button');
+                btnRevive.className = "btn-admin-mini";
+                btnRevive.style.cssText = `background:#2ecc71; color:white; width:100%; margin-top:5px; ${forceClickStyle}`;
+                btnRevive.innerText = "♻️ REVIENT";
+                btnRevive.onclick = function(e) { e.stopPropagation(); window.openResurrectModal(id); };
+                cardDiv.appendChild(btnRevive);
+
             } else {
-                buttonsHtml = `<div class="admin-actions"><button class="btn-admin-mini" style="background:#c0392b; color:white; width:100%;" onclick="event.stopPropagation(); window.adminKill('${id}')">💀 MORT</button></div>`;
+                // *** BOUTON TUER ***
+                const actionsDiv = document.createElement('div');
+                actionsDiv.className = "admin-actions";
+                
+                const btnKill = document.createElement('button');
+                btnKill.className = "btn-admin-mini";
+                btnKill.style.cssText = `background:#c0392b; color:white; width:100%;`;
+                btnKill.innerText = "💀 MORT";
+                btnKill.onclick = function(e) { e.stopPropagation(); window.adminKill(id); };
+                
+                actionsDiv.appendChild(btnKill);
+                cardDiv.appendChild(actionsDiv);
             }
 
-            listDiv.innerHTML += `
-                <div class="${cardClass}" style="position:relative;">
-                    ${draftBadge}
-                    <img src="${cardImage}" alt="Role">
-                    <strong>${p.name}</strong>
-                    <div style="font-size:0.8em; color:#aaa; margin-bottom:5px;">${roleTitle}</div>
-                    ${buttonsHtml}
-                </div>
-            `;
+            // Ajout final à la liste
+            listDiv.appendChild(cardDiv);
         });
     }
     updateAdminButtons(count);
@@ -358,11 +404,10 @@ window.generateResurrectionGrid = function() {
 
     grid.innerHTML = "";
     
-    // Tri alphabétique pour faciliter la recherche
+    // Tri alphabétique
     const sortedRoles = [...detectedRoles].sort((a, b) => a.title.localeCompare(b.title));
 
     sortedRoles.forEach(role => {
-        // On crée l'élément HTML via JS pour attacher l'événement click proprement
         const div = document.createElement('div');
         div.className = "role-select-item";
         div.style.cursor = "pointer";
@@ -374,7 +419,7 @@ window.generateResurrectionGrid = function() {
             <span style="display:block; font-size:0.8em; color:#aaa; margin-top:2px;">${role.title}</span>
         `;
         
-        // Clic direct (Fix pour le bouton bleu qui ne marchait pas)
+        // Clic direct
         div.onclick = function() { 
             window.assignRoleToPlayer(role.id); 
         };
@@ -383,21 +428,18 @@ window.generateResurrectionGrid = function() {
     });
 };
 
-// 2. Fonction d'ouverture (Appelée par le bouton bleu)
+// 2. Fonction d'ouverture
 window.openResurrectModal = function(playerId) {
     console.log("Ouverture modale pour le joueur :", playerId);
     targetResurrectId = playerId;
     
-    // 1. On remplit la grille
     window.generateResurrectionGrid();
 
-    // 2. On change le titre
     const modalTitle = document.querySelector('#modal-role-selector h2');
     if(modalTitle) {
         modalTitle.innerText = isDraftMode ? "♻️ CHANGER LA CARTE" : "⚰️ RESSUSCITER / CHANGER";
     }
 
-    // 3. On ouvre la fenêtre
     window.openModal('modal-role-selector');
 };
 
@@ -408,14 +450,12 @@ window.assignRoleToPlayer = function(roleId) {
     console.log("Nouveau rôle choisi :", roleId);
 
     if (isDraftMode) {
-        // Mode brouillon : modification silencieuse
         update(ref(db, `games/${currentGameCode}/players/${targetResurrectId}`), { 
             draftRole: roleId 
         }).then(() => {
             window.closeModal('modal-role-selector');
         });
     } else {
-        // Mode jeu : confirmation requise
         if(confirm("Confirmer le changement de rôle ?")) {
             update(ref(db, `games/${currentGameCode}/players/${targetResurrectId}`), { 
                 status: 'alive', 
