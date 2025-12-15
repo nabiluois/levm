@@ -1,5 +1,5 @@
 // ============================================
-// SYSTEME EN LIGNE - LE VILLAGE MAUDIT (V27 - SUMMARY 3 COLONNES)
+// SYSTEME EN LIGNE - LE VILLAGE MAUDIT (V28 - RECONNEXION JOUEUR & FIX DOS EVENT)
 // ============================================
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -31,17 +31,18 @@ let detectedRoles = [];
 let detectedEvents = { gold: [], silver: [], bronze: [] };
 let isDraftMode = false; 
 
-// Stockage de la sélection
+// Stockage de la sélection (Admin)
 let distributionSelection = [];
 
 // ============================================
-// A. INITIALISATION
+// A. INITIALISATION & RECONNEXION
 // ============================================
 
 document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => { scanContentFromHTML(); }, 500);
     ensureAdminButtonsExist(); 
 
+    // Boutons Menu
     const btnJoin = document.getElementById('btn-join-action');
     if(btnJoin) btnJoin.addEventListener('click', joinGame);
 
@@ -51,9 +52,64 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnReveal = document.getElementById('btn-reveal');
     if(btnReveal) btnReveal.addEventListener('click', revealRolesToEveryone);
 
+    // 1. Vérification Session ADMIN
     const savedAdminCode = localStorage.getItem('adminGameCode');
     if (savedAdminCode) { showResumeButton(savedAdminCode); }
+
+    // 2. Vérification Session JOUEUR (NOUVEAU)
+    checkPlayerSession();
 });
+
+// Vérifie si le joueur était déjà dans une partie
+function checkPlayerSession() {
+    const savedPCode = localStorage.getItem('vm_player_code');
+    const savedPId = localStorage.getItem('vm_player_id');
+    const savedPName = localStorage.getItem('vm_player_name');
+
+    if (savedPCode && savedPId) {
+        const menuContainer = document.querySelector('.modal-content');
+        // On évite les doublons
+        if (document.getElementById('btn-resume-player')) return;
+
+        const resumeBtn = document.createElement('button');
+        resumeBtn.id = "btn-resume-player";
+        resumeBtn.className = "btn-menu";
+        resumeBtn.style.background = "linear-gradient(135deg, #27ae60, #2ecc71)";
+        resumeBtn.style.border = "2px solid white";
+        resumeBtn.style.marginBottom = "15px";
+        resumeBtn.innerHTML = `🔄 REJOINDRE (${savedPName || 'Partie'})`;
+        
+        resumeBtn.onclick = function() {
+            restorePlayerSession(savedPCode, savedPId);
+        };
+
+        // On l'ajoute juste avant le titre ou au début
+        const title = menuContainer.querySelector('h2');
+        if(title) title.insertAdjacentElement('afterend', resumeBtn);
+    }
+}
+
+function restorePlayerSession(code, id) {
+    currentGameCode = code;
+    myPlayerId = id;
+    
+    // On vérifie si la partie existe toujours
+    get(child(ref(db), `games/${code}/players/${id}`)).then((snapshot) => {
+        if(snapshot.exists()) {
+            document.getElementById('btn-join-action').style.display = 'none';
+            document.getElementById('player-lobby-status').style.display = 'block';
+            window.closeModal('modal-online-menu'); // Ferme le menu
+            window.openModal('modal-join-game');    // Ouvre le lobby joueur
+            listenForPlayerUpdates();
+        } else {
+            alert("Cette partie est terminée ou tu as été supprimé.");
+            localStorage.removeItem('vm_player_code');
+            localStorage.removeItem('vm_player_id');
+            localStorage.removeItem('vm_player_name');
+            location.reload();
+        }
+    });
+}
 
 function ensureAdminButtonsExist() {
     const btnDistribute = document.getElementById('btn-distribute');
@@ -92,7 +148,7 @@ function showResumeButton(code) {
         resumeBtn.style.background = "linear-gradient(135deg, #8e44ad, #c0392b)";
         resumeBtn.style.border = "2px solid gold";
         resumeBtn.style.marginBottom = "15px";
-        resumeBtn.innerHTML = `👑 REPRENDRE LA PARTIE (${code})`;
+        resumeBtn.innerHTML = `👑 GÉRER MA PARTIE (${code})`;
         resumeBtn.onclick = () => window.restoreAdminSession(code);
         
         const title = menuContainer.querySelector('h2');
@@ -181,7 +237,7 @@ function launchAdminInterface() {
     document.body.style.overflow = 'hidden';
     window.closeModal('modal-online-menu');
     setupAdminListeners();
-    generateRoleChecklist(); // Affichera le bouton et le tableau vide au départ
+    generateRoleChecklist();
     if(window.generateResurrectionGrid) window.generateResurrectionGrid(); 
 }
 
@@ -194,11 +250,10 @@ function setupAdminListeners() {
 }
 
 // ============================================
-// C. POP-UP DE SÉLECTION DES RÔLES
+// C. LOGIQUE DE SÉLECTION (DASHBOARD & SVG)
 // ============================================
 
-// Mise à jour des compteurs DANS le pop-up
-function updatePopupCounters() {
+function updateDistributionDashboard() {
     const countVillage = distributionSelection.filter(id => {
         const r = detectedRoles.find(role => role.id === id);
         return r && r.category === 'village';
@@ -214,11 +269,13 @@ function updatePopupCounters() {
         return r && r.category === 'solo';
     }).length;
 
-    // Mise à jour des spans du pop-up
-    if(document.getElementById('pop-count-village')) document.getElementById('pop-count-village').innerText = countVillage;
-    if(document.getElementById('pop-count-loup')) document.getElementById('pop-count-loup').innerText = countLoup;
-    if(document.getElementById('pop-count-solo')) document.getElementById('pop-count-solo').innerText = countSolo;
-    if(document.getElementById('pop-total')) document.getElementById('pop-total').innerText = distributionSelection.length;
+    document.getElementById('count-village').innerText = countVillage;
+    document.getElementById('count-loup').innerText = countLoup;
+    document.getElementById('count-solo').innerText = countSolo;
+    document.getElementById('total-distrib').innerText = distributionSelection.length;
+
+    // Mise à jour du tableau récapitulatif
+    generateRoleChecklist(); 
 }
 
 window.generateResurrectionGrid = function(mode = 'single') {
@@ -229,11 +286,10 @@ window.generateResurrectionGrid = function(mode = 'single') {
     grid.style.display = "block"; 
     grid.innerHTML = "";
     
-    // HEADER DU POP-UP (Compteurs + Bouton Valider)
+    // DASHBOARD POPUP (SVG UNIQUEMENT)
     if (mode === 'multi') {
         const dashboard = document.createElement('div');
         dashboard.className = "selection-dashboard";
-        // On retire la liste écrite, on garde juste les compteurs SVG et le bouton
         dashboard.innerHTML = `
             <div class="dashboard-stats" style="margin-bottom:5px;">
                 <div class="stat-item stat-village"><img src="Village.svg" class="stat-icon"><span id="pop-count-village">0</span></div>
@@ -241,7 +297,7 @@ window.generateResurrectionGrid = function(mode = 'single') {
                 <div class="stat-item stat-solo"><img src="Solo.svg" class="stat-icon"><span id="pop-count-solo">0</span></div>
             </div>
             <button class="btn-validate btn-validate-small" style="background:#2ecc71;" onclick="window.validateDistribution()">
-                ✅ VALIDER LA SÉLECTION (<span id="pop-total">0</span>)
+                ✅ VALIDER (<span id="pop-total">0</span>)
             </button>
         `;
         grid.appendChild(dashboard);
@@ -272,7 +328,6 @@ window.generateResurrectionGrid = function(mode = 'single') {
                     
                     if (count > 0) {
                         div.classList.add('selected');
-                        
                         // PASTILLES UNIQUEMENT SUR LES CARTES SPÉCIFIQUES
                         const badgeCards = ['le_paysan', 'le_loup_garou', 'olaf_et_pilaf', 'les_jumeaux_explosifs'];
                         if (badgeCards.some(id => role.id.includes(id))) {
@@ -298,6 +353,28 @@ window.generateResurrectionGrid = function(mode = 'single') {
     }
 };
 
+function updatePopupCounters() {
+    const countVillage = distributionSelection.filter(id => {
+        const r = detectedRoles.find(role => role.id === id);
+        return r && r.category === 'village';
+    }).length;
+
+    const countLoup = distributionSelection.filter(id => {
+        const r = detectedRoles.find(role => role.id === id);
+        return r && r.category === 'loups';
+    }).length;
+
+    const countSolo = distributionSelection.filter(id => {
+        const r = detectedRoles.find(role => role.id === id);
+        return r && r.category === 'solo';
+    }).length;
+
+    if(document.getElementById('pop-count-village')) document.getElementById('pop-count-village').innerText = countVillage;
+    if(document.getElementById('pop-count-loup')) document.getElementById('pop-count-loup').innerText = countLoup;
+    if(document.getElementById('pop-count-solo')) document.getElementById('pop-count-solo').innerText = countSolo;
+    if(document.getElementById('pop-total')) document.getElementById('pop-total').innerText = distributionSelection.length;
+}
+
 function handleMultiSelection(roleId, divElement) {
     let currentCount = distributionSelection.filter(id => id === roleId).length;
     let newCount = 0;
@@ -318,7 +395,6 @@ function handleMultiSelection(roleId, divElement) {
         if (newCount > 2) newCount = 2;
     } 
     else {
-        // Toggle simple pour les autres
         newCount = currentCount > 0 ? 0 : 1;
     }
 
@@ -330,7 +406,6 @@ function handleMultiSelection(roleId, divElement) {
     if (newCount > 0) {
         divElement.classList.add('selected');
         
-        // On affiche le badge seulement pour les cartes spéciales
         const badgeCards = ['le_paysan', 'le_loup_garou', 'olaf_et_pilaf', 'les_jumeaux_explosifs'];
         if (badgeCards.some(id => roleId.includes(id))) {
             let badge = divElement.querySelector('.qty-badge');
@@ -352,8 +427,7 @@ function handleMultiSelection(roleId, divElement) {
 
 window.validateDistribution = function() {
     window.closeModal('modal-role-selector');
-    // Rafraîchir l'affichage principal
-    generateRoleChecklist(); 
+    generateRoleChecklist(); // Mise à jour du tableau 3 colonnes sur le dashboard
 };
 
 // 4. OUVERTURES DES MODALES
@@ -457,21 +531,16 @@ window.assignRoleToPlayer = function(roleId) {
 // D. DASHBOARD PRINCIPAL (TABLEAU RÉCAPITULATIF)
 // ============================================
 
-// Génère le tableau à 3 colonnes et le bouton d'ouverture
 function generateRoleChecklist() {
     const container = document.getElementById('roles-selection-list');
     if(!container) return;
     
-    // 1. Calcul des listes pour le tableau
     const rolesVillage = [];
     const rolesLoup = [];
     const rolesSolo = [];
 
-    // On parcourt la sélection
     const groupedSelection = {};
-    distributionSelection.forEach(id => {
-        groupedSelection[id] = (groupedSelection[id] || 0) + 1;
-    });
+    distributionSelection.forEach(id => { groupedSelection[id] = (groupedSelection[id] || 0) + 1; });
 
     Object.entries(groupedSelection).forEach(([id, qty]) => {
         const role = detectedRoles.find(r => r.id === id);
@@ -479,35 +548,33 @@ function generateRoleChecklist() {
             const txt = qty > 1 ? `${role.title} (x${qty})` : role.title;
             if(role.category === 'village') rolesVillage.push(txt);
             else if(role.category === 'loups') rolesLoup.push(txt);
-            else rolesSolo.push(txt); // Solo + Vampires ici
+            else rolesSolo.push(txt);
         }
     });
 
-    // 2. Construction HTML du tableau
     let summaryHTML = '';
     if (distributionSelection.length > 0) {
         summaryHTML = `
             <div class="summary-container">
                 <div class="summary-col">
                     <img src="Village.svg" alt="V">
-                    <strong>${rolesVillage.length > 0 ? rolesVillage.length : 0}</strong>
+                    <strong>${rolesVillage.length}</strong>
                     ${rolesVillage.map(t => `<div class="summary-list-item">${t}</div>`).join('')}
                 </div>
                 <div class="summary-col">
                     <img src="Loup.svg" alt="L">
-                    <strong>${rolesLoup.length > 0 ? rolesLoup.length : 0}</strong>
+                    <strong>${rolesLoup.length}</strong>
                     ${rolesLoup.map(t => `<div class="summary-list-item">${t}</div>`).join('')}
                 </div>
                 <div class="summary-col">
                     <img src="Solo.svg" alt="S">
-                    <strong>${rolesSolo.length > 0 ? rolesSolo.length : 0}</strong>
+                    <strong>${rolesSolo.length}</strong>
                     ${rolesSolo.map(t => `<div class="summary-list-item">${t}</div>`).join('')}
                 </div>
             </div>
         `;
     }
 
-    // 3. Affichage final (Tableau + Bouton)
     container.innerHTML = `
         ${summaryHTML}
         <button class="btn-validate" onclick="window.openDistributionSelector()" style="background:#2c3e50; border-color:#34495e; margin-top:0;">
@@ -515,16 +582,14 @@ function generateRoleChecklist() {
         </button>
     `;
     
-    // Update du bouton "Prédistribuer" en fonction du nombre de joueurs
     get(child(ref(db), `games/${currentGameCode}/players`)).then((snapshot) => {
         const playerCount = snapshot.exists() ? Object.keys(snapshot.val()).length : 0;
         updateAdminButtons(playerCount);
     });
 }
 
-// Fonction inutile ici mais gardée pour compatibilité si appelée ailleurs
 window.updateRoleCount = function() {
-    // Le dashboard est mis à jour par generateRoleChecklist
+    // Legacy support
 };
 
 function distributeRoles() {
@@ -683,11 +748,19 @@ function joinGame() {
     const pseudo = document.getElementById('join-pseudo').value.trim();
     const code = document.getElementById('join-code').value.toUpperCase().trim();
     if(!pseudo || !code) { alert("Remplis tout !"); return; }
+    
     currentGameCode = code;
+    
     get(child(ref(db), `games/${code}`)).then((snapshot) => {
         if (snapshot.exists()) {
             const newPlayerRef = push(ref(db, `games/${code}/players`));
             myPlayerId = newPlayerRef.key;
+            
+            // Sauvegarde de session
+            localStorage.setItem('vm_player_code', currentGameCode);
+            localStorage.setItem('vm_player_id', myPlayerId);
+            localStorage.setItem('vm_player_name', pseudo);
+
             set(newPlayerRef, { name: pseudo, role: null, status: 'alive' }).then(() => {
                 document.getElementById('btn-join-action').style.display = 'none';
                 document.getElementById('player-lobby-status').style.display = 'block';
@@ -728,9 +801,12 @@ function listenForPlayerUpdates() {
         if (data.drawnCard && data.drawnCard.image !== lastCardImg) {
             lastCardImg = data.drawnCard.image;
             let backImage = "back.png"; 
-            if (data.title && (data.title.includes("GOLD") || (data.category && data.category === 'GOLD'))) backImage = "back_or.png";
-            else if (data.title && (data.title.includes("SILVER") || (data.category && data.category === 'SILVER'))) backImage = "back_argant.png";
-            else if (data.title && (data.title.includes("BRONZE") || (data.category && data.category === 'BRONZE'))) backImage = "back_bronze.png";
+            if (data.category) {
+                const cat = data.category.toUpperCase();
+                if (cat === 'GOLD') backImage = "back_or.png";
+                else if (cat === 'SILVER') backImage = "back_argant.png";
+                else if (cat === 'BRONZE') backImage = "back_bronze.png";
+            }
             
             const panel = document.querySelector('.details-panel');
             const overlay = document.querySelector('.details-overlay');
