@@ -1,5 +1,5 @@
 // ============================================
-// SYSTEME EN LIGNE - LE VILLAGE MAUDIT (V4 - SÉCURISÉ & VISUEL)
+// SYSTEME EN LIGNE - LE VILLAGE MAUDIT (V6 - SCAN COMPLET)
 // ============================================
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -10,10 +10,7 @@ from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 const firebaseConfig = {
   apiKey: "AIzaSyDbOZGB_e-v82n3eZaXq3_Eq8GHW0OLkXo",
   authDomain: "le-village-maudit.firebaseapp.com",
-  
-  // L'adresse de ta base de données
   databaseURL: "https://le-village-maudit-default-rtdb.europe-west1.firebasedatabase.app", 
-  
   projectId: "le-village-maudit",
   storageBucket: "le-village-maudit.firebasestorage.app",
   messagingSenderId: "383628308052",
@@ -29,18 +26,21 @@ let currentGameCode = null;
 let myPlayerId = null;
 let targetResurrectId = null;
 
-const VM_CARDS = {
-    gold: ['or1.png', 'or2.png', 'or3.png', 'or4.png', 'or5.png', 'or6.png', 'or7.png', 'or8.png', 'or9.png', 'or10.png'],
-    silver: ['ar1.png', 'ar2.png', 'ar3.png', 'ar4.png', 'ar5.png', 'ar6.png', 'ar7.png', 'ar8.png', 'ar9.png', 'ar10.png'],
-    bronze: ['br1.png', 'br2.png', 'br3.png', 'br4.png', 'br5.png', 'br6.png', 'br7.png']
+// Listes dynamiques remplies par le scan HTML
+let detectedRoles = []; 
+let detectedEvents = {
+    gold: [],
+    silver: [],
+    bronze: []
 };
 
 // ============================================
-// A. GESTION DU MENU ET SÉCURITÉ
+// A. GESTION DU MENU & SCAN
 // ============================================
 
 document.addEventListener('DOMContentLoaded', () => {
-    // On attache les événements aux boutons existants
+    scanContentFromHTML(); // Scan automatique au lancement
+
     const btnJoin = document.getElementById('btn-join-action');
     if(btnJoin) btnJoin.addEventListener('click', joinGame);
 
@@ -48,40 +48,74 @@ document.addEventListener('DOMContentLoaded', () => {
     if(btnDistribute) btnDistribute.addEventListener('click', distributeRoles);
 });
 
-// --- NOUVEAU : PROTECTION PAR MOT DE PASSE ---
+// FONCTION DE SCAN INTELLIGENT
+function scanContentFromHTML() {
+    detectedRoles = [];
+    detectedEvents = { gold: [], silver: [], bronze: [] };
+
+    // 1. Scanner les Rôles (.carte-jeu) pour la distribution
+    document.querySelectorAll('.carte-jeu').forEach((card) => {
+        const imgTag = card.querySelector('.carte-front img');
+        const titleTag = card.querySelector('.carte-back h3');
+        
+        if (imgTag && titleTag) {
+            const imgSrc = imgTag.getAttribute('src');
+            const id = imgSrc.split('/').pop().replace(/\.[^/.]+$/, ""); // ID basé sur le nom de fichier
+            
+            detectedRoles.push({
+                id: id,
+                title: titleTag.innerText,
+                image: imgSrc,
+                description: card.querySelector('.carte-back p') ? card.querySelector('.carte-back p').innerHTML : ""
+            });
+        }
+    });
+
+    // 2. Scanner les Événements (.carte-vm) pour la mort
+    document.querySelectorAll('.carte-vm').forEach((card) => {
+        const imgTag = card.querySelector('img');
+        if (imgTag) {
+            const imgSrc = imgTag.getAttribute('src'); // ex: or1.png
+            
+            // On classe selon la classe HTML (gold, silver, bronze)
+            if (card.classList.contains('gold')) detectedEvents.gold.push(imgSrc);
+            else if (card.classList.contains('silver')) detectedEvents.silver.push(imgSrc);
+            else if (card.classList.contains('bronze')) detectedEvents.bronze.push(imgSrc);
+        }
+    });
+
+    console.log(`Scan terminé : ${detectedRoles.length} Rôles, ${detectedEvents.gold.length} Or, ${detectedEvents.silver.length} Argent.`);
+}
+
+// Sécurité MJ
 window.checkAdminPassword = function() {
     const password = prompt("🔐 Mot de passe MJ :");
-    
-    // MODIFIE "1234" ICI SI TU VEUX UN AUTRE CODE
-    if(password === "080147") {
-        window.initCreateGame(); // Lance la création
-        window.openModal('modal-create-game'); // Ouvre le salon admin
-        window.closeModal('modal-online-menu'); // Ferme le menu
+    if(password === "1234") {
+        window.initCreateGame();
+        window.openModal('modal-create-game');
+        window.closeModal('modal-online-menu');
     } else if (password !== null) {
-        alert("⛔ Accès refusé ! Seul le MJ peut créer une partie.");
+        alert("⛔ Accès refusé !");
     }
 };
 
 // ============================================
-// B. ADMIN (MJ) - LOGIQUE VISUELLE
+// B. ADMIN (MJ)
 // ============================================
 
 window.initCreateGame = function() {
     currentGameCode = Math.random().toString(36).substring(2, 6).toUpperCase();
     myPlayerId = "MJ_ADMIN";
     
-    const display = document.getElementById('game-code-display');
-    if(display) display.innerText = currentGameCode;
+    document.getElementById('game-code-display').innerText = currentGameCode;
     
     set(ref(db, 'games/' + currentGameCode), {
         status: 'waiting',
         created_at: Date.now()
     });
 
-    const playersRef = ref(db, 'games/' + currentGameCode + '/players');
-    onValue(playersRef, (snapshot) => {
-        const players = snapshot.val() || {};
-        updateAdminUI(players);
+    onValue(ref(db, 'games/' + currentGameCode + '/players'), (snapshot) => {
+        updateAdminUI(snapshot.val() || {});
     });
 
     generateRoleChecklist();
@@ -99,50 +133,39 @@ function updateAdminUI(players) {
         listDiv.innerHTML = '<div style="color:#aaa; font-style:italic; grid-column:1/-1;">En attente de joueurs...</div>';
     } else {
         Object.entries(players).forEach(([id, p]) => {
-            
-            // 1. Déterminer l'image à afficher
             let cardImage = "icon.png"; 
             let roleTitle = "En attente...";
             
-            if(p.role && window.paniniRoles) {
-                const r = window.paniniRoles.find(x => x.id === p.role);
+            if(p.role && detectedRoles.length > 0) {
+                const r = detectedRoles.find(x => x.id === p.role);
                 if(r) {
                     cardImage = r.image;
                     roleTitle = r.title;
                 }
             }
 
-            // 2. Gestion Mort / Vivant
             const isDead = p.status === 'dead';
             const cardClass = isDead ? "admin-player-card dead" : "admin-player-card";
             
-            // 3. Construction des boutons
             let buttonsHtml = "";
-
             if (!p.role) {
-                // Pas encore distribué
                 buttonsHtml = `<span style="font-size:0.8em; opacity:0.5;">...</span>`;
             } 
             else if (isDead) {
-                // MORT : Options VM + Résurrection
-                buttonsHtml = `
-                    <div class="admin-actions">
-                        <button class="btn-admin-mini" style="background:gold; color:black;" onclick="window.adminDraw('${id}', 'gold')">OR</button>
-                        <button class="btn-admin-mini" style="background:silver; color:black;" onclick="window.adminDraw('${id}', 'silver')">ARG</button>
-                        <button class="btn-admin-mini" style="background:#cd7f32; color:black;" onclick="window.adminDraw('${id}', 'bronze')">BRZ</button>
-                    </div>
+                // Boutons basés sur les catégories détectées
+                buttonsHtml = `<div class="admin-actions">`;
+                
+                if(detectedEvents.gold.length > 0) buttonsHtml += `<button class="btn-admin-mini" style="background:gold; color:black;" onclick="window.adminDraw('${id}', 'gold')">OR</button>`;
+                if(detectedEvents.silver.length > 0) buttonsHtml += `<button class="btn-admin-mini" style="background:silver; color:black;" onclick="window.adminDraw('${id}', 'silver')">ARG</button>`;
+                if(detectedEvents.bronze.length > 0) buttonsHtml += `<button class="btn-admin-mini" style="background:#cd7f32; color:black;" onclick="window.adminDraw('${id}', 'bronze')">BRZ</button>`;
+                
+                buttonsHtml += `</div>
                     <button class="btn-admin-mini" style="background:#2ecc71; color:white; width:100%; margin-top:5px;" onclick="window.openResurrectModal('${id}')">♻️ REVIENT</button>
                 `;
             } else {
-                // VIVANT : Option Tuer
-                buttonsHtml = `
-                    <div class="admin-actions">
-                        <button class="btn-admin-mini" style="background:#c0392b; color:white; width:100%;" onclick="window.adminKill('${id}')">💀 MORT</button>
-                    </div>
-                `;
+                buttonsHtml = `<div class="admin-actions"><button class="btn-admin-mini" style="background:#c0392b; color:white; width:100%;" onclick="window.adminKill('${id}')">💀 MORT</button></div>`;
             }
 
-            // 4. Injection HTML
             listDiv.innerHTML += `
                 <div class="${cardClass}">
                     <img src="${cardImage}" alt="Role">
@@ -156,33 +179,36 @@ function updateAdminUI(players) {
     checkDistributionReady(count);
 }
 
-// Actions directes Admin
+// Actions Admin
 window.adminKill = function(playerId) {
-    if(confirm("Valider la mort ?")) {
+    if(confirm("Confirmer la mort ?")) {
         update(ref(db, `games/${currentGameCode}/players/${playerId}`), { status: 'dead' });
     }
 };
 
 window.adminDraw = function(playerId, category) {
-    const cards = VM_CARDS[category];
-    const randomCard = cards[Math.floor(Math.random() * cards.length)];
-    
-    update(ref(db, `games/${currentGameCode}/players/${playerId}`), { 
-        drawnCard: { image: randomCard, category: category.toUpperCase() }
-    });
-    alert(`Carte ${category} envoyée !`);
+    const cards = detectedEvents[category];
+    if(cards && cards.length > 0) {
+        const randomCard = cards[Math.floor(Math.random() * cards.length)];
+        update(ref(db, `games/${currentGameCode}/players/${playerId}`), { 
+            drawnCard: { image: randomCard, category: category.toUpperCase() }
+        });
+        alert(`Carte ${category} envoyée !`);
+    } else {
+        alert("Aucune carte trouvée dans cette catégorie !");
+    }
 };
 
 // ============================================
-// C. LOGIQUE DE RESSURECTION VISUELLE
+// C. LOGIQUE DE RESSURECTION
 // ============================================
 
 function generateResurrectionGrid() {
     const grid = document.getElementById('admin-role-grid');
-    if(!grid || !window.paniniRoles) return;
+    if(!grid || detectedRoles.length === 0) return;
     
     grid.innerHTML = "";
-    window.paniniRoles.forEach(role => {
+    detectedRoles.forEach(role => {
         grid.innerHTML += `
             <div class="role-select-item" onclick="window.confirmResurrection('${role.id}')">
                 <img src="${role.image}" loading="lazy">
@@ -199,27 +225,24 @@ window.openResurrectModal = function(playerId) {
 
 window.confirmResurrection = function(roleId) {
     if(!targetResurrectId) return;
-
     update(ref(db, `games/${currentGameCode}/players/${targetResurrectId}`), { 
-        status: 'alive',
-        role: roleId,
-        drawnCard: null 
+        status: 'alive', role: roleId, drawnCard: null 
     });
-    
     window.closeModal('modal-role-selector');
-    window.showNotification("Succès", "Le joueur est revenu dans la partie !");
+    window.showNotification("Succès", "Le joueur est ressuscité !");
 };
 
 // ============================================
-// D. DISTRIBUTION & LISTE
+// D. DISTRIBUTION DES RÔLES
 // ============================================
 
 function generateRoleChecklist() {
     const container = document.getElementById('roles-selection-list');
     if(!container) return;
     container.innerHTML = "";
-    if(window.paniniRoles) {
-        window.paniniRoles.forEach((role, index) => {
+    
+    if(detectedRoles.length > 0) {
+        detectedRoles.forEach((role, index) => {
             container.innerHTML += `
                 <div style="margin-bottom:8px; display:flex; align-items:center;">
                     <input type="checkbox" class="role-checkbox" id="role-${index}" value="${role.id}" onchange="window.updateRoleCount()" style="width:20px; height:20px; margin-right:10px;">
@@ -227,6 +250,8 @@ function generateRoleChecklist() {
                 </div>
             `;
         });
+    } else {
+        container.innerHTML = "<p style='color:red;'>Aucun rôle trouvé. Vérifie le HTML.</p>";
     }
 }
 
@@ -265,6 +290,7 @@ function distributeRoles() {
     let selectedRoles = [];
     checkboxes.forEach(box => selectedRoles.push(box.value));
     
+    // Mélange (Shuffle)
     for (let i = selectedRoles.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [selectedRoles[i], selectedRoles[j]] = [selectedRoles[j], selectedRoles[i]];
@@ -294,7 +320,7 @@ function joinGame() {
     const pseudo = document.getElementById('join-pseudo').value.trim();
     const code = document.getElementById('join-code').value.toUpperCase().trim();
 
-    if(!pseudo || !code) { alert("Remplis tout !"); return; }
+    if(!pseudo || !code) { alert("Merci de tout remplir !"); return; }
     currentGameCode = code;
     
     get(child(ref(db), `games/${code}`)).then((snapshot) => {
@@ -306,7 +332,7 @@ function joinGame() {
                 document.getElementById('player-lobby-status').style.display = 'block';
                 listenForPlayerUpdates();
             });
-        } else { alert("Code faux !"); }
+        } else { alert("Code partie introuvable !"); }
     });
 }
 
@@ -327,10 +353,10 @@ function listenForPlayerUpdates() {
 
         // Mort ?
         if (data.status === 'dead') {
-            window.showNotification("💀 TU ES MORT", "Le village a parlé (ou les loups...).");
+            window.showNotification("💀 TU ES MORT", "Attends de voir si le destin t'offre une carte...");
         }
 
-        // Carte VM ?
+        // Carte VM ? (Gold/Silver/Bronze)
         if (data.drawnCard && data.drawnCard.image !== lastCardImg) {
             lastCardImg = data.drawnCard.image;
             const vmObject = {
@@ -346,13 +372,12 @@ function listenForPlayerUpdates() {
 function revealRole(roleId) {
     window.closeModal('modal-join-game');
     window.closeModal('modal-online-menu');
-    if(window.paniniRoles) {
-        const roleData = window.paniniRoles.find(r => r.id === roleId);
-        if(roleData) {
-            setTimeout(() => {
-                if(navigator.vibrate) navigator.vibrate([200, 100, 200]);
-                if(window.openDetails) window.openDetails(roleData);
-            }, 500);
-        }
+    
+    const roleData = detectedRoles.find(r => r.id === roleId);
+    if(roleData) {
+        setTimeout(() => {
+            if(navigator.vibrate) navigator.vibrate([200, 100, 200]);
+            if(window.openDetails) window.openDetails(roleData);
+        }, 500);
     }
 }
