@@ -329,44 +329,70 @@ window.adminDraw = function(playerId, category) {
 };
 
 // ============================================
-// C. LOGIQUE DE CHANGEMENT DE RÔLE (ET RESURRECTION)
+// C. LOGIQUE DE CHANGEMENT DE RÔLE (MANUEL & RESURRECTION)
 // ============================================
 
+// 1. Génère la grille des cartes dans la modale
 function generateResurrectionGrid() {
     const grid = document.getElementById('admin-role-grid');
+    // On vérifie que la grille et les rôles existent
     if(!grid || detectedRoles.length === 0) return;
     
     grid.innerHTML = "";
-    detectedRoles.forEach(role => {
+    
+    // On trie les rôles par ordre alphabétique pour faciliter la recherche du MJ
+    const sortedRoles = [...detectedRoles].sort((a, b) => a.title.localeCompare(b.title));
+
+    sortedRoles.forEach(role => {
         grid.innerHTML += `
-            <div class="role-select-item" onclick="window.assignRoleToPlayer('${role.id}')">
-                <img src="${role.image}" loading="lazy">
-                <span>${role.title}</span>
+            <div class="role-select-item" onclick="window.assignRoleToPlayer('${role.id}')" 
+                 style="cursor:pointer; text-align:center; padding:5px;">
+                <img src="${role.image}" loading="lazy" style="width:100%; border-radius:8px; border:2px solid transparent;">
+                <span style="display:block; font-size:0.8em; color:#aaa; margin-top:2px;">${role.title}</span>
             </div>
         `;
     });
 }
 
+// 2. Ouvre la fenêtre de choix
 window.openResurrectModal = function(playerId) {
     targetResurrectId = playerId;
+    
+    // On regénère la grille maintenant pour être sûr d'avoir toutes les cartes
+    generateResurrectionGrid();
+
+    // On adapte le titre de la fenêtre selon la situation
+    const modalTitle = document.querySelector('#modal-role-selector h2');
+    if(modalTitle) {
+        modalTitle.innerText = isDraftMode ? "♻️ CHANGER LA CARTE" : "⚰️ RESSUSCITER LE JOUEUR";
+    }
+
     window.openModal('modal-role-selector');
 };
 
+// 3. Assigne le rôle cliqué
 window.assignRoleToPlayer = function(roleId) {
     if(!targetResurrectId) return;
 
+    // CAS 1 : Mode Brouillon (Distribution initiale) - On change juste la carte cachée
     if (isDraftMode) {
         update(ref(db, `games/${currentGameCode}/players/${targetResurrectId}`), { 
             draftRole: roleId 
+        }).then(() => {
+            window.closeModal('modal-role-selector');
+            // Pas besoin d'alerte, le changement se voit direct sur l'écran du MJ
         });
-        window.closeModal('modal-role-selector');
-    } else {
-        if(confirm("Cela va changer le rôle du joueur et le ramener à la vie. Continuer ?")) {
+    } 
+    // CAS 2 : Partie en cours - C'est une résurrection (Fossoyeur ou autre)
+    else {
+        if(confirm("Es-tu sûr de vouloir ressusciter/changer ce joueur avec ce rôle ?")) {
             update(ref(db, `games/${currentGameCode}/players/${targetResurrectId}`), { 
-                status: 'alive', role: roleId, drawnCard: null 
+                status: 'alive', 
+                role: roleId, 
+                drawnCard: null 
             });
             window.closeModal('modal-role-selector');
-            internalShowNotification("Succès", "Joueur ressuscité !");
+            internalShowNotification("Succès", "Le joueur est de retour en jeu !");
         }
     }
 };
