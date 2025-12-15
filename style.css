@@ -2041,3 +2041,41 @@ body.no-scroll {
     position: fixed !important;
     width: 100% !important;
 }
+
+/* =======================================================
+   41. FIX TEXTE PACTE MAUDIT & RÈGLES (INVISIBLE)
+   ======================================================= */
+
+/* 1. On force le fond sombre pour être sûr */
+#modal-pacte .modal-content,
+#modal-regles .modal-content {
+    background: #1a120b !important; /* Fond noir/marron */
+    color: #fff !important;
+}
+
+/* 2. On force le texte des paragraphes et des listes à être blanc */
+#modal-pacte p, 
+#modal-pacte li,
+#modal-pacte div,
+#modal-regles p, 
+#modal-regles li {
+    color: #e0e0e0 !important; /* Blanc cassé très lisible */
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: block !important;
+    
+    /* On annule les contraintes des cartes de jeu */
+    width: auto !important;
+    height: auto !important;
+    overflow: visible !important;
+    white-space: normal !important;
+    text-align: left !important;
+}
+
+/* 3. Petit ajustement des titres */
+#modal-pacte h2,
+#modal-regles h2 {
+    color: var(--gold) !important;
+    margin-bottom: 20px !important;
+    border-bottom: 1px solid #555 !important;
+}
