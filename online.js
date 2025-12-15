@@ -1,5 +1,5 @@
 // ============================================
-// SYSTEME EN LIGNE - LE VILLAGE MAUDIT (V10 - FLIP INFINI & RAPPEL DE CARTE)
+// SYSTEME EN LIGNE - LE VILLAGE MAUDIT (V11 - BOUTONS SÉPARÉS)
 // ============================================
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -24,7 +24,7 @@ const db = getDatabase(app);
 // Variables Globales
 let currentGameCode = null;
 let myPlayerId = null;
-let myCurrentRoleId = null; // Stocke le rôle du joueur actuel
+let myCurrentRoleId = null;
 let targetResurrectId = null;
 let detectedRoles = [];
 let detectedEvents = { gold: [], silver: [], bronze: [] };
@@ -40,8 +40,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnJoin = document.getElementById('btn-join-action');
     if(btnJoin) btnJoin.addEventListener('click', joinGame);
 
+    // BOUTON 1 : PRÉPARER (Distribution Aléatoire Brouillon)
     const btnDistribute = document.getElementById('btn-distribute');
-    if(btnDistribute) btnDistribute.addEventListener('click', handleDistributionClick);
+    if(btnDistribute) btnDistribute.addEventListener('click', distributeRoles);
+
+    // BOUTON 2 : RÉVÉLER (Envoi final)
+    const btnReveal = document.getElementById('btn-reveal');
+    if(btnReveal) btnReveal.addEventListener('click', revealRolesToEveryone);
 
     // VÉRIFICATION DE SESSION ADMIN
     const savedAdminCode = localStorage.getItem('adminGameCode');
@@ -72,7 +77,6 @@ function scanContentFromHTML() {
     detectedRoles = [];
     detectedEvents = { gold: [], silver: [], bronze: [] };
 
-    // Scanner les Rôles
     document.querySelectorAll('.carte-jeu').forEach((card) => {
         const imgTag = card.querySelector('.carte-front img');
         const titleTag = card.querySelector('.carte-back h3');
@@ -88,7 +92,6 @@ function scanContentFromHTML() {
         }
     });
 
-    // Scanner les Cartes VM
     document.querySelectorAll('.carte-vm').forEach((card) => {
         const imgTag = card.querySelector('img');
         if (imgTag) {
@@ -166,6 +169,7 @@ function launchAdminInterface() {
 function setupAdminListeners() {
     onValue(ref(db, 'games/' + currentGameCode + '/players'), (snapshot) => {
         const players = snapshot.val() || {};
+        // Vérifie si on est en mode brouillon (au moins 1 draftRole présent)
         isDraftMode = Object.values(players).some(p => p.draftRole);
         updateAdminUI(players);
     });
@@ -240,40 +244,37 @@ function updateAdminUI(players) {
             `;
         });
     }
-    updateMainButton(count);
+    
+    // Mise à jour de l'état des deux boutons
+    updateAdminButtons(count);
 }
 
-function updateMainButton(playerCount) {
-    const btn = document.getElementById('btn-distribute');
+// NOUVELLE FONCTION DE GESTION DES DEUX BOUTONS
+function updateAdminButtons(playerCount) {
+    const btnDistribute = document.getElementById('btn-distribute');
+    const btnReveal = document.getElementById('btn-reveal');
     const selectedCount = document.querySelectorAll('.role-checkbox:checked').length;
 
-    if (isDraftMode) {
-        btn.disabled = false;
-        btn.style.background = "#27ae60"; 
-        btn.innerText = "📢 RÉVÉLER AUX JOUEURS";
-        btn.onclick = revealRolesToEveryone; 
+    // 1. Bouton "PRÉPARER" (Gauche)
+    // Actif si on a assez de joueurs et de rôles sélectionnés
+    if (playerCount > 0 && selectedCount === playerCount) {
+        btnDistribute.disabled = false;
+        btnDistribute.style.background = "linear-gradient(135deg, #d4af37, #b8941f)";
+        btnDistribute.style.cursor = "pointer";
+        btnDistribute.innerHTML = isDraftMode ? "🃏 REMÉLANGER" : "🃏 PRÉPARER"; // Petit détail ergonomique
     } else {
-        btn.style.background = "linear-gradient(135deg, #d4af37, #b8941f)";
-        btn.onclick = distributeRoles; 
-        
-        if (playerCount > 0 && selectedCount === playerCount) {
-            btn.disabled = false;
-            btn.style.cursor = "pointer";
-            btn.innerText = "🃏 PRÉPARER LA DISTRIBUTION";
-        } else {
-            btn.disabled = true;
-            btn.style.background = "grey";
-            btn.style.cursor = "not-allowed";
-            btn.innerText = `Attente (${playerCount} Joueurs / ${selectedCount} Rôles)`;
-        }
+        btnDistribute.disabled = true;
+        btnDistribute.style.background = "grey";
+        btnDistribute.style.cursor = "not-allowed";
+        btnDistribute.innerHTML = `Attente (${playerCount}J / ${selectedCount}R)`;
     }
-}
 
-function handleDistributionClick() {
-    if(isDraftMode) {
-        revealRolesToEveryone();
+    // 2. Bouton "RÉVÉLER" (Droite)
+    // Visible et Actif UNIQUEMENT si on est en mode Brouillon (Draft)
+    if (isDraftMode) {
+        btnReveal.style.display = "block"; // On affiche le bouton
     } else {
-        distributeRoles();
+        btnReveal.style.display = "none";  // On le cache
     }
 }
 
@@ -325,11 +326,13 @@ window.assignRoleToPlayer = function(roleId) {
     if(!targetResurrectId) return;
 
     if (isDraftMode) {
+        // Mode Brouillon : Mise à jour silencieuse
         update(ref(db, `games/${currentGameCode}/players/${targetResurrectId}`), { 
             draftRole: roleId 
         });
         window.closeModal('modal-role-selector');
     } else {
+        // Mode Jeu : Mise à jour avec notification
         if(confirm("Cela va changer le rôle du joueur immédiatement. Continuer ?")) {
             update(ref(db, `games/${currentGameCode}/players/${targetResurrectId}`), { 
                 status: 'alive', role: roleId, drawnCard: null 
@@ -368,15 +371,17 @@ window.updateRoleCount = function() {
     
     get(child(ref(db), `games/${currentGameCode}/players`)).then((snapshot) => {
         const playerCount = snapshot.exists() ? Object.keys(snapshot.val()).length : 0;
-        updateMainButton(playerCount);
+        updateAdminButtons(playerCount);
     });
 };
 
+// ACTION : DISTRIBUER (BROUILLON)
 function distributeRoles() {
     const checkboxes = document.querySelectorAll('.role-checkbox:checked');
     let selectedRoles = [];
     checkboxes.forEach(box => selectedRoles.push(box.value));
     
+    // Mélange de Fisher-Yates
     for (let i = selectedRoles.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [selectedRoles[i], selectedRoles[j]] = [selectedRoles[j], selectedRoles[i]];
@@ -390,6 +395,7 @@ function distributeRoles() {
         const updates = {};
         playerIds.forEach((id, index) => {
             if (selectedRoles[index]) {
+                // On met tout en draftRole
                 updates[`games/${currentGameCode}/players/${id}/draftRole`] = selectedRoles[index];
             }
         });
@@ -397,6 +403,7 @@ function distributeRoles() {
     });
 }
 
+// ACTION : RÉVÉLER (FINAL)
 function revealRolesToEveryone() {
     if(!confirm("Es-tu sûr de la distribution ? Les rôles vont être envoyés aux joueurs.")) return;
 
@@ -453,17 +460,14 @@ function listenForPlayerUpdates() {
         const data = snapshot.val();
         if (!data) return;
 
-        // MISE A JOUR DU ROLE ET DU BOUTON "VOIR CARTE"
         if (data.role) {
-            myCurrentRoleId = data.role; // On sauvegarde le rôle
+            myCurrentRoleId = data.role; 
             
-            // Si le rôle vient de changer, on l'affiche directement
             if (data.role !== lastRole) {
                 lastRole = data.role;
                 revealRole(data.role);
             }
 
-            // Affiche le bouton de rappel dans le lobby
             const lobbyStatus = document.getElementById('player-lobby-status');
             if(lobbyStatus) {
                 lobbyStatus.innerHTML = `
@@ -492,7 +496,6 @@ function listenForPlayerUpdates() {
     });
 }
 
-// Nouvelle fonction pour le bouton "Voir ma carte"
 window.showMyRoleAgain = function() {
     if(!myCurrentRoleId) return;
     revealRole(myCurrentRoleId);
@@ -519,10 +522,6 @@ function internalShowCard(data) {
     
     if(!panel || !overlay) return;
 
-    // MODIFICATION ICI POUR LE FLIP INFINI
-    // On utilise classList.toggle('is-flipped')
-    // Et on force 'revealed' pour le texte dès le premier clic
-    
     panel.innerHTML = `
         <div id="online-content-wrapper">
             <div class="details-header" style="text-align:center;">
