@@ -1558,3 +1558,21 @@ body.light-mode #online-mode-link {
     font-size: 0.7em !important;
     height: auto !important;
 }
+
+/* =======================================================
+   30. AJUSTEMENT TAILLE CARTE JOUEUR (ADMIN)
+   ======================================================= */
+
+/* On agrandit l'image de la carte (était 35px -> passe à 60px) */
+.admin-player-card img {
+    width: 60px !important;       
+    height: auto !important;      /* Garde les proportions */
+    max-height: 90px !important;  /* Sécurité hauteur */
+    margin-bottom: 5px !important;
+}
+
+/* On ajuste la grille pour que les cartes rentrent bien */
+.player-grid-admin {
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)) !important;
+    gap: 8px !important;
+}

@@ -1,5 +1,5 @@
 // ============================================
-// SYSTEME EN LIGNE - LE VILLAGE MAUDIT (V19 - FIX FENÊTRE CACHÉE)
+// SYSTEME EN LIGNE - LE VILLAGE MAUDIT (V21 - COMPLET & CATÉGORISÉ)
 // ============================================
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -35,7 +35,6 @@ let isDraftMode = false;
 // ============================================
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Petit délai pour être sûr que le HTML est prêt
     setTimeout(() => {
         scanContentFromHTML();
     }, 500);
@@ -102,15 +101,18 @@ function showResumeButton(code) {
     }
 }
 
-// SCAN AMÉLIORÉ (SÉCURITÉ)
+// SCAN AMÉLIORÉ (SÉCURITÉ + CATÉGORIE)
 function scanContentFromHTML() {
     detectedRoles = [];
     detectedEvents = { gold: [], silver: [], bronze: [] };
 
     document.querySelectorAll('.carte-jeu').forEach((card) => {
         const imgTag = card.querySelector('.carte-front img');
-        // On récupère le titre même s'il est caché en CSS (important !)
         const titleTag = card.querySelector('.carte-back h3'); 
+        
+        // On détecte la section parente (Category)
+        const section = card.closest('section');
+        const categoryId = section ? section.id : 'autre'; // village, loups, solo, vampires
         
         if (imgTag && titleTag) {
             const imgSrc = imgTag.getAttribute('src');
@@ -120,6 +122,7 @@ function scanContentFromHTML() {
                 id: id,
                 title: titleTag.innerText.trim(),
                 image: imgSrc,
+                category: categoryId, // On stocke la catégorie
                 description: card.querySelector('.carte-back p') ? card.querySelector('.carte-back p').innerHTML : ""
             });
         }
@@ -135,7 +138,7 @@ function scanContentFromHTML() {
         }
     });
     
-    console.log("Rôles détectés au scan :", detectedRoles.length);
+    console.log("Rôles détectés :", detectedRoles.length);
 }
 
 window.checkAdminPassword = function() {
@@ -208,62 +211,95 @@ function setupAdminListeners() {
 }
 
 // ============================================
-// C. LOGIQUE DE CHANGEMENT DE RÔLE (AVEC CORRECTIF Z-INDEX)
+// C. LOGIQUE DE CHANGEMENT DE RÔLE (V20 - TRI & 2 COLONNES)
 // ============================================
 
-// 1. Génération de la grille
+// 1. Génération de la grille ORGANISÉE
 window.generateResurrectionGrid = function() {
     const grid = document.getElementById('admin-role-grid');
-    if(!grid) {
-        console.warn("Grille admin introuvable dans le DOM");
-        return;
-    }
+    if(!grid) return;
     
-    // Scan de secours si la liste est vide
     if (detectedRoles.length === 0) {
         scanContentFromHTML();
     }
 
+    // Réinitialisation complète du style de la grille pour supprimer le grid par défaut
+    // On va gérer le grid à l'intérieur des catégories
+    grid.style.display = "block"; 
     grid.innerHTML = "";
     
-    const sortedRoles = [...detectedRoles].sort((a, b) => a.title.localeCompare(b.title));
+    // Définition de l'ordre d'affichage
+    const categoriesOrder = {
+        'village': '🏡 VILLAGE',
+        'loups': '🐺 LOUPS',
+        'solo': '🎭 SOLOS',
+        'vampires': '🧛 VAMPIRES',
+        'autre': '❓ AUTRES'
+    };
 
-    sortedRoles.forEach(role => {
-        const div = document.createElement('div');
-        div.className = "role-select-item";
-        div.style.cursor = "pointer";
-        div.style.textAlign = "center";
-        div.style.padding = "5px";
+    // Pour chaque catégorie, on crée une section
+    for (const [catKey, catTitle] of Object.entries(categoriesOrder)) {
+        // Filtrer les rôles de cette catégorie
+        const rolesInCat = detectedRoles.filter(r => r.category === catKey);
         
-        div.innerHTML = `
-            <img src="${role.image}" loading="lazy" style="width:100%; border-radius:8px; border:2px solid transparent;">
-            <span style="display:block; font-size:0.8em; color:#aaa; margin-top:2px;">${role.title}</span>
-        `;
-        
-        div.onclick = function() { 
-            window.assignRoleToPlayer(role.id); 
-        };
-        
-        grid.appendChild(div);
-    });
+        // S'il y a des rôles, on affiche
+        if (rolesInCat.length > 0) {
+            // Titre de séparation
+            const titleDiv = document.createElement('div');
+            titleDiv.innerHTML = `<h3 style="color:var(--gold); border-bottom:1px solid #555; padding-bottom:5px; margin-top:20px; margin-bottom:10px; font-family:'Pirata One'; font-size:1.4em;">${catTitle}</h3>`;
+            grid.appendChild(titleDiv);
+
+            // Conteneur Grille 2 Colonnes
+            const catGrid = document.createElement('div');
+            catGrid.style.display = "grid";
+            catGrid.style.gridTemplateColumns = "repeat(2, 1fr)"; // FORCE 2 COLONNES
+            catGrid.style.gap = "10px";
+            
+            // Tri alphabétique interne
+            rolesInCat.sort((a, b) => a.title.localeCompare(b.title));
+
+            rolesInCat.forEach(role => {
+                const div = document.createElement('div');
+                div.className = "role-select-item";
+                div.style.cursor = "pointer";
+                div.style.textAlign = "center";
+                div.style.background = "rgba(255,255,255,0.05)";
+                div.style.padding = "5px";
+                div.style.borderRadius = "8px";
+                
+                div.innerHTML = `
+                    <img src="${role.image}" loading="lazy" style="width:100%; height:auto; border-radius:6px;">
+                    <span style="display:block; font-size:0.85em; color:#ddd; margin-top:4px; line-height:1.1;">${role.title}</span>
+                `;
+                
+                div.onclick = function() { 
+                    window.assignRoleToPlayer(role.id); 
+                };
+                
+                catGrid.appendChild(div);
+            });
+
+            grid.appendChild(catGrid);
+        }
+    }
 };
 
-// 2. OUVERTURE DE LA FENÊTRE (LE FIX EST ICI)
+// 2. Fonction d'ouverture
 window.openResurrectModal = function(playerId) {
-    console.log("Ouverture modale pour le joueur :", playerId);
     targetResurrectId = playerId;
     
     window.generateResurrectionGrid();
 
     const modalTitle = document.querySelector('#modal-role-selector h2');
     if(modalTitle) {
-        modalTitle.innerText = isDraftMode ? "♻️ CHANGER LA CARTE" : "⚰️ RESSUSCITER / CHANGER";
+        modalTitle.innerText = isDraftMode ? "CHANGER CARTE" : "RESSUSCITER";
+        modalTitle.style.fontSize = "1.5em"; // Réduire la taille du titre
     }
 
-    // *** LE FIX MAGIQUE : ON FORCE LA FENÊTRE AU-DESSUS DE L'ADMIN ***
+    // FIX Z-INDEX
     const modal = document.getElementById('modal-role-selector');
     if(modal) {
-        modal.style.zIndex = "20000"; // 20000 > 10000 (Admin) -> Elle passe devant !
+        modal.style.zIndex = "20000"; 
     }
 
     window.openModal('modal-role-selector');
@@ -293,7 +329,7 @@ window.assignRoleToPlayer = function(roleId) {
 };
 
 // ============================================
-// D. MISE À JOUR DE L'INTERFACE ADMIN (DOM)
+// D. MISE À JOUR DE L'INTERFACE ADMIN (DOM) - V21
 // ============================================
 function updateAdminUI(players) {
     const listDiv = document.getElementById('player-list-admin');
@@ -334,14 +370,16 @@ function updateAdminUI(players) {
             cardDiv.className = cardClass;
             cardDiv.style.position = 'relative';
 
+            // HTML de base
             let innerHTML = `
                 <img src="${cardImage}" alt="Role">
                 <strong>${p.name}</strong>
-                <div style="font-size:0.8em; color:#aaa; margin-bottom:5px;">${roleTitle}</div>
+                <div style="font-size:0.75em; color:#aaa; margin-bottom:5px; line-height:1.1;">${roleTitle}</div>
             `;
 
+            // BADGE RACCOURCI ("PROV.")
             if(isDraft) {
-                innerHTML = `<div style="background:#e67e22; color:white; font-size:0.7em; padding:2px 6px; border-radius:4px; position:absolute; top:5px; right:5px; z-index:10; font-family:sans-serif;">PROVISOIRE</div>` + innerHTML;
+                innerHTML = `<div style="background:#e67e22; color:white; font-size:0.6em; padding:2px 5px; border-radius:4px; position:absolute; top:3px; right:3px; z-index:10; font-family:sans-serif; font-weight:bold; box-shadow:0 2px 4px rgba(0,0,0,0.5);">PROV.</div>` + innerHTML;
             }
 
             cardDiv.innerHTML = innerHTML;
@@ -349,10 +387,9 @@ function updateAdminUI(players) {
             const forceClickStyle = "pointer-events: auto; opacity: 1; filter: none; cursor: pointer; position:relative; z-index:100;";
 
             if (isDraft) {
-                // BOUTON CHANGER (MODE BROUILLON)
                 const btnChange = document.createElement('button');
                 btnChange.className = "btn-admin-mini";
-                btnChange.style.cssText = `background:#3498db; color:white; width:100%; border:none; padding:10px; border-radius:5px; font-family:'Pirata One'; font-size:1.1em; margin-top:5px; ${forceClickStyle}`;
+                btnChange.style.cssText = `background:#3498db; color:white; width:100%; border:none; padding:8px; border-radius:5px; font-family:'Pirata One'; font-size:1em; margin-top:3px; ${forceClickStyle}`;
                 btnChange.innerText = "🔄 CHANGER";
                 
                 btnChange.onclick = function(e) {
@@ -368,7 +405,6 @@ function updateAdminUI(players) {
                 cardDiv.appendChild(waiting);
             } 
             else if (isDead) {
-                // BOUTONS MORTS
                 const actionsDiv = document.createElement('div');
                 actionsDiv.className = "admin-actions";
 
@@ -398,7 +434,6 @@ function updateAdminUI(players) {
                 cardDiv.appendChild(btnRevive);
 
             } else {
-                // BOUTON MORT
                 const actionsDiv = document.createElement('div');
                 actionsDiv.className = "admin-actions";
                 
@@ -661,3 +696,23 @@ function internalShowNotification(title, message) {
         alert(title + "\n" + message);
     }
 }
+
+// Actions Admin
+window.adminKill = function(playerId) {
+    if(confirm("Confirmer la mort ?")) {
+        update(ref(db, `games/${currentGameCode}/players/${playerId}`), { status: 'dead' });
+    }
+};
+
+window.adminDraw = function(playerId, category) {
+    const cards = detectedEvents[category];
+    if(cards && cards.length > 0) {
+        const randomCard = cards[Math.floor(Math.random() * cards.length)];
+        update(ref(db, `games/${currentGameCode}/players/${playerId}`), { 
+            drawnCard: { image: randomCard, category: category.toUpperCase() }
+        });
+        alert(`Carte ${category} envoyée !`);
+    } else {
+        alert("Aucune carte trouvée dans cette catégorie !");
+    }
+};
