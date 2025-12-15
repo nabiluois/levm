@@ -1,5 +1,5 @@
 // ============================================
-// SYSTEME EN LIGNE - LE VILLAGE MAUDIT (V24 - DISTRIBUTION VISUELLE)
+// SYSTEME EN LIGNE - LE VILLAGE MAUDIT (V25 - DASHBOARD & QUANTITÉS)
 // ============================================
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -31,7 +31,7 @@ let detectedRoles = [];
 let detectedEvents = { gold: [], silver: [], bronze: [] };
 let isDraftMode = false; 
 
-// Nouvelle variable pour stocker la sélection temporaire de distribution
+// Stockage de la sélection (Tableau d'IDs)
 let distributionSelection = [];
 
 // ============================================
@@ -181,7 +181,8 @@ function launchAdminInterface() {
     document.body.style.overflow = 'hidden';
     window.closeModal('modal-online-menu');
     setupAdminListeners();
-    generateRoleChecklist(); // Initialise le bouton de sélection
+    generateRoleChecklist();
+    if(window.generateResurrectionGrid) window.generateResurrectionGrid(); 
 }
 
 function setupAdminListeners() {
@@ -193,10 +194,43 @@ function setupAdminListeners() {
 }
 
 // ============================================
-// C. LOGIQUE DE CHANGEMENT DE RÔLE & EVENTS
+// C. LOGIQUE DE SÉLECTION (DASHBOARD & QUANTITÉS)
 // ============================================
 
-// --- 1. GÉNÉRATEUR DE GRILLE POLYVALENT (SELECTEUR, MULTI, RESURRECT) ---
+// 1. Mise à jour du Dashboard
+function updateDistributionDashboard() {
+    const countVillage = distributionSelection.filter(id => {
+        const r = detectedRoles.find(role => role.id === id);
+        return r && r.category === 'village';
+    }).length;
+
+    const countLoup = distributionSelection.filter(id => {
+        const r = detectedRoles.find(role => role.id === id);
+        return r && r.category === 'loups';
+    }).length;
+
+    const countSolo = distributionSelection.length - countVillage - countLoup;
+
+    document.getElementById('count-village').innerText = countVillage;
+    document.getElementById('count-loup').innerText = countLoup;
+    document.getElementById('count-solo').innerText = countSolo;
+    document.getElementById('total-distrib').innerText = distributionSelection.length;
+
+    // Liste des noms (facultatif mais utile)
+    const names = distributionSelection.map(id => {
+        const r = detectedRoles.find(role => role.id === id);
+        return r ? r.title : id;
+    });
+    
+    // On groupe les noms (ex: Paysan x3)
+    const groupedNames = {};
+    names.forEach(name => { groupedNames[name] = (groupedNames[name] || 0) + 1; });
+    const textList = Object.entries(groupedNames).map(([k, v]) => v > 1 ? `${k} x${v}` : k).join(', ');
+    
+    document.getElementById('summary-list').innerText = textList || "Aucun rôle sélectionné.";
+}
+
+// 2. Génération de la grille
 window.generateResurrectionGrid = function(mode = 'single') {
     const grid = document.getElementById('admin-role-grid');
     if(!grid) return;
@@ -205,17 +239,23 @@ window.generateResurrectionGrid = function(mode = 'single') {
     grid.style.display = "block"; 
     grid.innerHTML = "";
     
-    // Titre et Bouton de Validation pour le mode MULTI
+    // TABLEAU DE BORD (En mode Multi)
     if (mode === 'multi') {
-        const validateBtn = document.createElement('button');
-        validateBtn.className = "btn-validate";
-        validateBtn.style.cssText = "width:100%; margin-bottom:20px; background:#2ecc71; border-color:#27ae60; position:sticky; top:0; z-index:1000;";
-        validateBtn.innerHTML = `✅ VALIDER LA SÉLECTION (<span id="multi-count">${distributionSelection.length}</span>)`;
-        validateBtn.onclick = function() { 
-            window.updateRoleCount(); // Met à jour le compteur du dashboard
-            window.closeModal('modal-role-selector'); 
-        };
-        grid.appendChild(validateBtn);
+        const dashboard = document.createElement('div');
+        dashboard.className = "selection-dashboard";
+        dashboard.innerHTML = `
+            <div class="dashboard-stats">
+                <div class="stat-item stat-village">🏡 <span id="count-village">0</span></div>
+                <div class="stat-item stat-loup">🐺 <span id="count-loup">0</span></div>
+                <div class="stat-item stat-solo">🎭 <span id="count-solo">0</span></div>
+            </div>
+            <div class="dashboard-list" id="summary-list">...</div>
+            <button class="btn-validate" style="margin-top:5px; padding:10px; background:#2ecc71;" onclick="window.validateDistribution()">
+                ✅ VALIDER LA SÉLECTION (<span id="total-distrib">0</span>)
+            </button>
+        `;
+        grid.appendChild(dashboard);
+        setTimeout(updateDistributionDashboard, 50); // Init
     }
 
     const categoriesOrder = { 'village': '🏡 VILLAGE', 'loups': '🐺 LOUPS', 'solo': '🎭 SOLOS', 'vampires': '🧛 VAMPIRES' };
@@ -228,9 +268,9 @@ window.generateResurrectionGrid = function(mode = 'single') {
             grid.appendChild(titleDiv);
 
             const catGrid = document.createElement('div');
+            catGrid.className = "admin-grid-container"; // Nouvelle classe CSS
             catGrid.style.display = "grid";
             catGrid.style.gridTemplateColumns = "repeat(2, 1fr)"; 
-            catGrid.style.gap = "10px";
             
             rolesInCat.sort((a, b) => a.title.localeCompare(b.title));
 
@@ -238,33 +278,27 @@ window.generateResurrectionGrid = function(mode = 'single') {
                 const div = document.createElement('div');
                 div.className = "role-select-item";
                 
-                // Style différent si mode Multi
+                // --- LOGIQUE MULTI-SÉLECTION ---
                 if (mode === 'multi') {
                     div.classList.add('multi-mode');
-                    // Si déjà sélectionné, on active la classe
-                    if (distributionSelection.includes(role.id)) {
+                    const count = distributionSelection.filter(id => id === role.id).length;
+                    
+                    if (count > 0) {
                         div.classList.add('selected');
+                        // Badge de quantité
+                        if (count > 1 || role.id.includes('paysan') || role.id.includes('loup')) {
+                            div.innerHTML += `<div class="qty-badge">x${count}</div>`;
+                        }
                     }
                 }
 
-                div.style.cssText += "cursor:pointer; text-align:center; padding:5px; border-radius:8px; position:relative;";
-                div.innerHTML = `<img src="${role.image}" loading="lazy" style="width:100%; height:auto; border-radius:6px;"><span style="display:block; font-size:0.85em; color:#ddd;">${role.title}</span>`;
+                div.style.cssText += "cursor:pointer; text-align:center; padding:5px; border-radius:8px; position:relative; background:rgba(255,255,255,0.05);";
+                div.innerHTML += `<img src="${role.image}" loading="lazy" style="width:100%; height:auto; border-radius:6px;"><span style="display:block; font-size:0.85em; color:#ddd;">${role.title}</span>`;
                 
-                // LOGIQUE DU CLIC
                 div.onclick = function() { 
                     if (mode === 'multi') {
-                        // Toggle sélection
-                        if (distributionSelection.includes(role.id)) {
-                            distributionSelection = distributionSelection.filter(id => id !== role.id);
-                            div.classList.remove('selected');
-                        } else {
-                            distributionSelection.push(role.id);
-                            div.classList.add('selected');
-                        }
-                        // Mise à jour compteur bouton
-                        document.getElementById('multi-count').innerText = distributionSelection.length;
+                        handleMultiSelection(role.id, div);
                     } else {
-                        // Mode unique (Changement direct)
                         window.assignRoleToPlayer(role.id); 
                     }
                 };
@@ -275,36 +309,92 @@ window.generateResurrectionGrid = function(mode = 'single') {
     }
 };
 
-// 2. OUVERTURE DISTRIBUTION (MULTI)
-window.openDistributionSelector = function() {
-    // On génère la grille en mode 'multi'
-    window.generateResurrectionGrid('multi');
+// 3. LOGIQUE DES QUANTITÉS (PROMPTS)
+function handleMultiSelection(roleId, divElement) {
+    let currentCount = distributionSelection.filter(id => id === roleId).length;
+    let newCount = 0;
 
-    const modalTitle = document.querySelector('#modal-role-selector h2');
-    if(modalTitle) modalTitle.innerText = "SÉLECTION DES RÔLES";
+    // Rôles Spéciaux à Quantité
+    if (roleId === 'le_paysan' || roleId === 'le_loup_garou') {
+        let input = prompt(`Combien de ${roleId === 'le_paysan' ? 'Paysans' : 'Loups'} ? (0 - 10)`, currentCount || 0);
+        if (input === null) return; // Annuler
+        newCount = parseInt(input);
+        if (isNaN(newCount) || newCount < 0) newCount = 0;
+        if (newCount > 10) newCount = 10;
+    } 
+    else if (roleId === 'olaf_et_pilaf' || roleId === 'les_jumeaux_explosifs') {
+        let input = prompt(`Combien de cartes pour ce duo ? (0, 1 ou 2)`, currentCount || 0);
+        if (input === null) return;
+        newCount = parseInt(input);
+        if (isNaN(newCount) || newCount < 0) newCount = 0;
+        if (newCount > 2) newCount = 2;
+    } 
+    else {
+        // Rôle Standard (On/Off)
+        newCount = currentCount > 0 ? 0 : 1;
+    }
+
+    // Mise à jour du tableau distributionSelection
+    // 1. On retire toutes les occurrences de ce rôle
+    distributionSelection = distributionSelection.filter(id => id !== roleId);
     
-    // Z-Index Fix
+    // 2. On ajoute le bon nombre
+    for(let i=0; i<newCount; i++) {
+        distributionSelection.push(roleId);
+    }
+
+    // Mise à jour visuelle immédiate (Badge)
+    if (newCount > 0) {
+        divElement.classList.add('selected');
+        // Gestion du badge DOM
+        let badge = divElement.querySelector('.qty-badge');
+        if (!badge) {
+            badge = document.createElement('div');
+            badge.className = 'qty-badge';
+            divElement.appendChild(badge);
+        }
+        badge.innerText = `x${newCount}`;
+    } else {
+        divElement.classList.remove('selected');
+        const badge = divElement.querySelector('.qty-badge');
+        if (badge) badge.remove();
+    }
+
+    updateDistributionDashboard();
+}
+
+window.validateDistribution = function() {
+    window.updateRoleCount(); // Met à jour le bouton principal
+    window.closeModal('modal-role-selector');
+};
+
+// 4. OUVERTURE DISTRIBUTION (MULTI)
+window.openDistributionSelector = function() {
+    window.generateResurrectionGrid('multi');
+    const modalTitle = document.querySelector('#modal-role-selector h2');
+    if(modalTitle) {
+        modalTitle.style.display = 'none'; // On cache le titre car on a le dashboard
+    }
     const modal = document.getElementById('modal-role-selector');
     if(modal) modal.style.zIndex = "20000"; 
-    
     window.openModal('modal-role-selector');
 };
 
-// 3. OUVERTURE CHANGEMENT RÔLE (SINGLE)
+// 5. OUVERTURE SINGLE (Resurrect/Change)
 window.openResurrectModal = function(playerId) {
     targetResurrectId = playerId;
-    // On génère la grille en mode 'single' (défaut)
     window.generateResurrectionGrid('single'); 
-    
     const modalTitle = document.querySelector('#modal-role-selector h2');
-    if(modalTitle) modalTitle.innerText = isDraftMode ? "CHANGER CARTE" : "RESSUSCITER";
-    
+    if(modalTitle) {
+        modalTitle.style.display = 'block';
+        modalTitle.innerText = isDraftMode ? "CHANGER CARTE" : "RESSUSCITER";
+    }
     const modal = document.getElementById('modal-role-selector');
     if(modal) modal.style.zIndex = "20000"; 
     window.openModal('modal-role-selector');
 };
 
-// 4. OUVERTURE MODALE CARTES EVENTS
+// 6. OUVERTURE EVENTS
 window.openEventSelector = function(playerId, category) {
     targetResurrectId = playerId;
     targetEventCategory = category;
@@ -315,7 +405,10 @@ window.openEventSelector = function(playerId, category) {
     grid.innerHTML = "";
 
     const modalTitle = document.querySelector('#modal-role-selector h2');
-    if(modalTitle) modalTitle.innerText = `CHOIX CARTE ${category.toUpperCase()}`;
+    if(modalTitle) {
+        modalTitle.style.display = 'block';
+        modalTitle.innerText = `CARTE ${category.toUpperCase()}`;
+    }
 
     const randomBtn = document.createElement('button');
     randomBtn.className = "btn-validate";
@@ -345,7 +438,6 @@ window.openEventSelector = function(playerId, category) {
     window.openModal('modal-role-selector');
 };
 
-// 5. FONCTIONS D'ASSIGNATION ET D'ENVOI
 window.adminDraw = function(playerId, category, isRandom, manualImg) {
     let finalCard = manualImg;
     if (isRandom) {
@@ -380,26 +472,21 @@ window.assignRoleToPlayer = function(roleId) {
 };
 
 // ============================================
-// D. MISE À JOUR UI ADMIN & DISTRIBUTION
+// D. DASHBOARD PRINCIPAL
 // ============================================
 
-// Initialisation du bouton sur le dashboard
 function generateRoleChecklist() {
     const container = document.getElementById('roles-selection-list');
     if(!container) return;
-    
-    // On remplace la liste par un simple bouton
     container.innerHTML = `
-        <button class="btn-validate" onclick="window.openDistributionSelector()" style="background:#2c3e50; border-color:#34495e;">
+        <button class="btn-validate" onclick="window.openDistributionSelector()" style="background:#2c3e50; border-color:#34495e; margin-top:0;">
             📂 CHOISIR LES RÔLES
         </button>
     `;
 }
 
-// Mise à jour du compteur sur le Dashboard
 window.updateRoleCount = function() {
     const countSpan = document.getElementById('role-count');
-    // On compte les éléments dans le tableau distributionSelection
     if(countSpan) countSpan.innerText = distributionSelection.length;
     
     get(child(ref(db), `games/${currentGameCode}/players`)).then((snapshot) => {
@@ -409,15 +496,11 @@ window.updateRoleCount = function() {
 };
 
 function distributeRoles() {
-    // On utilise le tableau global de sélection
     let selectedRoles = [...distributionSelection];
-    
-    // Mélange de Fisher-Yates
     for (let i = selectedRoles.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [selectedRoles[i], selectedRoles[j]] = [selectedRoles[j], selectedRoles[i]];
     }
-    
     const playersRef = ref(db, 'games/' + currentGameCode + '/players');
     get(playersRef).then((snapshot) => {
         const players = snapshot.val();
@@ -439,7 +522,6 @@ function updateAdminUI(players) {
     listDiv.innerHTML = "";
     
     const count = Object.keys(players).length;
-    
     if(count === 0) {
         listDiv.innerHTML = '<div style="color:#aaa; font-style:italic; grid-column:1/-1;">En attente de joueurs...</div>';
     } else {
@@ -486,13 +568,11 @@ function updateAdminUI(players) {
             else if (isDead) {
                 const actionsDiv = document.createElement('div');
                 actionsDiv.className = "admin-actions";
-
                 const types = [
                     { type: 'gold', color: 'gold', label: 'OR' },
                     { type: 'silver', color: 'silver', label: 'ARG' },
                     { type: 'bronze', color: '#cd7f32', label: 'BRZ' }
                 ];
-
                 types.forEach(t => {
                     if(detectedEvents[t.type].length > 0) {
                         const btn = document.createElement('button');
@@ -504,14 +584,12 @@ function updateAdminUI(players) {
                     }
                 });
                 cardDiv.appendChild(actionsDiv);
-
                 const btnRevive = document.createElement('button');
                 btnRevive.className = "btn-admin-mini";
                 btnRevive.style.cssText = `background:#2ecc71; color:white; width:100%; margin-top:5px; ${forceClickStyle}`;
                 btnRevive.innerText = "♻️ REVIENT";
                 btnRevive.onclick = function(e) { e.stopPropagation(); window.openResurrectModal(id); };
                 cardDiv.appendChild(btnRevive);
-
             } else {
                 const btnKill = document.createElement('button');
                 btnKill.className = "btn-admin-mini";
@@ -532,8 +610,6 @@ function updateAdminUI(players) {
 function updateAdminButtons(playerCount) {
     const btnDistribute = document.getElementById('btn-distribute');
     const btnReveal = document.getElementById('btn-reveal');
-    
-    // Mise à jour pour vérifier la longueur du tableau distributionSelection
     const selectedCount = distributionSelection.length; 
 
     if(!btnDistribute || !btnReveal) return; 
@@ -570,7 +646,6 @@ function revealRolesToEveryone() {
     });
 }
 
-// CÔTÉ JOUEUR
 function joinGame() {
     const pseudo = document.getElementById('join-pseudo').value.trim();
     const code = document.getElementById('join-code').value.toUpperCase().trim();
@@ -619,11 +694,27 @@ function listenForPlayerUpdates() {
         }
         if (data.drawnCard && data.drawnCard.image !== lastCardImg) {
             lastCardImg = data.drawnCard.image;
-            internalShowCard({ 
-                title: `CARTE ${data.drawnCard.category}`, 
-                image: data.drawnCard.image,
-                category: data.drawnCard.category 
-            });
+            let backImage = "back.png"; 
+            if (data.title && (data.title.includes("GOLD") || (data.category && data.category === 'GOLD'))) backImage = "back_or.png";
+            else if (data.title && (data.title.includes("SILVER") || (data.category && data.category === 'SILVER'))) backImage = "back_argant.png";
+            else if (data.title && (data.title.includes("BRONZE") || (data.category && data.category === 'BRONZE'))) backImage = "back_bronze.png";
+            
+            const panel = document.querySelector('.details-panel');
+            const overlay = document.querySelector('.details-overlay');
+            if(panel && overlay) {
+                panel.innerHTML = `
+                    <div id="online-content-wrapper" style="height:100%; display:flex; flex-direction:column; justify-content:center; align-items:center;">
+                        <button class="close-details" onclick="window.internalCloseDetails()" style="position:absolute; top:20px; right:20px; z-index:100; background:rgba(0,0,0,0.6); color:white; border:1px solid gold; border-radius:50%; width:40px; height:40px; font-size:20px;">✕</button>
+                        <div class="scene-flip" onclick="this.classList.toggle('is-flipped')" style="margin:0;">
+                            <div class="card-object">
+                                <div class="card-face face-front"><img src="${backImage}" class="card-back-img" alt="Dos" style="width:100%; height:100%; object-fit:cover; border-radius:15px;"></div>
+                                <div class="card-face face-back"><img src="${data.drawnCard.image}" alt="Rôle" style="width:100%; height:100%; object-fit:cover; border-radius:15px;"></div>
+                            </div>
+                        </div>
+                    </div>`;
+                panel.classList.add('active');
+                overlay.classList.add('active');
+            }
         }
     });
 }
@@ -639,36 +730,22 @@ function revealRole(roleId) {
     const roleData = detectedRoles.find(r => r.id === roleId);
     if(roleData) {
         if(navigator.vibrate) navigator.vibrate([200, 100, 200]);
-        internalShowCard(roleData);
-    }
-}
-
-function internalShowCard(data) {
-    const panel = document.querySelector('.details-panel');
-    const overlay = document.querySelector('.details-overlay');
-    if(!panel || !overlay) return;
-
-    let backImage = "back.png"; 
-    if (data.title && (data.title.includes("GOLD") || (data.category && data.category === 'GOLD'))) {
-        backImage = "back_or.png";
-    } else if (data.title && (data.title.includes("SILVER") || (data.category && data.category === 'SILVER'))) {
-        backImage = "back_argant.png";
-    } else if (data.title && (data.title.includes("BRONZE") || (data.category && data.category === 'BRONZE'))) {
-        backImage = "back_bronze.png";
-    }
-
-    panel.innerHTML = `
-        <div id="online-content-wrapper" style="height:100%; display:flex; flex-direction:column; justify-content:center; align-items:center;">
-            <button class="close-details" onclick="window.internalCloseDetails()" style="position:absolute; top:20px; right:20px; z-index:100; background:rgba(0,0,0,0.6); color:white; border:1px solid gold; border-radius:50%; width:40px; height:40px; font-size:20px;">✕</button>
-            <div class="scene-flip" onclick="this.classList.toggle('is-flipped')" style="margin:0;">
-                <div class="card-object">
-                    <div class="card-face face-front"><img src="${backImage}" class="card-back-img" alt="Dos" style="width:100%; height:100%; object-fit:cover; border-radius:15px;"></div>
-                    <div class="card-face face-back"><img src="${data.image}" alt="Rôle" style="width:100%; height:100%; object-fit:cover; border-radius:15px;"></div>
+        const panel = document.querySelector('.details-panel');
+        const overlay = document.querySelector('.details-overlay');
+        if(!panel || !overlay) return;
+        panel.innerHTML = `
+            <div id="online-content-wrapper" style="height:100%; display:flex; flex-direction:column; justify-content:center; align-items:center;">
+                <button class="close-details" onclick="window.internalCloseDetails()" style="position:absolute; top:20px; right:20px; z-index:100; background:rgba(0,0,0,0.6); color:white; border:1px solid gold; border-radius:50%; width:40px; height:40px; font-size:20px;">✕</button>
+                <div class="scene-flip" onclick="this.classList.toggle('is-flipped')" style="margin:0;">
+                    <div class="card-object">
+                        <div class="card-face face-front"><img src="back.png" class="card-back-img" alt="Dos" style="width:100%; height:100%; object-fit:cover; border-radius:15px;"></div>
+                        <div class="card-face face-back"><img src="${roleData.image}" alt="Rôle" style="width:100%; height:100%; object-fit:cover; border-radius:15px;"></div>
+                    </div>
                 </div>
-            </div>
-        </div>`;
-    panel.classList.add('active');
-    overlay.classList.add('active');
+            </div>`;
+        panel.classList.add('active');
+        overlay.classList.add('active');
+    }
 }
 
 window.internalCloseDetails = function() {
