@@ -1,5 +1,5 @@
 // ============================================
-// SYSTEME EN LIGNE - LE VILLAGE MAUDIT (V28 - RECONNEXION JOUEUR & FIX DOS EVENT)
+// SYSTEME EN LIGNE - LE VILLAGE MAUDIT (V29 - FIX MORTS & QUANTITES)
 // ============================================
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -31,18 +31,17 @@ let detectedRoles = [];
 let detectedEvents = { gold: [], silver: [], bronze: [] };
 let isDraftMode = false; 
 
-// Stockage de la sélection (Admin)
+// Stockage de la sélection
 let distributionSelection = [];
 
 // ============================================
-// A. INITIALISATION & RECONNEXION
+// A. INITIALISATION
 // ============================================
 
 document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => { scanContentFromHTML(); }, 500);
     ensureAdminButtonsExist(); 
 
-    // Boutons Menu
     const btnJoin = document.getElementById('btn-join-action');
     if(btnJoin) btnJoin.addEventListener('click', joinGame);
 
@@ -52,15 +51,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnReveal = document.getElementById('btn-reveal');
     if(btnReveal) btnReveal.addEventListener('click', revealRolesToEveryone);
 
-    // 1. Vérification Session ADMIN
     const savedAdminCode = localStorage.getItem('adminGameCode');
     if (savedAdminCode) { showResumeButton(savedAdminCode); }
-
-    // 2. Vérification Session JOUEUR (NOUVEAU)
+    
     checkPlayerSession();
 });
 
-// Vérifie si le joueur était déjà dans une partie
 function checkPlayerSession() {
     const savedPCode = localStorage.getItem('vm_player_code');
     const savedPId = localStorage.getItem('vm_player_id');
@@ -68,7 +64,6 @@ function checkPlayerSession() {
 
     if (savedPCode && savedPId) {
         const menuContainer = document.querySelector('.modal-content');
-        // On évite les doublons
         if (document.getElementById('btn-resume-player')) return;
 
         const resumeBtn = document.createElement('button');
@@ -78,12 +73,8 @@ function checkPlayerSession() {
         resumeBtn.style.border = "2px solid white";
         resumeBtn.style.marginBottom = "15px";
         resumeBtn.innerHTML = `🔄 REJOINDRE (${savedPName || 'Partie'})`;
-        
-        resumeBtn.onclick = function() {
-            restorePlayerSession(savedPCode, savedPId);
-        };
+        resumeBtn.onclick = function() { restorePlayerSession(savedPCode, savedPId); };
 
-        // On l'ajoute juste avant le titre ou au début
         const title = menuContainer.querySelector('h2');
         if(title) title.insertAdjacentElement('afterend', resumeBtn);
     }
@@ -92,17 +83,15 @@ function checkPlayerSession() {
 function restorePlayerSession(code, id) {
     currentGameCode = code;
     myPlayerId = id;
-    
-    // On vérifie si la partie existe toujours
     get(child(ref(db), `games/${code}/players/${id}`)).then((snapshot) => {
         if(snapshot.exists()) {
             document.getElementById('btn-join-action').style.display = 'none';
             document.getElementById('player-lobby-status').style.display = 'block';
-            window.closeModal('modal-online-menu'); // Ferme le menu
-            window.openModal('modal-join-game');    // Ouvre le lobby joueur
+            window.closeModal('modal-online-menu'); 
+            window.openModal('modal-join-game');    
             listenForPlayerUpdates();
         } else {
-            alert("Cette partie est terminée ou tu as été supprimé.");
+            alert("Partie terminée.");
             localStorage.removeItem('vm_player_code');
             localStorage.removeItem('vm_player_id');
             localStorage.removeItem('vm_player_name');
@@ -286,7 +275,7 @@ window.generateResurrectionGrid = function(mode = 'single') {
     grid.style.display = "block"; 
     grid.innerHTML = "";
     
-    // DASHBOARD POPUP (SVG UNIQUEMENT)
+    // DASHBOARD POPUP
     if (mode === 'multi') {
         const dashboard = document.createElement('div');
         dashboard.className = "selection-dashboard";
@@ -328,8 +317,9 @@ window.generateResurrectionGrid = function(mode = 'single') {
                     
                     if (count > 0) {
                         div.classList.add('selected');
-                        // PASTILLES UNIQUEMENT SUR LES CARTES SPÉCIFIQUES
+                        // BADGES (Seulement pour les cartes multiples)
                         const badgeCards = ['le_paysan', 'le_loup_garou', 'olaf_et_pilaf', 'les_jumeaux_explosifs'];
+                        // Vérification stricte ou partielle selon besoin (ici ID exact ou include)
                         if (badgeCards.some(id => role.id.includes(id))) {
                             div.innerHTML += `<div class="qty-badge">x${count}</div>`;
                         }
@@ -379,15 +369,15 @@ function handleMultiSelection(roleId, divElement) {
     let currentCount = distributionSelection.filter(id => id === roleId).length;
     let newCount = 0;
 
-    // Logique spéciale pour les cartes multiples
-    if (roleId.includes('paysan') || roleId.includes('loup_garou')) {
+    // LOGIQUE QUANTITÉ (CORRIGÉE : Uniquement "le_loup_garou" strict)
+    if (roleId === 'le_paysan' || roleId === 'le_loup_garou') {
         let input = prompt(`Nombre ? (0 - 10)`, currentCount || 0);
         if (input === null) return; 
         newCount = parseInt(input);
         if (isNaN(newCount) || newCount < 0) newCount = 0;
         if (newCount > 10) newCount = 10;
     } 
-    else if (roleId.includes('olaf') || roleId.includes('jumeaux')) {
+    else if (roleId === 'olaf_et_pilaf' || roleId === 'les_jumeaux_explosifs') {
         let input = prompt(`Nombre ? (0, 1, 2)`, currentCount || 0);
         if (input === null) return;
         newCount = parseInt(input);
@@ -395,6 +385,7 @@ function handleMultiSelection(roleId, divElement) {
         if (newCount > 2) newCount = 2;
     } 
     else {
+        // Toggle simple
         newCount = currentCount > 0 ? 0 : 1;
     }
 
@@ -407,7 +398,7 @@ function handleMultiSelection(roleId, divElement) {
         divElement.classList.add('selected');
         
         const badgeCards = ['le_paysan', 'le_loup_garou', 'olaf_et_pilaf', 'les_jumeaux_explosifs'];
-        if (badgeCards.some(id => roleId.includes(id))) {
+        if (badgeCards.some(id => roleId === id)) { // Vérification stricte
             let badge = divElement.querySelector('.qty-badge');
             if (!badge) {
                 badge = document.createElement('div');
@@ -427,7 +418,7 @@ function handleMultiSelection(roleId, divElement) {
 
 window.validateDistribution = function() {
     window.closeModal('modal-role-selector');
-    generateRoleChecklist(); // Mise à jour du tableau 3 colonnes sur le dashboard
+    generateRoleChecklist(); 
 };
 
 // 4. OUVERTURES DES MODALES
@@ -578,7 +569,7 @@ function generateRoleChecklist() {
     container.innerHTML = `
         ${summaryHTML}
         <button class="btn-validate" onclick="window.openDistributionSelector()" style="background:#2c3e50; border-color:#34495e; margin-top:0;">
-            📂 ${distributionSelection.length > 0 ? 'MODIFIER LA SÉLECTION' : 'CHOISIR LES RÔLES'}
+            📂 ${distributionSelection.length > 0 ? 'MODIFIER LA SÉLECTION' : 'CHOISIR LES RÔLES'} (${distributionSelection.length})
         </button>
     `;
     
@@ -784,25 +775,30 @@ function listenForPlayerUpdates() {
                 revealRole(data.role);
             }
             const lobbyStatus = document.getElementById('player-lobby-status');
-            if(lobbyStatus) {
-                lobbyStatus.innerHTML = `
-                    <h3 style="color:var(--gold);">Tu es en jeu !</h3>
-                    <div style="margin:20px 0;">
-                        <button class="btn-menu" style="background:var(--gold); color:black; font-weight:bold; padding:15px; width:100%; border:2px solid #fff;" onclick="window.showMyRoleAgain()">🃏 VOIR MA CARTE</button>
-                    </div>
-                    <p style="opacity:0.7;">Attend le MJ...</p>
-                `;
-            }
+            
+            // LOGIQUE MORTS : On affiche "Tu es mort" MAIS on garde le bouton "Voir ma carte"
+            let statusHTML = `
+                <h3 style="color:${data.status === 'dead' ? '#c0392b' : 'var(--gold)'};">
+                    ${data.status === 'dead' ? 'TU ES MORT 💀' : 'Tu es en jeu !'}
+                </h3>
+                <div style="margin:20px 0;">
+                    <button class="btn-menu" style="background:var(--gold); color:black; font-weight:bold; padding:15px; width:100%; border:2px solid #fff;" onclick="window.showMyRoleAgain()">🃏 VOIR MA CARTE</button>
+                </div>
+                <p style="opacity:0.7;">Attend le MJ...</p>
+            `;
+            
+            if(lobbyStatus) lobbyStatus.innerHTML = statusHTML;
         }
+        
         if (data.status === 'dead') {
-            internalShowNotification("💀 TU ES MORT", "Patience...");
-            document.getElementById('player-lobby-status').innerHTML = `<h3 style="color:#c0392b;">TU ES MORT 💀</h3>`;
+            internalShowNotification("💀 TU ES MORT", "Patience... Tu peux toujours voir ta carte.");
         }
+
         if (data.drawnCard && data.drawnCard.image !== lastCardImg) {
             lastCardImg = data.drawnCard.image;
             let backImage = "back.png"; 
-            if (data.category) {
-                const cat = data.category.toUpperCase();
+            if (data.drawnCard.category) {
+                const cat = data.drawnCard.category.toUpperCase();
                 if (cat === 'GOLD') backImage = "back_or.png";
                 else if (cat === 'SILVER') backImage = "back_argant.png";
                 else if (cat === 'BRONZE') backImage = "back_bronze.png";

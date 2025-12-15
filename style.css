@@ -1857,3 +1857,20 @@ body.light-mode #online-mode-link {
     line-height: 1.2;
     margin-bottom: 2px;
 }
+
+/* =======================================================
+   36. AJUSTEMENTS V28 (PASTILLES & INTERFACE)
+   ======================================================= */
+
+/* 1. Pastille rouge déplacée à GAUCHE */
+.qty-badge {
+    right: auto !important; /* Annule la droite */
+    left: -5px !important;  /* Colle à gauche */
+    top: -8px !important;
+}
+
+/* 2. Coche verte de sélection (Rappel pour être sûr) */
+.role-select-item.multi-mode.selected::after {
+    right: -5px !important;
+    left: auto !important;
+}
