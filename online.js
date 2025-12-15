@@ -1,5 +1,5 @@
 // ============================================
-// SYSTEME EN LIGNE - LE VILLAGE MAUDIT (V12 - AUTO-FIX & CARTE CLIQUABLE)
+// SYSTEME EN LIGNE - LE VILLAGE MAUDIT (V13 - RETOUR DU BOUTON BLEU)
 // ============================================
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -36,60 +36,46 @@ let isDraftMode = false;
 
 document.addEventListener('DOMContentLoaded', () => {
     scanContentFromHTML();
-    ensureAdminButtonsExist(); // <-- AUTO-FIX DU HTML
+    ensureAdminButtonsExist(); // Auto-réparation des boutons
 
     const btnJoin = document.getElementById('btn-join-action');
     if(btnJoin) btnJoin.addEventListener('click', joinGame);
 
-    // BOUTON 1 : PRÉPARER (Distribution Aléatoire Brouillon)
     const btnDistribute = document.getElementById('btn-distribute');
     if(btnDistribute) btnDistribute.addEventListener('click', distributeRoles);
 
-    // BOUTON 2 : RÉVÉLER (Envoi final)
-    // On attache l'événement même si le bouton a été créé dynamiquement
     const btnReveal = document.getElementById('btn-reveal');
     if(btnReveal) btnReveal.addEventListener('click', revealRolesToEveryone);
 
-    // VÉRIFICATION DE SESSION ADMIN
     const savedAdminCode = localStorage.getItem('adminGameCode');
     if (savedAdminCode) {
         showResumeButton(savedAdminCode);
     }
 });
 
-// --- NOUVEAU : FONCTION QUI RÉPARE LE HTML MANQUANT ---
 function ensureAdminButtonsExist() {
     const btnDistribute = document.getElementById('btn-distribute');
     let btnReveal = document.getElementById('btn-reveal');
 
-    // Si le bouton Distribuer existe mais pas le bouton Révéler
     if (btnDistribute && !btnReveal) {
-        // On crée un conteneur pour les mettre côte à côte
         const container = document.createElement('div');
         container.className = "admin-buttons-container";
         container.style.display = "flex";
         container.style.gap = "10px";
         container.style.marginTop = "15px";
 
-        // On insère le conteneur avant le bouton actuel
         btnDistribute.parentNode.insertBefore(container, btnDistribute);
-
-        // On déplace le bouton Distribuer dans le conteneur
         container.appendChild(btnDistribute);
 
-        // On crée le bouton Révéler
         btnReveal = document.createElement('button');
         btnReveal.id = "btn-reveal";
         btnReveal.className = "btn-validate btn-distribute-big";
         btnReveal.style.flex = "1";
-        btnReveal.style.background = "#27ae60"; // Vert
-        btnReveal.style.display = "none"; // Caché par défaut
+        btnReveal.style.background = "#27ae60"; 
+        btnReveal.style.display = "none";
         btnReveal.innerText = "📢 RÉVÉLER";
         
-        // On l'ajoute au conteneur
         container.appendChild(btnReveal);
-
-        // On ajuste le style du bouton distribuer pour qu'ils soient égaux
         btnDistribute.style.flex = "1";
         btnDistribute.style.width = "auto";
     }
@@ -97,10 +83,7 @@ function ensureAdminButtonsExist() {
 
 function showResumeButton(code) {
     const menuContainer = document.querySelector('.modal-content'); 
-    if(menuContainer) {
-        // Eviter les doublons
-        if(document.getElementById('btn-resume-admin')) return;
-
+    if(menuContainer && !document.getElementById('btn-resume-admin')) {
         const resumeBtn = document.createElement('button');
         resumeBtn.id = "btn-resume-admin";
         resumeBtn.className = "btn-menu";
@@ -111,9 +94,7 @@ function showResumeButton(code) {
         resumeBtn.onclick = () => window.restoreAdminSession(code);
         
         const title = menuContainer.querySelector('h2');
-        if(title) {
-            title.insertAdjacentElement('afterend', resumeBtn);
-        }
+        if(title) title.insertAdjacentElement('afterend', resumeBtn);
     }
 }
 
@@ -253,26 +234,24 @@ function updateAdminUI(players) {
             const cardClass = isDead ? "admin-player-card dead" : "admin-player-card";
             let buttonsHtml = "";
             let draftBadge = "";
-            let clickAction = ""; // Action au clic sur la carte entière
 
             if (isDraft) {
-                // --- MODE BROUILLON (Tout est cliquable) ---
+                // --- MODE BROUILLON (LE BOUTON BLEU EST ICI) ---
                 draftBadge = `<div style="background:#e67e22; color:white; font-size:0.7em; padding:2px 6px; border-radius:4px; position:absolute; top:5px; right:5px; z-index:10; font-family:sans-serif;">PROVISOIRE</div>`;
                 
-                // On met l'action de clic sur TOUTE la carte
-                clickAction = `onclick="window.openResurrectModal('${id}')"`;
-                
+                // IMPORTANT : On force pointer-events: auto pour être sûr que le clic passe
                 buttonsHtml = `
-                    <div style="background:#3498db; color:white; text-align:center; padding:5px; border-radius:5px; margin-top:5px; font-size:0.9em;">
-                        🔄 Tap pour changer
-                    </div>
+                    <button class="btn-admin-mini" 
+                        style="background:#3498db; color:white; width:100%; border:none; padding:10px; border-radius:5px; cursor:pointer; font-family:'Pirata One'; font-size:1.1em; pointer-events: auto; margin-top:5px; position:relative; z-index:100;" 
+                        onclick="event.stopPropagation(); window.openResurrectModal('${id}')">
+                        🔄 CHANGER
+                    </button>
                 `;
             } 
             else if (!currentRoleId) {
                 buttonsHtml = `<span style="font-size:0.8em; opacity:0.5;">...</span>`;
             } 
             else if (isDead) {
-                // Pour les morts, boutons spécifiques
                 buttonsHtml = `<div class="admin-actions">`;
                 if(detectedEvents.gold.length > 0) buttonsHtml += `<button class="btn-admin-mini" style="background:gold; color:black;" onclick="event.stopPropagation(); window.adminDraw('${id}', 'gold')">OR</button>`;
                 if(detectedEvents.silver.length > 0) buttonsHtml += `<button class="btn-admin-mini" style="background:silver; color:black;" onclick="event.stopPropagation(); window.adminDraw('${id}', 'silver')">ARG</button>`;
@@ -285,7 +264,7 @@ function updateAdminUI(players) {
             }
 
             listDiv.innerHTML += `
-                <div class="${cardClass}" style="position:relative; cursor:pointer;" ${clickAction}>
+                <div class="${cardClass}" style="position:relative;">
                     ${draftBadge}
                     <img src="${cardImage}" alt="Role">
                     <strong>${p.name}</strong>
@@ -295,7 +274,6 @@ function updateAdminUI(players) {
             `;
         });
     }
-    
     updateAdminButtons(count);
 }
 
@@ -304,7 +282,7 @@ function updateAdminButtons(playerCount) {
     const btnReveal = document.getElementById('btn-reveal');
     const selectedCount = document.querySelectorAll('.role-checkbox:checked').length;
 
-    if(!btnDistribute || !btnReveal) return; // Sécurité
+    if(!btnDistribute || !btnReveal) return; 
 
     // 1. Bouton "PRÉPARER" (Gauche)
     if (playerCount > 0 && selectedCount === playerCount) {
@@ -424,13 +402,11 @@ window.updateRoleCount = function() {
     });
 };
 
-// ACTION : DISTRIBUER (BROUILLON)
 function distributeRoles() {
     const checkboxes = document.querySelectorAll('.role-checkbox:checked');
     let selectedRoles = [];
     checkboxes.forEach(box => selectedRoles.push(box.value));
     
-    // Mélange de Fisher-Yates
     for (let i = selectedRoles.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [selectedRoles[i], selectedRoles[j]] = [selectedRoles[j], selectedRoles[i]];
@@ -444,7 +420,6 @@ function distributeRoles() {
         const updates = {};
         playerIds.forEach((id, index) => {
             if (selectedRoles[index]) {
-                // On met tout en draftRole
                 updates[`games/${currentGameCode}/players/${id}/draftRole`] = selectedRoles[index];
             }
         });
@@ -452,7 +427,6 @@ function distributeRoles() {
     });
 }
 
-// ACTION : RÉVÉLER (FINAL)
 function revealRolesToEveryone() {
     if(!confirm("Es-tu sûr de la distribution ? Les rôles vont être envoyés aux joueurs.")) return;
 
