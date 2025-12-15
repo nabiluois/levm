@@ -1243,3 +1243,212 @@ body.locked-game #online-mode-link {
     border-color: #555 !important;
     color: #888 !important;
 }
+
+/* ============================================
+   21. ANIMATION FLIP (RÉVÉLATION EN LIGNE)
+   ============================================ */
+
+/* La Scène 3D */
+.scene-flip {
+  width: 280px;
+  height: 420px;
+  margin: 20px auto;
+  perspective: 1000px;
+  cursor: pointer;
+}
+
+/* L'objet Carte qui bouge */
+.card-object {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transition: transform 0.8s cubic-bezier(0.4, 0.2, 0.2, 1);
+  transform-style: preserve-3d;
+}
+
+/* L'état retourné */
+.scene-flip.is-flipped .card-object {
+  transform: rotateY(180deg);
+}
+
+/* Les deux faces communes */
+.card-face {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden; /* Cache le dos */
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  overflow: hidden;
+  border: 3px solid var(--gold);
+}
+
+/* FACE 1 : LE DOS (back.png) */
+.face-front {
+  background: #000; /* Fond noir au cas où l'image ne charge pas */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: rotateY(0deg);
+  padding: 0; /* Important : pas de marge */
+}
+
+/* L'image back.png prend toute la place */
+.face-front img.card-back-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Remplit tout l'espace sans déformation */
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+}
+
+/* Texte par-dessus l'image (avec fond semi-transparent pour lire) */
+.tap-hint {
+  position: absolute;
+  bottom: 20px;
+  z-index: 2;
+  font-family: 'Pirata One', serif;
+  font-size: 1.2em;
+  color: #fff;
+  text-shadow: 0 2px 4px #000;
+  background: rgba(0, 0, 0, 0.6);
+  padding: 5px 15px;
+  border-radius: 20px;
+  border: 1px solid var(--gold);
+  animation: pulse 1.5s infinite;
+  pointer-events: none; /* Laisse le clic passer à travers */
+}
+
+/* FACE 2 : L'IMAGE DU RÔLE (Cachée au début) */
+.face-back {
+  transform: rotateY(180deg);
+  background: #000;
+}
+
+.face-back img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 0.9; }
+  50% { transform: scale(1.05); opacity: 1; }
+  100% { transform: scale(1); opacity: 0.9; }
+}
+
+/* ============================================
+   22. PAGE ADMIN DÉDIÉE (PLEIN ÉCRAN)
+   ============================================ */
+
+.admin-view {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh; /* Support mobile moderne */
+  background: #120c08; /* Fond très sombre */
+  background-image: radial-gradient(circle at 50% 50%, #2a1f15 0%, #000 100%);
+  z-index: 10000; /* Au-dessus de tout le reste */
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Barre du haut fixe */
+.admin-header-bar {
+  background: rgba(20, 14, 10, 0.95);
+  border-bottom: 2px solid var(--gold);
+  padding: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.8);
+  z-index: 10;
+}
+
+.admin-header-bar h2 {
+  margin: 0 !important;
+  font-size: 1.4em !important;
+  border: none !important;
+  background: none !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+  width: auto !important;
+}
+
+/* Bouton Quitter */
+.btn-quit-admin {
+  background: none;
+  border: 1px solid #c0392b;
+  color: #c0392b;
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-family: 'Pirata One';
+  cursor: pointer;
+}
+
+/* Le Code Partie en petit badge */
+.admin-code-badge {
+  background: var(--gold);
+  color: #000;
+  padding: 5px 10px;
+  border-radius: 8px;
+  font-weight: bold;
+  font-family: monospace;
+  font-size: 1.2em;
+  letter-spacing: 2px;
+}
+
+/* Zone de contenu qui défile */
+.admin-content-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  padding-bottom: 100px; /* Espace pour le scroll */
+}
+
+/* Sections */
+.admin-section {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid #333;
+  border-radius: 10px;
+  padding: 15px;
+  margin-bottom: 20px;
+}
+
+.admin-section h3 {
+  color: var(--gold);
+  font-family: 'Pirata One';
+  border-bottom: 1px solid #333;
+  padding-bottom: 10px;
+  margin-bottom: 15px;
+}
+
+/* Liste des rôles optimisée */
+.roles-list-container {
+  max-height: 250px;
+  overflow-y: auto;
+  background: rgba(0,0,0,0.4);
+  border-radius: 8px;
+  padding: 10px;
+  border: 1px solid #444;
+}
+
+/* Gros bouton distribuer */
+.btn-distribute-big {
+  width: 100%;
+  padding: 20px;
+  font-size: 1.5em;
+  margin-top: 10px;
+}
+
+/* Grille Admin (Force 2 colonnes propres) */
+.player-grid-admin {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}

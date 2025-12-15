@@ -79,10 +79,22 @@ window.checkAdminPassword = function() {
     const password = prompt("🔐 Mot de passe MJ :");
     if(password === "1234") {
         window.initCreateGame();
-        window.openModal('modal-create-game');
+        
+        // AU LIEU D'OUVRIR UNE MODALE, ON AFFICHE LA PAGE DÉDIÉE
+        document.getElementById('admin-dashboard').style.display = 'flex'; // Affiche la page
+        document.body.style.overflow = 'hidden'; // Bloque le scroll du site derrière
+        
         window.closeModal('modal-online-menu');
     } else if (password !== null) {
         alert("⛔ Accès refusé !");
+    }
+};
+
+// Fonction pour quitter la page admin
+window.closeAdminPanel = function() {
+    if(confirm("Quitter le mode Admin ? La partie continuera en fond.")) {
+        document.getElementById('admin-dashboard').style.display = 'none';
+        document.body.style.overflow = 'auto'; // Réactive le scroll
     }
 };
 
@@ -365,23 +377,37 @@ function revealRole(roleId) {
     }
 }
 
-// Affiche la carte directement (sans dépendre de script.js)
+// Affiche la carte avec effet FLIP et DOS PERSONNALISÉ
 function internalShowCard(data) {
     const panel = document.querySelector('.details-panel');
     const overlay = document.querySelector('.details-overlay');
     
-    if(!panel || !overlay) {
-        console.error("Panneau détails introuvable !");
-        return;
-    }
+    if(!panel || !overlay) return;
 
+    // On injecte le HTML de la carte 3D
     panel.innerHTML = `
         <div class="details-header" style="text-align:center;">
             <button class="close-details" onclick="window.internalCloseDetails()">✕</button>
             <h2 class="details-title">${data.title}</h2>
         </div>
-        <img src="${data.image}" class="details-image" style="width:100%; border:2px solid gold; border-radius:10px;">
-        <div class="details-section">
+
+        <div class="scene-flip" onclick="this.classList.toggle('is-flipped')">
+            <div class="card-object">
+                
+                <div class="card-face face-front">
+                    <img src="back.png" class="card-back-img" alt="Dos">
+                    
+                    <div class="tap-hint">👆 Touche pour révéler</div>
+                </div>
+
+                <div class="card-face face-back">
+                    <img src="${data.image}" alt="Rôle">
+                </div>
+
+            </div>
+        </div>
+
+        <div class="details-section" style="text-align:center;">
             ${data.description}
         </div>
     `;
