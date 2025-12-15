@@ -1245,98 +1245,81 @@ body.locked-game #online-mode-link {
 }
 
 /* ============================================
-   21. ANIMATION FLIP (RÉVÉLATION EN LIGNE)
+   21. ANIMATION FLIP & SUSPENSE (MISE À JOUR)
    ============================================ */
 
-/* La Scène 3D */
+/* --- CORRECTION DESCRIPTIONS OFFLINE (Retour à la normale) --- */
+.carte-back p {
+  text-align: left !important;      /* Texte aligné à gauche pour la lecture */
+  font-size: 0.95em !important;     /* Taille lisible */
+  line-height: 1.4 !important;      /* Espace entre les lignes */
+  white-space: normal !important;   /* Autorise le texte à aller à la ligne */
+  overflow-y: auto !important;      /* Scroll si le texte est très long */
+  flex: 1 !important;               /* Prend toute la place disponible */
+  margin: 0 !important;
+  padding: 5px 0 !important;
+  display: block !important;
+}
+
+/* --- ANIMATION EN LIGNE (3D) --- */
 .scene-flip {
   width: 280px;
   height: 420px;
   margin: 20px auto;
   perspective: 1000px;
   cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
 
-/* L'objet Carte qui bouge */
 .card-object {
-  width: 100%;
-  height: 100%;
-  position: relative;
+  width: 100%; height: 100%; position: relative;
   transition: transform 0.8s cubic-bezier(0.4, 0.2, 0.2, 1);
   transform-style: preserve-3d;
 }
 
-/* L'état retourné */
-.scene-flip.is-flipped .card-object {
-  transform: rotateY(180deg);
-}
+.scene-flip.is-flipped .card-object { transform: rotateY(180deg); }
 
-/* Les deux faces communes */
 .card-face {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  backface-visibility: hidden; /* Cache le dos */
-  border-radius: 15px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-  overflow: hidden;
-  border: 3px solid var(--gold);
+  position: absolute; width: 100%; height: 100%;
+  backface-visibility: hidden; -webkit-backface-visibility: hidden;
+  border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+  overflow: hidden; border: 3px solid var(--gold); background: #000;
 }
 
-/* FACE 1 : LE DOS (back.png) */
-.face-front {
-  background: #000; /* Fond noir au cas où l'image ne charge pas */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transform: rotateY(0deg);
-  padding: 0; /* Important : pas de marge */
-}
+/* FACE 1 : DOS (back.png) */
+.face-front { transform: rotateY(0deg); }
+.face-front img.card-back-img { width: 100%; height: 100%; object-fit: cover; }
 
-/* L'image back.png prend toute la place */
-.face-front img.card-back-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover; /* Remplit tout l'espace sans déformation */
-  position: absolute;
-  top: 0;
-  left: 0;
-  z-index: 1;
-}
-
-/* Texte par-dessus l'image (avec fond semi-transparent pour lire) */
 .tap-hint {
-  position: absolute;
-  bottom: 20px;
-  z-index: 2;
-  font-family: 'Pirata One', serif;
-  font-size: 1.2em;
-  color: #fff;
-  text-shadow: 0 2px 4px #000;
-  background: rgba(0, 0, 0, 0.6);
-  padding: 5px 15px;
-  border-radius: 20px;
-  border: 1px solid var(--gold);
-  animation: pulse 1.5s infinite;
-  pointer-events: none; /* Laisse le clic passer à travers */
+  position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+  z-index: 10; font-family: 'Pirata One', serif; font-size: 1.4em; color: #fff;
+  text-shadow: 0 2px 5px #000; animation: pulse 1.5s infinite; pointer-events: none;
+  width: 100%; text-align: center;
 }
 
-/* FACE 2 : L'IMAGE DU RÔLE (Cachée au début) */
-.face-back {
-  transform: rotateY(180deg);
-  background: #000;
+/* FACE 2 : RÔLE */
+.face-back { transform: rotateY(180deg); }
+.face-back img { width: 100%; height: 100%; object-fit: cover; }
+
+@keyframes pulse { 0% { opacity: 0.7; transform: translateX(-50%) scale(1); } 50% { opacity: 1; transform: translateX(-50%) scale(1.1); } 100% { opacity: 0.7; transform: translateX(-50%) scale(1); } }
+
+/* --- SUSPENSE : CACHER TITRE ET TEXTE AVANT LE FLIP --- */
+/* Par défaut (caché) */
+#online-content-wrapper .details-title,
+#online-content-wrapper .details-section {
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.5s ease 0.3s; /* Petit délai pour laisser la carte tourner */
+  transform: translateY(20px);
 }
 
-.face-back img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
+/* Quand révélé (affiché) */
+#online-content-wrapper.revealed .details-title,
+#online-content-wrapper.revealed .details-section {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
 
-@keyframes pulse {
-  0% { transform: scale(1); opacity: 0.9; }
-  50% { transform: scale(1.05); opacity: 1; }
-  100% { transform: scale(1); opacity: 0.9; }
 }
 
 /* ============================================
@@ -1451,4 +1434,26 @@ body.locked-game #online-mode-link {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 10px;
+}
+
+/* ============================================
+   23. MODE BROUILLON (DISTRIBUTION)
+   ============================================ */
+.draft-mode-badge {
+  background: #e67e22; /* Orange */
+  color: white;
+  font-size: 0.7em;
+  padding: 2px 6px;
+  border-radius: 4px;
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  z-index: 10;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+}
+
+.btn-reveal {
+  background: linear-gradient(135deg, #27ae60, #2ecc71) !important;
+  color: white !important;
+  animation: pulse 2s infinite;
 }
