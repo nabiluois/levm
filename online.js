@@ -1,5 +1,5 @@
 // ============================================
-// SYSTEME EN LIGNE - LE VILLAGE MAUDIT (V22 - EVENT SELECTOR & VISUEL MOBILE)
+// SYSTEME EN LIGNE - LE VILLAGE MAUDIT (V24 - DISTRIBUTION VISUELLE)
 // ============================================
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -26,10 +26,13 @@ let currentGameCode = null;
 let myPlayerId = null;
 let myCurrentRoleId = null;
 let targetResurrectId = null;
-let targetEventCategory = null; // Pour stocker la catégorie choisie (OR/ARG/BRZ)
+let targetEventCategory = null; 
 let detectedRoles = [];
 let detectedEvents = { gold: [], silver: [], bronze: [] };
 let isDraftMode = false; 
+
+// Nouvelle variable pour stocker la sélection temporaire de distribution
+let distributionSelection = [];
 
 // ============================================
 // A. INITIALISATION
@@ -178,8 +181,7 @@ function launchAdminInterface() {
     document.body.style.overflow = 'hidden';
     window.closeModal('modal-online-menu');
     setupAdminListeners();
-    generateRoleChecklist();
-    if(window.generateResurrectionGrid) window.generateResurrectionGrid(); 
+    generateRoleChecklist(); // Initialise le bouton de sélection
 }
 
 function setupAdminListeners() {
@@ -194,8 +196,8 @@ function setupAdminListeners() {
 // C. LOGIQUE DE CHANGEMENT DE RÔLE & EVENTS
 // ============================================
 
-// 1. GRILLE RÔLES (Changement manuel / Résurrection)
-window.generateResurrectionGrid = function() {
+// --- 1. GÉNÉRATEUR DE GRILLE POLYVALENT (SELECTEUR, MULTI, RESURRECT) ---
+window.generateResurrectionGrid = function(mode = 'single') {
     const grid = document.getElementById('admin-role-grid');
     if(!grid) return;
     if (detectedRoles.length === 0) scanContentFromHTML();
@@ -203,6 +205,19 @@ window.generateResurrectionGrid = function() {
     grid.style.display = "block"; 
     grid.innerHTML = "";
     
+    // Titre et Bouton de Validation pour le mode MULTI
+    if (mode === 'multi') {
+        const validateBtn = document.createElement('button');
+        validateBtn.className = "btn-validate";
+        validateBtn.style.cssText = "width:100%; margin-bottom:20px; background:#2ecc71; border-color:#27ae60; position:sticky; top:0; z-index:1000;";
+        validateBtn.innerHTML = `✅ VALIDER LA SÉLECTION (<span id="multi-count">${distributionSelection.length}</span>)`;
+        validateBtn.onclick = function() { 
+            window.updateRoleCount(); // Met à jour le compteur du dashboard
+            window.closeModal('modal-role-selector'); 
+        };
+        grid.appendChild(validateBtn);
+    }
+
     const categoriesOrder = { 'village': '🏡 VILLAGE', 'loups': '🐺 LOUPS', 'solo': '🎭 SOLOS', 'vampires': '🧛 VAMPIRES' };
 
     for (const [catKey, catTitle] of Object.entries(categoriesOrder)) {
@@ -222,9 +237,37 @@ window.generateResurrectionGrid = function() {
             rolesInCat.forEach(role => {
                 const div = document.createElement('div');
                 div.className = "role-select-item";
-                div.style.cssText = "cursor:pointer; text-align:center; background:rgba(255,255,255,0.05); padding:5px; border-radius:8px;";
+                
+                // Style différent si mode Multi
+                if (mode === 'multi') {
+                    div.classList.add('multi-mode');
+                    // Si déjà sélectionné, on active la classe
+                    if (distributionSelection.includes(role.id)) {
+                        div.classList.add('selected');
+                    }
+                }
+
+                div.style.cssText += "cursor:pointer; text-align:center; padding:5px; border-radius:8px; position:relative;";
                 div.innerHTML = `<img src="${role.image}" loading="lazy" style="width:100%; height:auto; border-radius:6px;"><span style="display:block; font-size:0.85em; color:#ddd;">${role.title}</span>`;
-                div.onclick = function() { window.assignRoleToPlayer(role.id); };
+                
+                // LOGIQUE DU CLIC
+                div.onclick = function() { 
+                    if (mode === 'multi') {
+                        // Toggle sélection
+                        if (distributionSelection.includes(role.id)) {
+                            distributionSelection = distributionSelection.filter(id => id !== role.id);
+                            div.classList.remove('selected');
+                        } else {
+                            distributionSelection.push(role.id);
+                            div.classList.add('selected');
+                        }
+                        // Mise à jour compteur bouton
+                        document.getElementById('multi-count').innerText = distributionSelection.length;
+                    } else {
+                        // Mode unique (Changement direct)
+                        window.assignRoleToPlayer(role.id); 
+                    }
+                };
                 catGrid.appendChild(div);
             });
             grid.appendChild(catGrid);
@@ -232,7 +275,36 @@ window.generateResurrectionGrid = function() {
     }
 };
 
-// 2. OUVERTURE MODALE CARTES EVENTS (NOUVEAU)
+// 2. OUVERTURE DISTRIBUTION (MULTI)
+window.openDistributionSelector = function() {
+    // On génère la grille en mode 'multi'
+    window.generateResurrectionGrid('multi');
+
+    const modalTitle = document.querySelector('#modal-role-selector h2');
+    if(modalTitle) modalTitle.innerText = "SÉLECTION DES RÔLES";
+    
+    // Z-Index Fix
+    const modal = document.getElementById('modal-role-selector');
+    if(modal) modal.style.zIndex = "20000"; 
+    
+    window.openModal('modal-role-selector');
+};
+
+// 3. OUVERTURE CHANGEMENT RÔLE (SINGLE)
+window.openResurrectModal = function(playerId) {
+    targetResurrectId = playerId;
+    // On génère la grille en mode 'single' (défaut)
+    window.generateResurrectionGrid('single'); 
+    
+    const modalTitle = document.querySelector('#modal-role-selector h2');
+    if(modalTitle) modalTitle.innerText = isDraftMode ? "CHANGER CARTE" : "RESSUSCITER";
+    
+    const modal = document.getElementById('modal-role-selector');
+    if(modal) modal.style.zIndex = "20000"; 
+    window.openModal('modal-role-selector');
+};
+
+// 4. OUVERTURE MODALE CARTES EVENTS
 window.openEventSelector = function(playerId, category) {
     targetResurrectId = playerId;
     targetEventCategory = category;
@@ -242,11 +314,9 @@ window.openEventSelector = function(playerId, category) {
     grid.style.display = "block"; 
     grid.innerHTML = "";
 
-    // Titre adapté
     const modalTitle = document.querySelector('#modal-role-selector h2');
     if(modalTitle) modalTitle.innerText = `CHOIX CARTE ${category.toUpperCase()}`;
 
-    // BOUTON ALÉATOIRE EN HAUT
     const randomBtn = document.createElement('button');
     randomBtn.className = "btn-validate";
     randomBtn.style.cssText = "width:100%; margin-bottom:20px; background:linear-gradient(135deg, #2980b9, #3498db); border-color:#2980b9;";
@@ -254,7 +324,6 @@ window.openEventSelector = function(playerId, category) {
     randomBtn.onclick = function() { window.adminDraw(playerId, category, true); };
     grid.appendChild(randomBtn);
 
-    // LISTE DES CARTES DE LA CATÉGORIE
     const catGrid = document.createElement('div');
     catGrid.style.display = "grid";
     catGrid.style.gridTemplateColumns = "repeat(2, 1fr)";
@@ -271,46 +340,29 @@ window.openEventSelector = function(playerId, category) {
     });
     grid.appendChild(catGrid);
 
-    // Fix Z-Index
     const modal = document.getElementById('modal-role-selector');
     if(modal) modal.style.zIndex = "20000"; 
     window.openModal('modal-role-selector');
 };
 
-// 3. ENVOI CARTE EVENT (Aléatoire ou Manuel)
+// 5. FONCTIONS D'ASSIGNATION ET D'ENVOI
 window.adminDraw = function(playerId, category, isRandom, manualImg) {
     let finalCard = manualImg;
-    
     if (isRandom) {
         const cards = detectedEvents[category];
         if(cards && cards.length > 0) {
             finalCard = cards[Math.floor(Math.random() * cards.length)];
         }
     }
-
     if (finalCard) {
         update(ref(db, `games/${currentGameCode}/players/${playerId}`), { 
             drawnCard: { image: finalCard, category: category.toUpperCase() }
         });
         window.closeModal('modal-role-selector');
         internalShowNotification("Envoyé", `Carte ${category.toUpperCase()} donnée !`);
-    } else {
-        alert("Erreur : Aucune carte trouvée.");
-    }
+    } else { alert("Erreur : Aucune carte trouvée."); }
 };
 
-// 4. OUVERTURE CHANGEMENT RÔLE
-window.openResurrectModal = function(playerId) {
-    targetResurrectId = playerId;
-    window.generateResurrectionGrid(); // Affiche les rôles
-    const modalTitle = document.querySelector('#modal-role-selector h2');
-    if(modalTitle) modalTitle.innerText = isDraftMode ? "CHANGER CARTE" : "RESSUSCITER";
-    const modal = document.getElementById('modal-role-selector');
-    if(modal) modal.style.zIndex = "20000"; 
-    window.openModal('modal-role-selector');
-};
-
-// 5. ASSIGNATION RÔLE
 window.assignRoleToPlayer = function(roleId) {
     if(!targetResurrectId) return;
     if (isDraftMode) {
@@ -328,8 +380,59 @@ window.assignRoleToPlayer = function(roleId) {
 };
 
 // ============================================
-// D. MISE À JOUR UI ADMIN
+// D. MISE À JOUR UI ADMIN & DISTRIBUTION
 // ============================================
+
+// Initialisation du bouton sur le dashboard
+function generateRoleChecklist() {
+    const container = document.getElementById('roles-selection-list');
+    if(!container) return;
+    
+    // On remplace la liste par un simple bouton
+    container.innerHTML = `
+        <button class="btn-validate" onclick="window.openDistributionSelector()" style="background:#2c3e50; border-color:#34495e;">
+            📂 CHOISIR LES RÔLES
+        </button>
+    `;
+}
+
+// Mise à jour du compteur sur le Dashboard
+window.updateRoleCount = function() {
+    const countSpan = document.getElementById('role-count');
+    // On compte les éléments dans le tableau distributionSelection
+    if(countSpan) countSpan.innerText = distributionSelection.length;
+    
+    get(child(ref(db), `games/${currentGameCode}/players`)).then((snapshot) => {
+        const playerCount = snapshot.exists() ? Object.keys(snapshot.val()).length : 0;
+        updateAdminButtons(playerCount);
+    });
+};
+
+function distributeRoles() {
+    // On utilise le tableau global de sélection
+    let selectedRoles = [...distributionSelection];
+    
+    // Mélange de Fisher-Yates
+    for (let i = selectedRoles.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [selectedRoles[i], selectedRoles[j]] = [selectedRoles[j], selectedRoles[i]];
+    }
+    
+    const playersRef = ref(db, 'games/' + currentGameCode + '/players');
+    get(playersRef).then((snapshot) => {
+        const players = snapshot.val();
+        if(!players) return;
+        const playerIds = Object.keys(players);
+        const updates = {};
+        playerIds.forEach((id, index) => {
+            if (selectedRoles[index]) {
+                updates[`games/${currentGameCode}/players/${id}/draftRole`] = selectedRoles[index];
+            }
+        });
+        update(ref(db), updates);
+    });
+}
+
 function updateAdminUI(players) {
     const listDiv = document.getElementById('player-list-admin');
     if(!listDiv) return;
@@ -381,7 +484,6 @@ function updateAdminUI(players) {
                 cardDiv.innerHTML += `<span style="font-size:0.8em; opacity:0.5;">...</span>`;
             } 
             else if (isDead) {
-                // ACTIONS MORT
                 const actionsDiv = document.createElement('div');
                 actionsDiv.className = "admin-actions";
 
@@ -395,10 +497,8 @@ function updateAdminUI(players) {
                     if(detectedEvents[t.type].length > 0) {
                         const btn = document.createElement('button');
                         btn.className = "btn-admin-mini";
-                        // On force la couleur ici, le CSS enlèvera le filtre gris
                         btn.style.cssText = `background:${t.color}; color:black; ${forceClickStyle}`;
                         btn.innerText = t.label;
-                        // NOUVEAU : Ouvre le sélecteur d'événements
                         btn.onclick = function(e) { e.stopPropagation(); window.openEventSelector(id, t.type); };
                         actionsDiv.appendChild(btn);
                     }
@@ -432,7 +532,10 @@ function updateAdminUI(players) {
 function updateAdminButtons(playerCount) {
     const btnDistribute = document.getElementById('btn-distribute');
     const btnReveal = document.getElementById('btn-reveal');
-    const selectedCount = document.querySelectorAll('.role-checkbox:checked').length;
+    
+    // Mise à jour pour vérifier la longueur du tableau distributionSelection
+    const selectedCount = distributionSelection.length; 
+
     if(!btnDistribute || !btnReveal) return; 
 
     if (playerCount > 0 && selectedCount === playerCount) {
@@ -447,55 +550,6 @@ function updateAdminButtons(playerCount) {
         btnDistribute.innerHTML = `Attente (${playerCount}J / ${selectedCount}R)`;
     }
     btnReveal.style.display = isDraftMode ? "block" : "none";
-}
-
-// DISTRIBUTION & JOIN
-function generateRoleChecklist() {
-    const container = document.getElementById('roles-selection-list');
-    if(!container) return;
-    container.innerHTML = "";
-    if(detectedRoles.length > 0) {
-        detectedRoles.forEach((role, index) => {
-            container.innerHTML += `
-                <div style="margin-bottom:8px; display:flex; align-items:center;">
-                    <input type="checkbox" class="role-checkbox" id="role-${index}" value="${role.id}" onchange="window.updateRoleCount()" style="width:20px; height:20px; margin-right:10px;">
-                    <label for="role-${index}" style="color:#ddd; cursor:pointer;">${role.title}</label>
-                </div>`;
-        });
-    }
-}
-
-window.updateRoleCount = function() {
-    const selected = document.querySelectorAll('.role-checkbox:checked').length;
-    const countSpan = document.getElementById('role-count');
-    if(countSpan) countSpan.innerText = selected;
-    get(child(ref(db), `games/${currentGameCode}/players`)).then((snapshot) => {
-        const playerCount = snapshot.exists() ? Object.keys(snapshot.val()).length : 0;
-        updateAdminButtons(playerCount);
-    });
-};
-
-function distributeRoles() {
-    const checkboxes = document.querySelectorAll('.role-checkbox:checked');
-    let selectedRoles = [];
-    checkboxes.forEach(box => selectedRoles.push(box.value));
-    for (let i = selectedRoles.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [selectedRoles[i], selectedRoles[j]] = [selectedRoles[j], selectedRoles[i]];
-    }
-    const playersRef = ref(db, 'games/' + currentGameCode + '/players');
-    get(playersRef).then((snapshot) => {
-        const players = snapshot.val();
-        if(!players) return;
-        const playerIds = Object.keys(players);
-        const updates = {};
-        playerIds.forEach((id, index) => {
-            if (selectedRoles[index]) {
-                updates[`games/${currentGameCode}/players/${id}/draftRole`] = selectedRoles[index];
-            }
-        });
-        update(ref(db), updates);
-    });
 }
 
 function revealRolesToEveryone() {
@@ -565,7 +619,11 @@ function listenForPlayerUpdates() {
         }
         if (data.drawnCard && data.drawnCard.image !== lastCardImg) {
             lastCardImg = data.drawnCard.image;
-            internalShowCard({ title: `CARTE ${data.drawnCard.category}`, image: data.drawnCard.image });
+            internalShowCard({ 
+                title: `CARTE ${data.drawnCard.category}`, 
+                image: data.drawnCard.image,
+                category: data.drawnCard.category 
+            });
         }
     });
 }
@@ -589,12 +647,22 @@ function internalShowCard(data) {
     const panel = document.querySelector('.details-panel');
     const overlay = document.querySelector('.details-overlay');
     if(!panel || !overlay) return;
+
+    let backImage = "back.png"; 
+    if (data.title && (data.title.includes("GOLD") || (data.category && data.category === 'GOLD'))) {
+        backImage = "back_or.png";
+    } else if (data.title && (data.title.includes("SILVER") || (data.category && data.category === 'SILVER'))) {
+        backImage = "back_argant.png";
+    } else if (data.title && (data.title.includes("BRONZE") || (data.category && data.category === 'BRONZE'))) {
+        backImage = "back_bronze.png";
+    }
+
     panel.innerHTML = `
         <div id="online-content-wrapper" style="height:100%; display:flex; flex-direction:column; justify-content:center; align-items:center;">
             <button class="close-details" onclick="window.internalCloseDetails()" style="position:absolute; top:20px; right:20px; z-index:100; background:rgba(0,0,0,0.6); color:white; border:1px solid gold; border-radius:50%; width:40px; height:40px; font-size:20px;">✕</button>
             <div class="scene-flip" onclick="this.classList.toggle('is-flipped')" style="margin:0;">
                 <div class="card-object">
-                    <div class="card-face face-front"><img src="back.png" class="card-back-img" alt="Dos" style="width:100%; height:100%; object-fit:cover; border-radius:15px;"></div>
+                    <div class="card-face face-front"><img src="${backImage}" class="card-back-img" alt="Dos" style="width:100%; height:100%; object-fit:cover; border-radius:15px;"></div>
                     <div class="card-face face-back"><img src="${data.image}" alt="Rôle" style="width:100%; height:100%; object-fit:cover; border-radius:15px;"></div>
                 </div>
             </div>
