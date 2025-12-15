@@ -1369,3 +1369,27 @@ body.locked-game #online-mode-link {
   color: white !important;
   animation: pulse 2s infinite;
 }
+
+/* =======================================================
+   24. OPTIMISATION ESPACE VERSO (POUR TOUTES LES CARTES)
+   ======================================================= */
+
+/* Cache le titre sur TOUS les dos de cartes pour gagner de la place */
+.carte-back h3 {
+  display: none !important;
+}
+
+/* Remonte le texte tout en haut */
+.carte-back p {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+  flex: 1 !important; 
+  display: block !important;
+}
+
+/* Réduit un peu le bouton pour maximiser l'espace lecture */
+.btn-details {
+  padding: 6px !important;
+  margin-top: 8px !important;
+  font-size: 1em !important;
+}
