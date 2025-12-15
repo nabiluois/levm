@@ -1,5 +1,5 @@
 // ============================================
-// SYSTEME EN LIGNE - LE VILLAGE MAUDIT (V13 - RETOUR DU BOUTON BLEU)
+// SYSTEME EN LIGNE - LE VILLAGE MAUDIT (V15 - RESURRECTION & CARTE ÉPURÉE)
 // ============================================
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -36,7 +36,7 @@ let isDraftMode = false;
 
 document.addEventListener('DOMContentLoaded', () => {
     scanContentFromHTML();
-    ensureAdminButtonsExist(); // Auto-réparation des boutons
+    ensureAdminButtonsExist(); 
 
     const btnJoin = document.getElementById('btn-join-action');
     if(btnJoin) btnJoin.addEventListener('click', joinGame);
@@ -236,10 +236,9 @@ function updateAdminUI(players) {
             let draftBadge = "";
 
             if (isDraft) {
-                // --- MODE BROUILLON (LE BOUTON BLEU EST ICI) ---
+                // --- MODE BROUILLON ---
                 draftBadge = `<div style="background:#e67e22; color:white; font-size:0.7em; padding:2px 6px; border-radius:4px; position:absolute; top:5px; right:5px; z-index:10; font-family:sans-serif;">PROVISOIRE</div>`;
                 
-                // IMPORTANT : On force pointer-events: auto pour être sûr que le clic passe
                 buttonsHtml = `
                     <button class="btn-admin-mini" 
                         style="background:#3498db; color:white; width:100%; border:none; padding:10px; border-radius:5px; cursor:pointer; font-family:'Pirata One'; font-size:1.1em; pointer-events: auto; margin-top:5px; position:relative; z-index:100;" 
@@ -252,6 +251,7 @@ function updateAdminUI(players) {
                 buttonsHtml = `<span style="font-size:0.8em; opacity:0.5;">...</span>`;
             } 
             else if (isDead) {
+                // --- JOUEUR MORT : Options événement + REVIENT ---
                 buttonsHtml = `<div class="admin-actions">`;
                 if(detectedEvents.gold.length > 0) buttonsHtml += `<button class="btn-admin-mini" style="background:gold; color:black;" onclick="event.stopPropagation(); window.adminDraw('${id}', 'gold')">OR</button>`;
                 if(detectedEvents.silver.length > 0) buttonsHtml += `<button class="btn-admin-mini" style="background:silver; color:black;" onclick="event.stopPropagation(); window.adminDraw('${id}', 'silver')">ARG</button>`;
@@ -284,7 +284,6 @@ function updateAdminButtons(playerCount) {
 
     if(!btnDistribute || !btnReveal) return; 
 
-    // 1. Bouton "PRÉPARER" (Gauche)
     if (playerCount > 0 && selectedCount === playerCount) {
         btnDistribute.disabled = false;
         btnDistribute.style.background = "linear-gradient(135deg, #d4af37, #b8941f)";
@@ -297,7 +296,6 @@ function updateAdminButtons(playerCount) {
         btnDistribute.innerHTML = `Attente (${playerCount}J / ${selectedCount}R)`;
     }
 
-    // 2. Bouton "RÉVÉLER" (Droite)
     if (isDraftMode) {
         btnReveal.style.display = "block"; 
     } else {
@@ -349,6 +347,7 @@ window.openResurrectModal = function(playerId) {
     window.openModal('modal-role-selector');
 };
 
+// C'est ici que la magie de la Résurrection opère
 window.assignRoleToPlayer = function(roleId) {
     if(!targetResurrectId) return;
 
@@ -359,13 +358,14 @@ window.assignRoleToPlayer = function(roleId) {
         });
         window.closeModal('modal-role-selector');
     } else {
-        // Mode Jeu
-        if(confirm("Cela va changer le rôle du joueur immédiatement. Continuer ?")) {
+        // Mode Jeu (RESURRECTION)
+        if(confirm("Cela va changer le rôle du joueur et le ramener à la vie. Continuer ?")) {
+            // On met status 'alive', le nouveau role, et on efface les cartes événements
             update(ref(db, `games/${currentGameCode}/players/${targetResurrectId}`), { 
                 status: 'alive', role: roleId, drawnCard: null 
             });
             window.closeModal('modal-role-selector');
-            internalShowNotification("Succès", "Rôle mis à jour !");
+            internalShowNotification("Succès", "Joueur ressuscité !");
         }
     }
 };
@@ -483,14 +483,17 @@ function listenForPlayerUpdates() {
         const data = snapshot.val();
         if (!data) return;
 
+        // GESTION DU ROLE (Normal ou Résurrection)
         if (data.role) {
             myCurrentRoleId = data.role; 
             
+            // Si le rôle change (nouvelle partie ou résurrection)
             if (data.role !== lastRole) {
                 lastRole = data.role;
-                revealRole(data.role);
+                revealRole(data.role); // Affiche la carte (Dos face à nous)
             }
 
+            // Affiche le lobby normal
             const lobbyStatus = document.getElementById('player-lobby-status');
             if(lobbyStatus) {
                 lobbyStatus.innerHTML = `
@@ -503,17 +506,19 @@ function listenForPlayerUpdates() {
             }
         }
 
+        // GESTION DE LA MORT
         if (data.status === 'dead') {
             internalShowNotification("💀 TU ES MORT", "Attends de voir si le destin t'offre une carte...");
             document.getElementById('player-lobby-status').innerHTML = `<h3 style="color:#c0392b;">TU ES MORT 💀</h3>`;
         }
 
+        // GESTION DES CARTES EVENEMENTS
         if (data.drawnCard && data.drawnCard.image !== lastCardImg) {
             lastCardImg = data.drawnCard.image;
             internalShowCard({
                 title: `CARTE ${data.drawnCard.category}`,
                 image: data.drawnCard.image,
-                description: `<span style="color:gold;">Carte Événement</span>`
+                description: `` // Pas de texte
             });
         }
     });
@@ -525,7 +530,7 @@ window.showMyRoleAgain = function() {
 };
 
 // ============================================
-// F. FONCTIONS D'AFFICHAGE
+// F. FONCTIONS D'AFFICHAGE (CARTE 100% IMAGE)
 // ============================================
 
 function revealRole(roleId) {
@@ -539,6 +544,7 @@ function revealRole(roleId) {
     }
 }
 
+// AFFICHAGE CARTE ÉPURÉ (SANS TEXTE)
 function internalShowCard(data) {
     const panel = document.querySelector('.details-panel');
     const overlay = document.querySelector('.details-overlay');
@@ -546,31 +552,28 @@ function internalShowCard(data) {
     if(!panel || !overlay) return;
 
     panel.innerHTML = `
-        <div id="online-content-wrapper">
-            <div class="details-header" style="text-align:center;">
-                <button class="close-details" onclick="window.internalCloseDetails()">✕</button>
-                <h2 class="details-title">${data.title}</h2>
-            </div>
+        <div id="online-content-wrapper" style="height:100%; display:flex; flex-direction:column; justify-content:center; align-items:center;">
             
-            <div class="scene-flip" onclick="
-                this.classList.toggle('is-flipped'); 
-                document.getElementById('online-content-wrapper').classList.add('revealed');
-            ">
+            <button class="close-details" onclick="window.internalCloseDetails()" 
+                style="position:absolute; top:20px; right:20px; z-index:100; background:rgba(0,0,0,0.6); color:white; border:1px solid gold; border-radius:50%; width:40px; height:40px; font-size:20px; cursor:pointer;">
+                ✕
+            </button>
+
+            <div class="scene-flip" onclick="this.classList.toggle('is-flipped')" style="margin:0;">
                 <div class="card-object">
+                    
                     <div class="card-face face-front">
-                        <img src="back.png" class="card-back-img" alt="Dos">
-                        <div class="tap-hint">👆 Taper pour révéler (Cliquer pour retourner)</div>
+                        <img src="back.png" class="card-back-img" alt="Dos" style="width:100%; height:100%; object-fit:cover; border-radius:15px;">
                     </div>
+
                     <div class="card-face face-back">
-                        <img src="${data.image}" alt="Rôle">
+                        <img src="${data.image}" alt="Rôle" style="width:100%; height:100%; object-fit:cover; border-radius:15px;">
                     </div>
+
                 </div>
             </div>
             
-            <div class="details-section" style="text-align:center;">
-                ${data.description}
             </div>
-        </div>
     `;
     
     panel.classList.add('active');
