@@ -1874,3 +1874,43 @@ body.light-mode #online-mode-link {
     right: -5px !important;
     left: auto !important;
 }
+
+/* =======================================================
+   37. STYLES BULLES RÉCAPITULATIF (V29)
+   ======================================================= */
+
+/* Style de base de la bulle */
+.summary-list-item {
+    display: block;                /* Force le retour à la ligne */
+    border-radius: 12px;           /* Forme arrondie (Bulle) */
+    padding: 4px 8px;              /* Espace à l'intérieur */
+    margin: 4px auto;              /* Espace entre les bulles */
+    width: 90%;                    /* Ne touche pas les bords */
+    font-size: 0.85em;             /* Texte lisible */
+    border: 1px solid rgba(255,255,255,0.2); /* Fine bordure */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);   /* Légère ombre */
+    white-space: nowrap;           /* Le texte tient sur une ligne */
+    overflow: hidden;              /* Coupe si c'est vraiment trop long */
+    text-overflow: ellipsis;       /* Ajoute "..." si coupé */
+}
+
+/* COLONNE 1 : VILLAGE (Teinte Verte) */
+.summary-col:nth-child(1) .summary-list-item {
+    background: rgba(46, 204, 113, 0.15); /* Fond vert transparent */
+    border-color: rgba(46, 204, 113, 0.5); /* Bordure verte */
+    color: #e8f8f5;                        /* Texte clair */
+}
+
+/* COLONNE 2 : LOUPS (Teinte Rouge) */
+.summary-col:nth-child(2) .summary-list-item {
+    background: rgba(231, 76, 60, 0.15);  /* Fond rouge transparent */
+    border-color: rgba(231, 76, 60, 0.5); /* Bordure rouge */
+    color: #fdedec;                       /* Texte clair */
+}
+
+/* COLONNE 3 : SOLOS (Teinte Violette) */
+.summary-col:nth-child(3) .summary-list-item {
+    background: rgba(155, 89, 182, 0.15); /* Fond violet transparent */
+    border-color: rgba(155, 89, 182, 0.5);/* Bordure violette */
+    color: #f4ecf7;                       /* Texte clair */
+}
