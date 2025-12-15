@@ -1,5 +1,5 @@
 // ============================================
-// SYSTEME EN LIGNE - LE VILLAGE MAUDIT (V6 - SCAN COMPLET)
+// SYSTEME EN LIGNE - LE VILLAGE MAUDIT (V7 - AUTONOME)
 // ============================================
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -25,21 +25,15 @@ const db = getDatabase(app);
 let currentGameCode = null;
 let myPlayerId = null;
 let targetResurrectId = null;
-
-// Listes dynamiques remplies par le scan HTML
-let detectedRoles = []; 
-let detectedEvents = {
-    gold: [],
-    silver: [],
-    bronze: []
-};
+let detectedRoles = [];
+let detectedEvents = { gold: [], silver: [], bronze: [] };
 
 // ============================================
 // A. GESTION DU MENU & SCAN
 // ============================================
 
 document.addEventListener('DOMContentLoaded', () => {
-    scanContentFromHTML(); // Scan automatique au lancement
+    scanContentFromHTML();
 
     const btnJoin = document.getElementById('btn-join-action');
     if(btnJoin) btnJoin.addEventListener('click', joinGame);
@@ -48,20 +42,17 @@ document.addEventListener('DOMContentLoaded', () => {
     if(btnDistribute) btnDistribute.addEventListener('click', distributeRoles);
 });
 
-// FONCTION DE SCAN INTELLIGENT
 function scanContentFromHTML() {
     detectedRoles = [];
     detectedEvents = { gold: [], silver: [], bronze: [] };
 
-    // 1. Scanner les Rôles (.carte-jeu) pour la distribution
+    // Scanner les Rôles
     document.querySelectorAll('.carte-jeu').forEach((card) => {
         const imgTag = card.querySelector('.carte-front img');
         const titleTag = card.querySelector('.carte-back h3');
-        
         if (imgTag && titleTag) {
             const imgSrc = imgTag.getAttribute('src');
-            const id = imgSrc.split('/').pop().replace(/\.[^/.]+$/, ""); // ID basé sur le nom de fichier
-            
+            const id = imgSrc.split('/').pop().replace(/\.[^/.]+$/, "");
             detectedRoles.push({
                 id: id,
                 title: titleTag.innerText,
@@ -71,20 +62,16 @@ function scanContentFromHTML() {
         }
     });
 
-    // 2. Scanner les Événements (.carte-vm) pour la mort
+    // Scanner les Cartes VM
     document.querySelectorAll('.carte-vm').forEach((card) => {
         const imgTag = card.querySelector('img');
         if (imgTag) {
-            const imgSrc = imgTag.getAttribute('src'); // ex: or1.png
-            
-            // On classe selon la classe HTML (gold, silver, bronze)
+            const imgSrc = imgTag.getAttribute('src');
             if (card.classList.contains('gold')) detectedEvents.gold.push(imgSrc);
             else if (card.classList.contains('silver')) detectedEvents.silver.push(imgSrc);
             else if (card.classList.contains('bronze')) detectedEvents.bronze.push(imgSrc);
         }
     });
-
-    console.log(`Scan terminé : ${detectedRoles.length} Rôles, ${detectedEvents.gold.length} Or, ${detectedEvents.silver.length} Argent.`);
 }
 
 // Sécurité MJ
@@ -152,14 +139,12 @@ function updateAdminUI(players) {
                 buttonsHtml = `<span style="font-size:0.8em; opacity:0.5;">...</span>`;
             } 
             else if (isDead) {
-                // Boutons basés sur les catégories détectées
-                buttonsHtml = `<div class="admin-actions">`;
-                
-                if(detectedEvents.gold.length > 0) buttonsHtml += `<button class="btn-admin-mini" style="background:gold; color:black;" onclick="window.adminDraw('${id}', 'gold')">OR</button>`;
-                if(detectedEvents.silver.length > 0) buttonsHtml += `<button class="btn-admin-mini" style="background:silver; color:black;" onclick="window.adminDraw('${id}', 'silver')">ARG</button>`;
-                if(detectedEvents.bronze.length > 0) buttonsHtml += `<button class="btn-admin-mini" style="background:#cd7f32; color:black;" onclick="window.adminDraw('${id}', 'bronze')">BRZ</button>`;
-                
-                buttonsHtml += `</div>
+                buttonsHtml = `
+                    <div class="admin-actions">
+                        <button class="btn-admin-mini" style="background:gold; color:black;" onclick="window.adminDraw('${id}', 'gold')">OR</button>
+                        <button class="btn-admin-mini" style="background:silver; color:black;" onclick="window.adminDraw('${id}', 'silver')">ARG</button>
+                        <button class="btn-admin-mini" style="background:#cd7f32; color:black;" onclick="window.adminDraw('${id}', 'bronze')">BRZ</button>
+                    </div>
                     <button class="btn-admin-mini" style="background:#2ecc71; color:white; width:100%; margin-top:5px;" onclick="window.openResurrectModal('${id}')">♻️ REVIENT</button>
                 `;
             } else {
@@ -229,11 +214,11 @@ window.confirmResurrection = function(roleId) {
         status: 'alive', role: roleId, drawnCard: null 
     });
     window.closeModal('modal-role-selector');
-    window.showNotification("Succès", "Le joueur est ressuscité !");
+    internalShowNotification("Succès", "Le joueur est ressuscité !");
 };
 
 // ============================================
-// D. DISTRIBUTION DES RÔLES
+// D. DISTRIBUTION
 // ============================================
 
 function generateRoleChecklist() {
@@ -250,8 +235,6 @@ function generateRoleChecklist() {
                 </div>
             `;
         });
-    } else {
-        container.innerHTML = "<p style='color:red;'>Aucun rôle trouvé. Vérifie le HTML.</p>";
     }
 }
 
@@ -290,7 +273,6 @@ function distributeRoles() {
     let selectedRoles = [];
     checkboxes.forEach(box => selectedRoles.push(box.value));
     
-    // Mélange (Shuffle)
     for (let i = selectedRoles.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [selectedRoles[i], selectedRoles[j]] = [selectedRoles[j], selectedRoles[i]];
@@ -345,7 +327,7 @@ function listenForPlayerUpdates() {
         const data = snapshot.val();
         if (!data) return;
 
-        // Rôle changé ? (Nouveau ou Résurrection)
+        // Rôle reçu ?
         if (data.role && data.role !== lastRole) {
             lastRole = data.role;
             revealRole(data.role);
@@ -353,21 +335,24 @@ function listenForPlayerUpdates() {
 
         // Mort ?
         if (data.status === 'dead') {
-            window.showNotification("💀 TU ES MORT", "Attends de voir si le destin t'offre une carte...");
+            internalShowNotification("💀 TU ES MORT", "Attends de voir si le destin t'offre une carte...");
         }
 
-        // Carte VM ? (Gold/Silver/Bronze)
+        // Carte VM ?
         if (data.drawnCard && data.drawnCard.image !== lastCardImg) {
             lastCardImg = data.drawnCard.image;
-            const vmObject = {
+            internalShowCard({
                 title: `CARTE ${data.drawnCard.category}`,
                 image: data.drawnCard.image,
                 description: `<span style="color:gold;">Carte Événement</span>`
-            };
-            if(window.openDetails) window.openDetails(vmObject);
+            });
         }
     });
 }
+
+// ============================================
+// F. FONCTIONS D'AFFICHAGE INTERNES (AUTONOMES)
+// ============================================
 
 function revealRole(roleId) {
     window.closeModal('modal-join-game');
@@ -375,9 +360,55 @@ function revealRole(roleId) {
     
     const roleData = detectedRoles.find(r => r.id === roleId);
     if(roleData) {
-        setTimeout(() => {
-            if(navigator.vibrate) navigator.vibrate([200, 100, 200]);
-            if(window.openDetails) window.openDetails(roleData);
-        }, 500);
+        if(navigator.vibrate) navigator.vibrate([200, 100, 200]);
+        internalShowCard(roleData);
+    }
+}
+
+// Affiche la carte directement (sans dépendre de script.js)
+function internalShowCard(data) {
+    const panel = document.querySelector('.details-panel');
+    const overlay = document.querySelector('.details-overlay');
+    
+    if(!panel || !overlay) {
+        console.error("Panneau détails introuvable !");
+        return;
+    }
+
+    panel.innerHTML = `
+        <div class="details-header" style="text-align:center;">
+            <button class="close-details" onclick="window.internalCloseDetails()">✕</button>
+            <h2 class="details-title">${data.title}</h2>
+        </div>
+        <img src="${data.image}" class="details-image" style="width:100%; border:2px solid gold; border-radius:10px;">
+        <div class="details-section">
+            ${data.description}
+        </div>
+    `;
+    
+    panel.classList.add('active');
+    overlay.classList.add('active');
+}
+
+// Fermer le panneau
+window.internalCloseDetails = function() {
+    document.querySelector('.details-panel').classList.remove('active');
+    document.querySelector('.details-overlay').classList.remove('active');
+};
+
+// Notification interne
+function internalShowNotification(title, message) {
+    const overlay = document.querySelector('.notification-overlay');
+    const box = document.querySelector('.notification-box');
+    
+    if(overlay && box) {
+        box.innerHTML = `
+            <h3 style="color:gold;">${title}</h3>
+            <p>${message}</p>
+            <button onclick="document.querySelector('.notification-overlay').classList.remove('active')">OK</button>
+        `;
+        overlay.classList.add('active');
+    } else {
+        alert(title + "\n" + message);
     }
 }
