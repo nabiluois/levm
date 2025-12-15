@@ -1914,3 +1914,38 @@ body.light-mode #online-mode-link {
     border-color: rgba(155, 89, 182, 0.5);/* Bordure violette */
     color: #f4ecf7;                       /* Texte clair */
 }
+
+/* =======================================================
+   38. FIX FINAL TABLEAU RÉCAP & SCROLL (V30)
+   ======================================================= */
+
+/* Le conteneur principal du tableau */
+.summary-container {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    overflow-x: hidden !important; /* Interdit le scroll horizontal */
+    padding: 5px !important;
+}
+
+/* Les colonnes */
+.summary-col {
+    /* Permet de rétrécir si besoin */
+    min-width: 0 !important; 
+    /* Ajoute un scroll vertical si la liste est très longue */
+    max-height: 200px; 
+    overflow-y: auto;
+}
+
+/* Les bulles de noms */
+.summary-list-item {
+    width: 95% !important;
+    /* Autorise le texte à passer à la ligne */
+    white-space: normal !important; 
+    word-wrap: break-word !important;
+    font-size: 0.75em !important; /* Un peu plus petit pour rentrer */
+    line-height: 1.1 !important;
+    display: flex !important;
+    justify-content: center;
+    align-items: center;
+    min-height: 25px;
+}

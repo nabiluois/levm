@@ -1,5 +1,5 @@
 // ============================================
-// SYSTEME EN LIGNE - LE VILLAGE MAUDIT (V29 - FIX MORTS & QUANTITES)
+// SYSTEME EN LIGNE - LE VILLAGE MAUDIT (V30 - SYNC MANUELLE & TABLEAU MOBILE)
 // ============================================
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -263,7 +263,7 @@ function updateDistributionDashboard() {
     document.getElementById('count-solo').innerText = countSolo;
     document.getElementById('total-distrib').innerText = distributionSelection.length;
 
-    // Mise à jour du tableau récapitulatif
+    // Mise à jour automatique du tableau sur le dashboard principal
     generateRoleChecklist(); 
 }
 
@@ -279,6 +279,7 @@ window.generateResurrectionGrid = function(mode = 'single') {
     if (mode === 'multi') {
         const dashboard = document.createElement('div');
         dashboard.className = "selection-dashboard";
+        // Suppression du texte "Clique sur une carte..."
         dashboard.innerHTML = `
             <div class="dashboard-stats" style="margin-bottom:5px;">
                 <div class="stat-item stat-village"><img src="Village.svg" class="stat-icon"><span id="pop-count-village">0</span></div>
@@ -317,9 +318,8 @@ window.generateResurrectionGrid = function(mode = 'single') {
                     
                     if (count > 0) {
                         div.classList.add('selected');
-                        // BADGES (Seulement pour les cartes multiples)
+                        // BADGES SUR LES CARTES MULTIPLES
                         const badgeCards = ['le_paysan', 'le_loup_garou', 'olaf_et_pilaf', 'les_jumeaux_explosifs'];
-                        // Vérification stricte ou partielle selon besoin (ici ID exact ou include)
                         if (badgeCards.some(id => role.id.includes(id))) {
                             div.innerHTML += `<div class="qty-badge">x${count}</div>`;
                         }
@@ -369,7 +369,7 @@ function handleMultiSelection(roleId, divElement) {
     let currentCount = distributionSelection.filter(id => id === roleId).length;
     let newCount = 0;
 
-    // LOGIQUE QUANTITÉ (CORRIGÉE : Uniquement "le_loup_garou" strict)
+    // LOGIQUE QUANTITÉ (UNIQUEMENT POUR LOUP-GAROU ID STRICT)
     if (roleId === 'le_paysan' || roleId === 'le_loup_garou') {
         let input = prompt(`Nombre ? (0 - 10)`, currentCount || 0);
         if (input === null) return; 
@@ -398,7 +398,8 @@ function handleMultiSelection(roleId, divElement) {
         divElement.classList.add('selected');
         
         const badgeCards = ['le_paysan', 'le_loup_garou', 'olaf_et_pilaf', 'les_jumeaux_explosifs'];
-        if (badgeCards.some(id => roleId === id)) { // Vérification stricte
+        // Vérification avec Includes pour être sûr, ou === si ID précis
+        if (badgeCards.some(id => roleId.includes(id))) { 
             let badge = divElement.querySelector('.qty-badge');
             if (!badge) {
                 badge = document.createElement('div');
@@ -506,7 +507,12 @@ window.assignRoleToPlayer = function(roleId) {
     if(!targetResurrectId) return;
     if (isDraftMode) {
         update(ref(db, `games/${currentGameCode}/players/${targetResurrectId}`), { draftRole: roleId })
-        .then(() => window.closeModal('modal-role-selector'));
+        .then(() => {
+            window.closeModal('modal-role-selector');
+            // SYNC MANUELLE : On ajoute à la sélection
+            distributionSelection.push(roleId);
+            generateRoleChecklist(); // Update Tableau
+        });
     } else {
         if(confirm("Confirmer le changement de rôle ?")) {
             update(ref(db, `games/${currentGameCode}/players/${targetResurrectId}`), { 
