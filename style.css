@@ -1576,3 +1576,56 @@ body.light-mode #online-mode-link {
     grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)) !important;
     gap: 8px !important;
 }
+
+/* =======================================================
+   31. CORRECTIFS MOBILE V17 (TITRES, MORTS, CENTRAGE)
+   ======================================================= */
+
+/* 1. TITRES COUPÉS (Admin & Modales) */
+@media (max-width: 768px) {
+    /* On autorise le titre à passer sur 2 lignes si besoin */
+    .admin-header-bar h2,
+    .modal h2 {
+        white-space: normal !important; /* Autorise le retour ligne */
+        overflow: visible !important;
+        text-overflow: clip !important;
+        font-size: 1.1em !important; /* Un peu plus petit pour rentrer */
+        line-height: 1.2 !important;
+        text-align: center;
+    }
+}
+
+/* 2. GESTION DES COULEURS DES MORTS (Important !) */
+/* On annule le filtre gris sur la carte globale */
+.admin-player-card.dead {
+    filter: none !important; 
+    border: 1px solid #555 !important;
+    background: linear-gradient(145deg, #1a0f0f, #000) !important; /* Fond sombre rougeâtre */
+}
+
+/* On grise UNIQUEMENT l'avatar et le pseudo */
+.admin-player-card.dead img,
+.admin-player-card.dead strong,
+.admin-player-card.dead div:not(.admin-actions) {
+    filter: grayscale(100%);
+    opacity: 0.5;
+    text-decoration: line-through; /* Barre le nom */
+}
+
+/* On s'assure que les boutons gardent leurs couleurs vives */
+.admin-player-card.dead .btn-admin-mini {
+    filter: none !important;
+    opacity: 1 !important;
+    text-decoration: none !important;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+}
+
+/* 3. CENTRAGE VERTICAL DE LA CARTE REÇUE (Côté Joueur) */
+#online-content-wrapper {
+    min-height: 100dvh !important; /* Prend toute la hauteur écran mobile */
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important; /* Centre verticalement */
+    align-items: center !important;     /* Centre horizontalement */
+    padding-bottom: 50px !important;    /* Petit ajustement optique */
+}
