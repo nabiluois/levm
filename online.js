@@ -1,5 +1,5 @@
 // ============================================
-// SYSTEME EN LIGNE - LE VILLAGE MAUDIT (V8 - DISTRIBUTION AVEC VALIDATION)
+// SYSTEME EN LIGNE - LE VILLAGE MAUDIT (V10 - FLIP INFINI & RAPPEL DE CARTE)
 // ============================================
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -24,13 +24,14 @@ const db = getDatabase(app);
 // Variables Globales
 let currentGameCode = null;
 let myPlayerId = null;
+let myCurrentRoleId = null; // Stocke le rôle du joueur actuel
 let targetResurrectId = null;
 let detectedRoles = [];
 let detectedEvents = { gold: [], silver: [], bronze: [] };
-let isDraftMode = false; // Pour savoir si on est en train de distribuer
+let isDraftMode = false; 
 
 // ============================================
-// A. GESTION DU MENU & SCAN
+// A. GESTION DU MENU & SCAN & RECONNEXION
 // ============================================
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -41,7 +42,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const btnDistribute = document.getElementById('btn-distribute');
     if(btnDistribute) btnDistribute.addEventListener('click', handleDistributionClick);
+
+    // VÉRIFICATION DE SESSION ADMIN
+    const savedAdminCode = localStorage.getItem('adminGameCode');
+    if (savedAdminCode) {
+        showResumeButton(savedAdminCode);
+    }
 });
+
+function showResumeButton(code) {
+    const menuContainer = document.querySelector('.modal-content'); 
+    if(menuContainer) {
+        const resumeBtn = document.createElement('button');
+        resumeBtn.className = "btn-menu";
+        resumeBtn.style.background = "linear-gradient(135deg, #8e44ad, #c0392b)";
+        resumeBtn.style.border = "2px solid gold";
+        resumeBtn.style.marginBottom = "15px";
+        resumeBtn.innerHTML = `👑 REPRENDRE LA PARTIE (${code})`;
+        resumeBtn.onclick = () => window.restoreAdminSession(code);
+        
+        const title = menuContainer.querySelector('h2');
+        if(title) {
+            title.insertAdjacentElement('afterend', resumeBtn);
+        }
+    }
+}
 
 function scanContentFromHTML() {
     detectedRoles = [];
@@ -80,46 +105,71 @@ window.checkAdminPassword = function() {
     const password = prompt("🔐 Mot de passe MJ :");
     if(password === "1234") {
         window.initCreateGame();
-        document.getElementById('admin-dashboard').style.display = 'flex';
-        document.body.style.overflow = 'hidden';
-        window.closeModal('modal-online-menu');
     } else if (password !== null) {
         alert("⛔ Accès refusé !");
     }
 };
 
 window.closeAdminPanel = function() {
-    if(confirm("Quitter le mode Admin ? La partie continuera en fond.")) {
+    if(confirm("Quitter le mode Admin ?")) {
         document.getElementById('admin-dashboard').style.display = 'none';
         document.body.style.overflow = 'auto';
+        localStorage.removeItem('adminGameCode');
+        location.reload(); 
     }
 };
 
 // ============================================
-// B. ADMIN (MJ)
+// B. ADMIN (MJ) - CRÉATION & RESTAURATION
 // ============================================
 
 window.initCreateGame = function() {
     currentGameCode = Math.random().toString(36).substring(2, 6).toUpperCase();
     myPlayerId = "MJ_ADMIN";
     
-    document.getElementById('game-code-display').innerText = currentGameCode;
+    localStorage.setItem('adminGameCode', currentGameCode);
+    launchAdminInterface();
     
     set(ref(db, 'games/' + currentGameCode), {
         status: 'waiting',
         created_at: Date.now()
     });
+};
 
+window.restoreAdminSession = function(savedCode) {
+    currentGameCode = savedCode;
+    myPlayerId = "MJ_ADMIN";
+    
+    get(child(ref(db), `games/${currentGameCode}`)).then((snapshot) => {
+        if(snapshot.exists()) {
+            alert(`Reconnexion réussie à la partie ${currentGameCode} !`);
+            launchAdminInterface();
+        } else {
+            alert("Cette partie n'existe plus.");
+            localStorage.removeItem('adminGameCode');
+            location.reload();
+        }
+    });
+};
+
+function launchAdminInterface() {
+    document.getElementById('game-code-display').innerText = currentGameCode;
+    document.getElementById('admin-dashboard').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    window.closeModal('modal-online-menu');
+
+    setupAdminListeners();
+    generateRoleChecklist();
+    generateResurrectionGrid();
+}
+
+function setupAdminListeners() {
     onValue(ref(db, 'games/' + currentGameCode + '/players'), (snapshot) => {
         const players = snapshot.val() || {};
-        // On vérifie si on est en mode brouillon (si au moins un joueur a un draftRole)
         isDraftMode = Object.values(players).some(p => p.draftRole);
         updateAdminUI(players);
     });
-
-    generateRoleChecklist();
-    generateResurrectionGrid(); 
-};
+}
 
 function updateAdminUI(players) {
     const listDiv = document.getElementById('player-list-admin');
@@ -133,12 +183,11 @@ function updateAdminUI(players) {
     } else {
         Object.entries(players).forEach(([id, p]) => {
             
-            // 1. DÉTERMINER LE RÔLE À AFFICHER (Draft ou Validé)
-            let currentRoleId = p.role; // Rôle validé
+            let currentRoleId = p.role;
             let isDraft = false;
 
             if (p.draftRole) {
-                currentRoleId = p.draftRole; // Si brouillon existe, on montre le brouillon
+                currentRoleId = p.draftRole; 
                 isDraft = true;
             }
 
@@ -153,24 +202,22 @@ function updateAdminUI(players) {
                 }
             }
 
-            // 2. BOUTONS & STYLE
             const isDead = p.status === 'dead';
             const cardClass = isDead ? "admin-player-card dead" : "admin-player-card";
             let buttonsHtml = "";
             let draftBadge = "";
 
             if (isDraft) {
-                // MODE BROUILLON : On peut changer le rôle
-                draftBadge = `<div class="draft-mode-badge">PROVISOIRE</div>`;
+                draftBadge = `<div style="background:#e67e22; color:white; font-size:0.7em; padding:2px 6px; border-radius:4px; position:absolute; top:5px; right:5px; z-index:10; font-family:sans-serif;">PROVISOIRE</div>`;
                 buttonsHtml = `
-                    <button class="btn-admin-mini" style="background:#3498db; color:white; width:100%;" onclick="window.openResurrectModal('${id}')">🔄 CHANGER</button>
+                    <button class="btn-admin-mini" style="background:#3498db; color:white; width:100%; border:none; padding:8px; border-radius:5px; cursor:pointer; font-family:'Pirata One'; font-size:1.1em;" 
+                    onclick="window.openResurrectModal('${id}')">🔄 CHANGER</button>
                 `;
             } 
             else if (!currentRoleId) {
                 buttonsHtml = `<span style="font-size:0.8em; opacity:0.5;">...</span>`;
             } 
             else if (isDead) {
-                // MORT VALIDÉ
                 buttonsHtml = `<div class="admin-actions">`;
                 if(detectedEvents.gold.length > 0) buttonsHtml += `<button class="btn-admin-mini" style="background:gold; color:black;" onclick="window.adminDraw('${id}', 'gold')">OR</button>`;
                 if(detectedEvents.silver.length > 0) buttonsHtml += `<button class="btn-admin-mini" style="background:silver; color:black;" onclick="window.adminDraw('${id}', 'silver')">ARG</button>`;
@@ -179,12 +226,11 @@ function updateAdminUI(players) {
                     <button class="btn-admin-mini" style="background:#2ecc71; color:white; width:100%; margin-top:5px;" onclick="window.openResurrectModal('${id}')">♻️ REVIENT</button>
                 `;
             } else {
-                // VIVANT VALIDÉ
                 buttonsHtml = `<div class="admin-actions"><button class="btn-admin-mini" style="background:#c0392b; color:white; width:100%;" onclick="window.adminKill('${id}')">💀 MORT</button></div>`;
             }
 
             listDiv.innerHTML += `
-                <div class="${cardClass}" onclick="${isDraft ? `window.openResurrectModal('${id}')` : ''}">
+                <div class="${cardClass}" style="position:relative;">
                     ${draftBadge}
                     <img src="${cardImage}" alt="Role">
                     <strong>${p.name}</strong>
@@ -194,29 +240,24 @@ function updateAdminUI(players) {
             `;
         });
     }
-    
     updateMainButton(count);
 }
 
-// GESTION DU BOUTON PRINCIPAL (DISTRIBUER vs RÉVÉLER)
 function updateMainButton(playerCount) {
     const btn = document.getElementById('btn-distribute');
     const selectedCount = document.querySelectorAll('.role-checkbox:checked').length;
 
     if (isDraftMode) {
-        // Si on est en mode brouillon, le bouton sert à valider
         btn.disabled = false;
-        btn.className = "btn-validate btn-distribute-big btn-reveal"; // Classe verte
+        btn.style.background = "#27ae60"; 
         btn.innerText = "📢 RÉVÉLER AUX JOUEURS";
-        btn.onclick = revealRolesToEveryone; // Nouvelle action
+        btn.onclick = revealRolesToEveryone; 
     } else {
-        // Sinon, c'est le bouton distribuer classique
-        btn.className = "btn-validate btn-distribute-big"; // Classe dorée
-        btn.onclick = distributeRoles; // Action distribution
+        btn.style.background = "linear-gradient(135deg, #d4af37, #b8941f)";
+        btn.onclick = distributeRoles; 
         
         if (playerCount > 0 && selectedCount === playerCount) {
             btn.disabled = false;
-            btn.style.background = "linear-gradient(135deg, #d4af37, #b8941f)";
             btn.style.cursor = "pointer";
             btn.innerText = "🃏 PRÉPARER LA DISTRIBUTION";
         } else {
@@ -228,7 +269,6 @@ function updateMainButton(playerCount) {
     }
 }
 
-// Fonction intermédiaire pour gérer le clic
 function handleDistributionClick() {
     if(isDraftMode) {
         revealRolesToEveryone();
@@ -281,18 +321,15 @@ window.openResurrectModal = function(playerId) {
     window.openModal('modal-role-selector');
 };
 
-// Cette fonction gère TOUS les changements de rôle (Brouillon ou Jeu)
 window.assignRoleToPlayer = function(roleId) {
     if(!targetResurrectId) return;
 
     if (isDraftMode) {
-        // Mode Brouillon : on change juste le draftRole
         update(ref(db, `games/${currentGameCode}/players/${targetResurrectId}`), { 
             draftRole: roleId 
         });
         window.closeModal('modal-role-selector');
     } else {
-        // Mode Jeu : Résurrection ou Changement forcé
         if(confirm("Cela va changer le rôle du joueur immédiatement. Continuer ?")) {
             update(ref(db, `games/${currentGameCode}/players/${targetResurrectId}`), { 
                 status: 'alive', role: roleId, drawnCard: null 
@@ -331,12 +368,10 @@ window.updateRoleCount = function() {
     
     get(child(ref(db), `games/${currentGameCode}/players`)).then((snapshot) => {
         const playerCount = snapshot.exists() ? Object.keys(snapshot.val()).length : 0;
-        // On force la mise à jour du bouton
         updateMainButton(playerCount);
     });
 };
 
-// ETAPE 1 : DISTRIBUTION BROUILLON (INVISIBLE AUX JOUEURS)
 function distributeRoles() {
     const checkboxes = document.querySelectorAll('.role-checkbox:checked');
     let selectedRoles = [];
@@ -355,16 +390,13 @@ function distributeRoles() {
         const updates = {};
         playerIds.forEach((id, index) => {
             if (selectedRoles[index]) {
-                // ON UTILISE draftRole AU LIEU DE role
                 updates[`games/${currentGameCode}/players/${id}/draftRole`] = selectedRoles[index];
             }
         });
         update(ref(db), updates);
-        isDraftMode = true; // Active le mode brouillon localement
     });
 }
 
-// ETAPE 2 : VALIDATION FINALE (RÉVÉLATION)
 function revealRolesToEveryone() {
     if(!confirm("Es-tu sûr de la distribution ? Les rôles vont être envoyés aux joueurs.")) return;
 
@@ -376,22 +408,20 @@ function revealRolesToEveryone() {
         const updates = {};
         Object.entries(players).forEach(([id, p]) => {
             if (p.draftRole) {
-                // On transfère draftRole vers role
                 updates[`games/${currentGameCode}/players/${id}/role`] = p.draftRole;
-                updates[`games/${currentGameCode}/players/${id}/draftRole`] = null; // On vide le brouillon
+                updates[`games/${currentGameCode}/players/${id}/draftRole`] = null; 
                 updates[`games/${currentGameCode}/players/${id}/status`] = 'alive';
             }
         });
         
         update(ref(db), updates).then(() => {
-            isDraftMode = false;
             alert("🚀 Rôles envoyés ! La partie commence.");
         });
     });
 }
 
 // ============================================
-// E. CÔTÉ JOUEUR (Reste identique)
+// E. CÔTÉ JOUEUR
 // ============================================
 
 function joinGame() {
@@ -423,14 +453,32 @@ function listenForPlayerUpdates() {
         const data = snapshot.val();
         if (!data) return;
 
-        // On écoute UNIQUEMENT 'role', on ignore 'draftRole'
-        if (data.role && data.role !== lastRole) {
-            lastRole = data.role;
-            revealRole(data.role);
+        // MISE A JOUR DU ROLE ET DU BOUTON "VOIR CARTE"
+        if (data.role) {
+            myCurrentRoleId = data.role; // On sauvegarde le rôle
+            
+            // Si le rôle vient de changer, on l'affiche directement
+            if (data.role !== lastRole) {
+                lastRole = data.role;
+                revealRole(data.role);
+            }
+
+            // Affiche le bouton de rappel dans le lobby
+            const lobbyStatus = document.getElementById('player-lobby-status');
+            if(lobbyStatus) {
+                lobbyStatus.innerHTML = `
+                    <h3 style="color:var(--gold);">Tu es en jeu !</h3>
+                    <div style="margin:20px 0;">
+                        <button class="btn-menu" style="background:var(--gold); color:black; font-weight:bold; padding:15px; width:100%; border:2px solid #fff;" onclick="window.showMyRoleAgain()">🃏 VOIR MA CARTE</button>
+                    </div>
+                    <p style="opacity:0.7;">Attend les instructions du MJ...</p>
+                `;
+            }
         }
 
         if (data.status === 'dead') {
             internalShowNotification("💀 TU ES MORT", "Attends de voir si le destin t'offre une carte...");
+            document.getElementById('player-lobby-status').innerHTML = `<h3 style="color:#c0392b;">TU ES MORT 💀</h3>`;
         }
 
         if (data.drawnCard && data.drawnCard.image !== lastCardImg) {
@@ -443,6 +491,12 @@ function listenForPlayerUpdates() {
         }
     });
 }
+
+// Nouvelle fonction pour le bouton "Voir ma carte"
+window.showMyRoleAgain = function() {
+    if(!myCurrentRoleId) return;
+    revealRole(myCurrentRoleId);
+};
 
 // ============================================
 // F. FONCTIONS D'AFFICHAGE
@@ -465,37 +519,35 @@ function internalShowCard(data) {
     
     if(!panel || !overlay) return;
 
-    // On injecte le HTML avec un conteneur spécial pour gérer l'apparition du texte
+    // MODIFICATION ICI POUR LE FLIP INFINI
+    // On utilise classList.toggle('is-flipped')
+    // Et on force 'revealed' pour le texte dès le premier clic
+    
     panel.innerHTML = `
         <div id="online-content-wrapper">
-            
             <div class="details-header" style="text-align:center;">
                 <button class="close-details" onclick="window.internalCloseDetails()">✕</button>
                 <h2 class="details-title">${data.title}</h2>
             </div>
-
+            
             <div class="scene-flip" onclick="
-                this.classList.add('is-flipped'); 
+                this.classList.toggle('is-flipped'); 
                 document.getElementById('online-content-wrapper').classList.add('revealed');
             ">
                 <div class="card-object">
-                    
                     <div class="card-face face-front">
                         <img src="back.png" class="card-back-img" alt="Dos">
-                        <div class="tap-hint">👆 Taper pour révéler</div>
+                        <div class="tap-hint">👆 Taper pour révéler (Cliquer pour retourner)</div>
                     </div>
-
                     <div class="card-face face-back">
                         <img src="${data.image}" alt="Rôle">
                     </div>
-
                 </div>
             </div>
-
+            
             <div class="details-section" style="text-align:center;">
                 ${data.description}
             </div>
-
         </div>
     `;
     
