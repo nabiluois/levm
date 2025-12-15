@@ -332,15 +332,15 @@ window.adminDraw = function(playerId, category) {
 // C. LOGIQUE DE CHANGEMENT DE RÔLE (MANUEL & RESURRECTION)
 // ============================================
 
-// 1. Génère la grille des cartes dans la modale
+// 1. Génère la grille des cartes dans la fenêtre (Modale)
 function generateResurrectionGrid() {
     const grid = document.getElementById('admin-role-grid');
-    // On vérifie que la grille et les rôles existent
+    // Sécurité : on vérifie que la grille existe et qu'on a bien scanné les rôles
     if(!grid || detectedRoles.length === 0) return;
     
     grid.innerHTML = "";
     
-    // On trie les rôles par ordre alphabétique pour faciliter la recherche du MJ
+    // On trie les rôles par ordre alphabétique pour que tu trouves vite la carte
     const sortedRoles = [...detectedRoles].sort((a, b) => a.title.localeCompare(b.title));
 
     sortedRoles.forEach(role => {
@@ -354,36 +354,38 @@ function generateResurrectionGrid() {
     });
 }
 
-// 2. Ouvre la fenêtre de choix
+// 2. Fonction appelée par le bouton bleu "CHANGER"
 window.openResurrectModal = function(playerId) {
     targetResurrectId = playerId;
     
-    // On regénère la grille maintenant pour être sûr d'avoir toutes les cartes
+    // 1. On remplit la grille avec les cartes
     generateResurrectionGrid();
 
-    // On adapte le titre de la fenêtre selon la situation
+    // 2. On change le titre de la fenêtre pour être clair
     const modalTitle = document.querySelector('#modal-role-selector h2');
     if(modalTitle) {
-        modalTitle.innerText = isDraftMode ? "♻️ CHANGER LA CARTE" : "⚰️ RESSUSCITER LE JOUEUR";
+        modalTitle.innerText = isDraftMode ? "♻️ CHANGER LA CARTE (Brouillon)" : "⚰️ RESSUSCITER / CHANGER";
     }
 
+    // 3. On ouvre la fenêtre
     window.openModal('modal-role-selector');
 };
 
-// 3. Assigne le rôle cliqué
+// 3. Action quand tu cliques sur une image de la liste
 window.assignRoleToPlayer = function(roleId) {
     if(!targetResurrectId) return;
 
-    // CAS 1 : Mode Brouillon (Distribution initiale) - On change juste la carte cachée
+    // CAS 1 : Mode Brouillon (Le jeu n'a pas commencé, bouton bleu)
     if (isDraftMode) {
+        // Mise à jour directe dans la base de données
         update(ref(db, `games/${currentGameCode}/players/${targetResurrectId}`), { 
             draftRole: roleId 
         }).then(() => {
+            // On ferme la fenêtre, le changement se verra tout de suite sur ton écran
             window.closeModal('modal-role-selector');
-            // Pas besoin d'alerte, le changement se voit direct sur l'écran du MJ
         });
     } 
-    // CAS 2 : Partie en cours - C'est une résurrection (Fossoyeur ou autre)
+    // CAS 2 : Partie en cours (Bouton vert "REVIENT")
     else {
         if(confirm("Es-tu sûr de vouloir ressusciter/changer ce joueur avec ce rôle ?")) {
             update(ref(db, `games/${currentGameCode}/players/${targetResurrectId}`), { 
@@ -392,7 +394,7 @@ window.assignRoleToPlayer = function(roleId) {
                 drawnCard: null 
             });
             window.closeModal('modal-role-selector');
-            internalShowNotification("Succès", "Le joueur est de retour en jeu !");
+            internalShowNotification("Succès", "Le rôle a été changé !");
         }
     }
 };
