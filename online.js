@@ -1,5 +1,5 @@
 // ============================================
-// SYSTEME EN LIGNE - LE VILLAGE MAUDIT (V30 - SYNC MANUELLE & TABLEAU MOBILE)
+// SYSTEME EN LIGNE - LE VILLAGE MAUDIT (V31 - SYNC TOTALE & VISIBILITÉ)
 // ============================================
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -263,7 +263,6 @@ function updateDistributionDashboard() {
     document.getElementById('count-solo').innerText = countSolo;
     document.getElementById('total-distrib').innerText = distributionSelection.length;
 
-    // Mise à jour automatique du tableau sur le dashboard principal
     generateRoleChecklist(); 
 }
 
@@ -279,7 +278,6 @@ window.generateResurrectionGrid = function(mode = 'single') {
     if (mode === 'multi') {
         const dashboard = document.createElement('div');
         dashboard.className = "selection-dashboard";
-        // Suppression du texte "Clique sur une carte..."
         dashboard.innerHTML = `
             <div class="dashboard-stats" style="margin-bottom:5px;">
                 <div class="stat-item stat-village"><img src="Village.svg" class="stat-icon"><span id="pop-count-village">0</span></div>
@@ -318,7 +316,6 @@ window.generateResurrectionGrid = function(mode = 'single') {
                     
                     if (count > 0) {
                         div.classList.add('selected');
-                        // BADGES SUR LES CARTES MULTIPLES
                         const badgeCards = ['le_paysan', 'le_loup_garou', 'olaf_et_pilaf', 'les_jumeaux_explosifs'];
                         if (badgeCards.some(id => role.id.includes(id))) {
                             div.innerHTML += `<div class="qty-badge">x${count}</div>`;
@@ -398,8 +395,7 @@ function handleMultiSelection(roleId, divElement) {
         divElement.classList.add('selected');
         
         const badgeCards = ['le_paysan', 'le_loup_garou', 'olaf_et_pilaf', 'les_jumeaux_explosifs'];
-        // Vérification avec Includes pour être sûr, ou === si ID précis
-        if (badgeCards.some(id => roleId.includes(id))) { 
+        if (badgeCards.some(id => roleId === id)) { 
             let badge = divElement.querySelector('.qty-badge');
             if (!badge) {
                 badge = document.createElement('div');
@@ -507,12 +503,8 @@ window.assignRoleToPlayer = function(roleId) {
     if(!targetResurrectId) return;
     if (isDraftMode) {
         update(ref(db, `games/${currentGameCode}/players/${targetResurrectId}`), { draftRole: roleId })
-        .then(() => {
-            window.closeModal('modal-role-selector');
-            // SYNC MANUELLE : On ajoute à la sélection
-            distributionSelection.push(roleId);
-            generateRoleChecklist(); // Update Tableau
-        });
+        .then(() => window.closeModal('modal-role-selector'));
+        // La mise à jour se fera via le listener updateAdminUI
     } else {
         if(confirm("Confirmer le changement de rôle ?")) {
             update(ref(db, `games/${currentGameCode}/players/${targetResurrectId}`), { 
@@ -615,6 +607,20 @@ function updateAdminUI(players) {
     if(!listDiv) return;
     listDiv.innerHTML = "";
     
+    // *** SYNC IMPORTANTE ***
+    // Si on est en mode Draft (distribution en cours), on force le tableau
+    // à refléter exactement ce que les joueurs ont reçu (y compris les changements manuels)
+    const isDraft = Object.values(players).some(p => p.draftRole);
+    if(isDraft) {
+        distributionSelection = []; // On vide la sélection locale
+        Object.values(players).forEach(p => {
+            if(p.draftRole) distributionSelection.push(p.draftRole);
+        });
+        // On rafraîchit le tableau récapitulatif
+        generateRoleChecklist();
+    }
+    // ************************
+
     const count = Object.keys(players).length;
     if(count === 0) {
         listDiv.innerHTML = '<div style="color:#aaa; font-style:italic; grid-column:1/-1;">En attente de joueurs...</div>';

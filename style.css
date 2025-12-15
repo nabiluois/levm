@@ -1949,3 +1949,39 @@ body.light-mode #online-mode-link {
     align-items: center;
     min-height: 25px;
 }
+
+/* =======================================================
+   39. AMÉLIORATION VISIBILITÉ & FIX VIDÉO (V31)
+   ======================================================= */
+
+/* 1. TABLEAU RÉCAPITULATIF AGRANDI */
+.summary-col {
+    max-height: 300px !important; /* Plus de hauteur pour voir la liste */
+}
+
+/* 2. BULLES PLUS LISIBLES */
+.summary-list-item {
+    font-size: 0.9em !important; /* Texte plus gros */
+    padding: 6px 10px !important; /* Plus d'espace dedans */
+    margin: 3px auto !important;
+    width: 96% !important; /* Prend presque toute la largeur de la colonne */
+}
+
+/* 3. BOUTONS D'ACTION PLUS PETITS */
+.btn-validate, 
+.btn-distribute-big {
+    padding: 8px 10px !important; /* Moins de hauteur */
+    font-size: 1em !important;    /* Texte taille standard */
+    margin-top: 5px !important;
+}
+
+/* 4. FIX VIDÉO MENU (Supprime l'espace en bas) */
+.menu-header video {
+    display: block !important;       /* Indispensable pour virer la marge */
+    width: 100% !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    object-fit: cover !important;
+    line-height: 0 !important;
+}
