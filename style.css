@@ -1985,3 +1985,59 @@ body.light-mode #online-mode-link {
     object-fit: cover !important;
     line-height: 0 !important;
 }
+
+/* =======================================================
+   40. FIX FINAL (TITRE MOBILE, TABLEAU LARGE, SCROLL)
+   ======================================================= */
+
+/* 1. CORRECTION TITRE "LE VILLAGE" (Mobile) */
+.main-title-container {
+    /* Ajustement de la pilule */
+    padding: 5px 15px !important;
+    white-space: nowrap !important;
+    max-width: 95% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    overflow: hidden !important;
+}
+
+.main-title-container h1 {
+    /* Texte plus net (moins de flou néon) */
+    text-shadow: 0 0 5px var(--gold), 0 0 10px var(--gold) !important; 
+    font-size: 2.5rem !important; /* Taille par défaut */
+    margin: 0 !important;
+    line-height: 1 !important;
+    padding-top: 5px !important; /* Petit ajustement vertical */
+}
+
+/* Sur petit écran (iPhone etc) */
+@media (max-width: 400px) {
+    .main-title-container h1 {
+        font-size: 1.8rem !important; /* On réduit la police */
+    }
+    .main-title-container svg, 
+    .main-title-container img {
+        height: 30px !important; /* On réduit le logo aussi */
+        width: auto !important;
+    }
+}
+
+/* 2. TABLEAU RÉCAPITULATIF (LARGEUR MAXIMALE) */
+.summary-container {
+    width: 100% !important;
+    margin: 0 0 15px 0 !important;
+    padding: 8px !important;
+}
+
+.summary-list-item {
+    width: 98% !important; /* Utilise toute la largeur de la colonne */
+}
+
+/* 3. CLASSE ANTI-SCROLL (Pour figer le fond) */
+body.no-scroll {
+    overflow: hidden !important;
+    height: 100vh !important;
+    position: fixed !important;
+    width: 100% !important;
+}

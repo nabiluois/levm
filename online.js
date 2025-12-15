@@ -1,5 +1,5 @@
 // ============================================
-// SYSTEME EN LIGNE - LE VILLAGE MAUDIT (V31 - SYNC TOTALE & VISIBILITÉ)
+// SYSTEME EN LIGNE - LE VILLAGE MAUDIT (V32 - FIX SCROLL & COMPTEUR)
 // ============================================
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -189,6 +189,7 @@ window.checkAdminPassword = function() {
 window.closeAdminPanel = function() {
     if(confirm("Quitter le mode Admin ?")) {
         localStorage.removeItem('adminGameCode');
+        document.body.classList.remove('no-scroll'); // Réactive le scroll
         location.reload(); 
     }
 };
@@ -222,8 +223,11 @@ window.restoreAdminSession = function(savedCode) {
 
 function launchAdminInterface() {
     document.getElementById('game-code-display').innerText = currentGameCode;
-    document.getElementById('admin-dashboard').style.display = 'flex';
+    const adminDash = document.getElementById('admin-dashboard');
+    adminDash.style.display = 'flex';
     document.body.style.overflow = 'hidden';
+    document.body.classList.add('no-scroll'); // Bloque le scroll arrière-plan
+    
     window.closeModal('modal-online-menu');
     setupAdminListeners();
     generateRoleChecklist();
@@ -243,6 +247,7 @@ function setupAdminListeners() {
 // ============================================
 
 function updateDistributionDashboard() {
+    // Calcul des totaux
     const countVillage = distributionSelection.filter(id => {
         const r = detectedRoles.find(role => role.id === id);
         return r && r.category === 'village';
@@ -258,11 +263,13 @@ function updateDistributionDashboard() {
         return r && r.category === 'solo';
     }).length;
 
-    document.getElementById('count-village').innerText = countVillage;
-    document.getElementById('count-loup').innerText = countLoup;
-    document.getElementById('count-solo').innerText = countSolo;
-    document.getElementById('total-distrib').innerText = distributionSelection.length;
+    // Mise à jour des compteurs Dashboard POP-UP
+    if(document.getElementById('pop-count-village')) document.getElementById('pop-count-village').innerText = countVillage;
+    if(document.getElementById('pop-count-loup')) document.getElementById('pop-count-loup').innerText = countLoup;
+    if(document.getElementById('pop-count-solo')) document.getElementById('pop-count-solo').innerText = countSolo;
+    if(document.getElementById('pop-total')) document.getElementById('pop-total').innerText = distributionSelection.length;
 
+    // Mise à jour du Tableau Récapitulatif + Compteur Principal
     generateRoleChecklist(); 
 }
 
@@ -289,7 +296,7 @@ window.generateResurrectionGrid = function(mode = 'single') {
             </button>
         `;
         grid.appendChild(dashboard);
-        setTimeout(updatePopupCounters, 50); 
+        setTimeout(updateDistributionDashboard, 50); 
     }
 
     const categoriesOrder = { 'village': '🏡 VILLAGE', 'loups': '🐺 LOUPS', 'solo': '🎭 SOLOS', 'vampires': '🧛 VAMPIRES' };
@@ -316,6 +323,7 @@ window.generateResurrectionGrid = function(mode = 'single') {
                     
                     if (count > 0) {
                         div.classList.add('selected');
+                        // BADGES SUR LES CARTES MULTIPLES
                         const badgeCards = ['le_paysan', 'le_loup_garou', 'olaf_et_pilaf', 'les_jumeaux_explosifs'];
                         if (badgeCards.some(id => role.id.includes(id))) {
                             div.innerHTML += `<div class="qty-badge">x${count}</div>`;
@@ -339,28 +347,6 @@ window.generateResurrectionGrid = function(mode = 'single') {
         }
     }
 };
-
-function updatePopupCounters() {
-    const countVillage = distributionSelection.filter(id => {
-        const r = detectedRoles.find(role => role.id === id);
-        return r && r.category === 'village';
-    }).length;
-
-    const countLoup = distributionSelection.filter(id => {
-        const r = detectedRoles.find(role => role.id === id);
-        return r && r.category === 'loups';
-    }).length;
-
-    const countSolo = distributionSelection.filter(id => {
-        const r = detectedRoles.find(role => role.id === id);
-        return r && r.category === 'solo';
-    }).length;
-
-    if(document.getElementById('pop-count-village')) document.getElementById('pop-count-village').innerText = countVillage;
-    if(document.getElementById('pop-count-loup')) document.getElementById('pop-count-loup').innerText = countLoup;
-    if(document.getElementById('pop-count-solo')) document.getElementById('pop-count-solo').innerText = countSolo;
-    if(document.getElementById('pop-total')) document.getElementById('pop-total').innerText = distributionSelection.length;
-}
 
 function handleMultiSelection(roleId, divElement) {
     let currentCount = distributionSelection.filter(id => id === roleId).length;
@@ -410,7 +396,7 @@ function handleMultiSelection(roleId, divElement) {
         if (badge) badge.remove();
     }
 
-    updatePopupCounters();
+    updateDistributionDashboard();
 }
 
 window.validateDistribution = function() {
@@ -503,8 +489,12 @@ window.assignRoleToPlayer = function(roleId) {
     if(!targetResurrectId) return;
     if (isDraftMode) {
         update(ref(db, `games/${currentGameCode}/players/${targetResurrectId}`), { draftRole: roleId })
-        .then(() => window.closeModal('modal-role-selector'));
-        // La mise à jour se fera via le listener updateAdminUI
+        .then(() => {
+            window.closeModal('modal-role-selector');
+            // SYNC MANUELLE : On ajoute à la sélection
+            distributionSelection.push(roleId);
+            generateRoleChecklist(); // Update Tableau
+        });
     } else {
         if(confirm("Confirmer le changement de rôle ?")) {
             update(ref(db, `games/${currentGameCode}/players/${targetResurrectId}`), { 
@@ -524,6 +514,14 @@ function generateRoleChecklist() {
     const container = document.getElementById('roles-selection-list');
     if(!container) return;
     
+    // --- MISE A JOUR DU COMPTEUR "ROLES SELECTIONNES : X" ---
+    // On cherche l'élément #role-count dans le DOM (il est dans le h3)
+    const countSpan = document.getElementById('role-count');
+    if(countSpan) {
+        countSpan.innerText = distributionSelection.length;
+    }
+    // ---------------------------------------------------------
+
     const rolesVillage = [];
     const rolesLoup = [];
     const rolesSolo = [];
@@ -567,7 +565,7 @@ function generateRoleChecklist() {
     container.innerHTML = `
         ${summaryHTML}
         <button class="btn-validate" onclick="window.openDistributionSelector()" style="background:#2c3e50; border-color:#34495e; margin-top:0;">
-            📂 ${distributionSelection.length > 0 ? 'MODIFIER LA SÉLECTION' : 'CHOISIR LES RÔLES'} (${distributionSelection.length})
+            📂 ${distributionSelection.length > 0 ? 'MODIFIER LA SÉLECTION' : 'CHOISIR LES RÔLES'}
         </button>
     `;
     
@@ -576,10 +574,6 @@ function generateRoleChecklist() {
         updateAdminButtons(playerCount);
     });
 }
-
-window.updateRoleCount = function() {
-    // Legacy support
-};
 
 function distributeRoles() {
     let selectedRoles = [...distributionSelection];
@@ -608,16 +602,13 @@ function updateAdminUI(players) {
     listDiv.innerHTML = "";
     
     // *** SYNC IMPORTANTE ***
-    // Si on est en mode Draft (distribution en cours), on force le tableau
-    // à refléter exactement ce que les joueurs ont reçu (y compris les changements manuels)
     const isDraft = Object.values(players).some(p => p.draftRole);
     if(isDraft) {
-        distributionSelection = []; // On vide la sélection locale
+        distributionSelection = []; 
         Object.values(players).forEach(p => {
             if(p.draftRole) distributionSelection.push(p.draftRole);
         });
-        // On rafraîchit le tableau récapitulatif
-        generateRoleChecklist();
+        generateRoleChecklist(); // Met à jour le compteur et le tableau
     }
     // ************************
 
@@ -626,6 +617,7 @@ function updateAdminUI(players) {
         listDiv.innerHTML = '<div style="color:#aaa; font-style:italic; grid-column:1/-1;">En attente de joueurs...</div>';
     } else {
         Object.entries(players).forEach(([id, p]) => {
+            // ... (Code génération carte joueur identique) ...
             let currentRoleId = p.role;
             let isDraft = p.draftRole ? true : false;
             if (p.draftRole) currentRoleId = p.draftRole;
