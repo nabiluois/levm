@@ -1471,3 +1471,19 @@ body.light-mode .carte-back p {
     /* On resserre légèrement les lignes pour afficher plus de texte sans scroller */
     line-height: 1.35 !important; 
 }
+
+/* =======================================================
+   28. RESTAURATION COULEURS MENU (MODE CLAIR)
+   ======================================================= */
+
+/* Règles de base & Pacte Maudit -> ROUGE */
+body.light-mode .extra-links a[onclick*="modal-regles"] {
+    color: #ff6b6b !important;        /* Texte Rouge */
+    border-color: #ff6b6b !important; /* Bordure Rouge */
+}
+
+/* Mode En Ligne -> VERT */
+body.light-mode #online-mode-link {
+    color: #2ecc71 !important;        /* Texte Vert */
+    border-color: #2ecc71 !important; /* Bordure Verte */
+}
