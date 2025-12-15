@@ -1393,3 +1393,59 @@ body.locked-game #online-mode-link {
   margin-top: 8px !important;
   font-size: 1em !important;
 }
+
+/* =======================================================
+   25. CORRECTIFS VISIBILITÉ (MODE CLAIR & TEXTE NET)
+   ======================================================= */
+
+/* 1. Menu Village en Mode Clair : Fond Blanc pour lisibilité */
+body.light-mode .extra-links a {
+    background: #ffffff !important;       /* Fond blanc propre */
+    color: #000000 !important;            /* Texte bien noir */
+    border: 1px solid #8a6e2f !important; /* Bordure dorée conservée */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1) !important;
+}
+
+body.light-mode .extra-links a:hover {
+    background: #f5e6d3 !important; /* Beige très clair au survol */
+}
+
+/* 2. Suppression de l'effet de flou (ombre) sur le texte des cartes */
+.carte-back p {
+    text-shadow: none !important; /* Supprime l'effet qui fait mal aux yeux */
+}
+
+/* 3. Texte bien noir au dos des cartes (Uniquement en Mode Clair) */
+body.light-mode .carte-back p {
+    color: #000000 !important; /* Noir pur */
+    font-weight: 500 !important; /* Un tout petit peu plus gras pour la netteté */
+}
+
+/* (Rappel : En mode sombre, le texte reste clair pour être lisible sur fond noir) */
+
+
+/* =======================================================
+   26. CORRECTIF SCROLL HORIZONTAL (TEXTE AJUSTÉ)
+   ======================================================= */
+
+/* 1. On interdit le scroll horizontal sur le dos de la carte */
+.carte-back {
+    overflow-x: hidden !important;
+}
+
+/* 2. On force le texte à tenir dans la largeur */
+.carte-back p {
+    width: 100% !important;
+    max-width: 100% !important;
+    
+    /* Coupe proprement les mots s'ils sont trop longs pour l'écran */
+    overflow-wrap: break-word !important; 
+    word-wrap: break-word !important;
+    
+    /* Garde les retours à la ligne du HTML, mais force le reste à s'adapter */
+    white-space: pre-line !important;
+    
+    /* Sécurité supplémentaire */
+    overflow-x: hidden !important;
+    box-sizing: border-box !important;
+}
