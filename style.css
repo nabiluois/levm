@@ -429,12 +429,35 @@ h2 {
     width: fit-content !important; max-width: 90% !important; margin-left: auto !important; margin-right: auto !important;
 }
 
-.media-wrapper, .details-video, .details-image { width: 100% !important; margin-bottom: 15px !important; border-radius: 12px; border: 2px solid var(--gold); background: #000; margin-top: 0 !important; }
+/* --- FIX VIDÉO PLEIN CADRE --- */
+.media-wrapper { 
+    width: 100% !important; 
+    aspect-ratio: 16/9; /* Force un format rectangulaire standard */
+    margin-bottom: 15px !important; 
+    border-radius: 12px; 
+    border: 2px solid var(--gold); 
+    background: #000; 
+    margin-top: 0 !important; 
+    overflow: hidden !important; /* Coupe ce qui dépasse des coins arrondis */
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+}
+
+.details-video, .details-image {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important; /* LE SECRET : Remplit tout l'espace */
+    display: block !important;
+    border: none !important; /* On retire la bordure de la vidéo car c'est le wrapper qui l'a */
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
 .details-section { font-family: 'Almendra'; font-size: 1.15em; line-height: 1.6; color: #fffce6; background: rgba(20, 14, 10, 0.95); border: 1px solid var(--gold); padding: 25px; border-radius: 12px; margin-top: 20px; }
 .details-section p { display: block; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid rgba(212, 175, 55, 0.3); }
 .details-section p:last-child { border-bottom: none; padding-bottom: 0; margin-bottom: 0; }
 .emoji-svg { width: 1.3em !important; height: 1.3em !important; vertical-align: text-bottom !important; margin-right: 5px !important; display: inline-block !important; object-fit: contain !important; }
-
 /* ============================================
    12. ADMIN DASHBOARD & ONLINE
    ============================================ */
