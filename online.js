@@ -1,5 +1,5 @@
 // ============================================
-// SYSTEME EN LIGNE - V47 (LOGIQUE STRICTE & EVENTS)
+// SYSTEME EN LIGNE - V48 (FINAL VERIFIED)
 // ============================================
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -241,7 +241,6 @@ function generateDashboardControls() {
     const container = document.getElementById('roles-selection-list');
     if(!container) return;
     
-    // Nettoyage complet
     container.innerHTML = "";
     container.style.border = "none";
     container.style.background = "transparent";
@@ -281,11 +280,11 @@ function generateDashboardControls() {
     const btnReveal = document.createElement('button');
     btnReveal.id = "btn-reveal";
     btnReveal.className = "btn-admin-action";
-    btnReveal.style.background = "grey"; // Gris par défaut
+    btnReveal.style.background = "grey";
     btnReveal.style.color = "white";
     btnReveal.style.display = "none";
     btnReveal.innerText = "📢 RÉVÉLER À TOUS";
-    btnReveal.disabled = true; // Désactivé par défaut
+    btnReveal.disabled = true;
     btnReveal.onclick = revealRolesToEveryone;
     wrapper.appendChild(btnReveal);
 
@@ -345,7 +344,6 @@ window.openRoleSummaryPanel = function() {
              contentDiv = panel.querySelector('.details-content');
         }
         contentDiv.innerHTML = summaryHTML;
-        
         panel.classList.add('active');
         overlay.classList.add('active');
         document.body.classList.add('no-scroll');
@@ -374,11 +372,17 @@ window.openAdminPlayerDetail = function(playerId, playerPseudo, roleId, isDead, 
         }
     }
 
+    // Gestion du statut : Afficher uniquement si MORT ou MAIRE
+    let statusHTML = "";
+    if(isDead) statusHTML += `<span style="color:#c0392b; margin-right:10px;">MORT 💀</span>`;
+    if(isMayor) statusHTML += `<span style="color:gold;">MAIRE 🎖️</span>`;
+
     const htmlContent = `
         <div class="panini-admin-header">
             <button class="close-details" onclick="window.internalCloseDetails()" style="position:absolute; right:0; top:0; background:transparent; border:none; color:gold; font-size:1.5em; cursor:pointer;">✕</button>
             <img src="${avatarBase64}" class="panini-big-avatar">
             <h2 style="color:var(--gold); margin:0;">${playerPseudo}</h2>
+            <div style="font-size:1.2em; margin-top:5px; font-weight:bold;">${statusHTML}</div>
         </div>
 
         <div style="text-align:center; margin-bottom:20px;">
@@ -404,10 +408,11 @@ window.openAdminPlayerDetail = function(playerId, playerPseudo, roleId, isDead, 
         </div>
 
         ${isDead ? `
-            <div class="event-buttons-row">
-                <button class="btn-event" style="background:gold;" onclick="window.adminDrawEvent('${playerId}', 'gold')">CARTE OR</button>
-                <button class="btn-event" style="background:silver;" onclick="window.adminDrawEvent('${playerId}', 'silver')">CARTE ARGENT</button>
-                <button class="btn-event" style="background:#cd7f32;" onclick="window.adminDrawEvent('${playerId}', 'bronze')">CARTE BRONZE</button>
+            <h3 style="text-align:center; color:gold; margin-top:20px; font-family:'Pirata One';">DONNER UNE CARTE</h3>
+            <div style="display:flex; gap:10px;">
+                <button class="btn-admin-mini" style="background:gold; color:black; padding:15px; flex:1;" onclick="window.adminDrawEvent('${playerId}', 'gold')">OR</button>
+                <button class="btn-admin-mini" style="background:silver; color:black; padding:15px; flex:1;" onclick="window.adminDrawEvent('${playerId}', 'silver')">ARGENT</button>
+                <button class="btn-admin-mini" style="background:#cd7f32; color:black; padding:15px; flex:1;" onclick="window.adminDrawEvent('${playerId}', 'bronze')">BRONZE</button>
             </div>
         ` : ''}
         <br><br><br>
@@ -768,6 +773,27 @@ function updateAdminUI(players) {
     updateAdminButtons(count);
 }
 
+function distributeRoles() {
+    let selectedRoles = [...distributionSelection];
+    for (let i = selectedRoles.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [selectedRoles[i], selectedRoles[j]] = [selectedRoles[j], selectedRoles[i]];
+    }
+    const playersRef = ref(db, 'games/' + currentGameCode + '/players');
+    get(playersRef).then((snapshot) => {
+        const players = snapshot.val();
+        if(!players) return;
+        const playerIds = Object.keys(players);
+        const updates = {};
+        playerIds.forEach((id, index) => {
+            if (selectedRoles[index]) {
+                updates[`games/${currentGameCode}/players/${id}/draftRole`] = selectedRoles[index];
+            }
+        });
+        update(ref(db), updates);
+    });
+}
+
 function updateAdminButtons(playerCount) {
     const btnDistribute = document.getElementById('btn-distribute');
     const btnReveal = document.getElementById('btn-reveal');
@@ -796,6 +822,24 @@ function updateAdminButtons(playerCount) {
         btnReveal.style.cursor = "not-allowed";
     }
     btnReveal.style.display = isDraftMode ? "block" : "none";
+}
+
+function revealRolesToEveryone() {
+    if(!confirm("Envoyer les rôles ?")) return;
+    const playersRef = ref(db, 'games/' + currentGameCode + '/players');
+    get(playersRef).then((snapshot) => {
+        const players = snapshot.val();
+        if(!players) return;
+        const updates = {};
+        Object.entries(players).forEach(([id, p]) => {
+            if (p.draftRole) {
+                updates[`games/${currentGameCode}/players/${id}/role`] = p.draftRole;
+                updates[`games/${currentGameCode}/players/${id}/draftRole`] = null; 
+                updates[`games/${currentGameCode}/players/${id}/status`] = 'alive';
+            }
+        });
+        update(ref(db), updates).then(() => { alert("🚀 Rôles envoyés !"); });
+    });
 }
 
 // CÔTÉ JOUEUR
@@ -890,3 +934,20 @@ function listenForPlayerUpdates() {
         }
     });
 }
+
+window.showMyRoleAgain = function() { if(!myCurrentRoleId) return; revealRole(myCurrentRoleId); };
+function revealRole(roleId) {
+    window.closeModal('modal-join-game'); window.closeModal('modal-online-menu');
+    const roleData = detectedRoles.find(r => r.id === roleId);
+    if(roleData) {
+        if(navigator.vibrate) navigator.vibrate([200, 100, 200]);
+        const panel = document.querySelector('.details-panel');
+        const overlay = document.querySelector('.details-overlay');
+        if(!panel || !overlay) return;
+        panel.innerHTML = `<div id="online-content-wrapper" style="height:100%; display:flex; flex-direction:column; justify-content:center; align-items:center;"><button class="close-details" onclick="window.internalCloseDetails()" style="position:absolute; top:20px; right:20px; z-index:100; background:rgba(0,0,0,0.6); color:white; border:1px solid gold; border-radius:50%; width:40px; height:40px; font-size:20px;">✕</button><div class="scene-flip" onclick="this.classList.toggle('is-flipped')" style="margin:0;"><div class="card-object"><div class="card-face face-front"><img src="back.png" class="card-back-img" style="width:100%; height:100%; object-fit:cover; border-radius:15px;"></div><div class="card-face face-back"><img src="${roleData.image}" style="width:100%; height:100%; object-fit:cover; border-radius:15px;"></div></div></div></div>`;
+        panel.classList.add('active'); overlay.classList.add('active');
+    }
+}
+window.internalCloseDetails = function() { document.querySelector('.details-panel').classList.remove('active'); document.querySelector('.details-overlay').classList.remove('active'); };
+function internalShowNotification(title, message) { alert(title + "\n" + message); }
+window.adminKill = function(playerId) { if(confirm("Mort ?")) { update(ref(db, `games/${currentGameCode}/players/${playerId}`), { status: 'dead' }); } };
