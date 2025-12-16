@@ -1,5 +1,5 @@
 // ============================================
-// SYSTEME EN LIGNE - V45 (AVATAR & BADGE TEXTE)
+// SYSTEME EN LIGNE - V46 (LOGIQUE D'ÉCHANGE DE RÔLES)
 // ============================================
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -624,18 +624,87 @@ window.adminDraw = function(playerId, category, isRandom, manualImg) {
     }
 };
 
-window.assignRoleToPlayer = function(roleId) {
+window.assignRoleToPlayer = function(newRoleId) {
     if(!targetResurrectId) return;
-    if (isDraftMode) {
-        update(ref(db, `games/${currentGameCode}/players/${targetResurrectId}`), { draftRole: roleId })
-        .then(() => { window.closeModal('modal-role-selector'); distributionSelection.push(roleId); generateDashboardControls(); });
-    } else {
-        if(confirm("Confirmer le changement ?")) {
-            update(ref(db, `games/${currentGameCode}/players/${targetResurrectId}`), { status: 'alive', role: roleId, drawnCard: null });
-            window.closeModal('modal-role-selector');
-            internalShowNotification("Succès", "Rôle modifié !");
+
+    // --- LOGIQUE D'ÉCHANGE DE RÔLE (V46) ---
+    // Récupération de tous les joueurs pour vérifier les doublons
+    const playersRef = child(ref(db), `games/${currentGameCode}/players`);
+    
+    get(playersRef).then((snapshot) => {
+        const players = snapshot.val() || {};
+        const updates = {};
+
+        // 1. Identification du Joueur Cible (celui qu'on modifie)
+        const p1Id = targetResurrectId;
+        const p1Data = players[p1Id];
+        // Quel était son ancien rôle ?
+        const p1OldRole = isDraftMode ? p1Data.draftRole : p1Data.role;
+
+        // 2. Le nouveau rôle est-il "Illimité" ? (Paysan / Loup)
+        const isUnlimited = ['le_paysan', 'le_loup_garou'].includes(newRoleId);
+
+        let p2Id = null;
+
+        // 3. Si c'est un rôle UNIQUE, on cherche qui le possède déjà
+        if (!isUnlimited) {
+            const found = Object.entries(players).find(([pid, p]) => {
+                const r = isDraftMode ? p.draftRole : p.role;
+                return r === newRoleId && pid !== p1Id; // On cherche quelqu'un d'autre
+            });
+            if (found) p2Id = found[0]; // On a trouvé le propriétaire actuel
         }
-    }
+
+        // --- PREPARATION DES MISES A JOUR ---
+
+        // A. Mise à jour du Joueur Cible (Il reçoit TOUJOURS le nouveau rôle)
+        if (isDraftMode) {
+            updates[`games/${currentGameCode}/players/${p1Id}/draftRole`] = newRoleId;
+        } else {
+            updates[`games/${currentGameCode}/players/${p1Id}/role`] = newRoleId;
+            updates[`games/${currentGameCode}/players/${p1Id}/status`] = 'alive';
+            updates[`games/${currentGameCode}/players/${p1Id}/drawnCard`] = null;
+        }
+
+        // B. Mise à jour de l'Ancien Propriétaire (ÉCHANGE)
+        // Il reçoit l'ancien rôle du Joueur Cible (p1OldRole), même si c'est null
+        if (p2Id) {
+            if (isDraftMode) {
+                updates[`games/${currentGameCode}/players/${p2Id}/draftRole`] = p1OldRole;
+            } else {
+                updates[`games/${currentGameCode}/players/${p2Id}/role`] = p1OldRole;
+            }
+        }
+
+        // C. Mise à jour de la Sélection (Compteurs Draft)
+        // Cette partie est purement visuelle pour l'admin si on est en mode prépa
+        if (isDraftMode) {
+            // Si on a fait un échange, le "pool" total de cartes ne change pas
+            // Si on a pris un rôle libre (p2Id null), on doit ajuster la liste
+            if (!p2Id) {
+                // On retire l'ancien rôle de la liste (s'il existait)
+                if (p1OldRole) {
+                    const idx = distributionSelection.indexOf(p1OldRole);
+                    if (idx > -1) distributionSelection.splice(idx, 1);
+                }
+                // On ajoute le nouveau rôle
+                distributionSelection.push(newRoleId);
+            }
+        }
+
+        // D. Envoi Global
+        update(ref(db), updates).then(() => {
+            window.closeModal('modal-role-selector');
+            window.internalCloseDetails(); 
+            
+            let msg = "Rôle attribué !";
+            if (p2Id) msg = "🔄 Échange effectué avec le joueur qui avait ce rôle.";
+            internalShowNotification("Succès", msg);
+            
+            // Rafraîchir le dashboard si nécessaire
+            if(isDraftMode) generateDashboardControls();
+        });
+    });
 };
 
 function updateAdminUI(players) {
@@ -655,7 +724,6 @@ function updateAdminUI(players) {
     if(count === 0) {
         listDiv.innerHTML = '<div style="color:#aaa; font-style:italic; grid-column:1/-1;">En attente de joueurs...</div>';
     } else {
-        // TRI : Maire > Vivants > Morts
         const sortedPlayers = Object.entries(players).sort(([,a], [,b]) => {
             if (a.isMayor && !b.isMayor) return -1;
             if (!a.isMayor && b.isMayor) return 1;
@@ -671,24 +739,25 @@ function updateAdminUI(players) {
             // --- LOGIQUE AVATAR & RÔLE ---
             let roleTitle = "";
             let roleCategory = "inconnu";
-            let roleImageSrc = "icon.png"; // Fallback
+            let roleImageSrc = "icon.png"; 
 
             if(currentRoleId && detectedRoles.length > 0) {
                 const r = detectedRoles.find(x => x.id === currentRoleId);
                 if(r) { 
                     roleTitle = r.title;
-                    roleCategory = r.category; // village, loups, solo...
-                    roleImageSrc = r.image;    // Image de la carte
+                    roleCategory = r.category;
+                    roleImageSrc = r.image;
                 }
             }
 
-            // Avatar dynamique : Photo du joueur OU Image de sa carte
+            // Avatar dynamique
             let displayAvatar = p.avatar ? p.avatar : (currentRoleId ? roleImageSrc : "icon.png");
 
             const isDead = p.status === 'dead';
             const cardDiv = document.createElement('div');
             cardDiv.className = isDead ? "admin-player-card dead" : "admin-player-card";
             cardDiv.style.position = 'relative';
+            cardDiv.style.cursor = 'pointer'; 
             
             let innerHTML = `
                 <div class="admin-avatar-container">
@@ -698,7 +767,7 @@ function updateAdminUI(players) {
                 <strong style="font-size:0.9em;">${p.name}</strong>
             `;
 
-            // Ajout du BADGE TEXTE sous le pseudo
+            // Badge Texte
             if (roleTitle) {
                 innerHTML += `<div class="role-text-badge badge-${roleCategory}">${roleTitle}</div>`;
             }
@@ -706,17 +775,25 @@ function updateAdminUI(players) {
             if(isDraft) innerHTML = `<div style="background:#e67e22; color:white; font-size:0.6em; padding:2px 5px; border-radius:4px; position:absolute; top:3px; left:3px; z-index:10; font-weight:bold;">PROV.</div>` + innerHTML;
             cardDiv.innerHTML = innerHTML;
 
-            // Au clic, ouverture du Panini Joueur
-            if(!isDraft) {
-                cardDiv.onclick = () => window.openAdminPlayerDetail(id, p.name, currentRoleId, isDead, displayAvatar, p.isMayor);
-            } else {
+            // --- Clic Permanent ---
+            cardDiv.onclick = function() {
+                window.openAdminPlayerDetail(id, p.name, currentRoleId, isDead, displayAvatar, p.isMayor);
+            };
+
+            // Bouton Changer (Draft uniquement)
+            if(isDraft) {
                 const btnChange = document.createElement('button');
                 btnChange.className = "btn-admin-mini";
-                btnChange.style.cssText = `background:#3498db; color:white; width:100%; border:none; padding:8px; font-family:'Pirata One'; font-size:1em; margin-top:3px;`;
+                btnChange.style.cssText = `background:#3498db; color:white; width:100%; border:none; padding:8px; font-family:'Pirata One'; font-size:1em; margin-top:3px; position:relative; z-index:20;`; 
                 btnChange.innerText = "🔄 CHANGER";
-                btnChange.onclick = (e) => { e.stopPropagation(); window.openResurrectModal(id); };
+                
+                btnChange.onclick = (e) => { 
+                    e.stopPropagation(); 
+                    window.openResurrectModal(id); 
+                };
                 cardDiv.appendChild(btnChange);
             }
+
             listDiv.appendChild(cardDiv);
         });
     }
