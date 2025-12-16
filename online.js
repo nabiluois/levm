@@ -1,5 +1,5 @@
 // ============================================
-// SYSTEME EN LIGNE - V48 (FINAL VERIFIED)
+// SYSTEME EN LIGNE - V49 (FINAL - CLEAN UI)
 // ============================================
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -241,6 +241,13 @@ function generateDashboardControls() {
     const container = document.getElementById('roles-selection-list');
     if(!container) return;
     
+    // --- SUPPRESSION DU TEXTE "ROLES SELECTIONNES" ---
+    const countSpan = document.getElementById('role-count');
+    if(countSpan && countSpan.parentElement) {
+        countSpan.parentElement.style.display = 'none';
+    }
+    
+    // Nettoyage container
     container.innerHTML = "";
     container.style.border = "none";
     container.style.background = "transparent";
@@ -372,7 +379,7 @@ window.openAdminPlayerDetail = function(playerId, playerPseudo, roleId, isDead, 
         }
     }
 
-    // Gestion du statut : Afficher uniquement si MORT ou MAIRE
+    // Gestion du statut
     let statusHTML = "";
     if(isDead) statusHTML += `<span style="color:#c0392b; margin-right:10px;">MORT 💀</span>`;
     if(isMayor) statusHTML += `<span style="color:gold;">MAIRE 🎖️</span>`;
@@ -408,11 +415,10 @@ window.openAdminPlayerDetail = function(playerId, playerPseudo, roleId, isDead, 
         </div>
 
         ${isDead ? `
-            <h3 style="text-align:center; color:gold; margin-top:20px; font-family:'Pirata One';">DONNER UNE CARTE</h3>
-            <div style="display:flex; gap:10px;">
-                <button class="btn-admin-mini" style="background:gold; color:black; padding:15px; flex:1;" onclick="window.adminDrawEvent('${playerId}', 'gold')">OR</button>
-                <button class="btn-admin-mini" style="background:silver; color:black; padding:15px; flex:1;" onclick="window.adminDrawEvent('${playerId}', 'silver')">ARGENT</button>
-                <button class="btn-admin-mini" style="background:#cd7f32; color:black; padding:15px; flex:1;" onclick="window.adminDrawEvent('${playerId}', 'bronze')">BRONZE</button>
+            <div class="event-buttons-row">
+                <button class="btn-event" style="background:gold;" onclick="window.adminDrawEvent('${playerId}', 'gold')">CARTE OR</button>
+                <button class="btn-event" style="background:silver;" onclick="window.adminDrawEvent('${playerId}', 'silver')">CARTE ARGENT</button>
+                <button class="btn-event" style="background:#cd7f32;" onclick="window.adminDrawEvent('${playerId}', 'bronze')">CARTE BRONZE</button>
             </div>
         ` : ''}
         <br><br><br>
