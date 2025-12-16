@@ -787,81 +787,66 @@ button[onclick="signPact()"]::before {
 }
 
 /* ============================================
-   20. OPTIMISATION ADMIN MOBILE (V37)
+   20. FIX AVATARS & PANELS (V41)
    ============================================ */
 
-/* 1. Correction de la Grille Joueurs (Avatar + Badge) */
+/* 1. Correction Avatar & Pastille (Zéro superposition) */
 .admin-avatar-container {
-    width: 65px;
-    height: 65px;
-    position: relative; /* Important pour le positionnement */
-    margin: 0 auto 5px auto;
-    border-radius: 50%;
-    border: 2px solid var(--gold);
+    width: 70px;
+    height: 70px;
+    margin: 0 auto 10px auto;
+    position: relative !important; /* L'ancre */
     background: #000;
+    border-radius: 50%; /* Le conteneur est rond */
+    border: 2px solid var(--gold);
+    overflow: visible !important; /* IMPORTANT : Laisser dépasser la carte */
 }
 
+/* La photo de profil (Rempli le cercle) */
 .admin-avatar-container img[alt="Avatar"] {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 50%;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    border-radius: 50% !important;
+    display: block;
 }
 
-/* La carte rôle en petite pastille */
+/* La Petite Carte (Pastille en bas à droite) */
 .mini-role-badge {
-    position: absolute;
-    bottom: -2px;
-    right: -2px;
-    width: 28px !important;
-    height: 42px !important; /* Ratio carte */
+    position: absolute !important;
+    bottom: -5px !important;
+    right: -10px !important; /* Sort du cadre à droite */
+    width: 30px !important;
+    height: 45px !important; /* Ratio carte vertical */
     border-radius: 4px !important;
-    border: 1px solid #fff;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.8);
-    z-index: 10;
-    object-fit: cover;
+    border: 1px solid #fff !important;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.8) !important;
+    z-index: 50 !important; /* Au-dessus de la photo */
+    background: #111;
 }
 
-/* Badge Maire (Écharpe) */
+/* Badge Maire (En haut à gauche) */
 .mayor-badge {
-    position: absolute;
-    top: -5px;
-    left: -5px; /* Déplacé à gauche pour ne pas gêner la carte */
-    font-size: 1.4em;
-    z-index: 20;
-    filter: drop-shadow(0 2px 2px rgba(0,0,0,0.8));
+    position: absolute !important;
+    top: -5px !important;
+    left: -5px !important;
+    font-size: 1.5em !important;
+    z-index: 60 !important;
+    filter: drop-shadow(0 2px 2px black);
 }
 
-/* 2. Boutons Dashboard compacts */
-.admin-controls-wrapper {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin-bottom: 20px;
-}
-
-.btn-admin-action {
-    width: 100%;
-    padding: 12px;
-    font-family: 'Pirata One';
-    font-size: 1.2em;
-    border-radius: 8px;
-    border: none;
-    cursor: pointer;
-    text-transform: uppercase;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-}
-
-/* 3. Style du Panel Panini Admin */
+/* 2. Styles du Panini Admin (Tableau & Fiche) */
 .panini-admin-header {
     text-align: center;
+    border-bottom: 1px solid var(--gold);
+    padding-bottom: 20px;
     margin-bottom: 20px;
-    border-bottom: 1px solid rgba(212, 175, 55, 0.3);
-    padding-bottom: 15px;
+    position: relative;
 }
-.panini-admin-avatar {
-    width: 120px;
-    height: 120px;
+
+.panini-big-avatar {
+    width: 130px;
+    height: 130px;
     border-radius: 50%;
     border: 4px solid var(--gold);
     object-fit: cover;
@@ -869,14 +854,22 @@ button[onclick="signPact()"]::before {
     margin: 0 auto 15px auto;
     display: block;
 }
-.panini-role-card {
-    width: 100px;
+
+.panini-big-card {
+    width: 120px;
     height: auto;
-    border-radius: 8px;
+    border-radius: 10px;
     border: 2px solid #fff;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.6);
     margin: 10px auto;
     display: block;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+}
+
+/* Grille boutons actions */
+.admin-actions-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 
 /* ============================================
@@ -943,4 +936,51 @@ button[onclick="signPact()"]::before {
     margin-bottom: 5px;
     padding-bottom: 2px;
     clear: both;
+}
+
+/* ============================================
+   22. CORRECTIFS SÉLECTION & BADGES (V40)
+   ============================================ */
+
+/* 1. Comportement Grisé / Couleur */
+.role-select-item img {
+    filter: grayscale(100%);
+    opacity: 0.5;
+    transition: all 0.2s ease;
+    border: 2px solid transparent;
+    transform: scale(0.95);
+}
+
+/* Quand c'est sélectionné : Couleur + Bordure + Zoom */
+.role-select-item.selected img {
+    filter: none;
+    opacity: 1;
+    border-color: var(--gold);
+    transform: scale(1);
+    box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
+}
+
+/* 2. Positionnement précis de la pastille (Badge) */
+.role-select-item {
+    position: relative !important; /* Indispensable */
+    overflow: visible !important;
+}
+
+.qty-badge {
+    position: absolute;
+    top: -5px;       /* Sort légèrement en haut */
+    right: 5px;      /* Collé à droite */
+    background: #c0392b;
+    color: white;
+    font-family: 'Pirata One';
+    font-size: 1em;
+    min-width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #fff;
+    z-index: 50;     /* Au-dessus de tout */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.5);
 }

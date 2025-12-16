@@ -1,5 +1,5 @@
 // ============================================
-// SYSTEME EN LIGNE - V39 (CLEAN & FIX SELECTEUR)
+// SYSTEME EN LIGNE - V41 (PANINI FIX & ACTIONS)
 // ============================================
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -230,10 +230,9 @@ function setupAdminListeners() {
 }
 
 // ============================================
-// C. LOGIQUE SÉLECTION (CORRIGÉE & OPTIMISÉE)
+// C. LOGIQUE SÉLECTION (CORRIGÉE)
 // ============================================
 
-// Met à jour les compteurs dans le dashboard fixe
 function updateDistributionDashboard() {
     const countVillage = distributionSelection.filter(id => {
         const r = detectedRoles.find(role => role.id === id); return r && r.category === 'village';
@@ -259,7 +258,6 @@ window.generateResurrectionGrid = function(mode = 'single') {
     grid.style.display = "block"; 
     grid.innerHTML = "";
     
-    // --- 1. Dashboard Fixe en haut (si Multi) ---
     if (mode === 'multi') {
         const dashboard = document.createElement('div');
         dashboard.className = "selection-dashboard";
@@ -277,14 +275,12 @@ window.generateResurrectionGrid = function(mode = 'single') {
         setTimeout(updateDistributionDashboard, 50); 
     }
 
-    // --- 2. La Grille des Cartes ---
     const categoriesOrder = { 'village': '🏡 VILLAGE', 'loups': '🐺 LOUPS', 'solo': '🎭 SOLOS', 'vampires': '🧛 VAMPIRES' };
     
     for (const [catKey, catTitle] of Object.entries(categoriesOrder)) {
         const rolesInCat = detectedRoles.filter(r => r.category === catKey);
         
         if (rolesInCat.length > 0) {
-            // Titre de catégorie visible
             const titleDiv = document.createElement('div');
             titleDiv.className = "category-separator";
             titleDiv.innerText = catTitle;
@@ -299,7 +295,6 @@ window.generateResurrectionGrid = function(mode = 'single') {
                 const div = document.createElement('div');
                 div.className = "role-select-item";
                 
-                // Si une carte est sélectionnée, on l'affiche visuellement
                 if (mode === 'multi') {
                     const count = distributionSelection.filter(id => id === role.id).length;
                     if (count > 0) {
@@ -310,7 +305,6 @@ window.generateResurrectionGrid = function(mode = 'single') {
 
                 div.innerHTML += `<img src="${role.image}" loading="lazy" style="width:100%; border-radius:6px; display:block;">`;
                 
-                // Le CLIC
                 div.onclick = function() { 
                     if (mode === 'multi') {
                         handleMultiSelection(role.id, div);
@@ -329,37 +323,40 @@ function handleMultiSelection(roleId, divElement) {
     let currentCount = distributionSelection.filter(id => id === roleId).length;
     let newCount = 0;
     
-    // Logique simplifiée : toggle +1 ou +0 (sauf cartes spéciales)
-    const isMultiCard = ['le_paysan', 'le_loup_garou', 'olaf_et_pilaf', 'les_jumeaux_explosifs'].some(id => roleId.includes(id));
-    
+    const isMultiCard = (roleId === 'le_paysan' || roleId === 'le_loup_garou');
+    const isDuoCard = (roleId === 'olaf_et_pilaf' || roleId === 'les_jumeaux_explosifs');
+
     if (isMultiCard) {
         let input = prompt(`Combien ?`, currentCount || 0);
         if (input === null) return; 
+        newCount = Math.max(0, parseInt(input) || 0);
+    } 
+    else if (isDuoCard) {
+        let input = prompt(`Duo (0 ou 2) ?`, currentCount || 0);
+        if (input === null) return;
         newCount = parseInt(input);
-        if (isNaN(newCount) || newCount < 0) newCount = 0;
-    } else {
+        if(newCount !== 2 && newCount !== 0) newCount = 0;
+    }
+    else {
         newCount = currentCount > 0 ? 0 : 1;
     }
 
-    // Mise à jour de la liste
     distributionSelection = distributionSelection.filter(id => id !== roleId);
     for(let i=0; i<newCount; i++) {
         distributionSelection.push(roleId);
     }
 
-    // Mise à jour visuelle immédiate de la carte
-    // On nettoie d'abord les badges existants
     const existingBadge = divElement.querySelector('.qty-badge');
     if(existingBadge) existingBadge.remove();
 
     if (newCount > 0) {
-        divElement.classList.add('selected');
+        divElement.classList.add('selected'); 
         const badge = document.createElement('div');
         badge.className = 'qty-badge';
         badge.innerText = `x${newCount}`;
         divElement.appendChild(badge);
     } else {
-        divElement.classList.remove('selected');
+        divElement.classList.remove('selected'); 
     }
 
     updateDistributionDashboard();
@@ -370,7 +367,6 @@ window.validateDistribution = function() {
     generateDashboardControls(); 
 };
 
-// 4. OUVERTURE MODALES
 window.openDistributionSelector = function() {
     window.generateResurrectionGrid('multi');
     const modalTitle = document.querySelector('#modal-role-selector h2');
@@ -394,7 +390,7 @@ window.openResurrectModal = function(playerId) {
 };
 
 // ============================================
-// D. DASHBOARD & PANEL
+// D. DASHBOARD & PANINI (TABLEAU & JOUEUR)
 // ============================================
 
 function generateDashboardControls() {
@@ -407,10 +403,10 @@ function generateDashboardControls() {
     container.style.background = "transparent";
     container.style.maxHeight = "none";
 
-    // Boutons
     const wrapper = document.createElement('div');
     wrapper.className = "admin-controls-wrapper";
 
+    // 1. Bouton "Tableau des Rôles" (Ouvre le Panini)
     const btnTable = document.createElement('button');
     btnTable.className = "btn-admin-action";
     btnTable.style.background = "#34495e";
@@ -420,6 +416,7 @@ function generateDashboardControls() {
     btnTable.onclick = () => window.openRoleSummaryPanel();
     wrapper.appendChild(btnTable);
 
+    // 2. Bouton "Modifier Sélection"
     const btnSelect = document.createElement('button');
     btnSelect.className = "btn-admin-action";
     btnSelect.style.background = "#2c3e50";
@@ -428,6 +425,7 @@ function generateDashboardControls() {
     btnSelect.onclick = () => window.openDistributionSelector();
     wrapper.appendChild(btnSelect);
 
+    // 3. Bouton "Distribuer"
     const btnDistribute = document.createElement('button');
     btnDistribute.id = "btn-distribute";
     btnDistribute.className = "btn-admin-action";
@@ -437,6 +435,7 @@ function generateDashboardControls() {
     btnDistribute.onclick = distributeRoles;
     wrapper.appendChild(btnDistribute);
 
+    // 4. Bouton "Révéler"
     const btnReveal = document.createElement('button');
     btnReveal.id = "btn-reveal";
     btnReveal.className = "btn-admin-action";
@@ -455,6 +454,7 @@ function generateDashboardControls() {
     });
 }
 
+// --- FONCTION : OUVRIR LE TABLEAU (PANINI) ---
 window.openRoleSummaryPanel = function() {
     const rolesVillage = [];
     const rolesLoup = [];
@@ -472,10 +472,11 @@ window.openRoleSummaryPanel = function() {
         }
     });
 
+    // Contenu HTML du Panini Tableau
     const summaryHTML = `
         <div class="panini-admin-header">
             <h2 style="color:var(--gold); font-family:'Pirata One'; font-size:2em; margin:0;">RÉPARTITION</h2>
-            <button class="close-details" onclick="closeDetails()" style="position:absolute; right:20px; top:20px; background:transparent; border:none; color:gold; font-size:1.5em;">✕</button>
+            <button class="close-details" onclick="window.internalCloseDetails()" style="position:absolute; right:0; top:0; background:transparent; border:none; color:gold; font-size:1.5em; cursor:pointer;">✕</button>
         </div>
         <div class="summary-container" style="display:flex; gap:10px;">
             <div class="summary-col"><img src="Village.svg"><strong>${rolesVillage.length}</strong>${rolesVillage.map(t => `<div class="summary-list-item">${t}</div>`).join('')}</div>
@@ -485,16 +486,25 @@ window.openRoleSummaryPanel = function() {
         <br><br><br>
     `;
 
+    // INJECTION DANS LE PANINI (Details Panel)
     const panel = document.querySelector('.details-panel');
     const overlay = document.querySelector('.details-overlay');
     if(panel && overlay) {
-        panel.querySelector('.details-content').innerHTML = summaryHTML;
+        // On cible le conteneur interne pour ne pas écraser la croix native si elle existe
+        let contentDiv = panel.querySelector('.details-content');
+        if(!contentDiv) {
+             panel.innerHTML = '<div class="details-content"></div>';
+             contentDiv = panel.querySelector('.details-content');
+        }
+        contentDiv.innerHTML = summaryHTML;
+        
         panel.classList.add('active');
         overlay.classList.add('active');
+        document.body.classList.add('no-scroll');
     }
 }
 
-// --- FICHE JOUEUR PANINI ---
+// --- FONCTION : OUVRIR FICHE JOUEUR (PANINI) ---
 window.openAdminPlayerDetail = function(playerId, playerPseudo, roleId, isDead, avatarBase64, isMayor) {
     const panel = document.querySelector('.details-panel');
     const overlay = document.querySelector('.details-overlay');
@@ -509,17 +519,18 @@ window.openAdminPlayerDetail = function(playerId, playerPseudo, roleId, isDead, 
         if(r) { 
             roleImg = r.image; 
             roleTitle = r.title; 
-            if(r.category === 'loups') campIcon = `<img src="Loup.svg" style="width:30px; vertical-align:middle;">`;
-            else if(r.category === 'solo') campIcon = `<img src="Solo.svg" style="width:30px; vertical-align:middle;">`;
-            else if(r.category === 'vampires') campIcon = `<img src="Vampires.svg" style="width:30px; vertical-align:middle;">`;
-            else campIcon = `<img src="Village.svg" style="width:30px; vertical-align:middle;">`;
+            if(r.category === 'loups') campIcon = `<img src="Loup.svg" style="width:30px; vertical-align:middle; margin-right:5px;">`;
+            else if(r.category === 'solo') campIcon = `<img src="Solo.svg" style="width:30px; vertical-align:middle; margin-right:5px;">`;
+            else if(r.category === 'vampires') campIcon = `<img src="Vampires.svg" style="width:30px; vertical-align:middle; margin-right:5px;">`;
+            else campIcon = `<img src="Village.svg" style="width:30px; vertical-align:middle; margin-right:5px;">`;
         }
     }
 
+    // Contenu HTML du Panini Joueur
     const htmlContent = `
         <div class="panini-admin-header">
-            <button class="close-details" onclick="closeDetails()" style="position:absolute; right:20px; top:20px;">✕</button>
-            <img src="${avatarBase64}" class="panini-admin-avatar">
+            <button class="close-details" onclick="window.internalCloseDetails()" style="position:absolute; right:0; top:0; background:transparent; border:none; color:gold; font-size:1.5em; cursor:pointer;">✕</button>
+            <img src="${avatarBase64}" class="panini-big-avatar">
             <h2 style="color:var(--gold); margin:0;">${playerPseudo}</h2>
             <div style="font-size:1.2em; margin-top:5px; color:${isDead ? '#c0392b' : '#2ecc71'}">
                 ${isDead ? 'MORT 💀' : 'VIVANT ❤️'} ${isMayor ? '| 🎖️ MAIRE' : ''}
@@ -527,23 +538,23 @@ window.openAdminPlayerDetail = function(playerId, playerPseudo, roleId, isDead, 
         </div>
 
         <div style="text-align:center; margin-bottom:20px;">
-            ${campIcon} <span style="font-family:'Almendra'; font-size:1.4em; color:#fff;">${roleTitle}</span>
-            <img src="${roleImg}" class="panini-role-card" style="filter:${isDead ? 'grayscale(100%)' : 'none'}">
+            <div style="display:flex; align-items:center; justify-content:center;">${campIcon} <span style="font-family:'Almendra'; font-size:1.4em; color:#fff;">${roleTitle}</span></div>
+            <img src="${roleImg}" class="panini-big-card" style="filter:${isDead ? 'grayscale(100%)' : 'none'}">
         </div>
 
-        <div class="admin-controls-wrapper">
-            <button class="btn-admin-action" style="background:${isMayor ? '#7f8c8d' : '#f1c40f'}; color:${isMayor ? '#fff' : '#000'};"
+        <div class="admin-actions-grid">
+            <button class="btn-admin-action" style="background:${isMayor ? '#7f8c8d' : '#f1c40f'}; color:${isMayor ? '#fff' : '#000'}; border:2px solid #fff;"
                 onclick="window.toggleMayor('${playerId}', ${!isMayor})">
                 ${isMayor ? '❌ DESTITUER MAIRE' : '🎖️ NOMMER MAIRE'}
             </button>
 
-            <button class="btn-admin-action" style="background:${isDead ? '#2ecc71' : '#c0392b'}; color:#fff;"
+            <button class="btn-admin-action" style="background:${isDead ? '#2ecc71' : '#c0392b'}; color:#fff; border:2px solid #fff;"
                 onclick="window.toggleLife('${playerId}', ${!isDead})">
                 ${isDead ? '♻️ RESSUSCITER' : '💀 TUER LE JOUEUR'}
             </button>
 
-            <button class="btn-admin-action" style="background:#3498db; color:#fff;"
-                onclick="window.closeDetails(); window.openResurrectModal('${playerId}')">
+            <button class="btn-admin-action" style="background:#3498db; color:#fff; border:2px solid #fff;"
+                onclick="window.internalCloseDetails(); window.openResurrectModal('${playerId}')">
                 🔄 CHANGER LE RÔLE
             </button>
         </div>
@@ -559,21 +570,27 @@ window.openAdminPlayerDetail = function(playerId, playerPseudo, roleId, isDead, 
         <br><br><br>
     `;
 
-    panel.querySelector('.details-content').innerHTML = htmlContent;
+    let contentDiv = panel.querySelector('.details-content');
+    if(!contentDiv) {
+         panel.innerHTML = '<div class="details-content"></div>';
+         contentDiv = panel.querySelector('.details-content');
+    }
+    contentDiv.innerHTML = htmlContent;
     panel.classList.add('active');
     overlay.classList.add('active');
+    document.body.classList.add('no-scroll');
 };
 
 // ACTIONS ADMIN RAPIDES
 window.toggleMayor = function(pid, state) {
     update(ref(db, `games/${currentGameCode}/players/${pid}`), { isMayor: state });
-    window.closeDetails();
+    window.internalCloseDetails();
 };
 window.toggleLife = function(pid, state) {
     const status = state ? 'alive' : 'dead';
     if(!state && !confirm("Tuer ce joueur ?")) return;
     update(ref(db, `games/${currentGameCode}/players/${pid}`), { status: status });
-    window.closeDetails();
+    window.internalCloseDetails();
 };
 window.adminDrawEvent = function(pid, cat) { window.openEventSelector(pid, cat); };
 
@@ -640,6 +657,7 @@ function updateAdminUI(players) {
     if(!listDiv) return;
     listDiv.innerHTML = "";
     
+    // Sync Draft
     const isDraft = Object.values(players).some(p => p.draftRole);
     if(isDraft) {
         distributionSelection = []; 
@@ -687,6 +705,7 @@ function updateAdminUI(players) {
             if(isDraft) innerHTML = `<div style="background:#e67e22; color:white; font-size:0.6em; padding:2px 5px; border-radius:4px; position:absolute; top:3px; left:3px; z-index:10; font-weight:bold;">PROV.</div>` + innerHTML;
             cardDiv.innerHTML = innerHTML;
 
+            // FIX: Clic direct pour ouvrir le Panini Joueur
             if(!isDraft) {
                 cardDiv.onclick = () => window.openAdminPlayerDetail(id, p.name, currentRoleId, isDead, avatarSrc, p.isMayor);
             } else {
