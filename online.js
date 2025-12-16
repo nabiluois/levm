@@ -1,5 +1,5 @@
 // ============================================
-// SYSTEME EN LIGNE - V58 (LIAISONS & ACTIONS SPÉCIALES)
+// SYSTEME EN LIGNE - V61 (PRELOAD & VITESSE)
 // ============================================
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -25,7 +25,8 @@ const db = getDatabase(app);
 let currentGameCode = null;
 let myPlayerId = null;
 let myCurrentRoleId = null;
-let targetResurrectId = null; 
+let targetResurrectId = null;
+let targetEventCategory = null; 
 let detectedRoles = [];
 let detectedEvents = { gold: [], silver: [], bronze: [] };
 let isDraftMode = false; 
@@ -34,9 +35,9 @@ let distributionSelection = [];
 let currentPlayersData = {}; 
 
 // Variables pour les Liaisons
-let actionSourceRole = null;    // Quel rôle a déclenché l'action (ex: 'l_orphelin')
-let actionStep = 0;             // Etape de sélection (ex: Amoureux 1, puis Amoureux 2)
-let tempSelection = [];         // Stockage temporaire des ID sélectionnés
+let actionSourceRole = null;
+let actionStep = 0;
+let tempSelection = [];
 
 // ============================================
 // A. INITIALISATION
@@ -178,6 +179,10 @@ function scanContentFromHTML() {
                 image: imgSrc,
                 category: categoryId
             });
+
+            // OPTIMISATION V61 : PRELOAD
+            const preloadImg = new Image();
+            preloadImg.src = imgSrc;
         }
     });
 
@@ -188,6 +193,10 @@ function scanContentFromHTML() {
             if (card.classList.contains('gold')) detectedEvents.gold.push(imgSrc);
             else if (card.classList.contains('silver')) detectedEvents.silver.push(imgSrc);
             else if (card.classList.contains('bronze')) detectedEvents.bronze.push(imgSrc);
+            
+            // OPTIMISATION V61 : PRELOAD
+            const preloadImg = new Image();
+            preloadImg.src = imgSrc;
         }
     });
 }
@@ -419,19 +428,11 @@ window.openRoleSummaryPanel = function() {
     
     // LOGIQUE DE CLIC POUR RÔLES SPÉCIAUX
     window.handleTableRoleClick = function(roleId, playerId) {
-        if(isDraftMode) return; // Pas d'action en mode Draft
-        
-        // Liste des rôles à action
-        const specialRoles = [
-            'l_orphelin', 'target', 'le_loup_garou_rouge', 'le_loup_garou_maudit', 
-            'le_loup_garou_alpha', 'le_papa_des_loups'
-        ];
-
+        if(isDraftMode) return;
+        const specialRoles = ['l_orphelin', 'target', 'le_loup_garou_rouge', 'le_loup_garou_maudit', 'le_loup_garou_alpha', 'le_papa_des_loups'];
         if (specialRoles.includes(roleId)) {
-            // Lancement du sélecteur de joueurs
             window.openPlayerSelectorForAction(roleId, playerId);
         } else {
-            // Sinon on ouvre juste la fiche du joueur (Comportement normal)
             const p = currentPlayersData[playerId];
             if(p) window.openAdminPlayerDetail(playerId, p.name, roleId, p.status === 'dead', p.avatar || 'icon.png', p.isMayor);
         }
@@ -450,7 +451,6 @@ window.openRoleSummaryPanel = function() {
             
             const avatar = playerObj.avatar || "icon.png";
             
-            // Ajout des petits badges dans la ligne (Cœur, Cible...)
             let icons = "";
             if(playerObj.attributes) {
                 if(playerObj.attributes.lover) icons += "💘 ";
@@ -460,16 +460,19 @@ window.openRoleSummaryPanel = function() {
                 if(playerObj.attributes.cursed_mentor) icons += "🌙 ";
             }
 
-            // AJOUT DU ONCLICK SPÉCIAL
-            html = `<div class="summary-list-item" onclick="window.handleTableRoleClick('${roleId}', '${playerId}')" style="${style} display:flex; align-items:center; gap:10px; padding:8px 10px; margin:5px 0; border-radius:20px; justify-content:flex-start; width:95%;">
-                <img src="${avatar}" style="width:40px; height:40px; min-width:40px; border-radius:50%; object-fit:cover; border:2px solid gold;">
+            // --- MISE EN PAGE SPACIEUSE (XXL) ---
+            html = `<div class="summary-list-item" onclick="window.handleTableRoleClick('${roleId}', '${playerId}')" 
+                style="${style} display:flex; align-items:center; gap:20px; padding:12px 15px; margin:8px 0; border-radius:15px; justify-content:flex-start; width:95%;">
+                
+                <img src="${avatar}" style="width:60px; height:60px; min-width:60px; border-radius:50%; object-fit:cover; border:3px solid gold; box-shadow:0 0 10px rgba(0,0,0,0.5);">
+                
                 <div style="display:flex; flex-direction:column; align-items:flex-start; overflow:hidden;">
-                    <span style="font-family:'Almendra'; font-size:1.2em; font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${playerObj.name}</span>
-                    <span style="font-size:0.8em; opacity:0.8;">${role.title} ${icons}</span>
+                    <span style="font-family:'Almendra'; font-size:1.4em; font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${playerObj.name}</span>
+                    <span style="font-size:1.1em; color:#ddd; margin-top:2px;">${role.title} ${icons}</span>
                 </div>
             </div>`;
         } else {
-            html = `<div class="summary-list-item" style="color:#ddd; padding:5px;">${role.title}</div>`;
+            html = `<div class="summary-list-item" style="color:#ddd; padding:8px; font-size:1.1em;">${role.title}</div>`;
         }
         return { html, cat: role.category };
     };
@@ -529,13 +532,12 @@ window.openRoleSummaryPanel = function() {
     }
 }
 
-// --- LOGIQUE SÉLECTEUR DE JOUEURS POUR ACTIONS ---
+// --- LOGIQUE SÉLECTEUR DE JOUEURS POUR ACTIONS (AVEC VISUEL ON/OFF) ---
 window.openPlayerSelectorForAction = function(roleType, sourceId) {
     actionSourceRole = roleType;
     actionStep = 1;
-    tempSelection = []; // On reset
+    tempSelection = []; 
     
-    // Titre selon le rôle
     let title = "CHOISIR UNE CIBLE";
     if(roleType === 'l_orphelin') title = "CHOISIR AMOUREUX 1";
     if(roleType === 'target') title = "CHOISIR CIBLE MIROIR";
@@ -543,7 +545,6 @@ window.openPlayerSelectorForAction = function(roleType, sourceId) {
     if(roleType === 'le_loup_garou_maudit') title = "CHOISIR MENTOR";
     if(roleType === 'le_papa_des_loups' || roleType === 'le_loup_garou_alpha') title = "INFECTER QUI ?";
 
-    // Création Modale Rapide (On utilise admin-role-grid temporairement)
     const grid = document.getElementById('admin-role-grid');
     if(!grid) return;
     
@@ -555,21 +556,39 @@ window.openPlayerSelectorForAction = function(roleType, sourceId) {
     
     grid.style.display = "block"; grid.innerHTML = "";
     
-    // Grille des joueurs
     const catGrid = document.createElement('div');
     catGrid.className = "admin-grid-container";
     
     Object.entries(currentPlayersData).forEach(([pid, p]) => {
-        // On ne s'affiche pas soi-même (sauf orphelin qui choisit 2 autres)
         if (pid === sourceId && roleType !== 'l_orphelin') return;
         
         const div = document.createElement('div');
-        div.className = "role-select-item";
+        div.className = "role-select-item player-selector-item";
+        
+        // STYLE PAR DÉFAUT : GRISÉ + OPTIMISATION IMAGE V61
         div.innerHTML = `
-            <img src="${p.avatar || 'icon.png'}" style="width:100%; aspect-ratio:1/1; object-fit:cover; border-radius:50%; border:2px solid gold;">
-            <div style="color:white; font-weight:bold; margin-top:5px;">${p.name}</div>
+            <img src="${p.avatar || 'icon.png'}" loading="eager" style="width:100%; aspect-ratio:1/1; object-fit:cover; border-radius:50%; border:2px solid #555; filter:grayscale(100%); opacity:0.6; transition:all 0.2s ease;">
+            <div style="color:#aaa; font-weight:bold; margin-top:5px; transition:color 0.2s;">${p.name}</div>
         `;
-        div.onclick = () => window.handleActionSelection(roleType, sourceId, pid);
+        
+        // INTERACTION : CLIC
+        div.onclick = function() {
+            // 1. Visuel : On allume
+            const img = this.querySelector('img');
+            const txt = this.querySelector('div');
+            
+            img.style.filter = "none";
+            img.style.opacity = "1";
+            img.style.borderColor = "#2ecc71"; // Vert de validation
+            img.style.transform = "scale(1.1)";
+            txt.style.color = "white";
+            
+            // 2. Action après petit délai pour voir l'effet
+            setTimeout(() => {
+                window.handleActionSelection(roleType, sourceId, pid);
+            }, 300);
+        };
+        
         catGrid.appendChild(div);
     });
     grid.appendChild(catGrid);
@@ -584,10 +603,12 @@ window.handleActionSelection = function(roleType, sourceId, selectedPid) {
             tempSelection.push(selectedPid);
             actionStep = 2;
             document.querySelector('#modal-role-selector h2').innerText = "CHOISIR AMOUREUX 2";
-            // On rafraichit pour enlever le joueur 1 de la liste (optionnel mais mieux)
+            
+            // On rafraîchit la grille pour exclure le 1er choix (ou le marquer)
+            // Mais pour faire simple et rapide, on garde la grille ouverte
+            // On pourrait marquer visuellement le 1er choix ici si on voulait
             return; 
         } else if (actionStep === 2) {
-            // Fin Orphelin : On lie les deux
             const lover1 = tempSelection[0];
             const lover2 = selectedPid;
             
@@ -600,12 +621,11 @@ window.handleActionSelection = function(roleType, sourceId, selectedPid) {
             update(ref(db), updates).then(() => {
                 internalShowNotification("❤️", "Le couple est formé !");
                 window.closeModal('modal-role-selector');
-                window.openRoleSummaryPanel(); // Refresh table
+                window.openRoleSummaryPanel();
             });
         }
     } 
     else {
-        // Actions simples (1 cible)
         const updates = {};
         
         if (roleType === 'target') {
@@ -613,7 +633,7 @@ window.handleActionSelection = function(roleType, sourceId, selectedPid) {
             internalShowNotification("🎯", "Cible verrouillée !");
         }
         else if (roleType === 'le_loup_garou_rouge') {
-            updates[`games/${currentGameCode}/players/${selectedPid}/attributes/linked_red`] = sourceId; // On lie au rouge
+            updates[`games/${currentGameCode}/players/${selectedPid}/attributes/linked_red`] = sourceId;
             internalShowNotification("❤️", "Cœur lié au Loup Rouge !");
         }
         else if (roleType === 'le_loup_garou_maudit') {
@@ -770,7 +790,6 @@ window.toggleLife = function(pid, state, btn) {
         btn.innerText = state ? '💀 TUER LE JOUEUR' : '♻️ RESSUSCITER';
         btn.setAttribute('onclick', `window.toggleLife('${pid}', ${!state}, this)`);
         
-        // Rafraichir le panini si ouvert
         const cardImg = document.querySelector('.panini-big-card');
         if(cardImg) cardImg.style.filter = state ? 'none' : 'grayscale(100%)';
         
@@ -808,6 +827,7 @@ function updateDistributionDashboard() {
     if(document.getElementById('pop-total')) document.getElementById('pop-total').innerText = distributionSelection.length;
 }
 
+// --- OPTIMISATION GENERATION GRILLE (Fragment + SVG + EAGER) ---
 window.generateResurrectionGrid = function(mode = 'single') {
     const grid = document.getElementById('admin-role-grid');
     if(!grid) return;
@@ -854,7 +874,8 @@ window.generateResurrectionGrid = function(mode = 'single') {
                         div.innerHTML += `<div class="qty-badge">x${count}</div>`;
                     }
                 }
-                div.innerHTML += `<img src="${role.image}" loading="lazy" style="width:100%; border-radius:6px; display:block;">`;
+                // OPTIMISATION V61 : LOADING EAGER (POUR QUE ÇA S'AFFICHE VITE)
+                div.innerHTML += `<img src="${role.image}" loading="eager" style="width:100%; border-radius:6px; display:block;">`;
                 div.onclick = () => mode === 'multi' ? handleMultiSelection(role.id, div) : window.assignRoleToPlayer(role.id);
                 catGrid.appendChild(div);
             });
@@ -1049,6 +1070,8 @@ function distributeRoles() {
         playerIds.forEach((id, index) => {
             if (selectedRoles[index]) {
                 updates[`games/${currentGameCode}/players/${id}/draftRole`] = selectedRoles[index];
+                // V60 : RESET TOTAL DES ATTRIBUTS
+                updates[`games/${currentGameCode}/players/${id}/attributes`] = null; 
             }
         });
         update(ref(db), updates);
