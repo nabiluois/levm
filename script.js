@@ -2367,20 +2367,35 @@ document.addEventListener('DOMContentLoaded', function() {
   function openDetails(cardData) {
     if (navigator.vibrate) navigator.vibrate(15);
     const content = detailsPanel.querySelector('.details-content') || detailsPanel;
+    
+    // On construit le chemin vidéo
     const videoSrc = cardData.image.replace(/\.(png|jpg|jpeg|webp)$/i, '.mp4');
-    const uniqueId = 'fallback-' + Math.random().toString(36).substr(2, 9);
+    
+    // Contenu HTML propre : on insère SEULEMENT la vidéo d'abord.
+    // Si elle échoue, le JS la remplacera proprement par l'image.
     content.innerHTML = `
       <div class="details-header">
         <h2 class="details-title">${cardData.title}</h2>
         <button class="close-details" onclick="closeDetails()">✕</button>
       </div>
-      <div class="media-wrapper" style="position:relative; min-height:200px;">
-          <video class="details-video" src="${videoSrc}" poster="${cardData.image}" autoplay loop muted playsinline webkit-playsinline style="display:block;" onerror="this.style.display='none'; document.getElementById('${uniqueId}').style.display='block';">
+      <div class="media-wrapper" style="position:relative; min-height:200px; display:flex; justify-content:center;">
+          <video class="details-video" src="${videoSrc}" poster="${cardData.image}" autoplay loop muted playsinline webkit-playsinline style="width:100%; height:auto; display:block;">
           </video>
-          <img id="${uniqueId}" src="${cardData.image}" alt="${cardData.title}" class="details-image" style="display:none;">
       </div>
       <div class="details-section">${cardData.description || ''}</div>
     `;
+
+    // Logique de remplacement d'erreur plus propre
+    const videoEl = content.querySelector('.details-video');
+    const wrapper = content.querySelector('.media-wrapper');
+    
+    if(videoEl) {
+        videoEl.addEventListener('error', () => {
+            // Si la vidéo plante, on vide le wrapper et on met l'image
+            wrapper.innerHTML = `<img src="${cardData.image}" alt="${cardData.title}" class="details-image" style="width:100%; height:auto; display:block;">`;
+        });
+    }
+
     detailsPanel.classList.add('active');
     overlay.classList.add('active');
     document.body.classList.add('no-scroll');
