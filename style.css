@@ -878,3 +878,69 @@ button[onclick="signPact()"]::before {
     display: block;
     box-shadow: 0 5px 15px rgba(0,0,0,0.5);
 }
+
+/* ============================================
+   21. FIX SELECTEUR & NETTOYAGE (V39)
+   ============================================ */
+
+/* Masquer le texte inutile dans la modale */
+#modal-role-selector p { display: none !important; }
+
+/* Remonter le titre et le réduire */
+#modal-role-selector h2 { 
+    margin: 5px 0 10px 0 !important; 
+    font-size: 1.4em !important; 
+    padding: 0 !important;
+    border: none !important;
+}
+
+/* Dashboard de sélection (Compteurs + Bouton compact) */
+.selection-dashboard {
+    position: sticky;
+    top: 0;
+    background: #1a120b;
+    z-index: 500;
+    padding: 10px 5px;
+    border-bottom: 2px solid var(--gold);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.8);
+    margin: -10px -10px 10px -10px; /* Colle aux bords */
+}
+
+/* Les compteurs (Village / Loup / Solo) */
+.dashboard-stats {
+    display: flex;
+    gap: 15px;
+    font-family: 'Pirata One';
+    font-size: 1.2em;
+}
+.stat-item { display: flex; align-items: center; gap: 5px; }
+.stat-item img { width: 24px; height: 24px; }
+.stat-item span { color: #fff; }
+
+/* Bouton Valider Compact */
+.btn-compact {
+    background: #2ecc71;
+    color: #fff;
+    border: 1px solid #fff;
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-family: 'Pirata One';
+    font-size: 1.1em;
+    cursor: pointer;
+    text-transform: uppercase;
+}
+
+/* Titres des catégories bien visibles */
+.category-separator {
+    color: var(--gold);
+    font-family: 'Pirata One';
+    font-size: 1.4em;
+    border-bottom: 1px solid #555;
+    margin-top: 15px;
+    margin-bottom: 5px;
+    padding-bottom: 2px;
+    clear: both;
+}

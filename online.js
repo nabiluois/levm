@@ -1,5 +1,5 @@
 // ============================================
-// SYSTEME EN LIGNE - V38 (PANINI ADMIN & OPTIMISATION)
+// SYSTEME EN LIGNE - V39 (CLEAN & FIX SELECTEUR)
 // ============================================
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -40,15 +40,12 @@ let distributionSelection = [];
 document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => { scanContentFromHTML(); }, 500);
     
-    // Gestion Bouton REJOINDRE (Joueur)
     const btnJoin = document.getElementById('btn-join-action');
     if(btnJoin) btnJoin.addEventListener('click', joinGame);
 
-    // Gestion Bouton CRÉER (MJ)
     attachCreateEvent();
     setInterval(attachCreateEvent, 1000);
 
-    // Restauration Session
     const savedAdminCode = localStorage.getItem('adminGameCode');
     if (savedAdminCode) { showResumeButton(savedAdminCode); }
     checkPlayerSession();
@@ -217,21 +214,6 @@ window.restoreAdminSession = function(savedCode) {
 function launchAdminInterface() {
     document.getElementById('game-code-display').innerText = currentGameCode;
     const adminDash = document.getElementById('admin-dashboard');
-    
-    // Notes MJ
-    if(!document.getElementById('mj-notes')) {
-        const notesHTML = `
-            <div class="admin-section" style="order:-1;">
-                <label class="admin-notes-label">📝 Notes MJ</label>
-                <textarea id="mj-notes" class="admin-notes-area" placeholder="Notes privées..."></textarea>
-            </div>
-        `;
-        adminDash.querySelector('.admin-content-scroll').insertAdjacentHTML('afterbegin', notesHTML);
-        const textArea = document.getElementById('mj-notes');
-        textArea.value = localStorage.getItem(`vm_notes_${currentGameCode}`) || "";
-        textArea.addEventListener('input', (e) => localStorage.setItem(`vm_notes_${currentGameCode}`, e.target.value));
-    }
-
     adminDash.style.display = 'flex';
     document.body.classList.add('no-scroll'); 
     window.closeModal('modal-online-menu');
@@ -248,24 +230,187 @@ function setupAdminListeners() {
 }
 
 // ============================================
-// C. DASHBOARD CONTROLS (BOUTONS & TABLEAU PANINI)
+// C. LOGIQUE SÉLECTION (CORRIGÉE & OPTIMISÉE)
+// ============================================
+
+// Met à jour les compteurs dans le dashboard fixe
+function updateDistributionDashboard() {
+    const countVillage = distributionSelection.filter(id => {
+        const r = detectedRoles.find(role => role.id === id); return r && r.category === 'village';
+    }).length;
+    const countLoup = distributionSelection.filter(id => {
+        const r = detectedRoles.find(role => role.id === id); return r && r.category === 'loups';
+    }).length;
+    const countSolo = distributionSelection.filter(id => {
+        const r = detectedRoles.find(role => role.id === id); return r && r.category === 'solo';
+    }).length;
+
+    if(document.getElementById('pop-count-village')) document.getElementById('pop-count-village').innerText = countVillage;
+    if(document.getElementById('pop-count-loup')) document.getElementById('pop-count-loup').innerText = countLoup;
+    if(document.getElementById('pop-count-solo')) document.getElementById('pop-count-solo').innerText = countSolo;
+    if(document.getElementById('pop-total')) document.getElementById('pop-total').innerText = distributionSelection.length;
+}
+
+window.generateResurrectionGrid = function(mode = 'single') {
+    const grid = document.getElementById('admin-role-grid');
+    if(!grid) return;
+    if (detectedRoles.length === 0) scanContentFromHTML();
+    
+    grid.style.display = "block"; 
+    grid.innerHTML = "";
+    
+    // --- 1. Dashboard Fixe en haut (si Multi) ---
+    if (mode === 'multi') {
+        const dashboard = document.createElement('div');
+        dashboard.className = "selection-dashboard";
+        dashboard.innerHTML = `
+            <div class="dashboard-stats">
+                <div class="stat-item"><img src="Village.svg"><span id="pop-count-village">0</span></div>
+                <div class="stat-item"><img src="Loup.svg"><span id="pop-count-loup">0</span></div>
+                <div class="stat-item"><img src="Solo.svg"><span id="pop-count-solo">0</span></div>
+            </div>
+            <button class="btn-compact" onclick="window.validateDistribution()">
+                OK (<span id="pop-total">0</span>)
+            </button>
+        `;
+        grid.appendChild(dashboard);
+        setTimeout(updateDistributionDashboard, 50); 
+    }
+
+    // --- 2. La Grille des Cartes ---
+    const categoriesOrder = { 'village': '🏡 VILLAGE', 'loups': '🐺 LOUPS', 'solo': '🎭 SOLOS', 'vampires': '🧛 VAMPIRES' };
+    
+    for (const [catKey, catTitle] of Object.entries(categoriesOrder)) {
+        const rolesInCat = detectedRoles.filter(r => r.category === catKey);
+        
+        if (rolesInCat.length > 0) {
+            // Titre de catégorie visible
+            const titleDiv = document.createElement('div');
+            titleDiv.className = "category-separator";
+            titleDiv.innerText = catTitle;
+            grid.appendChild(titleDiv);
+
+            const catGrid = document.createElement('div');
+            catGrid.className = "admin-grid-container"; 
+            
+            rolesInCat.sort((a, b) => a.title.localeCompare(b.title));
+
+            rolesInCat.forEach(role => {
+                const div = document.createElement('div');
+                div.className = "role-select-item";
+                
+                // Si une carte est sélectionnée, on l'affiche visuellement
+                if (mode === 'multi') {
+                    const count = distributionSelection.filter(id => id === role.id).length;
+                    if (count > 0) {
+                        div.classList.add('selected');
+                        div.innerHTML += `<div class="qty-badge">x${count}</div>`;
+                    }
+                }
+
+                div.innerHTML += `<img src="${role.image}" loading="lazy" style="width:100%; border-radius:6px; display:block;">`;
+                
+                // Le CLIC
+                div.onclick = function() { 
+                    if (mode === 'multi') {
+                        handleMultiSelection(role.id, div);
+                    } else {
+                        window.assignRoleToPlayer(role.id); 
+                    }
+                };
+                catGrid.appendChild(div);
+            });
+            grid.appendChild(catGrid);
+        }
+    }
+};
+
+function handleMultiSelection(roleId, divElement) {
+    let currentCount = distributionSelection.filter(id => id === roleId).length;
+    let newCount = 0;
+    
+    // Logique simplifiée : toggle +1 ou +0 (sauf cartes spéciales)
+    const isMultiCard = ['le_paysan', 'le_loup_garou', 'olaf_et_pilaf', 'les_jumeaux_explosifs'].some(id => roleId.includes(id));
+    
+    if (isMultiCard) {
+        let input = prompt(`Combien ?`, currentCount || 0);
+        if (input === null) return; 
+        newCount = parseInt(input);
+        if (isNaN(newCount) || newCount < 0) newCount = 0;
+    } else {
+        newCount = currentCount > 0 ? 0 : 1;
+    }
+
+    // Mise à jour de la liste
+    distributionSelection = distributionSelection.filter(id => id !== roleId);
+    for(let i=0; i<newCount; i++) {
+        distributionSelection.push(roleId);
+    }
+
+    // Mise à jour visuelle immédiate de la carte
+    // On nettoie d'abord les badges existants
+    const existingBadge = divElement.querySelector('.qty-badge');
+    if(existingBadge) existingBadge.remove();
+
+    if (newCount > 0) {
+        divElement.classList.add('selected');
+        const badge = document.createElement('div');
+        badge.className = 'qty-badge';
+        badge.innerText = `x${newCount}`;
+        divElement.appendChild(badge);
+    } else {
+        divElement.classList.remove('selected');
+    }
+
+    updateDistributionDashboard();
+}
+
+window.validateDistribution = function() {
+    window.closeModal('modal-role-selector');
+    generateDashboardControls(); 
+};
+
+// 4. OUVERTURE MODALES
+window.openDistributionSelector = function() {
+    window.generateResurrectionGrid('multi');
+    const modalTitle = document.querySelector('#modal-role-selector h2');
+    if(modalTitle) modalTitle.style.display = 'none'; 
+    const modal = document.getElementById('modal-role-selector');
+    if(modal) modal.style.zIndex = "20000"; 
+    window.openModal('modal-role-selector');
+};
+
+window.openResurrectModal = function(playerId) {
+    targetResurrectId = playerId;
+    window.generateResurrectionGrid('single'); 
+    const modalTitle = document.querySelector('#modal-role-selector h2');
+    if(modalTitle) {
+        modalTitle.style.display = 'block';
+        modalTitle.innerText = isDraftMode ? "CHANGER CARTE" : "RESSUSCITER";
+    }
+    const modal = document.getElementById('modal-role-selector');
+    if(modal) modal.style.zIndex = "20000"; 
+    window.openModal('modal-role-selector');
+};
+
+// ============================================
+// D. DASHBOARD & PANEL
 // ============================================
 
 function generateDashboardControls() {
     const container = document.getElementById('roles-selection-list');
     if(!container) return;
     
-    // Nettoyage complet : on vire le tableau du DOM principal
+    // Nettoyage complet
     container.innerHTML = "";
     container.style.border = "none";
     container.style.background = "transparent";
     container.style.maxHeight = "none";
 
-    // On crée les boutons d'action
+    // Boutons
     const wrapper = document.createElement('div');
     wrapper.className = "admin-controls-wrapper";
 
-    // Bouton 1 : Voir Tableau
     const btnTable = document.createElement('button');
     btnTable.className = "btn-admin-action";
     btnTable.style.background = "#34495e";
@@ -275,7 +420,6 @@ function generateDashboardControls() {
     btnTable.onclick = () => window.openRoleSummaryPanel();
     wrapper.appendChild(btnTable);
 
-    // Bouton 2 : Modifier Sélection
     const btnSelect = document.createElement('button');
     btnSelect.className = "btn-admin-action";
     btnSelect.style.background = "#2c3e50";
@@ -284,7 +428,6 @@ function generateDashboardControls() {
     btnSelect.onclick = () => window.openDistributionSelector();
     wrapper.appendChild(btnSelect);
 
-    // Bouton 3 : Distribuer
     const btnDistribute = document.createElement('button');
     btnDistribute.id = "btn-distribute";
     btnDistribute.className = "btn-admin-action";
@@ -294,7 +437,6 @@ function generateDashboardControls() {
     btnDistribute.onclick = distributeRoles;
     wrapper.appendChild(btnDistribute);
 
-    // Bouton 4 : Révéler
     const btnReveal = document.createElement('button');
     btnReveal.id = "btn-reveal";
     btnReveal.className = "btn-admin-action";
@@ -307,14 +449,12 @@ function generateDashboardControls() {
 
     container.appendChild(wrapper);
     
-    // Mise à jour du compteur
     get(child(ref(db), `games/${currentGameCode}/players`)).then((snapshot) => {
         const count = snapshot.exists() ? Object.keys(snapshot.val()).length : 0;
         updateAdminButtons(count);
     });
 }
 
-// --- OUVERTURE DU RÉCAPITULATIF (PANINI) ---
 window.openRoleSummaryPanel = function() {
     const rolesVillage = [];
     const rolesLoup = [];
@@ -335,7 +475,7 @@ window.openRoleSummaryPanel = function() {
     const summaryHTML = `
         <div class="panini-admin-header">
             <h2 style="color:var(--gold); font-family:'Pirata One'; font-size:2em; margin:0;">RÉPARTITION</h2>
-            <button class="close-details" onclick="closeDetails()">✕</button>
+            <button class="close-details" onclick="closeDetails()" style="position:absolute; right:20px; top:20px; background:transparent; border:none; color:gold; font-size:1.5em;">✕</button>
         </div>
         <div class="summary-container" style="display:flex; gap:10px;">
             <div class="summary-col"><img src="Village.svg"><strong>${rolesVillage.length}</strong>${rolesVillage.map(t => `<div class="summary-list-item">${t}</div>`).join('')}</div>
@@ -354,110 +494,12 @@ window.openRoleSummaryPanel = function() {
     }
 }
 
-// --- LOGIQUE SÉLECTION ---
-window.generateResurrectionGrid = function(mode = 'single') {
-    const grid = document.getElementById('admin-role-grid');
-    if(!grid) return;
-    if (detectedRoles.length === 0) scanContentFromHTML();
-    grid.style.display = "block"; grid.innerHTML = "";
-    
-    if (mode === 'multi') {
-        grid.innerHTML += `<div class="selection-dashboard"><button class="btn-validate" onclick="window.validateDistribution()">✅ VALIDER SÉLECTION</button></div>`;
-    }
-
-    const categoriesOrder = { 'village': '🏡 VILLAGE', 'loups': '🐺 LOUPS', 'solo': '🎭 SOLOS', 'vampires': '🧛 VAMPIRES' };
-    for (const [catKey, catTitle] of Object.entries(categoriesOrder)) {
-        const rolesInCat = detectedRoles.filter(r => r.category === catKey);
-        if (rolesInCat.length > 0) {
-            grid.innerHTML += `<h3 style="color:var(--gold); border-bottom:1px solid #555; margin-top:20px;">${catTitle}</h3>`;
-            const catGrid = document.createElement('div');
-            catGrid.className = "admin-grid-container"; 
-            rolesInCat.sort((a, b) => a.title.localeCompare(b.title));
-            rolesInCat.forEach(role => {
-                const div = document.createElement('div');
-                div.className = "role-select-item";
-                if (mode === 'multi' && distributionSelection.includes(role.id)) {
-                    div.classList.add('selected');
-                    const count = distributionSelection.filter(id => id === role.id).length;
-                    div.innerHTML += `<div class="qty-badge">x${count}</div>`;
-                }
-                div.innerHTML += `<img src="${role.image}" loading="lazy" style="width:100%; border-radius:6px;">`;
-                div.onclick = () => mode === 'multi' ? handleMultiSelection(role.id, div) : window.assignRoleToPlayer(role.id);
-                catGrid.appendChild(div);
-            });
-            grid.appendChild(catGrid);
-        }
-    }
-};
-
-function handleMultiSelection(roleId, divElement) {
-    let currentCount = distributionSelection.filter(id => id === roleId).length;
-    let newCount = 0;
-    const isMultiCard = ['le_paysan', 'le_loup_garou', 'olaf_et_pilaf', 'les_jumeaux_explosifs'].some(id => roleId.includes(id));
-    
-    if (isMultiCard) {
-        let input = prompt(`Combien ?`, currentCount || 0);
-        if (input === null) return;
-        newCount = Math.max(0, parseInt(input) || 0);
-    } else {
-        newCount = currentCount > 0 ? 0 : 1;
-    }
-
-    distributionSelection = distributionSelection.filter(id => id !== roleId);
-    for(let i=0; i<newCount; i++) distributionSelection.push(roleId);
-
-    if (newCount > 0) {
-        divElement.classList.add('selected');
-        if(isMultiCard) {
-            let badge = divElement.querySelector('.qty-badge') || document.createElement('div');
-            badge.className = 'qty-badge'; badge.innerText = `x${newCount}`;
-            divElement.appendChild(badge);
-        }
-    } else {
-        divElement.classList.remove('selected');
-        const badge = divElement.querySelector('.qty-badge');
-        if(badge) badge.remove();
-    }
-    
-    // Update button text
-    const ctrlTotal = document.getElementById('ctrl-total');
-    if(ctrlTotal) ctrlTotal.innerText = distributionSelection.length;
-}
-
-window.validateDistribution = function() {
-    window.closeModal('modal-role-selector');
-    generateDashboardControls(); 
-};
-
-// 4. OUVERTURE MODALES
-window.openDistributionSelector = function() {
-    window.generateResurrectionGrid('multi');
-    document.getElementById('modal-role-selector').style.zIndex = "20000"; 
-    window.openModal('modal-role-selector');
-};
-
-window.openResurrectModal = function(playerId) {
-    targetResurrectId = playerId;
-    window.generateResurrectionGrid('single'); 
-    const modalTitle = document.querySelector('#modal-role-selector h2');
-    if(modalTitle) {
-        modalTitle.style.display = 'block';
-        modalTitle.innerText = isDraftMode ? "CHANGER CARTE" : "RESSUSCITER";
-    }
-    document.getElementById('modal-role-selector').style.zIndex = "20000"; 
-    window.openModal('modal-role-selector');
-};
-
-// ============================================
-// D. FICHE JOUEUR PANINI (NOUVEAU)
-// ============================================
-
+// --- FICHE JOUEUR PANINI ---
 window.openAdminPlayerDetail = function(playerId, playerPseudo, roleId, isDead, avatarBase64, isMayor) {
     const panel = document.querySelector('.details-panel');
     const overlay = document.querySelector('.details-overlay');
     if(!panel || !overlay) return;
 
-    // Info Role
     let roleImg = "back.png";
     let roleTitle = "En attente...";
     let campIcon = "";
@@ -533,11 +575,8 @@ window.toggleLife = function(pid, state) {
     update(ref(db, `games/${currentGameCode}/players/${pid}`), { status: status });
     window.closeDetails();
 };
-window.adminDrawEvent = function(pid, cat) {
-    window.openEventSelector(pid, cat);
-};
+window.adminDrawEvent = function(pid, cat) { window.openEventSelector(pid, cat); };
 
-// EVENT SELECTOR (Reste en Modal Centré pour la sélection)
 window.openEventSelector = function(playerId, category) {
     targetResurrectId = playerId;
     targetEventCategory = category;
@@ -601,7 +640,6 @@ function updateAdminUI(players) {
     if(!listDiv) return;
     listDiv.innerHTML = "";
     
-    // Sync Draft
     const isDraft = Object.values(players).some(p => p.draftRole);
     if(isDraft) {
         distributionSelection = []; 
@@ -613,7 +651,6 @@ function updateAdminUI(players) {
     if(count === 0) {
         listDiv.innerHTML = '<div style="color:#aaa; font-style:italic; grid-column:1/-1;">En attente de joueurs...</div>';
     } else {
-        // TRI : Maire > Vivants > Morts
         const sortedPlayers = Object.entries(players).sort(([,a], [,b]) => {
             if (a.isMayor && !b.isMayor) return -1;
             if (!a.isMayor && b.isMayor) return 1;
@@ -650,7 +687,6 @@ function updateAdminUI(players) {
             if(isDraft) innerHTML = `<div style="background:#e67e22; color:white; font-size:0.6em; padding:2px 5px; border-radius:4px; position:absolute; top:3px; left:3px; z-index:10; font-weight:bold;">PROV.</div>` + innerHTML;
             cardDiv.innerHTML = innerHTML;
 
-            // Au clic, ouverture du Panini Fiche Joueur
             if(!isDraft) {
                 cardDiv.onclick = () => window.openAdminPlayerDetail(id, p.name, currentRoleId, isDead, avatarSrc, p.isMayor);
             } else {
@@ -725,7 +761,7 @@ function revealRolesToEveryone() {
     });
 }
 
-// CÔTÉ JOUEUR (Inchangé mais inclus pour complétude)
+// CÔTÉ JOUEUR (Inchangé)
 function joinGame() {
     const pseudo = document.getElementById('join-pseudo').value.trim();
     const code = document.getElementById('join-code').value.toUpperCase().trim();
