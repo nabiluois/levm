@@ -134,7 +134,7 @@ body.no-scroll {
 .extra-footer { margin-top: auto; text-align: center; font-size: 0.8em; opacity: 0.5; color: var(--gold); }
 
 /* ============================================
-   5. MODALES (STYLES DE BASE)
+   5. MODALES (STYLES DE BASE & ESPACEMENT RÉDUIT)
    ============================================ */
 .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.85); z-index: 4000; justify-content: center; align-items: center; padding: 20px; backdrop-filter: blur(5px); }
 .modal.active { display: flex; animation: fadeIn 0.3s; }
@@ -144,7 +144,8 @@ body.no-scroll {
     border: 2px solid var(--gold); border-radius: 15px; 
     margin-top: calc(env(safe-area-inset-top) + 20px); 
     max-height: calc(100dvh - 80px); 
-    padding: 50px 25px 25px 25px; 
+    /* ESPACE RÉDUIT ICI (20px au lieu de 50px) */
+    padding: 20px 25px 25px 25px !important; 
     width: 100%; max-width: 500px; 
     overflow-y: auto; position: relative; 
     box-shadow: 0 0 30px rgba(212, 175, 55, 0.2); 
@@ -162,9 +163,10 @@ body.no-scroll {
 
 /* Correctif Mobile pour les Modales */
 @media (max-width: 768px) {
-  .modal-content:not(.modal-large) { padding-top: 45px !important; }
+  /* ESPACE RÉDUIT MOBILE (20px au lieu de 45px) */
+  .modal-content:not(.modal-large) { padding-top: 20px !important; }
   .close-modal { top: 5px !important; right: 5px !important; width: 32px !important; height: 32px !important; line-height: 30px !important; z-index: 500 !important; }
-  .modal h2 { white-space: normal !important; text-align: center !important; font-size: 1.4em !important; border: none !important; }
+  .modal h2 { margin-top: 5px !important; white-space: normal !important; text-align: center !important; font-size: 1.4em !important; border: none !important; }
 }
 
 /* Formulaires dans les modales */
@@ -181,7 +183,9 @@ body.no-scroll {
 .modal-large { max-width: 600px; height: 85vh; display: flex; flex-direction: column; padding: 0 !important; overflow: hidden !important; }
 .slides-container { 
     flex: 1; position: relative; width: 100%; overflow-y: auto !important; 
-    padding: 70px 20px 20px 20px !important; overscroll-behavior: contain; 
+    /* ESPACE RÉDUIT RÈGLES (10px au lieu de 70px) */
+    padding: 10px 20px 20px 20px !important; 
+    overscroll-behavior: contain; 
     mask-image: linear-gradient(to bottom, transparent 0%, black 10%, black 90%, transparent 100%);
     -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 10%, black 90%, transparent 100%);
 }
@@ -210,12 +214,12 @@ body.no-scroll {
 .role-action-card { width: 100%; background: #1a120b; border: 1px solid #5a4633; padding: 15px; border-radius: 8px; margin-bottom: 10px; }
 .role-action-card h4 { color: var(--gold); margin-bottom: 5px; font-family: 'Pirata One'; }
 
-/* Timeline Maire */
+/* Timeline Maire (FIX BULLES) */
 .mayor-timeline { display: flex; flex-direction: column; width: 100%; padding: 10px 0; }
-.mayor-bubble { display: flex; align-items: center; gap: 15px; background: rgba(255,255,255,0.05); padding: 12px; border-radius: 50px; border: 1px solid #444; margin: 5px 0; }
+.mayor-bubble { display: flex; align-items: center; gap: 15px; background: rgba(255,255,255,0.05); padding: 8px 15px 8px 8px; border-radius: 50px; border: 1px solid #444; margin: 5px 0; overflow: hidden; position: relative; }
 .mayor-bubble.special { background: rgba(212, 175, 55, 0.15); border-color: var(--gold); }
 .mayor-bubble.permanent { background: rgba(74, 14, 78, 0.2); border-color: #8a6e2f; }
-.bubble-icon { width: 45px; height: 45px; border-radius: 50%; background: #1a120b; border: 2px solid var(--gold); display: flex; align-items: center; justify-content: center; color: var(--gold); font-size: 1.2em; flex-shrink: 0; }
+.bubble-icon { width: 45px !important; height: 45px !important; min-width: 45px !important; border-radius: 50%; background: #1a120b; border: 2px solid var(--gold); display: flex; align-items: center; justify-content: center; color: var(--gold); font-size: 1.2em; flex-shrink: 0; z-index: 2; }
 .bubble-content strong { display: block; color: var(--gold); font-family: 'Pirata One'; font-size: 1.1em; }
 .timeline-connector { width: 2px; height: 15px; background: #444; margin-left: 35px; }
 
@@ -458,6 +462,7 @@ h2 {
 .details-section p { display: block; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid rgba(212, 175, 55, 0.3); }
 .details-section p:last-child { border-bottom: none; padding-bottom: 0; margin-bottom: 0; }
 .emoji-svg { width: 1.3em !important; height: 1.3em !important; vertical-align: text-bottom !important; margin-right: 5px !important; display: inline-block !important; object-fit: contain !important; }
+
 /* ============================================
    12. ADMIN DASHBOARD & ONLINE
    ============================================ */
@@ -575,96 +580,65 @@ body.locked-game #online-mode-link { opacity: 0.3; filter: grayscale(100%); poin
 .notification-box button { background: var(--gold); color: #1a120b; border: none; padding: 10px 25px; font-family: 'Pirata One'; font-size: 1.2em; border-radius: 8px; cursor: pointer; width: 100%; }
 
 /* ============================================
-   15. MODE CLAIR (THEME LIGHT)
+   15. MODE CLAIR (THEME LIGHT) - CORRIGÉ
    ============================================ */
 body.light-mode { background: var(--bg-light); color: var(--text-light); }
-body.light-mode .main-header { background: rgba(245, 230, 211, 0.95); border-bottom-color: #8a6e2f; }
-body.light-mode input, body.light-mode select, body.light-mode textarea { background: rgba(255, 255, 255, 0.7); color: #000; border-color: #8a6e2f; }
+
+/* En-tête */
+body.light-mode .main-header { background: rgba(245, 230, 211, 0.98); border-bottom-color: #8a6e2f; }
 body.light-mode #themeBtn, body.light-mode .burger-btn { color: #5a4633; border-color: #8a6e2f; background: rgba(255,255,255,0.5); }
 body.light-mode .nav-btn { background: rgba(255, 255, 255, 0.6); border-color: #8a6e2f; }
 body.light-mode .nav-btn:hover { background: #8a6e2f; box-shadow: 0 0 10px rgba(138, 110, 47, 0.4); }
-body.light-mode h2, body.light-mode h3, body.light-mode strong { background: rgba(245, 230, 211, 0.95); color: #1a1a1a !important; text-shadow: none !important; border-bottom-color: #ccc !important; }
-body.light-mode .section-icon { filter: none; }
-body.light-mode h2 { box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-color: #8a6e2f; }
 
-/* Light Mode - Cartes */
+/* TITRES PRINCIPAUX (Le problème du cercle incomplet est réglé ici) */
+body.light-mode h2 { 
+    background: rgba(245, 230, 211, 0.95); 
+    color: #1a1a1a !important; 
+    text-shadow: none !important; 
+    border: 3px double #8a6e2f !important; /* Force la bordure complète */
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
+}
+body.light-mode .section-icon { filter: none; }
+
+/* TITRES SECONDAIRES */
+body.light-mode h3, body.light-mode strong { color: #1a1a1a !important; text-shadow: none !important; }
+
+/* Cartes */
 body.light-mode .carte-back { background: linear-gradient(135deg, #f5e6d3 0%, #fff 100%); }
 body.light-mode .carte-back p { color: #000000 !important; font-weight: 500 !important; }
 
-/* Light Mode - Details Panel */
+/* Interface Générale */
 body.light-mode .details-panel, body.light-mode .extra-menu, body.light-mode .modal-content, body.light-mode .lock-content, body.light-mode #admin-dashboard { background: #fffcf5 !important; border-color: #b8860b !important; color: #3e2f23 !important; }
-body.light-mode #admin-dashboard { background: #f4f6f8 !important; border: 1px solid #d1d5db !important; }
 body.light-mode .details-title, body.light-mode .extra-header h3, body.light-mode .modal h2 { color: #1a120b; text-shadow: none; }
-body.light-mode .details-section { background: rgba(255, 252, 245, 0.95); color: #3e2f23; border: 2px solid #b8860b; box-shadow: 0 5px 20px rgba(138, 110, 47, 0.2); }
-body.light-mode .details-section p, body.light-mode .details-section br + br { border-bottom-color: rgba(184, 134, 11, 0.3); }
+body.light-mode .details-section { background: rgba(255, 252, 245, 0.95); color: #3e2f23; border: 2px solid #b8860b; }
 body.light-mode .close-details, body.light-mode .close-extra, body.light-mode .close-modal { color: #5a4633 !important; border-color: #5a4633 !important; background: rgba(255,255,255,0.8) !important; }
 
-/* Light Mode - Admin */
-body.light-mode .admin-player-card { background: #ffffff !important; border: 1px solid #e5e7eb !important; color: #333 !important; box-shadow: 0 2px 5px rgba(0,0,0,0.05) !important; }
+/* Admin & Inputs */
+body.light-mode .admin-player-card { background: #ffffff !important; border: 1px solid #e5e7eb !important; color: #333 !important; }
 body.light-mode .admin-player-card.dead { background: #f3f4f6 !important; border: 1px solid #9ca3af !important; }
-body.light-mode .admin-player-card.dead strong { color: #9ca3af !important; }
-body.light-mode .summary-container { background: #ffffff !important; border: 1px solid #d1d5db !important; }
-body.light-mode .summary-col { border-right: 1px solid #e5e7eb !important; }
-body.light-mode .role-select-item { background: #ffffff !important; border: 1px solid #e5e7eb !important; box-shadow: 0 2px 4px rgba(0,0,0,0.05) !important; }
+body.light-mode .role-select-item { background: #ffffff !important; border: 1px solid #e5e7eb !important; }
 body.light-mode .role-select-item span { color: #4b5563 !important; font-weight: bold !important; }
-body.light-mode .role-select-item.selected { border: 2px solid #2ecc71 !important; background: #ecfdf5 !important; }
-body.light-mode .qty-badge { border: 2px solid #fff !important; box-shadow: 0 2px 4px rgba(0,0,0,0.2) !important; }
+body.light-mode .qty-badge { border: 2px solid #fff !important; }
+body.light-mode input, body.light-mode select, body.light-mode textarea { background: #ffffff !important; color: #000000 !important; border: 1px solid #8a6e2f !important; }
 
-/* Light Mode - Menu */
-body.light-mode .extra-links a { background: #ffffff !important; color: #000000 !important; border: 1px solid #8a6e2f !important; box-shadow: 0 2px 5px rgba(0,0,0,0.1) !important; }
-body.light-mode .extra-links a:hover { background: #f5e6d3 !important; }
-body.light-mode .extra-links a[onclick*="modal-regles"] { color: #ff6b6b !important; border-color: #ff6b6b !important; }
-body.light-mode #online-mode-link { color: #2ecc71 !important; border-color: #2ecc71 !important; }
-
-/* Light Mode - Slides */
-body.light-mode .step-box, body.light-mode .info-card, body.light-mode .role-action-card, body.light-mode .mayor-power-main, body.light-mode .power-item, body.light-mode .mayor-bubble, body.light-mode .choice-item { background: rgba(255, 255, 255, 0.7); border-color: #b8860b; color: #3e2f23; box-shadow: 0 2px 5px rgba(138, 110, 47, 0.1); }
-body.light-mode .slide-subtitle, body.light-mode .slide-text, body.light-mode .slide-intro, body.light-mode .step-content p, body.light-mode .info-card p, body.light-mode .role-action-card p, body.light-mode .mayor-bubble p, body.light-mode .power-item p { color: #3e2f23; }
+/* SLIDES & PAGE 7 (CONTRASTE CORRIGÉ) */
 body.light-mode .slide-title { color: #8a6e2f; text-shadow: none; }
 body.light-mode .step-content strong, body.light-mode .info-card strong, body.light-mode .mayor-bubble strong, body.light-mode .role-action-card h4 { color: #8a6e2f; }
-body.light-mode .step-num, body.light-mode .info-card i, body.light-mode .role-action-card i, body.light-mode .mayor-power-main i, body.light-mode .power-item i, body.light-mode .clean-list i { color: #b8860b; }
-body.light-mode .info-card.warning { background: rgba(255, 235, 235, 0.8); border-color: #cc0000; }
-body.light-mode .info-card.warning i, body.light-mode .info-card.warning strong { color: #cc0000; }
-body.light-mode .mayor-bubble.special { background: rgba(255, 215, 0, 0.2); border-color: #daa520; }
-body.light-mode .mayor-bubble.permanent { background: rgba(128, 0, 128, 0.1); border-color: #800080; }
-body.light-mode .bubble-icon { background: #fff; border-color: #b8860b; color: #b8860b; }
-body.light-mode .choice-item.highlight { background: rgba(255, 255, 255, 1); border: 2px solid #b8860b; color: #8a6e2f; font-weight: bold; }
-body.light-mode .slides-nav { background: rgba(245, 230, 211, 0.9); border-top-color: #b8860b; }
-body.light-mode .slides-nav button { border-color: #8a6e2f; color: #5a4633; }
-body.light-mode .slides-nav button:hover { background: #8a6e2f; color: #fff; }
-body.light-mode #slide-counter { color: #3e2f23; }
-body.light-mode .lock-slide p, body.light-mode .lock-step { color: #3e2f23; }
-body.light-mode .lock-steps { background: rgba(0,0,0,0.05); border-color: #b8860b; }
-body.light-mode .btn-validate, body.light-mode .btn-menu { border: 1px solid rgba(0,0,0,0.1) !important; box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important; border-color: #b8860b; }
-body.light-mode .rule-box { background: rgba(255, 255, 255, 0.6); border-color: #d4af37; border-left-color: #b8860b; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-body.light-mode .rule-box:hover { background: #fff; box-shadow: 0 5px 15px rgba(184, 134, 11, 0.2); }
-body.light-mode .rule-text h3 { color: #5a4633; text-shadow: none; }
-body.light-mode .rule-text p { color: #3e2f23; }
+body.light-mode .info-card, body.light-mode .role-action-card, body.light-mode .mayor-power-main, body.light-mode .power-item { background: rgba(255, 255, 255, 0.7); border-color: #b8860b; color: #3e2f23; }
 
-/* FIX PAGE 7 (Couleur Jaune Illisible -> Doré Foncé) */
-body.light-mode .card-type.gold { background: rgba(255, 215, 0, 0.2); color: #5a4633; border-color: #b8860b; }
+/* PAGE 7 SPÉCIFIQUE : JAUNE FONCÉ POUR LISIBILITÉ */
+body.light-mode .card-type.gold { 
+    background: rgba(255, 223, 0, 0.15) !important; /* Jaune très pâle fond */
+    border: 2px solid #b8860b !important; /* Bordure foncée */
+    color: #5a4633 !important; /* Texte marron foncé */
+}
+body.light-mode .card-type.gold i { color: #b8860b !important; } /* Icône couronne foncée */
+
 body.light-mode .card-type.silver { background: rgba(192, 192, 192, 0.2); color: #333; border-color: #999; }
 body.light-mode .card-type.bronze { background: rgba(205, 127, 50, 0.2); color: #5a4633; border-color: #cd7f32; }
-body.light-mode .card-type i { color: #b8860b !important; }
 
-/* FIX FINAL POP-UPS (Textes Illisibles) */
-body.light-mode #modal-regles p, 
-body.light-mode #modal-regles li,
-body.light-mode #modal-regles .rule-text p,
-body.light-mode p, 
-body.light-mode .lock-content p {
-    color: #1a120b !important; /* Noir foncé */
-    text-shadow: none !important;
-}
-
-/* Formulaires lisibles en Mode Clair */
-body.light-mode input, 
-body.light-mode select, 
-body.light-mode textarea {
-    background: #ffffff !important;
-    color: #000000 !important;
-    border: 1px solid #8a6e2f !important;
-}
-body.light-mode ::placeholder { color: #666 !important; }
+/* Fix Textes Popups */
+body.light-mode #modal-regles p, body.light-mode #modal-regles li, body.light-mode .rule-text p, body.light-mode p { color: #1a120b !important; text-shadow: none !important; }
 
 /* ============================================
    17. BOUTONS D'ACTION (SUPER VISIBLES)
