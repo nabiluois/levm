@@ -665,3 +665,40 @@ body.light-mode textarea {
     border: 1px solid #8a6e2f !important;
 }
 body.light-mode ::placeholder { color: #666 !important; }
+
+/* ============================================
+   17. BOUTONS D'ACTION (SUPER VISIBLES)
+   ============================================ */
+
+/* Ciblage spécifique des boutons de validation (Règles & Pacte) */
+#modal-regles .btn-validate, 
+#modal-regles-base .btn-validate, /* Ajouté pour cibler aussi la fin des slides */
+button[onclick="finishRules()"],
+button[onclick="signPact()"] {
+    background: linear-gradient(135deg, #27ae60, #2ecc71) !important; /* Vert Flashy */
+    color: #fff !important;
+    font-size: 1.5em !important;
+    padding: 20px !important;
+    margin-top: 30px !important;
+    margin-bottom: 20px !important;
+    border: 3px solid #fff !important;
+    box-shadow: 0 0 20px rgba(46, 204, 113, 0.6) !important;
+    animation: superPulse 2s infinite ease-in-out !important;
+    position: relative;
+    z-index: 100;
+}
+
+/* Animation de pulsation pour attirer l'oeil */
+@keyframes superPulse {
+    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.7); }
+    50% { transform: scale(1.05); box-shadow: 0 0 20px 10px rgba(46, 204, 113, 0); }
+    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(46, 204, 113, 0); }
+}
+
+/* Petit doigt qui pointe (Pseudo-élément) */
+button[onclick="finishRules()"]::before,
+button[onclick="signPact()"]::before {
+    content: "👇 ";
+    font-size: 1.2em;
+    margin-right: 10px;
+}
