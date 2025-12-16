@@ -37,12 +37,13 @@ body {
   transition: background 0.5s ease;
 }
 
-/* Classe pour bloquer le scroll (utilisée par les modales) */
+/* Bloque totalement le scroll d'arrière-plan */
 body.no-scroll { 
     overflow: hidden !important; 
     height: 100vh !important; 
     position: fixed !important; 
-    width: 100% !important; 
+    width: 100% !important;
+    touch-action: none !important; /* Empêche le glissement sur mobile */
 }
 
 /* ============================================
@@ -448,14 +449,15 @@ h2 {
     justify-content: center;
 }
 
+/* --- CORRECTIF VIDÉO/IMAGE --- */
 .details-video, .details-image {
     width: 100% !important;
     height: 100% !important;
-    object-fit: cover !important; /* LE SECRET : Remplit tout l'espace */
-    display: block !important;
-    border: none !important; /* On retire la bordure de la vidéo car c'est le wrapper qui l'a */
+    object-fit: cover !important;
+    border: none !important;
     margin: 0 !important;
     padding: 0 !important;
+    /* J'ai retiré "display: block !important" pour laisser le JS gérer l'affichage */
 }
 
 .details-section { font-family: 'Almendra'; font-size: 1.15em; line-height: 1.6; color: #fffce6; background: rgba(20, 14, 10, 0.95); border: 1px solid var(--gold); padding: 25px; border-radius: 12px; margin-top: 20px; }

@@ -42,8 +42,20 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => { scanContentFromHTML(); }, 500);
     ensureAdminButtonsExist(); 
 
+    // Gestion Bouton REJOINDRE
     const btnJoin = document.getElementById('btn-join-action');
     if(btnJoin) btnJoin.addEventListener('click', joinGame);
+
+    // --- CORRECTIF : Gestion Bouton CRÉER MJ ---
+    const btnCreate = document.getElementById('btn-create-game');
+    if(btnCreate) {
+        btnCreate.addEventListener('click', () => {
+            const password = prompt("🔐 Mot de passe MJ :");
+            if(password === "1234") { window.initCreateGame(); } 
+            else if (password !== null) { alert("⛔ Accès refusé !"); }
+        });
+    }
+    // -------------------------------------------
 
     const btnDistribute = document.getElementById('btn-distribute');
     if(btnDistribute) btnDistribute.addEventListener('click', distributeRoles);
