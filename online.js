@@ -1,5 +1,5 @@
 // ============================================
-// SYSTEME EN LIGNE - V44 (FINAL CLEAN & SCROLL FIX)
+// SYSTEME EN LIGNE - V45 (AVATAR & BADGE TEXTE)
 // ============================================
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -215,13 +215,10 @@ function launchAdminInterface() {
     document.getElementById('game-code-display').innerText = currentGameCode;
     const adminDash = document.getElementById('admin-dashboard');
     
-    // 1. D'abord on ferme le menu (ce qui débloque temporairement le scroll)
     window.closeModal('modal-online-menu');
 
-    // 2. Ensuite on affiche le Dashboard
     adminDash.style.display = 'flex';
 
-    // 3. ET ON RE-VERROUILLE LE SCROLL DE FORCE
     document.body.classList.add('no-scroll'); 
     document.body.style.overflow = 'hidden';
     document.body.style.position = 'fixed';
@@ -248,7 +245,6 @@ function generateDashboardControls() {
     const container = document.getElementById('roles-selection-list');
     if(!container) return;
     
-    // Nettoyage complet
     container.innerHTML = "";
     container.style.border = "none";
     container.style.background = "transparent";
@@ -257,7 +253,6 @@ function generateDashboardControls() {
     const wrapper = document.createElement('div');
     wrapper.className = "admin-controls-wrapper";
 
-    // 1. Bouton "Tableau des Rôles" (Ouvre le Panini)
     const btnTable = document.createElement('button');
     btnTable.className = "btn-admin-action";
     btnTable.style.background = "#34495e";
@@ -269,7 +264,6 @@ function generateDashboardControls() {
     });
     wrapper.appendChild(btnTable);
 
-    // 2. Bouton "Modifier Sélection"
     const btnSelect = document.createElement('button');
     btnSelect.className = "btn-admin-action";
     btnSelect.style.background = "#2c3e50";
@@ -278,7 +272,6 @@ function generateDashboardControls() {
     btnSelect.onclick = () => window.openDistributionSelector();
     wrapper.appendChild(btnSelect);
 
-    // 3. Bouton "Distribuer"
     const btnDistribute = document.createElement('button');
     btnDistribute.id = "btn-distribute";
     btnDistribute.className = "btn-admin-action";
@@ -288,7 +281,6 @@ function generateDashboardControls() {
     btnDistribute.onclick = distributeRoles;
     wrapper.appendChild(btnDistribute);
 
-    // 4. Bouton "Révéler"
     const btnReveal = document.createElement('button');
     btnReveal.id = "btn-reveal";
     btnReveal.className = "btn-admin-action";
@@ -307,7 +299,6 @@ function generateDashboardControls() {
     });
 }
 
-// --- OUVERTURE DU RÉCAPITULATIF (PANINI) ---
 window.openRoleSummaryPanel = function() {
     const rolesVillage = [];
     const rolesLoup = [];
@@ -363,7 +354,6 @@ window.openRoleSummaryPanel = function() {
     }
 }
 
-// --- FICHE JOUEUR PANINI ---
 window.openAdminPlayerDetail = function(playerId, playerPseudo, roleId, isDead, avatarBase64, isMayor) {
     const panel = document.querySelector('.details-panel');
     const overlay = document.querySelector('.details-overlay');
@@ -653,6 +643,7 @@ function updateAdminUI(players) {
     if(!listDiv) return;
     listDiv.innerHTML = "";
     
+    // Sync Draft
     const isDraft = Object.values(players).some(p => p.draftRole);
     if(isDraft) {
         distributionSelection = []; 
@@ -664,6 +655,7 @@ function updateAdminUI(players) {
     if(count === 0) {
         listDiv.innerHTML = '<div style="color:#aaa; font-style:italic; grid-column:1/-1;">En attente de joueurs...</div>';
     } else {
+        // TRI : Maire > Vivants > Morts
         const sortedPlayers = Object.entries(players).sort(([,a], [,b]) => {
             if (a.isMayor && !b.isMayor) return -1;
             if (!a.isMayor && b.isMayor) return 1;
@@ -675,36 +667,48 @@ function updateAdminUI(players) {
         sortedPlayers.forEach(([id, p]) => {
             let currentRoleId = p.role;
             if (p.draftRole) currentRoleId = p.draftRole;
-            let cardImage = "back.png"; 
+            
+            // --- LOGIQUE AVATAR & RÔLE ---
+            let roleTitle = "";
+            let roleCategory = "inconnu";
+            let roleImageSrc = "icon.png"; // Fallback
+
             if(currentRoleId && detectedRoles.length > 0) {
                 const r = detectedRoles.find(x => x.id === currentRoleId);
-                if(r) cardImage = r.image;
+                if(r) { 
+                    roleTitle = r.title;
+                    roleCategory = r.category; // village, loups, solo...
+                    roleImageSrc = r.image;    // Image de la carte
+                }
             }
+
+            // Avatar dynamique : Photo du joueur OU Image de sa carte
+            let displayAvatar = p.avatar ? p.avatar : (currentRoleId ? roleImageSrc : "icon.png");
 
             const isDead = p.status === 'dead';
             const cardDiv = document.createElement('div');
             cardDiv.className = isDead ? "admin-player-card dead" : "admin-player-card";
             cardDiv.style.position = 'relative';
             
-            const avatarSrc = p.avatar || "icon.png";
-
             let innerHTML = `
                 <div class="admin-avatar-container">
-                    <img src="${avatarSrc}" alt="Avatar">
-                    ${currentRoleId ? `<img src="${cardImage}" class="mini-role-badge">` : ''}
+                    <img src="${displayAvatar}" alt="Avatar">
                     ${p.isMayor ? `<span class="mayor-badge">🎖️</span>` : ''} 
                 </div>
-                <strong>${p.name}</strong>
+                <strong style="font-size:0.9em;">${p.name}</strong>
             `;
+
+            // Ajout du BADGE TEXTE sous le pseudo
+            if (roleTitle) {
+                innerHTML += `<div class="role-text-badge badge-${roleCategory}">${roleTitle}</div>`;
+            }
 
             if(isDraft) innerHTML = `<div style="background:#e67e22; color:white; font-size:0.6em; padding:2px 5px; border-radius:4px; position:absolute; top:3px; left:3px; z-index:10; font-weight:bold;">PROV.</div>` + innerHTML;
             cardDiv.innerHTML = innerHTML;
 
-            // FIX: Clic direct sur la carte pour ouvrir le Panini
+            // Au clic, ouverture du Panini Joueur
             if(!isDraft) {
-                cardDiv.onclick = function() {
-                    window.openAdminPlayerDetail(id, p.name, currentRoleId, isDead, avatarSrc, p.isMayor);
-                };
+                cardDiv.onclick = () => window.openAdminPlayerDetail(id, p.name, currentRoleId, isDead, displayAvatar, p.isMayor);
             } else {
                 const btnChange = document.createElement('button');
                 btnChange.className = "btn-admin-mini";

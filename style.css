@@ -1045,3 +1045,41 @@ button[onclick="signPact()"]::before {
 .summary-container {
     flex-wrap: wrap;
 }
+
+/* ============================================
+   24. FIX AVATARS & BADGES RÔLES (V45)
+   ============================================ */
+
+/* Style du badge Rôle (sous le pseudo) */
+.role-text-badge {
+    font-size: 0.75em;
+    font-family: 'Helvetica', sans-serif;
+    font-weight: bold;
+    padding: 3px 8px;
+    border-radius: 10px;
+    color: white;
+    margin-top: 4px;
+    width: 95%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: center;
+    border: 1px solid rgba(255,255,255,0.4);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
+
+/* Couleurs des badges */
+.badge-village { background: #27ae60; } /* Vert */
+.badge-loups { background: #c0392b; }   /* Rouge */
+.badge-solo { background: #8e44ad; }    /* Violet */
+.badge-vampires { background: #2c3e50; } /* Bleu nuit */
+.badge-inconnu { background: #7f8c8d; } /* Gris */
+
+/* Ajustement de la carte joueur pour accueillir le texte */
+.admin-player-card {
+    padding-bottom: 8px !important;
+    justify-content: flex-start !important;
+}
+
+/* On cache définitivement l'ancienne pastille carte si elle traîne */
+.mini-role-badge { display: none !important; }
