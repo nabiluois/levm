@@ -1,5 +1,5 @@
 // ============================================
-// SYSTEME EN LIGNE - V54 (OPTIMISÉE & STABLE)
+// SYSTEME EN LIGNE - V55 (SYNC RÔLES LIVE)
 // ============================================
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -113,7 +113,7 @@ function checkPlayerSession() {
         
         const resumeBtn = document.createElement('button');
         resumeBtn.id = "btn-resume-player";
-        resumeBtn.className = "btn-menu"; // Utilise le style existant si dispo, sinon fallback inline
+        resumeBtn.className = "btn-menu"; 
         resumeBtn.style.cssText = "background:linear-gradient(135deg, #27ae60, #2ecc71); border:2px solid white; margin-bottom:15px; width:90%; margin-left:5%; padding:10px; border-radius:8px; color:white; font-family:'Pirata One'; font-size:1.2em; cursor:pointer;";
         resumeBtn.innerHTML = `🔄 REJOINDRE (${savedPName || 'Partie'})`;
         resumeBtn.onclick = function() { restorePlayerSession(savedPCode, savedPId); };
@@ -169,12 +169,10 @@ function scanContentFromHTML() {
         const imgTag = card.querySelector('.carte-front img');
         const titleTag = card.querySelector('.carte-back h3'); 
         const section = card.closest('section');
-        // Fallback si l'ID n'est pas trouvé
         const categoryId = section ? section.id : 'village'; 
         
         if (imgTag && titleTag) {
             const imgSrc = imgTag.getAttribute('src');
-            // ID basé sur le nom du fichier image
             const id = imgSrc.split('/').pop().replace(/\.[^/.]+$/, "");
             detectedRoles.push({
                 id: id,
@@ -241,7 +239,6 @@ function launchAdminInterface() {
     
     if(adminDash) adminDash.style.display = 'flex';
     
-    // Force le style mobile bloqué pour l'admin
     document.body.classList.add('no-scroll'); 
     document.body.style.overflow = 'hidden';
     document.body.style.position = 'fixed';
@@ -255,7 +252,6 @@ function launchAdminInterface() {
 function setupAdminListeners() {
     onValue(ref(db, 'games/' + currentGameCode + '/players'), (snapshot) => {
         const players = snapshot.val() || {};
-        isDraftMode = Object.values(players).some(p => p.draftRole);
         updateAdminUI(players);
     });
 }
@@ -263,6 +259,104 @@ function setupAdminListeners() {
 // ============================================
 // C. LOGIQUE SÉLECTION & DASHBOARD
 // ============================================
+
+function updateAdminUI(players) {
+    const listDiv = document.getElementById('player-list-admin');
+    if(!listDiv) return;
+    listDiv.innerHTML = "";
+    
+    // 1. DÉTECTION DU MODE
+    const isDraft = Object.values(players).some(p => p.draftRole);
+    isDraftMode = isDraft;
+
+    // 2. SYNCHRONISATION DE LA LISTE DES RÔLES
+    // Cette partie assure que si on change un rôle en live, le tableau s'actualise
+    distributionSelection = []; 
+    Object.values(players).forEach(p => { 
+        if(isDraft && p.draftRole) {
+            distributionSelection.push(p.draftRole); // Mode Prépa
+        } else if (!isDraft && p.role) {
+            distributionSelection.push(p.role);      // Mode Jeu (Live)
+        }
+    });
+
+    // 3. Mise à jour immédiate du bouton "TABLEAU DES RÔLES (X)"
+    generateDashboardControls(); 
+
+    const count = Object.keys(players).length;
+    if(count === 0) {
+        listDiv.innerHTML = '<div style="color:#aaa; font-style:italic; grid-column:1/-1;">En attente de joueurs...</div>';
+    } else {
+        const sortedPlayers = Object.entries(players).sort(([,a], [,b]) => {
+            if (a.isMayor && !b.isMayor) return -1;
+            if (!a.isMayor && b.isMayor) return 1;
+            if (a.status !== 'dead' && b.status === 'dead') return -1;
+            if (a.status === 'dead' && b.status !== 'dead') return 1;
+            return a.name.localeCompare(b.name);
+        });
+
+        sortedPlayers.forEach(([id, p]) => {
+            let currentRoleId = p.role;
+            if (p.draftRole) currentRoleId = p.draftRole;
+            
+            let roleTitle = "";
+            let roleCategory = "inconnu";
+            let roleImageSrc = "icon.png"; 
+
+            if(currentRoleId && detectedRoles.length > 0) {
+                const r = detectedRoles.find(x => x.id === currentRoleId);
+                if(r) { 
+                    roleTitle = r.title;
+                    roleCategory = r.category;
+                    roleImageSrc = r.image;
+                }
+            }
+
+            let displayAvatar = p.avatar ? p.avatar : (currentRoleId ? roleImageSrc : "icon.png");
+
+            const isDead = p.status === 'dead';
+            const cardDiv = document.createElement('div');
+            cardDiv.className = isDead ? "admin-player-card dead" : "admin-player-card";
+            cardDiv.style.position = 'relative';
+            cardDiv.style.cursor = 'pointer'; 
+            
+            let innerHTML = `
+                <div class="admin-avatar-container">
+                    <img src="${displayAvatar}" alt="Avatar">
+                    ${p.isMayor ? `<span class="mayor-badge">🎖️</span>` : ''} 
+                </div>
+                <strong style="font-size:0.9em;">${p.name}</strong>
+            `;
+
+            if (roleTitle) {
+                innerHTML += `<div class="role-text-badge badge-${roleCategory}">${roleTitle}</div>`;
+            }
+
+            if(isDraft) innerHTML = `<div style="background:#e67e22; color:white; font-size:0.6em; padding:2px 5px; border-radius:4px; position:absolute; top:3px; left:3px; z-index:10; font-weight:bold;">PROV.</div>` + innerHTML;
+            cardDiv.innerHTML = innerHTML;
+
+            cardDiv.onclick = function() {
+                window.openAdminPlayerDetail(id, p.name, currentRoleId, isDead, displayAvatar, p.isMayor);
+            };
+
+            if(isDraft) {
+                const btnChange = document.createElement('button');
+                btnChange.className = "btn-admin-mini";
+                btnChange.style.cssText = `background:#3498db; color:white; width:100%; border:none; padding:8px; font-family:'Pirata One'; font-size:1em; margin-top:3px; position:relative; z-index:20;`; 
+                btnChange.innerText = "🔄 CHANGER";
+                
+                btnChange.onclick = (e) => { 
+                    e.stopPropagation(); 
+                    window.openResurrectModal(id); 
+                };
+                cardDiv.appendChild(btnChange);
+            }
+
+            listDiv.appendChild(cardDiv);
+        });
+    }
+    updateAdminButtons(count);
+}
 
 function generateDashboardControls() {
     const container = document.getElementById('roles-selection-list');
@@ -774,93 +868,6 @@ window.assignRoleToPlayer = function(newRoleId) {
         });
     });
 };
-
-function updateAdminUI(players) {
-    const listDiv = document.getElementById('player-list-admin');
-    if(!listDiv) return;
-    listDiv.innerHTML = "";
-    
-    const isDraft = Object.values(players).some(p => p.draftRole);
-    if(isDraft) {
-        distributionSelection = []; 
-        Object.values(players).forEach(p => { if(p.draftRole) distributionSelection.push(p.draftRole); });
-        generateDashboardControls(); 
-    }
-
-    const count = Object.keys(players).length;
-    if(count === 0) {
-        listDiv.innerHTML = '<div style="color:#aaa; font-style:italic; grid-column:1/-1;">En attente de joueurs...</div>';
-    } else {
-        const sortedPlayers = Object.entries(players).sort(([,a], [,b]) => {
-            if (a.isMayor && !b.isMayor) return -1;
-            if (!a.isMayor && b.isMayor) return 1;
-            if (a.status !== 'dead' && b.status === 'dead') return -1;
-            if (a.status === 'dead' && b.status !== 'dead') return 1;
-            return a.name.localeCompare(b.name);
-        });
-
-        sortedPlayers.forEach(([id, p]) => {
-            let currentRoleId = p.role;
-            if (p.draftRole) currentRoleId = p.draftRole;
-            
-            let roleTitle = "";
-            let roleCategory = "inconnu";
-            let roleImageSrc = "icon.png"; 
-
-            if(currentRoleId && detectedRoles.length > 0) {
-                const r = detectedRoles.find(x => x.id === currentRoleId);
-                if(r) { 
-                    roleTitle = r.title;
-                    roleCategory = r.category;
-                    roleImageSrc = r.image;
-                }
-            }
-
-            let displayAvatar = p.avatar ? p.avatar : (currentRoleId ? roleImageSrc : "icon.png");
-
-            const isDead = p.status === 'dead';
-            const cardDiv = document.createElement('div');
-            cardDiv.className = isDead ? "admin-player-card dead" : "admin-player-card";
-            cardDiv.style.position = 'relative';
-            cardDiv.style.cursor = 'pointer'; 
-            
-            let innerHTML = `
-                <div class="admin-avatar-container">
-                    <img src="${displayAvatar}" alt="Avatar">
-                    ${p.isMayor ? `<span class="mayor-badge">🎖️</span>` : ''} 
-                </div>
-                <strong style="font-size:0.9em;">${p.name}</strong>
-            `;
-
-            if (roleTitle) {
-                innerHTML += `<div class="role-text-badge badge-${roleCategory}">${roleTitle}</div>`;
-            }
-
-            if(isDraft) innerHTML = `<div style="background:#e67e22; color:white; font-size:0.6em; padding:2px 5px; border-radius:4px; position:absolute; top:3px; left:3px; z-index:10; font-weight:bold;">PROV.</div>` + innerHTML;
-            cardDiv.innerHTML = innerHTML;
-
-            cardDiv.onclick = function() {
-                window.openAdminPlayerDetail(id, p.name, currentRoleId, isDead, displayAvatar, p.isMayor);
-            };
-
-            if(isDraft) {
-                const btnChange = document.createElement('button');
-                btnChange.className = "btn-admin-mini";
-                btnChange.style.cssText = `background:#3498db; color:white; width:100%; border:none; padding:8px; font-family:'Pirata One'; font-size:1em; margin-top:3px; position:relative; z-index:20;`; 
-                btnChange.innerText = "🔄 CHANGER";
-                
-                btnChange.onclick = (e) => { 
-                    e.stopPropagation(); 
-                    window.openResurrectModal(id); 
-                };
-                cardDiv.appendChild(btnChange);
-            }
-
-            listDiv.appendChild(cardDiv);
-        });
-    }
-    updateAdminButtons(count);
-}
 
 function distributeRoles() {
     let selectedRoles = [...distributionSelection];
