@@ -694,44 +694,91 @@ button[onclick="signPact()"]::before {
 }
 
 /* ============================================
-   18. PHOTOS DE PROFIL (ADMIN)
+   18. PHOTOS DE PROFIL & FICHE ADMIN (V34)
    ============================================ */
 
-/* Conteneur de l'avatar dans la grille */
+/* --- 1. GRILLE JOUEURS (PETITE PASTILLE) --- */
+.admin-player-card {
+    padding-top: 5px !important;
+    overflow: visible !important; /* Permet à la pastille de dépasser un peu */
+}
+
+/* Le conteneur de la photo (Rond) */
 .admin-avatar-container {
-    width: 50px;
-    height: 50px;
+    width: 60px;
+    height: 60px;
     border-radius: 50%;
     border: 2px solid var(--gold);
     overflow: hidden;
     background: #000;
-    margin: 0 auto 5px auto; /* Centré */
-    box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+    margin: 0 auto 5px auto;
+    position: relative; /* Pour positionner la pastille par rapport à ça */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.6);
 }
 
 .admin-avatar-container img {
     width: 100% !important;
     height: 100% !important;
     object-fit: cover !important;
-    border: none !important;
-    border-radius: 0 !important;
     margin: 0 !important;
 }
 
-/* On ajuste la carte admin pour accueillir la photo */
-.admin-player-card {
-    padding-top: 10px !important;
+/* La Pastille de Rôle (Bulle en bas à droite) */
+.mini-role-badge {
+    width: 28px !important;
+    height: 28px !important;
+    border-radius: 50%;       /* Rond parfait */
+    border: 2px solid #fff;
+    position: absolute;
+    bottom: -2px;
+    right: -2px;              /* Coin bas-droite de la photo */
+    z-index: 10;
+    background: #000;
+    object-fit: cover;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.8);
 }
 
-/* La petite carte de rôle devient plus discrète en bas à droite de la photo */
-.mini-role-indicator {
-    width: 30px !important;
-    height: 45px !important;
-    position: absolute;
-    top: 5px;
-    right: 5px;
-    border: 1px solid #fff;
-    border-radius: 4px;
-    z-index: 10;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.8);
+/* --- 2. FICHE TECHNIQUE JOUEUR (MODALE) --- */
+.player-sheet-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 20px;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 15px;
+    border-radius: 12px;
+    border: 1px solid var(--gold);
+}
+
+.sheet-avatar {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    border: 3px solid var(--gold);
+    object-fit: cover;
+    background: #000;
+    box-shadow: 0 0 15px rgba(0,0,0,0.5);
+}
+
+.sheet-card {
+    width: 70px;
+    height: 105px; /* Ratio carte */
+    border-radius: 8px;
+    border: 2px solid #fff;
+    object-fit: cover;
+    box-shadow: 0 0 15px rgba(0,0,0,0.5);
+}
+
+.camp-icon {
+    width: 40px;
+    height: 40px;
+    margin-bottom: 5px;
+    filter: drop-shadow(0 0 5px rgba(255,215,0,0.5));
+}
+
+.detail-info-box {
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
 }
