@@ -1,5 +1,5 @@
 // ============================================
-// SYSTEME EN LIGNE - V57 (VERSION FINALE OPTIMISÉE)
+// SYSTEME EN LIGNE - V58 (LIAISONS & ACTIONS SPÉCIALES)
 // ============================================
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -25,14 +25,18 @@ const db = getDatabase(app);
 let currentGameCode = null;
 let myPlayerId = null;
 let myCurrentRoleId = null;
-let targetResurrectId = null;
-let targetEventCategory = null; 
+let targetResurrectId = null; 
 let detectedRoles = [];
 let detectedEvents = { gold: [], silver: [], bronze: [] };
 let isDraftMode = false; 
 let playerPhotoData = null; 
 let distributionSelection = [];
 let currentPlayersData = {}; 
+
+// Variables pour les Liaisons
+let actionSourceRole = null;    // Quel rôle a déclenché l'action (ex: 'l_orphelin')
+let actionStep = 0;             // Etape de sélection (ex: Amoureux 1, puis Amoureux 2)
+let tempSelection = [];         // Stockage temporaire des ID sélectionnés
 
 // ============================================
 // A. INITIALISATION
@@ -246,6 +250,10 @@ function setupAdminListeners() {
         const players = snapshot.val() || {};
         currentPlayersData = players;
         updateAdminUI(players);
+        // Si le tableau de répartition est ouvert, on le rafraîchit en temps réel
+        if(document.querySelector('.panini-admin-header') && document.querySelector('.summary-container')) {
+            window.openRoleSummaryPanel();
+        }
     });
 }
 
@@ -281,7 +289,6 @@ function updateAdminUI(players) {
             return a.name.localeCompare(b.name);
         });
 
-        // OPTIMISATION : Utilisation de Fragment
         const fragment = document.createDocumentFragment();
 
         sortedPlayers.forEach(([id, p]) => {
@@ -310,7 +317,11 @@ function updateAdminUI(players) {
             let innerHTML = `
                 <div class="admin-avatar-container">
                     <img src="${displayAvatar}" alt="Avatar">
-                    ${p.isMayor ? `<span class="mayor-badge">🎖️</span>` : ''} 
+                    ${p.isMayor ? `<span class="mayor-badge">🎖️</span>` : ''}
+                    ${p.attributes && p.attributes.infected ? `<span style="position:absolute; bottom:0; right:0; font-size:1.5em; filter:drop-shadow(0 0 2px black);">🐾</span>` : ''}
+                    ${p.attributes && p.attributes.target ? `<span style="position:absolute; bottom:0; left:0; font-size:1.5em; filter:drop-shadow(0 0 2px black);">🎯</span>` : ''}
+                    ${p.attributes && p.attributes.linked_red ? `<span style="position:absolute; top:0; right:0; font-size:1.5em; filter:drop-shadow(0 0 2px black);">❤️</span>` : ''}
+                    ${p.attributes && p.attributes.lover ? `<span style="position:absolute; top:0; right:0; font-size:1.5em; filter:drop-shadow(0 0 2px black);">💘</span>` : ''}
                 </div>
                 <strong style="font-size:0.9em;">${p.name}</strong>
             `;
@@ -395,7 +406,7 @@ function generateDashboardControls() {
 }
 
 // ============================================
-// D. NOUVEAU TABLEAU RÉPARTITION (OPTIMISÉ + VISUEL)
+// D. TABLEAU RÉPARTITION & LOGIQUE SPECIALE
 // ============================================
 
 window.openRoleSummaryPanel = function() {
@@ -404,35 +415,68 @@ window.openRoleSummaryPanel = function() {
     const rolesSolo = [];
     const rolesVampire = [];
     
-    // Détermine si on affiche la liste des joueurs (Jeu) ou la liste des cartes (Draft)
     const hasActivePlayers = Object.keys(currentPlayersData).length > 0;
     
-    const createLine = (roleId, playerObj) => {
+    // LOGIQUE DE CLIC POUR RÔLES SPÉCIAUX
+    window.handleTableRoleClick = function(roleId, playerId) {
+        if(isDraftMode) return; // Pas d'action en mode Draft
+        
+        // Liste des rôles à action
+        const specialRoles = [
+            'l_orphelin', 'target', 'le_loup_garou_rouge', 'le_loup_garou_maudit', 
+            'le_loup_garou_alpha', 'le_papa_des_loups'
+        ];
+
+        if (specialRoles.includes(roleId)) {
+            // Lancement du sélecteur de joueurs
+            window.openPlayerSelectorForAction(roleId, playerId);
+        } else {
+            // Sinon on ouvre juste la fiche du joueur (Comportement normal)
+            const p = currentPlayersData[playerId];
+            if(p) window.openAdminPlayerDetail(playerId, p.name, roleId, p.status === 'dead', p.avatar || 'icon.png', p.isMayor);
+        }
+    };
+
+    const createLine = (roleId, playerObj, playerId) => {
         const role = detectedRoles.find(r => r.id === roleId);
         if(!role) return null;
         let html = "";
         
         if (hasActivePlayers && playerObj) {
-            // MODE JEU : Affichage du joueur
             const isDead = playerObj.status === 'dead';
             const style = isDead 
                 ? "background:#2c3e50; color:#95a5a6; text-decoration:line-through; border:1px solid #7f8c8d; opacity:0.7;" 
-                : "background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,215,0,0.3);";
+                : "background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,215,0,0.3); cursor:pointer;";
             
             const avatar = playerObj.avatar || "icon.png";
-            // Ligne Joueur : Avatar + Rôle
-            html = `<div class="summary-list-item" style="${style} display:flex; align-items:center; gap:10px; padding:5px 10px; margin:5px 0; border-radius:20px; justify-content:flex-start; width:95%;"><img src="${avatar}" style="width:30px; height:30px; min-width:30px; border-radius:50%; object-fit:cover; border:1px solid gold;"><span style="font-family:'Almendra'; font-size:1.1em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${role.title}</span></div>`;
+            
+            // Ajout des petits badges dans la ligne (Cœur, Cible...)
+            let icons = "";
+            if(playerObj.attributes) {
+                if(playerObj.attributes.lover) icons += "💘 ";
+                if(playerObj.attributes.target) icons += "🎯 ";
+                if(playerObj.attributes.infected) icons += "🐾 ";
+                if(playerObj.attributes.linked_red) icons += "❤️ ";
+                if(playerObj.attributes.cursed_mentor) icons += "🌙 ";
+            }
+
+            // AJOUT DU ONCLICK SPÉCIAL
+            html = `<div class="summary-list-item" onclick="window.handleTableRoleClick('${roleId}', '${playerId}')" style="${style} display:flex; align-items:center; gap:10px; padding:8px 10px; margin:5px 0; border-radius:20px; justify-content:flex-start; width:95%;">
+                <img src="${avatar}" style="width:40px; height:40px; min-width:40px; border-radius:50%; object-fit:cover; border:2px solid gold;">
+                <div style="display:flex; flex-direction:column; align-items:flex-start; overflow:hidden;">
+                    <span style="font-family:'Almendra'; font-size:1.2em; font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${playerObj.name}</span>
+                    <span style="font-size:0.8em; opacity:0.8;">${role.title} ${icons}</span>
+                </div>
+            </div>`;
         } else {
-            // MODE DRAFT : Juste le nom du rôle
             html = `<div class="summary-list-item" style="color:#ddd; padding:5px;">${role.title}</div>`;
         }
         return { html, cat: role.category };
     };
 
     if (hasActivePlayers && !isDraftMode) {
-        // En Live, on liste les joueurs réels
-        Object.values(currentPlayersData).forEach(p => {
-            const item = createLine(p.role, p);
+        Object.entries(currentPlayersData).forEach(([pid, p]) => {
+            const item = createLine(p.role, p, pid);
             if(item) {
                 if(item.cat === 'village') rolesVillage.push(item.html);
                 else if(item.cat === 'loups') rolesLoup.push(item.html);
@@ -441,7 +485,6 @@ window.openRoleSummaryPanel = function() {
             }
         });
     } else {
-        // En Draft, on liste les quantités
         const grouped = {};
         distributionSelection.forEach(id => { grouped[id] = (grouped[id] || 0) + 1; });
         Object.entries(grouped).forEach(([id, qty]) => {
@@ -485,6 +528,109 @@ window.openRoleSummaryPanel = function() {
         document.body.classList.add('no-scroll');
     }
 }
+
+// --- LOGIQUE SÉLECTEUR DE JOUEURS POUR ACTIONS ---
+window.openPlayerSelectorForAction = function(roleType, sourceId) {
+    actionSourceRole = roleType;
+    actionStep = 1;
+    tempSelection = []; // On reset
+    
+    // Titre selon le rôle
+    let title = "CHOISIR UNE CIBLE";
+    if(roleType === 'l_orphelin') title = "CHOISIR AMOUREUX 1";
+    if(roleType === 'target') title = "CHOISIR CIBLE MIROIR";
+    if(roleType === 'le_loup_garou_rouge') title = "CHOISIR CŒUR";
+    if(roleType === 'le_loup_garou_maudit') title = "CHOISIR MENTOR";
+    if(roleType === 'le_papa_des_loups' || roleType === 'le_loup_garou_alpha') title = "INFECTER QUI ?";
+
+    // Création Modale Rapide (On utilise admin-role-grid temporairement)
+    const grid = document.getElementById('admin-role-grid');
+    if(!grid) return;
+    
+    const modalTitle = document.querySelector('#modal-role-selector h2');
+    if(modalTitle) {
+        modalTitle.style.display = 'block';
+        modalTitle.innerText = title;
+    }
+    
+    grid.style.display = "block"; grid.innerHTML = "";
+    
+    // Grille des joueurs
+    const catGrid = document.createElement('div');
+    catGrid.className = "admin-grid-container";
+    
+    Object.entries(currentPlayersData).forEach(([pid, p]) => {
+        // On ne s'affiche pas soi-même (sauf orphelin qui choisit 2 autres)
+        if (pid === sourceId && roleType !== 'l_orphelin') return;
+        
+        const div = document.createElement('div');
+        div.className = "role-select-item";
+        div.innerHTML = `
+            <img src="${p.avatar || 'icon.png'}" style="width:100%; aspect-ratio:1/1; object-fit:cover; border-radius:50%; border:2px solid gold;">
+            <div style="color:white; font-weight:bold; margin-top:5px;">${p.name}</div>
+        `;
+        div.onclick = () => window.handleActionSelection(roleType, sourceId, pid);
+        catGrid.appendChild(div);
+    });
+    grid.appendChild(catGrid);
+    
+    document.getElementById('modal-role-selector').style.zIndex = "20000"; 
+    window.openModal('modal-role-selector');
+};
+
+window.handleActionSelection = function(roleType, sourceId, selectedPid) {
+    if (roleType === 'l_orphelin') {
+        if (actionStep === 1) {
+            tempSelection.push(selectedPid);
+            actionStep = 2;
+            document.querySelector('#modal-role-selector h2').innerText = "CHOISIR AMOUREUX 2";
+            // On rafraichit pour enlever le joueur 1 de la liste (optionnel mais mieux)
+            return; 
+        } else if (actionStep === 2) {
+            // Fin Orphelin : On lie les deux
+            const lover1 = tempSelection[0];
+            const lover2 = selectedPid;
+            
+            if(lover1 === lover2) { alert("Il faut deux joueurs différents !"); return; }
+
+            const updates = {};
+            updates[`games/${currentGameCode}/players/${lover1}/attributes/lover`] = lover2;
+            updates[`games/${currentGameCode}/players/${lover2}/attributes/lover`] = lover1;
+            
+            update(ref(db), updates).then(() => {
+                internalShowNotification("❤️", "Le couple est formé !");
+                window.closeModal('modal-role-selector');
+                window.openRoleSummaryPanel(); // Refresh table
+            });
+        }
+    } 
+    else {
+        // Actions simples (1 cible)
+        const updates = {};
+        
+        if (roleType === 'target') {
+            updates[`games/${currentGameCode}/players/${selectedPid}/attributes/target`] = true;
+            internalShowNotification("🎯", "Cible verrouillée !");
+        }
+        else if (roleType === 'le_loup_garou_rouge') {
+            updates[`games/${currentGameCode}/players/${selectedPid}/attributes/linked_red`] = sourceId; // On lie au rouge
+            internalShowNotification("❤️", "Cœur lié au Loup Rouge !");
+        }
+        else if (roleType === 'le_loup_garou_maudit') {
+            updates[`games/${currentGameCode}/players/${selectedPid}/attributes/cursed_mentor`] = true;
+            internalShowNotification("🌙", "Mentor désigné !");
+        }
+        else if (roleType === 'le_papa_des_loups' || roleType === 'le_loup_garou_alpha') {
+            updates[`games/${currentGameCode}/players/${selectedPid}/attributes/infected`] = true;
+            internalShowNotification("🐾", "Joueur infecté !");
+        }
+
+        update(ref(db), updates).then(() => {
+            window.closeModal('modal-role-selector');
+            window.openRoleSummaryPanel();
+        });
+    }
+};
 
 // --- FICHE JOUEUR PANINI (ADMIN) ---
 window.openAdminPlayerDetail = function(playerId, playerPseudo, roleId, isDead, avatarBase64, isMayor) {
@@ -564,7 +710,7 @@ window.openAdminPlayerDetail = function(playerId, playerPseudo, roleId, isDead, 
 };
 
 // ============================================
-// E. FONCTIONS UTILITAIRES & SÉLECTION
+// E. FONCTIONS UTILITAIRES (AVEC LOGIQUE MORT EN CHAINE)
 // ============================================
 
 window.toggleMayor = function(pid, state, btn) {
@@ -580,12 +726,54 @@ window.toggleMayor = function(pid, state, btn) {
 window.toggleLife = function(pid, state, btn) {
     const status = state ? 'alive' : 'dead';
     if(!state && !confirm("Tuer ce joueur ?")) return;
+    
+    // GESTION DES REPERCUSSIONS (MORT)
+    if (!state) { // Si on tue (state = false = mort)
+        const victim = currentPlayersData[pid];
+        if (victim && victim.attributes) {
+            
+            // 1. Amoureux (Cupidon/Orphelin)
+            if (victim.attributes.lover) {
+                const partnerId = victim.attributes.lover;
+                const partner = currentPlayersData[partnerId];
+                if (partner && partner.status !== 'dead') {
+                    setTimeout(() => {
+                        alert(`💔 ${victim.name} est mort... Son amour ${partner.name} se suicide !`);
+                        window.toggleLife(partnerId, false);
+                    }, 500);
+                }
+            }
+
+            // 2. Lié au Loup Rouge
+            if (victim.attributes.linked_red) {
+                const redWolfId = victim.attributes.linked_red;
+                const redWolf = currentPlayersData[redWolfId];
+                if (redWolf && redWolf.status !== 'dead') {
+                    setTimeout(() => {
+                        alert(`🩸 Le cœur du Loup Garou Rouge (${redWolf.name}) a cessé de battre... Il meurt !`);
+                        window.toggleLife(redWolfId, false);
+                    }, 800);
+                }
+            }
+
+            // 3. Mentor du Maudit
+            if (victim.attributes.cursed_mentor) {
+                setTimeout(() => {
+                    alert(`🐺 ATTENTION MJ : Le Mentor est mort. Le Loup-Garou Maudit doit se réveiller et rejoindre la meute !`);
+                }, 500);
+            }
+        }
+    }
+
     if(btn) {
         btn.style.background = state ? "#c0392b" : "#2ecc71"; 
         btn.innerText = state ? '💀 TUER LE JOUEUR' : '♻️ RESSUSCITER';
         btn.setAttribute('onclick', `window.toggleLife('${pid}', ${!state}, this)`);
+        
+        // Rafraichir le panini si ouvert
         const cardImg = document.querySelector('.panini-big-card');
         if(cardImg) cardImg.style.filter = state ? 'none' : 'grayscale(100%)';
+        
         const contentDiv = document.querySelector('.details-content');
         const existingRow = document.querySelector('.event-buttons-row');
         if(!state && !existingRow && contentDiv) {
@@ -595,6 +783,7 @@ window.toggleLife = function(pid, state, btn) {
              contentDiv.appendChild(row);
         } else if (state && existingRow) { existingRow.remove(); }
     }
+    
     update(ref(db, `games/${currentGameCode}/players/${pid}`), { status: status });
 };
 
@@ -619,7 +808,6 @@ function updateDistributionDashboard() {
     if(document.getElementById('pop-total')) document.getElementById('pop-total').innerText = distributionSelection.length;
 }
 
-// --- OPTIMISATION GENERATION GRILLE (Fragment + SVG) ---
 window.generateResurrectionGrid = function(mode = 'single') {
     const grid = document.getElementById('admin-role-grid');
     if(!grid) return;
@@ -796,7 +984,6 @@ window.assignRoleToPlayer = function(newRoleId) {
         const p1Id = targetResurrectId;
         const p1Data = players[p1Id];
         const p1OldRole = isDraftMode ? p1Data.draftRole : p1Data.role;
-        // CORRECTIF DOUBLONS V57 : AUTORISÉS EN LIVE
         const allowDuplicates = multiRoles.includes(newRoleId) || !isDraftMode;
         let p2Id = null;
 
