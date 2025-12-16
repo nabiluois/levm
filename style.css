@@ -1083,3 +1083,54 @@ button[onclick="signPact()"]::before {
 
 /* On cache définitivement l'ancienne pastille carte si elle traîne */
 .mini-role-badge { display: none !important; }
+
+/* ============================================
+   25. ETAT MORT & UI ADMIN (V47)
+   ============================================ */
+
+/* Côté Joueur : Quand il est mort */
+.dead-state .scene-flip {
+    pointer-events: none !important; /* Empêche le clic */
+    filter: grayscale(100%) brightness(0.7);
+}
+.dead-state .card-object {
+    transform: rotateY(0deg) !important; /* Force le dos (si face front est le dos) */
+    /* Note : Dans ton code, rotateY(0) = Front (Dos image) et rotateY(180) = Back (Rôle) */
+}
+
+/* Badge Maire sur le téléphone du joueur */
+.player-mayor-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    font-size: 3em;
+    z-index: 200;
+    filter: drop-shadow(0 0 10px gold);
+    animation: bounceIn 0.5s;
+}
+
+/* Panini Admin : Centrage Pseudo */
+.panini-admin-header h2 {
+    text-align: center;
+    width: 100%;
+    margin-top: 10px;
+}
+
+/* Boutons Event (Or/Argent/Bronze) */
+.event-buttons-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+    border-top: 1px solid #333;
+    padding-top: 15px;
+}
+.btn-event {
+    flex: 1;
+    border: none;
+    padding: 10px;
+    font-weight: bold;
+    font-family: 'Pirata One';
+    color: #000;
+    cursor: pointer;
+    border-radius: 5px;
+}

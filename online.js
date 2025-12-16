@@ -1,5 +1,5 @@
 // ============================================
-// SYSTEME EN LIGNE - V46 (LOGIQUE D'ÉCHANGE DE RÔLES)
+// SYSTEME EN LIGNE - V47 (LOGIQUE STRICTE & EVENTS)
 // ============================================
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -214,17 +214,13 @@ window.restoreAdminSession = function(savedCode) {
 function launchAdminInterface() {
     document.getElementById('game-code-display').innerText = currentGameCode;
     const adminDash = document.getElementById('admin-dashboard');
-    
     window.closeModal('modal-online-menu');
-
     adminDash.style.display = 'flex';
-
     document.body.classList.add('no-scroll'); 
     document.body.style.overflow = 'hidden';
     document.body.style.position = 'fixed';
     document.body.style.width = '100%';
     document.body.style.top = '0';
-
     setupAdminListeners();
     generateDashboardControls(); 
 }
@@ -245,6 +241,7 @@ function generateDashboardControls() {
     const container = document.getElementById('roles-selection-list');
     if(!container) return;
     
+    // Nettoyage complet
     container.innerHTML = "";
     container.style.border = "none";
     container.style.background = "transparent";
@@ -284,10 +281,11 @@ function generateDashboardControls() {
     const btnReveal = document.createElement('button');
     btnReveal.id = "btn-reveal";
     btnReveal.className = "btn-admin-action";
-    btnReveal.style.background = "#27ae60";
+    btnReveal.style.background = "grey"; // Gris par défaut
     btnReveal.style.color = "white";
     btnReveal.style.display = "none";
     btnReveal.innerText = "📢 RÉVÉLER À TOUS";
+    btnReveal.disabled = true; // Désactivé par défaut
     btnReveal.onclick = revealRolesToEveryone;
     wrapper.appendChild(btnReveal);
 
@@ -354,6 +352,7 @@ window.openRoleSummaryPanel = function() {
     }
 }
 
+// --- FICHE JOUEUR PANINI ---
 window.openAdminPlayerDetail = function(playerId, playerPseudo, roleId, isDead, avatarBase64, isMayor) {
     const panel = document.querySelector('.details-panel');
     const overlay = document.querySelector('.details-overlay');
@@ -380,9 +379,6 @@ window.openAdminPlayerDetail = function(playerId, playerPseudo, roleId, isDead, 
             <button class="close-details" onclick="window.internalCloseDetails()" style="position:absolute; right:0; top:0; background:transparent; border:none; color:gold; font-size:1.5em; cursor:pointer;">✕</button>
             <img src="${avatarBase64}" class="panini-big-avatar">
             <h2 style="color:var(--gold); margin:0;">${playerPseudo}</h2>
-            <div style="font-size:1.2em; margin-top:5px; color:${isDead ? '#c0392b' : '#2ecc71'}">
-                ${isDead ? 'MORT 💀' : 'VIVANT ❤️'} ${isMayor ? '| 🎖️ MAIRE' : ''}
-            </div>
         </div>
 
         <div style="text-align:center; margin-bottom:20px;">
@@ -408,11 +404,10 @@ window.openAdminPlayerDetail = function(playerId, playerPseudo, roleId, isDead, 
         </div>
 
         ${isDead ? `
-            <h3 style="text-align:center; color:gold; margin-top:20px; font-family:'Pirata One';">DONNER UNE CARTE</h3>
-            <div style="display:flex; gap:10px;">
-                <button class="btn-admin-mini" style="background:gold; color:black; padding:15px; flex:1;" onclick="window.adminDrawEvent('${playerId}', 'gold')">OR</button>
-                <button class="btn-admin-mini" style="background:silver; color:black; padding:15px; flex:1;" onclick="window.adminDrawEvent('${playerId}', 'silver')">ARGENT</button>
-                <button class="btn-admin-mini" style="background:#cd7f32; color:black; padding:15px; flex:1;" onclick="window.adminDrawEvent('${playerId}', 'bronze')">BRONZE</button>
+            <div class="event-buttons-row">
+                <button class="btn-event" style="background:gold;" onclick="window.adminDrawEvent('${playerId}', 'gold')">CARTE OR</button>
+                <button class="btn-event" style="background:silver;" onclick="window.adminDrawEvent('${playerId}', 'silver')">CARTE ARGENT</button>
+                <button class="btn-event" style="background:#cd7f32;" onclick="window.adminDrawEvent('${playerId}', 'bronze')">CARTE BRONZE</button>
             </div>
         ` : ''}
         <br><br><br>
@@ -627,37 +622,26 @@ window.adminDraw = function(playerId, category, isRandom, manualImg) {
 window.assignRoleToPlayer = function(newRoleId) {
     if(!targetResurrectId) return;
 
-    // --- LOGIQUE D'ÉCHANGE DE RÔLE (V46) ---
-    // Récupération de tous les joueurs pour vérifier les doublons
+    const multiRoles = ['le_paysan', 'le_loup_garou']; 
     const playersRef = child(ref(db), `games/${currentGameCode}/players`);
     
     get(playersRef).then((snapshot) => {
         const players = snapshot.val() || {};
         const updates = {};
-
-        // 1. Identification du Joueur Cible (celui qu'on modifie)
         const p1Id = targetResurrectId;
         const p1Data = players[p1Id];
-        // Quel était son ancien rôle ?
         const p1OldRole = isDraftMode ? p1Data.draftRole : p1Data.role;
-
-        // 2. Le nouveau rôle est-il "Illimité" ? (Paysan / Loup)
-        const isUnlimited = ['le_paysan', 'le_loup_garou'].includes(newRoleId);
-
+        const isUnlimited = multiRoles.includes(newRoleId);
         let p2Id = null;
 
-        // 3. Si c'est un rôle UNIQUE, on cherche qui le possède déjà
         if (!isUnlimited) {
             const found = Object.entries(players).find(([pid, p]) => {
                 const r = isDraftMode ? p.draftRole : p.role;
-                return r === newRoleId && pid !== p1Id; // On cherche quelqu'un d'autre
+                return r === newRoleId && pid !== p1Id; 
             });
-            if (found) p2Id = found[0]; // On a trouvé le propriétaire actuel
+            if (found) p2Id = found[0]; 
         }
 
-        // --- PREPARATION DES MISES A JOUR ---
-
-        // A. Mise à jour du Joueur Cible (Il reçoit TOUJOURS le nouveau rôle)
         if (isDraftMode) {
             updates[`games/${currentGameCode}/players/${p1Id}/draftRole`] = newRoleId;
         } else {
@@ -666,8 +650,6 @@ window.assignRoleToPlayer = function(newRoleId) {
             updates[`games/${currentGameCode}/players/${p1Id}/drawnCard`] = null;
         }
 
-        // B. Mise à jour de l'Ancien Propriétaire (ÉCHANGE)
-        // Il reçoit l'ancien rôle du Joueur Cible (p1OldRole), même si c'est null
         if (p2Id) {
             if (isDraftMode) {
                 updates[`games/${currentGameCode}/players/${p2Id}/draftRole`] = p1OldRole;
@@ -676,23 +658,16 @@ window.assignRoleToPlayer = function(newRoleId) {
             }
         }
 
-        // C. Mise à jour de la Sélection (Compteurs Draft)
-        // Cette partie est purement visuelle pour l'admin si on est en mode prépa
         if (isDraftMode) {
-            // Si on a fait un échange, le "pool" total de cartes ne change pas
-            // Si on a pris un rôle libre (p2Id null), on doit ajuster la liste
             if (!p2Id) {
-                // On retire l'ancien rôle de la liste (s'il existait)
                 if (p1OldRole) {
                     const idx = distributionSelection.indexOf(p1OldRole);
                     if (idx > -1) distributionSelection.splice(idx, 1);
                 }
-                // On ajoute le nouveau rôle
                 distributionSelection.push(newRoleId);
             }
         }
 
-        // D. Envoi Global
         update(ref(db), updates).then(() => {
             window.closeModal('modal-role-selector');
             window.internalCloseDetails(); 
@@ -701,7 +676,6 @@ window.assignRoleToPlayer = function(newRoleId) {
             if (p2Id) msg = "🔄 Échange effectué avec le joueur qui avait ce rôle.";
             internalShowNotification("Succès", msg);
             
-            // Rafraîchir le dashboard si nécessaire
             if(isDraftMode) generateDashboardControls();
         });
     });
@@ -712,7 +686,6 @@ function updateAdminUI(players) {
     if(!listDiv) return;
     listDiv.innerHTML = "";
     
-    // Sync Draft
     const isDraft = Object.values(players).some(p => p.draftRole);
     if(isDraft) {
         distributionSelection = []; 
@@ -736,7 +709,6 @@ function updateAdminUI(players) {
             let currentRoleId = p.role;
             if (p.draftRole) currentRoleId = p.draftRole;
             
-            // --- LOGIQUE AVATAR & RÔLE ---
             let roleTitle = "";
             let roleCategory = "inconnu";
             let roleImageSrc = "icon.png"; 
@@ -750,7 +722,6 @@ function updateAdminUI(players) {
                 }
             }
 
-            // Avatar dynamique
             let displayAvatar = p.avatar ? p.avatar : (currentRoleId ? roleImageSrc : "icon.png");
 
             const isDead = p.status === 'dead';
@@ -767,7 +738,6 @@ function updateAdminUI(players) {
                 <strong style="font-size:0.9em;">${p.name}</strong>
             `;
 
-            // Badge Texte
             if (roleTitle) {
                 innerHTML += `<div class="role-text-badge badge-${roleCategory}">${roleTitle}</div>`;
             }
@@ -775,12 +745,10 @@ function updateAdminUI(players) {
             if(isDraft) innerHTML = `<div style="background:#e67e22; color:white; font-size:0.6em; padding:2px 5px; border-radius:4px; position:absolute; top:3px; left:3px; z-index:10; font-weight:bold;">PROV.</div>` + innerHTML;
             cardDiv.innerHTML = innerHTML;
 
-            // --- Clic Permanent ---
             cardDiv.onclick = function() {
                 window.openAdminPlayerDetail(id, p.name, currentRoleId, isDead, displayAvatar, p.isMayor);
             };
 
-            // Bouton Changer (Draft uniquement)
             if(isDraft) {
                 const btnChange = document.createElement('button');
                 btnChange.className = "btn-admin-mini";
@@ -800,65 +768,37 @@ function updateAdminUI(players) {
     updateAdminButtons(count);
 }
 
-function distributeRoles() {
-    let selectedRoles = [...distributionSelection];
-    for (let i = selectedRoles.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [selectedRoles[i], selectedRoles[j]] = [selectedRoles[j], selectedRoles[i]];
-    }
-    const playersRef = ref(db, 'games/' + currentGameCode + '/players');
-    get(playersRef).then((snapshot) => {
-        const players = snapshot.val();
-        if(!players) return;
-        const playerIds = Object.keys(players);
-        const updates = {};
-        playerIds.forEach((id, index) => {
-            if (selectedRoles[index]) {
-                updates[`games/${currentGameCode}/players/${id}/draftRole`] = selectedRoles[index];
-            }
-        });
-        update(ref(db), updates);
-    });
-}
-
 function updateAdminButtons(playerCount) {
     const btnDistribute = document.getElementById('btn-distribute');
     const btnReveal = document.getElementById('btn-reveal');
     const selectedCount = distributionSelection.length; 
+    
     if(!btnDistribute || !btnReveal) return; 
+
+    // RÈGLE STRICTE : Si plus ou moins de cartes que de joueurs => Désactivé
     if (playerCount > 0 && selectedCount === playerCount) {
         btnDistribute.disabled = false;
         btnDistribute.style.background = "linear-gradient(135deg, #d4af37, #b8941f)";
         btnDistribute.style.cursor = "pointer";
         btnDistribute.innerHTML = isDraftMode ? "🃏 REMÉLANGER" : "🃏 PRÉPARER";
+        
+        btnReveal.disabled = false;
+        btnReveal.style.background = "#27ae60"; 
+        btnReveal.style.cursor = "pointer";
     } else {
         btnDistribute.disabled = true;
         btnDistribute.style.background = "grey";
         btnDistribute.style.cursor = "not-allowed";
         btnDistribute.innerHTML = `Attente (${playerCount}J / ${selectedCount}R)`;
+        
+        btnReveal.disabled = true;
+        btnReveal.style.background = "grey";
+        btnReveal.style.cursor = "not-allowed";
     }
     btnReveal.style.display = isDraftMode ? "block" : "none";
 }
 
-function revealRolesToEveryone() {
-    if(!confirm("Envoyer les rôles ?")) return;
-    const playersRef = ref(db, 'games/' + currentGameCode + '/players');
-    get(playersRef).then((snapshot) => {
-        const players = snapshot.val();
-        if(!players) return;
-        const updates = {};
-        Object.entries(players).forEach(([id, p]) => {
-            if (p.draftRole) {
-                updates[`games/${currentGameCode}/players/${id}/role`] = p.draftRole;
-                updates[`games/${currentGameCode}/players/${id}/draftRole`] = null; 
-                updates[`games/${currentGameCode}/players/${id}/status`] = 'alive';
-            }
-        });
-        update(ref(db), updates).then(() => { alert("🚀 Rôles envoyés !"); });
-    });
-}
-
-// CÔTÉ JOUEUR (Inchangé)
+// CÔTÉ JOUEUR
 function joinGame() {
     const pseudo = document.getElementById('join-pseudo').value.trim();
     const code = document.getElementById('join-code').value.toUpperCase().trim();
@@ -888,42 +828,65 @@ function listenForPlayerUpdates() {
     onValue(myPlayerRef, (snapshot) => {
         const data = snapshot.val();
         if (!data) return;
+        
+        const panel = document.querySelector('.details-panel');
+        const overlay = document.querySelector('.details-overlay');
+        const wrapper = document.getElementById('online-content-wrapper');
+
+        // Gestion Mort / Vivant
+        if (data.status === 'dead') {
+            document.body.classList.add('dead-state'); // Active le CSS grisé/bloqué
+            // On force le message de mort
+            const lobbyStatus = document.getElementById('player-lobby-status');
+            if(lobbyStatus) lobbyStatus.innerHTML = `<h1 style="color:#c0392b; font-size:3em;">TU ES MORT 💀</h1>`;
+        } else {
+            document.body.classList.remove('dead-state');
+        }
+
+        // Gestion du Rôle
         if (data.role) {
             myCurrentRoleId = data.role; 
             if (data.role !== lastRole) { lastRole = data.role; revealRole(data.role); }
-            const lobbyStatus = document.getElementById('player-lobby-status');
-            let statusHTML = `<h3 style="color:${data.status === 'dead' ? '#c0392b' : 'var(--gold)'};">${data.status === 'dead' ? 'TU ES MORT 💀' : 'Tu es en jeu !'}</h3><div style="margin:20px 0;"><button class="btn-menu" style="background:var(--gold); color:black; font-weight:bold; padding:15px; width:100%; border:2px solid #fff;" onclick="window.showMyRoleAgain()">🃏 VOIR MA CARTE</button></div>`;
-            if(lobbyStatus) lobbyStatus.innerHTML = statusHTML;
+            
+            // Si le joueur est vivant, message normal
+            if (data.status !== 'dead') {
+                const lobbyStatus = document.getElementById('player-lobby-status');
+                let statusHTML = `
+                    <h3 style="color:var(--gold);">Tu es en jeu !</h3>
+                    <div style="margin:20px 0;">
+                        <button class="btn-menu" style="background:var(--gold); color:black; font-weight:bold; padding:15px; width:100%; border:2px solid #fff;" onclick="window.showMyRoleAgain()">🃏 VOIR MA CARTE</button>
+                    </div>
+                `;
+                if(lobbyStatus) lobbyStatus.innerHTML = statusHTML;
+            }
         }
+
+        // Gestion de la Carte Evénement (Remplace le rôle)
         if (data.drawnCard && data.drawnCard.image !== lastCardImg) {
             lastCardImg = data.drawnCard.image;
             let backImage = "back.png"; 
             if (data.drawnCard.category === 'GOLD') backImage = "back_or.png";
             else if (data.drawnCard.category === 'SILVER') backImage = "back_argant.png";
             else if (data.drawnCard.category === 'BRONZE') backImage = "back_bronze.png";
-            const panel = document.querySelector('.details-panel');
-            const overlay = document.querySelector('.details-overlay');
+            
             if(panel && overlay) {
                 panel.innerHTML = `<div id="online-content-wrapper" style="height:100%; display:flex; flex-direction:column; justify-content:center; align-items:center;"><button class="close-details" onclick="window.internalCloseDetails()" style="position:absolute; top:20px; right:20px; z-index:100; background:rgba(0,0,0,0.6); color:white; border:1px solid gold; border-radius:50%; width:40px; height:40px; font-size:20px;">✕</button><div class="scene-flip" onclick="this.classList.toggle('is-flipped')" style="margin:0;"><div class="card-object"><div class="card-face face-front"><img src="${backImage}" class="card-back-img" style="width:100%; height:100%; object-fit:cover; border-radius:15px;"></div><div class="card-face face-back"><img src="${data.drawnCard.image}" style="width:100%; height:100%; object-fit:cover; border-radius:15px;"></div></div></div></div>`;
                 panel.classList.add('active'); overlay.classList.add('active');
             }
         }
+
+        // Gestion Médaille Maire
+        if (data.isMayor) {
+            if (!document.getElementById('player-medal')) {
+                const medal = document.createElement('div');
+                medal.id = 'player-medal';
+                medal.className = 'player-mayor-badge';
+                medal.innerHTML = '🎖️';
+                document.body.appendChild(medal);
+            }
+        } else {
+            const medal = document.getElementById('player-medal');
+            if(medal) medal.remove();
+        }
     });
 }
-
-window.showMyRoleAgain = function() { if(!myCurrentRoleId) return; revealRole(myCurrentRoleId); };
-function revealRole(roleId) {
-    window.closeModal('modal-join-game'); window.closeModal('modal-online-menu');
-    const roleData = detectedRoles.find(r => r.id === roleId);
-    if(roleData) {
-        if(navigator.vibrate) navigator.vibrate([200, 100, 200]);
-        const panel = document.querySelector('.details-panel');
-        const overlay = document.querySelector('.details-overlay');
-        if(!panel || !overlay) return;
-        panel.innerHTML = `<div id="online-content-wrapper" style="height:100%; display:flex; flex-direction:column; justify-content:center; align-items:center;"><button class="close-details" onclick="window.internalCloseDetails()" style="position:absolute; top:20px; right:20px; z-index:100; background:rgba(0,0,0,0.6); color:white; border:1px solid gold; border-radius:50%; width:40px; height:40px; font-size:20px;">✕</button><div class="scene-flip" onclick="this.classList.toggle('is-flipped')" style="margin:0;"><div class="card-object"><div class="card-face face-front"><img src="back.png" class="card-back-img" style="width:100%; height:100%; object-fit:cover; border-radius:15px;"></div><div class="card-face face-back"><img src="${roleData.image}" style="width:100%; height:100%; object-fit:cover; border-radius:15px;"></div></div></div></div>`;
-        panel.classList.add('active'); overlay.classList.add('active');
-    }
-}
-window.internalCloseDetails = function() { document.querySelector('.details-panel').classList.remove('active'); document.querySelector('.details-overlay').classList.remove('active'); };
-function internalShowNotification(title, message) { alert(title + "\n" + message); }
-window.adminKill = function(playerId) { if(confirm("Mort ?")) { update(ref(db, `games/${currentGameCode}/players/${playerId}`), { status: 'dead' }); } };
