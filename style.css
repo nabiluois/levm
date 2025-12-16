@@ -365,6 +365,21 @@ h2 {
 @keyframes shine { 0% { left: -100%; opacity: 0; } 20% { opacity: 0.8; } 40% { left: 200%; opacity: 0; } 100% { left: 200%; opacity: 0; } }
 .carte-front::after, .carte-vm::after { content: ''; position: absolute; top: 0; left: -100%; width: 60%; height: 100%; background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.5), transparent); transform: skewX(-25deg); pointer-events: none; z-index: 10; }
 @media (hover: hover) { .carte-jeu:hover .carte-front::after, .carte-vm:hover::after { animation: shine 0.7s ease-in-out; } }
+/* --- AJOUTER CECI POUR LE BRILLANT SUR MOBILE --- */
+@media (hover: none) { 
+  .carte-front::after, .carte-vm::after { 
+    animation: shine 8s infinite ease-in-out; 
+  } 
+  /* Décalage pour créer l'effet aléatoire */
+  .carte-jeu:nth-child(even) .carte-front::after, 
+  .carte-vm:nth-child(even)::after { 
+    animation-delay: 4s; 
+  } 
+  .carte-jeu:nth-child(3n) .carte-front::after, 
+  .carte-vm:nth-child(3n)::after { 
+    animation-delay: 2s; 
+  } 
+}
 
 /* ============================================
    10. CARTES ÉVÉNEMENTS (VM)
