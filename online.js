@@ -1,5 +1,5 @@
 // ============================================
-// SYSTEME EN LIGNE - V42 (STABLE & Z-INDEX FIX)
+// SYSTEME EN LIGNE - V44 (FINAL CLEAN & SCROLL FIX)
 // ============================================
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -214,9 +214,20 @@ window.restoreAdminSession = function(savedCode) {
 function launchAdminInterface() {
     document.getElementById('game-code-display').innerText = currentGameCode;
     const adminDash = document.getElementById('admin-dashboard');
-    adminDash.style.display = 'flex';
-    document.body.classList.add('no-scroll'); 
+    
+    // 1. D'abord on ferme le menu (ce qui débloque temporairement le scroll)
     window.closeModal('modal-online-menu');
+
+    // 2. Ensuite on affiche le Dashboard
+    adminDash.style.display = 'flex';
+
+    // 3. ET ON RE-VERROUILLE LE SCROLL DE FORCE
+    document.body.classList.add('no-scroll'); 
+    document.body.style.overflow = 'hidden';
+    document.body.style.position = 'fixed';
+    document.body.style.width = '100%';
+    document.body.style.top = '0';
+
     setupAdminListeners();
     generateDashboardControls(); 
 }
@@ -253,7 +264,6 @@ function generateDashboardControls() {
     btnTable.style.color = "#ecf0f1";
     btnTable.style.border = "1px solid #7f8c8d";
     btnTable.innerHTML = `📊 TABLEAU DES RÔLES (<span id="ctrl-total">${distributionSelection.length}</span>)`;
-    // ACTION DIRECTE
     btnTable.addEventListener('click', function() {
         window.openRoleSummaryPanel();
     });
@@ -265,9 +275,7 @@ function generateDashboardControls() {
     btnSelect.style.background = "#2c3e50";
     btnSelect.style.color = "#bdc3c7";
     btnSelect.innerHTML = "📂 MODIFIER SÉLECTION";
-    btnSelect.addEventListener('click', function() {
-        window.openDistributionSelector();
-    });
+    btnSelect.onclick = () => window.openDistributionSelector();
     wrapper.appendChild(btnSelect);
 
     // 3. Bouton "Distribuer"
@@ -524,6 +532,7 @@ window.generateResurrectionGrid = function(mode = 'single') {
 function handleMultiSelection(roleId, divElement) {
     let currentCount = distributionSelection.filter(id => id === roleId).length;
     let newCount = 0;
+    
     const isMultiCard = (roleId === 'le_paysan' || roleId === 'le_loup_garou');
     const isDuoCard = (roleId === 'olaf_et_pilaf' || roleId === 'les_jumeaux_explosifs');
 

@@ -1010,3 +1010,38 @@ button[onclick="signPact()"]::before {
 .summary-container {
     flex-wrap: wrap; /* Permet aux colonnes de s'adapter */
 }
+
+/* ============================================
+   23. FIX FINAL PANINI & FLOU (V43)
+   ============================================ */
+
+/* 1. L'arrière-plan flouté (Derrière) */
+.details-overlay {
+    z-index: 11000 !important; 
+    backdrop-filter: blur(5px); /* Le flou reste derrière */
+}
+
+/* 2. Le Panneau Panini (DEVANT - Net et précis) */
+.details-panel {
+    z-index: 11050 !important; /* Supérieur à l'overlay */
+    filter: none !important;   /* Force la netteté */
+    -webkit-filter: none !important;
+    box-shadow: -5px 0 25px rgba(0,0,0,0.8) !important;
+}
+
+/* 3. La croix de fermeture (Encore plus devant) */
+.close-details {
+    z-index: 11100 !important;
+    cursor: pointer;
+}
+
+/* S'assure que le contenu du Panini est scrollable */
+.details-content {
+    padding-bottom: 80px; /* Espace pour scroller jusqu'au bout */
+    width: 100%;
+}
+
+/* Fix visuel pour la liste dans le Panini */
+.summary-container {
+    flex-wrap: wrap;
+}
