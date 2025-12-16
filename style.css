@@ -409,7 +409,7 @@ h2 {
 #vm-overlay.active { display: block; }
 
 /* ============================================
-   11. PANEL DÉTAILS (PANINI)
+   11. PANEL DÉTAILS (PANINI - FIX VIDÉO)
    ============================================ */
 .details-panel { 
   position: fixed; top: 0; right: -100%; width: 100%; max-width: 500px; 
@@ -434,30 +434,31 @@ h2 {
     width: fit-content !important; max-width: 90% !important; margin-left: auto !important; margin-right: auto !important;
 }
 
-/* --- FIX VIDÉO PLEIN CADRE --- */
+/* --- FIX VIDÉO COMPLETE --- */
 .media-wrapper { 
     width: 100% !important; 
-    aspect-ratio: 16/9; /* Force un format rectangulaire standard */
+    /* On enlève le ratio forcé pour que la vidéo verticale prenne sa place */
+    aspect-ratio: auto !important; 
     margin-bottom: 15px !important; 
     border-radius: 12px; 
     border: 2px solid var(--gold); 
     background: #000; 
     margin-top: 0 !important; 
-    overflow: hidden !important; /* Coupe ce qui dépasse des coins arrondis */
+    overflow: hidden !important; 
     display: flex !important;
     align-items: center;
     justify-content: center;
 }
 
-/* --- CORRECTIF VIDÉO/IMAGE --- */
 .details-video, .details-image {
     width: 100% !important;
-    height: 100% !important;
-    object-fit: cover !important;
+    height: auto !important; /* La hauteur s'adapte au contenu */
+    max-height: 70vh !important; /* Empêche que ça soit plus grand que l'écran */
+    object-fit: contain !important; /* Affiche TOUTE l'image sans couper */
+    display: block !important;
     border: none !important;
     margin: 0 !important;
     padding: 0 !important;
-    /* J'ai retiré "display: block !important" pour laisser le JS gérer l'affichage */
 }
 
 .details-section { font-family: 'Almendra'; font-size: 1.15em; line-height: 1.6; color: #fffce6; background: rgba(20, 14, 10, 0.95); border: 1px solid var(--gold); padding: 25px; border-radius: 12px; margin-top: 20px; }

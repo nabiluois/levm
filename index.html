@@ -1336,13 +1336,19 @@ La seule façon de le faire disparaître ? Le convoquer au bûcher, en plein j
       <h2 style="color:#2980b9;">Rejoindre</h2>
       
       <div class="form-group" style="text-align:center; margin-bottom:20px;">
-        <label for="player-photo-input" class="photo-upload-label">
-          <div id="photo-preview" style="width:80px; height:80px; border-radius:50%; background:#333; border:2px dashed #2980b9; margin:0 auto; display:flex; align-items:center; justify-content:center; overflow:hidden;">
-            <span style="font-size:2em;">📷</span>
+        <label onclick="document.getElementById('camera-input').click()" class="photo-upload-label" style="cursor:pointer;">
+          <div id="photo-preview" style="width:100px; height:100px; border-radius:50%; background:#333; border:3px solid #2980b9; margin:0 auto; display:flex; align-items:center; justify-content:center; overflow:hidden; box-shadow: 0 0 15px rgba(41, 128, 185, 0.5);">
+            <span style="font-size:2.5em;">📸</span>
           </div>
-          <span style="font-size:0.9em; color:#2980b9; display:block; margin-top:5px;">Ta photo (Clic ici)</span>
+          <span style="font-size:0.9em; color:#2980b9; display:block; margin-top:5px; font-weight:bold;">Prendre une photo</span>
         </label>
-        <input type="file" id="player-photo-input" accept="image/*" style="display:none;" onchange="previewPlayerPhoto(this)">
+
+        <button onclick="document.getElementById('gallery-input').click()" style="background:transparent; border:1px solid #2980b9; color:#2980b9; padding:5px 15px; border-radius:20px; margin-top:10px; font-size:0.9em; cursor:pointer;">
+            Ou choisir dans la galerie 📂
+        </button>
+
+        <input type="file" id="camera-input" accept="image/*" capture="user" style="display:none;" onchange="previewPlayerPhoto(this)">
+        <input type="file" id="gallery-input" accept="image/*" style="display:none;" onchange="previewPlayerPhoto(this)">
       </div>
 
       <div class="form-group"><label>Ton Pseudo</label><input type="text" id="join-pseudo" placeholder="Ex: Aziza"></div>

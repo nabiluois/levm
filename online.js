@@ -46,16 +46,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnJoin = document.getElementById('btn-join-action');
     if(btnJoin) btnJoin.addEventListener('click', joinGame);
 
-    // --- CORRECTIF : Gestion Bouton CRÉER MJ ---
-    const btnCreate = document.getElementById('btn-create-game');
-    if(btnCreate) {
-        btnCreate.addEventListener('click', () => {
-            const password = prompt("🔐 Mot de passe MJ :");
-            if(password === "1234") { window.initCreateGame(); } 
-            else if (password !== null) { alert("⛔ Accès refusé !"); }
-        });
-    }
-    // -------------------------------------------
+    // --- FIX ROBUSTE BOUTON MJ ---
+    // On essaye d'attacher l'événement tout de suite
+    attachCreateEvent();
+    
+    // Et on réessaye toutes les 500ms au cas où le menu s'ouvre plus tard
+    setInterval(attachCreateEvent, 500);
 
     const btnDistribute = document.getElementById('btn-distribute');
     if(btnDistribute) btnDistribute.addEventListener('click', distributeRoles);
@@ -68,6 +64,19 @@ document.addEventListener('DOMContentLoaded', () => {
     
     checkPlayerSession();
 });
+
+function attachCreateEvent() {
+    const btnCreate = document.getElementById('btn-create-game');
+    // On vérifie si le bouton existe et s'il n'a pas déjà été traité (marqueur 'data-ready')
+    if(btnCreate && !btnCreate.getAttribute('data-ready')) {
+        btnCreate.addEventListener('click', () => {
+            const password = prompt("🔐 Mot de passe MJ :");
+            if(password === "1234") { window.initCreateGame(); } 
+            else if (password !== null) { alert("⛔ Accès refusé !"); }
+        });
+        btnCreate.setAttribute('data-ready', 'true'); // On marque qu'il est prêt
+    }
+}
 
 // --- GESTION PHOTO DE PROFIL ---
 window.previewPlayerPhoto = function(input) {
