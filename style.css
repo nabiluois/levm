@@ -984,3 +984,29 @@ button[onclick="signPact()"]::before {
     z-index: 50;     /* Au-dessus de tout */
     box-shadow: 0 2px 5px rgba(0,0,0,0.5);
 }
+
+/* ============================================
+   23. FIX FINAL PANINI & Z-INDEX (V42)
+   ============================================ */
+
+/* FORCE LE PANINI AU-DESSUS DU DASHBOARD ADMIN */
+.details-panel, .details-overlay {
+    z-index: 11000 !important; /* Supérieur à 10000 (Admin) */
+}
+
+/* Ajustement pour que la croix de fermeture soit accessible */
+.close-details {
+    z-index: 11001 !important;
+    cursor: pointer;
+}
+
+/* S'assure que le contenu du Panini est scrollable */
+.details-content {
+    padding-bottom: 50px;
+    width: 100%;
+}
+
+/* Fix visuel pour la liste dans le Panini */
+.summary-container {
+    flex-wrap: wrap; /* Permet aux colonnes de s'adapter */
+}
