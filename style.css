@@ -468,7 +468,23 @@ h2 {
    ============================================ */
 .admin-view { position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; background: #120c08; z-index: 10000; display: flex; flex-direction: column; overflow: hidden; }
 .admin-header-bar { background: #000 !important; border-bottom: 2px solid var(--gold); padding: 5px 10px !important; display: flex; align-items: center; justify-content: space-between; height: 50px !important; z-index: 10; }
-.admin-header-bar h2 { font-size: 1em !important; border: none !important; background: none !important; box-shadow: none !important; max-width: 120px !important; overflow: hidden !important; text-overflow: ellipsis !important; margin: 0 !important; }
+
+/* TITRE ADMIN FIX (Mobile) */
+.admin-header-bar h2 { 
+    font-size: 0.9em !important; /* Un peu plus petit */
+    border: none !important; 
+    background: none !important; 
+    box-shadow: none !important; 
+    /* On enlève la limite de largeur et on laisse le titre prendre la place dispo */
+    flex: 1 !important; 
+    text-align: center !important;
+    white-space: nowrap !important; 
+    overflow: hidden !important; 
+    text-overflow: ellipsis !important; 
+    margin: 0 5px !important; /* Espacement avec les boutons */
+    padding: 0 !important;
+}
+
 .btn-quit-admin { background: none; border: 1px solid #c0392b; color: #c0392b; padding: 2px 8px !important; border-radius: 5px; font-family: 'Pirata One'; cursor: pointer; font-size: 0.9em !important; }
 .admin-code-badge { background: rgba(46, 204, 113, 0.1) !important; color: #2ecc71 !important; padding: 2px 8px !important; border-radius: 8px; font-weight: 900 !important; font-family: 'Verdana', sans-serif !important; font-size: 1.2em !important; letter-spacing: 2px !important; border: 1px solid #2ecc71 !important; text-transform: uppercase; margin: 0 !important; }
 
@@ -675,4 +691,47 @@ button[onclick="signPact()"]::before {
     content: "👇 ";
     font-size: 1.2em;
     margin-right: 10px;
+}
+
+/* ============================================
+   18. PHOTOS DE PROFIL (ADMIN)
+   ============================================ */
+
+/* Conteneur de l'avatar dans la grille */
+.admin-avatar-container {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: 2px solid var(--gold);
+    overflow: hidden;
+    background: #000;
+    margin: 0 auto 5px auto; /* Centré */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+}
+
+.admin-avatar-container img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    border: none !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+}
+
+/* On ajuste la carte admin pour accueillir la photo */
+.admin-player-card {
+    padding-top: 10px !important;
+}
+
+/* La petite carte de rôle devient plus discrète en bas à droite de la photo */
+.mini-role-indicator {
+    width: 30px !important;
+    height: 45px !important;
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    border: 1px solid #fff;
+    border-radius: 4px;
+    z-index: 10;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.8);
 }

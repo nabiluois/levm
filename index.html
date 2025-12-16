@@ -1334,9 +1334,21 @@ La seule façon de le faire disparaître ? Le convoquer au bûcher, en plein j
     <div class="modal-content">
       <span class="close-modal" onclick="closeModal('modal-join-game')">✕</span>
       <h2 style="color:#2980b9;">Rejoindre</h2>
+      
+      <div class="form-group" style="text-align:center; margin-bottom:20px;">
+        <label for="player-photo-input" class="photo-upload-label">
+          <div id="photo-preview" style="width:80px; height:80px; border-radius:50%; background:#333; border:2px dashed #2980b9; margin:0 auto; display:flex; align-items:center; justify-content:center; overflow:hidden;">
+            <span style="font-size:2em;">📷</span>
+          </div>
+          <span style="font-size:0.9em; color:#2980b9; display:block; margin-top:5px;">Ta trombine (Optionnel)</span>
+        </label>
+        <input type="file" id="player-photo-input" accept="image/*" capture="user" style="display:none;" onchange="previewPlayerPhoto(this)">
+      </div>
+
       <div class="form-group"><label>Ton Pseudo</label><input type="text" id="join-pseudo" placeholder="Ex: Aziza"></div>
       <div class="form-group"><label>Code Partie</label><input type="text" id="join-code" placeholder="Ex: ABCD" style="text-transform:uppercase; text-align:center;"></div>
       <button id="btn-join-action" class="btn-submit" style="background:#2980b9;">Entrer</button>
+      
       <div id="player-lobby-status" style="display:none; text-align:center; margin-top:20px;">
         <h3 style="color:var(--gold);">En attente du MJ...</h3>
         <div style="font-size:2em;">⏳</div>
@@ -1351,6 +1363,28 @@ La seule façon de le faire disparaître ? Le convoquer au bûcher, en plein j
       <h2 style="color:var(--gold);">Choisis le Nouveau Rôle</h2>
       <p style="text-align:center;">Clique sur une carte pour l'assigner au joueur.</p>
       <div id="admin-role-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; overflow-y: auto; padding: 10px;"></div>
+    </div>
+  </div>
+
+  <div id="modal-player-detail" class="modal">
+    <div class="modal-content" style="text-align:center;">
+      <span class="close-modal" onclick="closeModal('modal-player-detail')">✕</span>
+      <h2 id="detail-pseudo" style="color:var(--gold); font-size:2em;">Pseudo</h2>
+      
+      <div style="display:flex; justify-content:center; gap:20px; margin:20px 0;">
+        <div style="width:120px; height:120px; border-radius:50%; border:4px solid var(--gold); overflow:hidden; background:#000;">
+            <img id="detail-avatar" src="icon.png" style="width:100%; height:100%; object-fit:cover;">
+        </div>
+        <div style="width:80px; height:120px; border-radius:8px; border:2px solid #555; overflow:hidden;">
+            <img id="detail-card" src="back.png" style="width:100%; height:100%; object-fit:cover;">
+        </div>
+      </div>
+
+      <h3 id="detail-role-name" style="color:#aaa; font-family:'Almendra';">Rôle inconnu</h3>
+      <div id="detail-status" style="margin-bottom:20px; font-weight:bold; color:#2ecc71;">VIVANT</div>
+
+      <div id="detail-actions" style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+        </div>
     </div>
   </div>
 
