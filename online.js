@@ -1,5 +1,5 @@
 // ============================================
-// SYSTEME EN LIGNE - V49 (FINAL - CLEAN UI)
+// SYSTEME EN LIGNE - V53 (VERSION FINALE CERTIFIÉE)
 // ============================================
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -241,13 +241,11 @@ function generateDashboardControls() {
     const container = document.getElementById('roles-selection-list');
     if(!container) return;
     
-    // --- SUPPRESSION DU TEXTE "ROLES SELECTIONNES" ---
+    // Suppression du texte "Roles selectionnes: 0"
     const countSpan = document.getElementById('role-count');
-    if(countSpan && countSpan.parentElement) {
-        countSpan.parentElement.style.display = 'none';
-    }
+    if(countSpan && countSpan.parentElement) countSpan.parentElement.style.display = 'none';
     
-    // Nettoyage container
+    // Nettoyage complet
     container.innerHTML = "";
     container.style.border = "none";
     container.style.background = "transparent";
@@ -398,13 +396,13 @@ window.openAdminPlayerDetail = function(playerId, playerPseudo, roleId, isDead, 
         </div>
 
         <div class="admin-actions-grid">
-            <button class="btn-admin-action" style="background:${isMayor ? '#7f8c8d' : '#f1c40f'}; color:${isMayor ? '#fff' : '#000'}; border:2px solid #fff;"
-                onclick="window.toggleMayor('${playerId}', ${!isMayor})">
+            <button id="btn-mayor" class="btn-admin-action" style="background:${isMayor ? '#7f8c8d' : '#f1c40f'}; color:${isMayor ? '#fff' : '#000'}; border:2px solid #fff;"
+                onclick="window.toggleMayor('${playerId}', ${!isMayor}, this)">
                 ${isMayor ? '❌ DESTITUER MAIRE' : '🎖️ NOMMER MAIRE'}
             </button>
 
-            <button class="btn-admin-action" style="background:${isDead ? '#2ecc71' : '#c0392b'}; color:#fff; border:2px solid #fff;"
-                onclick="window.toggleLife('${playerId}', ${!isDead})">
+            <button id="btn-life" class="btn-admin-action" style="background:${isDead ? '#2ecc71' : '#c0392b'}; color:#fff; border:2px solid #fff;"
+                onclick="window.toggleLife('${playerId}', ${!isDead}, this)">
                 ${isDead ? '♻️ RESSUSCITER' : '💀 TUER LE JOUEUR'}
             </button>
 
@@ -439,16 +437,33 @@ window.openAdminPlayerDetail = function(playerId, playerPseudo, roleId, isDead, 
 // E. FONCTIONS UTILITAIRES & SÉLECTION
 // ============================================
 
-window.toggleMayor = function(pid, state) {
+window.toggleMayor = function(pid, state, btn) {
+    // Changement visuel immédiat (Toggle)
+    if(btn) {
+        btn.style.background = state ? "#7f8c8d" : "#f1c40f";
+        btn.style.color = state ? "#fff" : "#000";
+        btn.innerText = state ? '❌ DESTITUER MAIRE' : '🎖️ NOMMER MAIRE';
+        btn.setAttribute('onclick', `window.toggleMayor('${pid}', ${!state}, this)`);
+    }
     update(ref(db, `games/${currentGameCode}/players/${pid}`), { isMayor: state });
-    window.internalCloseDetails();
+    // PAS DE FERMETURE DU PANINI
 };
-window.toggleLife = function(pid, state) {
+
+window.toggleLife = function(pid, state, btn) {
     const status = state ? 'alive' : 'dead';
     if(!state && !confirm("Tuer ce joueur ?")) return;
+    
+    // Changement visuel immédiat (Toggle)
+    if(btn) {
+        btn.style.background = state ? "#c0392b" : "#2ecc71"; 
+        btn.innerText = state ? '💀 TUER LE JOUEUR' : '♻️ RESSUSCITER';
+        btn.setAttribute('onclick', `window.toggleLife('${pid}', ${!state}, this)`);
+    }
+    
     update(ref(db, `games/${currentGameCode}/players/${pid}`), { status: status });
-    window.internalCloseDetails();
+    // PAS DE FERMETURE DU PANINI
 };
+
 window.adminDrawEvent = function(pid, cat) { window.openEventSelector(pid, cat); };
 
 window.internalCloseDetails = function() {
@@ -596,6 +611,7 @@ window.openEventSelector = function(playerId, category) {
     const title = document.querySelector('#modal-role-selector h2');
     if(title) { title.style.display = 'block'; title.innerText = `CARTE ${category.toUpperCase()}`; }
 
+    // Bouton Aléatoire
     const randomBtn = document.createElement('button');
     randomBtn.className = "btn-validate";
     randomBtn.innerText = "🎲 ALÉATOIRE";
@@ -830,24 +846,6 @@ function updateAdminButtons(playerCount) {
     btnReveal.style.display = isDraftMode ? "block" : "none";
 }
 
-function revealRolesToEveryone() {
-    if(!confirm("Envoyer les rôles ?")) return;
-    const playersRef = ref(db, 'games/' + currentGameCode + '/players');
-    get(playersRef).then((snapshot) => {
-        const players = snapshot.val();
-        if(!players) return;
-        const updates = {};
-        Object.entries(players).forEach(([id, p]) => {
-            if (p.draftRole) {
-                updates[`games/${currentGameCode}/players/${id}/role`] = p.draftRole;
-                updates[`games/${currentGameCode}/players/${id}/draftRole`] = null; 
-                updates[`games/${currentGameCode}/players/${id}/status`] = 'alive';
-            }
-        });
-        update(ref(db), updates).then(() => { alert("🚀 Rôles envoyés !"); });
-    });
-}
-
 // CÔTÉ JOUEUR
 function joinGame() {
     const pseudo = document.getElementById('join-pseudo').value.trim();
@@ -883,22 +881,34 @@ function listenForPlayerUpdates() {
         const overlay = document.querySelector('.details-overlay');
         const wrapper = document.getElementById('online-content-wrapper');
 
-        // Gestion Mort / Vivant
+        // 1. GESTION MORT / VIVANT (Priorité absolue)
         if (data.status === 'dead') {
             document.body.classList.add('dead-state'); // Active le CSS grisé/bloqué
-            // On force le message de mort
+            
+            // Si le joueur est mort, on affiche le message ET on bloque sa carte
             const lobbyStatus = document.getElementById('player-lobby-status');
             if(lobbyStatus) lobbyStatus.innerHTML = `<h1 style="color:#c0392b; font-size:3em;">TU ES MORT 💀</h1>`;
+            
+            // On force la fermeture du panel s'il était ouvert sur la carte Rôle
+            if(panel && panel.classList.contains('active') && !data.drawnCard) {
+                // Sauf si c'est une carte événement qu'il vient de recevoir
+                // window.internalCloseDetails(); 
+            }
         } else {
             document.body.classList.remove('dead-state');
         }
 
-        // Gestion du Rôle
+        // 2. GESTION DU RÔLE (Mise à jour silencieuse)
         if (data.role) {
             myCurrentRoleId = data.role; 
-            if (data.role !== lastRole) { lastRole = data.role; revealRole(data.role); }
             
-            // Si le joueur est vivant, message normal
+            // Si c'est la première attribution ou un changement
+            if (data.role !== lastRole) { 
+                lastRole = data.role; 
+                revealRole(data.role); 
+            }
+            
+            // Message d'état (si vivant)
             if (data.status !== 'dead') {
                 const lobbyStatus = document.getElementById('player-lobby-status');
                 let statusHTML = `
@@ -911,13 +921,16 @@ function listenForPlayerUpdates() {
             }
         }
 
-        // Gestion de la Carte Evénement (Remplace le rôle)
+        // 3. GESTION CARTE ÉVÉNEMENT (Remplace visuellement le rôle)
         if (data.drawnCard && data.drawnCard.image !== lastCardImg) {
             lastCardImg = data.drawnCard.image;
             let backImage = "back.png"; 
-            if (data.drawnCard.category === 'GOLD') backImage = "back_or.png";
-            else if (data.drawnCard.category === 'SILVER') backImage = "back_argant.png";
-            else if (data.drawnCard.category === 'BRONZE') backImage = "back_bronze.png";
+            
+            // Logique de Verso stricte (V51)
+            const cat = data.drawnCard.category ? data.drawnCard.category.toUpperCase() : "";
+            if (cat.includes('GOLD') || cat.includes('OR')) backImage = "back_or.png";
+            else if (cat.includes('SILVER') || cat.includes('ARGENT')) backImage = "back_argant.png";
+            else if (cat.includes('BRONZE')) backImage = "back_bronze.png";
             
             if(panel && overlay) {
                 panel.innerHTML = `<div id="online-content-wrapper" style="height:100%; display:flex; flex-direction:column; justify-content:center; align-items:center;"><button class="close-details" onclick="window.internalCloseDetails()" style="position:absolute; top:20px; right:20px; z-index:100; background:rgba(0,0,0,0.6); color:white; border:1px solid gold; border-radius:50%; width:40px; height:40px; font-size:20px;">✕</button><div class="scene-flip" onclick="this.classList.toggle('is-flipped')" style="margin:0;"><div class="card-object"><div class="card-face face-front"><img src="${backImage}" class="card-back-img" style="width:100%; height:100%; object-fit:cover; border-radius:15px;"></div><div class="card-face face-back"><img src="${data.drawnCard.image}" style="width:100%; height:100%; object-fit:cover; border-radius:15px;"></div></div></div></div>`;
@@ -925,7 +938,7 @@ function listenForPlayerUpdates() {
             }
         }
 
-        // Gestion Médaille Maire
+        // 4. GESTION MÉDAILLE MAIRE
         if (data.isMayor) {
             if (!document.getElementById('player-medal')) {
                 const medal = document.createElement('div');
