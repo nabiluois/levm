@@ -1,5 +1,5 @@
 // ============================================
-// SYSTEME EN LIGNE - V76 (FINAL : CSS FIX, MORT & PANINI)
+// SYSTEME EN LIGNE - V79 (VERSION FINALE CERTIFIÉE)
 // ============================================
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -43,7 +43,8 @@ let actionSourceId = null;
 // ============================================
 
 document.addEventListener('DOMContentLoaded', () => {
-    setTimeout(() => { scanContentFromHTML(); }, 300);
+    // Scan immédiat et sécurisé pour peupler detectedRoles
+    try { scanContentFromHTML(); } catch(e) { console.error("Erreur Scan:", e); }
     
     const btnJoin = document.getElementById('btn-join-action');
     if(btnJoin) btnJoin.addEventListener('click', joinGame);
@@ -256,10 +257,7 @@ function setupAdminListeners() {
         const players = snapshot.val() || {};
         currentPlayersData = players;
         updateAdminUI(players);
-        // Rafraichit le tableau s'il est déjà ouvert
-        if(document.querySelector('.panini-admin-header') && document.querySelector('.summary-container')) {
-            window.openRoleSummaryPanel();
-        }
+        // Le tableau ne s'ouvre JAMAIS automatiquement
     });
 }
 
@@ -694,6 +692,197 @@ window.updateDistributionDashboard = function() {
     setTxt('ctrl-total', total);
 };
 
+window.generateResurrectionGrid = function(mode = 'single') {
+    // FORCE SCAN
+    if (!detectedRoles || detectedRoles.length === 0) {
+        try { scanContentFromHTML(); } catch(e) { console.warn(e); }
+    }
+
+    const grid = document.getElementById('admin-role-grid');
+    if(!grid) return; // Si l'élément n'existe pas, on arrête
+    
+    grid.style.display = "block"; 
+    grid.innerHTML = "";
+    
+    // Ajout du tableau de bord si on est en mode sélection multiple
+    if (mode === 'multi') {
+        const dashboard = document.createElement('div');
+        dashboard.className = "selection-dashboard";
+        dashboard.innerHTML = `
+            <div class="dashboard-stats">
+                <div class="stat-item"><img src="Village.svg"><span id="pop-count-village">0</span></div>
+                <div class="stat-item"><img src="Loup.svg"><span id="pop-count-loup">0</span></div>
+                <div class="stat-item"><img src="Solo.svg"><span id="pop-count-solo">0</span></div>
+            </div>
+            <button class="btn-compact" onclick="window.validateDistribution()">OK (<span id="pop-total">0</span>)</button>
+        `;
+        grid.appendChild(dashboard);
+        setTimeout(updateDistributionDashboard, 50); 
+    }
+
+    const categoriesOrder = { 
+        'village': '<img src="Village.svg" style="width:25px; vertical-align:middle; margin-right:8px;"> VILLAGE', 
+        'loups': '<img src="Loup.svg" style="width:25px; vertical-align:middle; margin-right:8px;"> LOUPS', 
+        'solo': '<img src="Solo.svg" style="width:25px; vertical-align:middle; margin-right:8px;"> SOLOS', 
+        'vampires': '<img src="Vampires.svg" style="width:25px; vertical-align:middle; margin-right:8px;"> VAMPIRES' 
+    };
+
+    const mainFragment = document.createDocumentFragment();
+
+    for (const [catKey, catTitleHTML] of Object.entries(categoriesOrder)) {
+        const rolesInCat = detectedRoles.filter(r => r.category === catKey);
+        if (rolesInCat.length > 0) {
+            const titleDiv = document.createElement('div');
+            titleDiv.className = "category-separator";
+            titleDiv.style.cssText = "margin-top:25px; margin-bottom:10px; padding-bottom:5px; border-bottom:1px solid #555; display:flex; align-items:center; color:var(--gold); font-family:'Pirata One'; font-size:1.4em; clear:both;";
+            titleDiv.innerHTML = catTitleHTML;
+            mainFragment.appendChild(titleDiv);
+            
+            const catGrid = document.createElement('div');
+            catGrid.className = "admin-grid-container";
+            
+            rolesInCat.sort((a, b) => a.title.localeCompare(b.title));
+            rolesInCat.forEach(role => {
+                const div = document.createElement('div');
+                div.className = "role-select-item";
+                
+                // Si on est en mode multi, on vérifie si le rôle est sélectionné
+                if (mode === 'multi') {
+                    const count = distributionSelection.filter(id => id === role.id).length;
+                    if (count > 0) {
+                        div.classList.add('selected');
+                        div.innerHTML += `<div class="qty-badge">x${count}</div>`;
+                    }
+                }
+                
+                // EAGER LOADING FORCE
+                div.innerHTML += `<img src="${role.image}" loading="eager" style="width:100%; border-radius:6px; display:block;">`;
+                
+                div.onclick = () => mode === 'multi' ? window.handleMultiSelection(role.id, div) : window.assignRoleToPlayer(role.id);
+                catGrid.appendChild(div);
+            });
+            mainFragment.appendChild(catGrid);
+        }
+    }
+    grid.appendChild(mainFragment);
+};
+
+window.openDistributionSelector = function() {
+    // SÉCURITÉ : Scan forcé
+    if (!detectedRoles || detectedRoles.length === 0) {
+        scanContentFromHTML();
+    }
+
+    // 1. On génère la grille
+    window.generateResurrectionGrid('multi');
+    
+    // 2. On récupère la modale
+    const modal = document.getElementById('modal-role-selector');
+    if(modal) {
+        // CORRECTION : Z-Index Maximum pour passer devant le dashboard Admin
+        modal.style.zIndex = "999999"; 
+        
+        // On cache le titre par défaut car on a le dashboard (stats en haut)
+        const h2 = modal.querySelector('h2');
+        if(h2) h2.style.display = "none"; 
+        
+        // On ouvre via la fonction globale
+        window.openModal('modal-role-selector');
+        
+        // Sécurité supplémentaire : on force l'affichage CSS
+        modal.classList.add('active');
+        
+        // Hack pour nettoyer le style quand on ferme via la croix
+        const closeBtn = modal.querySelector('.close-modal');
+        if(closeBtn) {
+            closeBtn.onclick = function() {
+                modal.style.display = ''; // On vide le style inline
+                modal.style.zIndex = '';  // On vide le z-index
+                window.closeModal('modal-role-selector');
+            };
+        }
+    } else {
+        alert("Erreur: Modale de sélection introuvable dans le HTML.");
+    }
+};
+
+window.openResurrectModal = function(playerId) {
+    targetResurrectId = playerId;
+    window.generateResurrectionGrid('single'); 
+    const modalTitle = document.querySelector('#modal-role-selector h2');
+    if(modalTitle) {
+        modalTitle.style.display = 'block';
+        modalTitle.innerText = isDraftMode ? "CHANGER CARTE" : "RESSUSCITER";
+    }
+    document.getElementById('modal-role-selector').style.zIndex = "25000"; 
+    window.openModal('modal-role-selector');
+};
+
+// CORRECTION : On attache la fonction à "window" pour qu'elle soit vue par le HTML
+window.handleMultiSelection = function(roleId, divElement) {
+    let currentCount = distributionSelection.filter(id => id === roleId).length;
+    let newCount = 0;
+    
+    const isMultiCard = (roleId === 'le_paysan' || roleId === 'le_loup_garou');
+    const isDuoCard = (roleId === 'olaf_et_pilaf' || roleId === 'les_jumeaux_explosifs');
+
+    if (isMultiCard) {
+        let input = prompt(`Combien ?`, currentCount || 0);
+        if (input === null) return; 
+        newCount = Math.max(0, parseInt(input) || 0);
+    } 
+    else if (isDuoCard) {
+        let input = prompt(`Duo (0 ou 2) ?`, currentCount || 0);
+        if (input === null) return;
+        newCount = parseInt(input);
+        if(newCount !== 2 && newCount !== 0) newCount = 0;
+    }
+    else { newCount = currentCount > 0 ? 0 : 1; }
+
+    distributionSelection = distributionSelection.filter(id => id !== roleId);
+    for(let i=0; i<newCount; i++) distributionSelection.push(roleId);
+
+    const existingBadge = divElement.querySelector('.qty-badge');
+    if(existingBadge) existingBadge.remove();
+
+    if (newCount > 0) {
+        divElement.classList.add('selected'); 
+        const badge = document.createElement('div');
+        badge.className = 'qty-badge';
+        badge.innerText = `x${newCount}`;
+        divElement.appendChild(badge);
+    } else {
+        divElement.classList.remove('selected'); 
+    }
+    
+    // Mise à jour des stats du dashboard
+    if(typeof updateDistributionDashboard === 'function') {
+        updateDistributionDashboard();
+    }
+};
+
+window.updateDistributionDashboard = function() {
+    let cVillage = 0, cLoups = 0, cSolo = 0, total = 0;
+    
+    distributionSelection.forEach(id => {
+        const role = detectedRoles.find(r => r.id === id);
+        if (role) {
+            if (role.category === 'village') cVillage++;
+            else if (role.category === 'loups') cLoups++;
+            else cSolo++; // Solos + Vampires + Autres
+            total++;
+        }
+    });
+
+    const setTxt = (id, val) => { const el = document.getElementById(id); if(el) el.innerText = val; };
+    
+    setTxt('pop-count-village', cVillage);
+    setTxt('pop-count-loup', cLoups);
+    setTxt('pop-count-solo', cSolo);
+    setTxt('pop-total', total);
+    setTxt('ctrl-total', total);
+};
+
 window.validateDistribution = function() {
     // NETTOYAGE FORCE DU STYLE
     const modal = document.getElementById('modal-role-selector');
@@ -958,20 +1147,22 @@ window.openAdminPlayerDetail = function(pid, name, roleId, isDead, avatarSrc, is
         btnChangeRole.onclick = () => window.openResurrectModal(pid);
         pActions.appendChild(btnChangeRole);
 
-        // Bouton Cartes VM (OR/ARGENT/BRONZE) - Texte au lieu d'emoji
-        const categories = [
-            {id:'gold', label:'VM OR', color:'gold'},
-            {id:'silver', label:'VM ARGENT', color:'silver'},
-            {id:'bronze', label:'VM BRONZE', color:'#cd7f32'}
-        ];
-        
-        categories.forEach(cat => {
-            const btn = document.createElement('button');
-            btn.style.cssText = `background:transparent; border:1px solid ${cat.color}; color:${cat.color}; padding:8px; border-radius:5px; cursor:pointer; font-size:0.9em; font-family:'Pirata One'; font-weight:bold;`;
-            btn.innerHTML = cat.label;
-            btn.onclick = () => window.openEventSelector(pid, cat.id);
-            pActions.appendChild(btn);
-        });
+        // MODIF : Boutons VM (OR/ARGENT/BRONZE) uniquement si MORT
+        if(isDead) {
+            const categories = [
+                {id:'gold', label:'VM OR', color:'gold'},
+                {id:'silver', label:'VM ARGENT', color:'silver'},
+                {id:'bronze', label:'VM BRONZE', color:'#cd7f32'}
+            ];
+            
+            categories.forEach(cat => {
+                const btn = document.createElement('button');
+                btn.style.cssText = `background:transparent; border:1px solid ${cat.color}; color:${cat.color}; padding:8px; border-radius:5px; cursor:pointer; font-size:0.9em; font-family:'Pirata One'; font-weight:bold;`;
+                btn.innerHTML = cat.label;
+                btn.onclick = () => window.openEventSelector(pid, cat.id);
+                pActions.appendChild(btn);
+            });
+        }
     }
 
     // Ouverture Modale
@@ -1036,6 +1227,7 @@ function listenForPlayerUpdates() {
     let lastCardImg = null;
     let currentAttributes = {}; 
     let currentStatus = 'alive';
+    let lastMayor = false;
     
     onValue(myPlayerRef, (snapshot) => {
         const data = snapshot.val();
@@ -1071,9 +1263,12 @@ function listenForPlayerUpdates() {
 
         if (data.role) {
             myCurrentRoleId = data.role; 
-            if (data.role !== lastRole) { 
+            
+            // On détecte un changement de rôle ou de statut de Maire
+            if (data.role !== lastRole || data.isMayor !== lastMayor) { 
                 lastRole = data.role; 
-                revealRole(data.role, currentStatus); 
+                lastMayor = data.isMayor;
+                revealRole(data.role, currentStatus, data.isMayor); 
             }
             
             // BOUTON TOUJOURS PRÉSENT (Même si mort)
@@ -1122,25 +1317,19 @@ function listenForPlayerUpdates() {
             currentAttributes = data.attributes || {};
             window.updateCardBackEmojis(currentAttributes);
         }
-
-        if (data.isMayor) {
-            if (!document.getElementById('player-medal')) {
-                const medal = document.createElement('div');
-                medal.id = 'player-medal';
-                medal.className = 'player-mayor-badge'; 
-                medal.innerHTML = '🎖️';
-                document.body.appendChild(medal);
-            }
-        } else {
-            const medal = document.getElementById('player-medal');
-            if(medal) medal.remove();
-        }
     });
 }
 
-window.showMyRoleAgain = function() { if(!myCurrentRoleId) return; revealRole(myCurrentRoleId, document.body.classList.contains('dead-state') ? 'dead' : 'alive'); };
+window.showMyRoleAgain = function() { 
+    if(!myCurrentRoleId) return; 
+    // On relit la DB pour avoir le statut "isMayor" à jour
+    get(child(ref(db), `games/${currentGameCode}/players/${myPlayerId}`)).then((snapshot) => {
+        const d = snapshot.val();
+        if(d) revealRole(d.role, d.status || 'alive', d.isMayor || false);
+    });
+};
 
-function revealRole(roleId, status) {
+function revealRole(roleId, status, isMayor) {
     if(window.closeModal) {
         window.closeModal('modal-join-game'); 
         window.closeModal('modal-online-menu');
@@ -1158,7 +1347,10 @@ function revealRole(roleId, status) {
         const clickAction = isDead ? "" : "this.classList.toggle('flipped')";
         const instructionText = isDead ? "TU ES MORT" : "CLIQUE POUR RETOURNER";
         
-        // CSS FIX: On remet les classes carte-jeu, carte-inner, carte-front, carte-back
+        // Badge Maire : visible uniquement sur le dos (carte-front)
+        const mayorBadge = isMayor ? `<div style="position:absolute; top:-10px; left:-10px; font-size:3.5em; z-index:100; filter:drop-shadow(2px 4px 6px black);">🎖️</div>` : '';
+        
+        // CORRECTION MAJEURE : On utilise la même structure HTML que dans index.html pour le CSS
         panel.innerHTML = `
         <div id="online-content-wrapper" style="height:100%; display:flex; flex-direction:column; justify-content:center; align-items:center;">
             <button class="close-details" onclick="window.internalCloseDetails()" style="position:absolute; top:20px; right:20px; z-index:100; background:rgba(0,0,0,0.6); color:white; border:1px solid gold; border-radius:50%; width:40px; height:40px; font-size:20px;">✕</button>
@@ -1167,6 +1359,7 @@ function revealRole(roleId, status) {
                 <div class="carte-inner">
                     <div class="carte-front">
                         <img src="back.png" style="width:100%; height:100%; object-fit:cover;">
+                        ${mayorBadge}
                         <div id="card-emoji-container" style="position:absolute; top:10px; left:10px; display:flex; flex-direction:column; gap:5px; z-index:50;"></div>
                     </div>
                     <div class="carte-back" style="padding:0; border:none;">
