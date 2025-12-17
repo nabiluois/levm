@@ -2011,7 +2011,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const cardsArray = Array.from(document.querySelectorAll('.carte-jeu')); 
 
   // ===============================
-  // 13. SYSTÈME DE DÉVERROUILLAGE & VALIDATION (V2 - GRISÉ)
+  // 13. SYSTÈME DE DÉVERROUILLAGE & VALIDATION (V3 - VISUEL)
   // ===============================
   
   // A. Navigation dans le cadenas (Slides Intro)
@@ -2041,7 +2041,7 @@ document.addEventListener('DOMContentLoaded', function() {
   window.finishRules = function() {
       localStorage.setItem('vm_rules_read', 'true');
       
-      // Mise à jour visuelle immédiate (Bouton devient gris)
+      // On met à jour l'aspect du bouton immédiatement (Devient GRIS)
       updateValidationButtons();
       
       closeModal('modal-regles-base');
@@ -2059,7 +2059,7 @@ document.addEventListener('DOMContentLoaded', function() {
   window.signPact = function() {
       localStorage.setItem('vm_pact_read', 'true');
       
-      // Mise à jour visuelle immédiate (Bouton devient gris)
+      // On met à jour l'aspect du bouton immédiatement (Devient GRIS)
       updateValidationButtons();
 
       closeModal('modal-regles');
@@ -2085,29 +2085,25 @@ document.addEventListener('DOMContentLoaded', function() {
       }
   }
 
-  // F. Fonction pour griser les boutons (NOUVEAU)
+  // F. Fonction pour changer la couleur des boutons (VERT -> GRIS)
   function updateValidationButtons() {
       const rulesRead = localStorage.getItem('vm_rules_read') === 'true';
       const pactRead = localStorage.getItem('vm_pact_read') === 'true';
 
-      // Bouton des Règles
-      // On cible tous les boutons qui lancent finishRules (Menu + Slide fin)
-      const btnsRules = document.querySelectorAll('button[onclick="finishRules()"], a[onclick="openModal(\'modal-regles-base\')"]');
-      
-      // Cas spécifique pour le bouton de validation dans le slide
-      const validateBtnRules = document.querySelector('#modal-regles-base .btn-validate');
-      if (validateBtnRules && rulesRead) {
-          validateBtnRules.classList.add('disabled');
-          validateBtnRules.innerHTML = "✅ Règles Validées";
-          validateBtnRules.removeAttribute('onclick'); // Sécurité supplémentaire
+      // 1. Bouton des Règles (dans le slide final)
+      const btnRules = document.querySelector('#modal-regles-base .btn-validate');
+      if (btnRules && rulesRead) {
+          btnRules.classList.add('disabled');     // Ajoute la classe CSS grise
+          btnRules.innerHTML = "✅ Règles Lues";  // Change le texte
+          btnRules.removeAttribute('onclick');    // Coupe l'action
       }
 
-      // Bouton du Pacte
-      const validateBtnPact = document.querySelector('#modal-regles .btn-validate');
-      if (validateBtnPact && pactRead) {
-          validateBtnPact.classList.add('disabled');
-          validateBtnPact.innerHTML = "✅ Pacte Signé";
-          validateBtnPact.removeAttribute('onclick'); // Sécurité supplémentaire
+      // 2. Bouton du Pacte (dans la modale pacte)
+      const btnPact = document.querySelector('#modal-regles .btn-validate');
+      if (btnPact && pactRead) {
+          btnPact.classList.add('disabled');      // Ajoute la classe CSS grise
+          btnPact.innerHTML = "✅ Pacte Signé";   // Change le texte
+          btnPact.removeAttribute('onclick');     // Coupe l'action
       }
   }
 
@@ -2116,9 +2112,9 @@ document.addEventListener('DOMContentLoaded', function() {
       const rulesRead = localStorage.getItem('vm_rules_read') === 'true';
       const pactRead = localStorage.getItem('vm_pact_read') === 'true';
 
-      // On met à jour l'aspect des boutons au démarrage
-      // (Si le joueur revient, les boutons seront déjà gris)
-      setTimeout(updateValidationButtons, 100); 
+      // On vérifie tout de suite si on doit griser les boutons
+      // (Utile si le joueur rafraîchit la page)
+      setTimeout(updateValidationButtons, 100);
 
       if (!rulesRead || !pactRead) {
           document.body.classList.add('locked-game');

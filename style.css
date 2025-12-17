@@ -1301,20 +1301,20 @@ button[onclick="signPact()"]::before {
 }
 
 /* ============================================
-   29. BOUTONS VALIDÉS (GRISÉS)
+   29. BOUTONS VALIDÉS (STYLE GRIS)
    ============================================ */
 .btn-validate.disabled {
-    background: #555 !important;       /* Fond gris foncé */
-    border-color: #777 !important;     /* Bordure grise */
-    color: #aaa !important;            /* Texte gris clair */
+    background: #444 !important;       /* Fond Gris foncé */
+    border-color: #666 !important;     /* Bordure Grise */
+    color: #888 !important;            /* Texte Gris clair */
     cursor: not-allowed !important;    /* Curseur interdit */
-    box-shadow: none !important;       /* Pas d'ombre */
-    animation: none !important;        /* Pas de pulsation */
-    pointer-events: none !important;   /* Empêche le clic */
-    transform: none !important;        /* Pas de zoom */
+    box-shadow: none !important;       /* Plus d'ombre */
+    animation: none !important;        /* Plus de clignotement */
+    transform: none !important;        /* Plus de zoom au clic */
+    pointer-events: none !important;   /* Empêche totalement le clic */
 }
 
-/* On enlève le petit doigt 👇 quand c'est validé */
+/* On retire le petit doigt 👇 quand c'est validé */
 .btn-validate.disabled::before {
     content: "" !important;
 }
