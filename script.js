@@ -2011,7 +2011,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const cardsArray = Array.from(document.querySelectorAll('.carte-jeu')); 
 
   // ===============================
-  // 13. SYSTÈME DE DÉVERROUILLAGE (CORRIGÉ STABLE)
+  // 13. SYSTÈME DE DÉVERROUILLAGE & VALIDATION (V2 - GRISÉ)
   // ===============================
   
   // A. Navigation dans le cadenas (Slides Intro)
@@ -2026,12 +2026,9 @@ document.addEventListener('DOMContentLoaded', function() {
       if(nextDot) nextDot.classList.add('active');
   };
 
-  // B. Fermer l'intro pour aller naviguer (Bouton "Ouvrir le Menu")
+  // B. Fermer l'intro pour aller naviguer
   window.finishIntro = function() {
-      // On ferme la modale Intro
       closeModal('modal-lock-intro');
-      
-      // On ouvre le menu burger pour montrer le chemin
       setTimeout(() => {
           const extraMenu = document.querySelector('.extra-menu');
           if(extraMenu && !extraMenu.classList.contains('open')) {
@@ -2040,35 +2037,39 @@ document.addEventListener('DOMContentLoaded', function() {
       }, 500);
   };
 
-  // C. Validation Manuelle des Règles (Bouton page 9/9)
+  // C. Validation Manuelle des Règles
   window.finishRules = function() {
       localStorage.setItem('vm_rules_read', 'true');
+      
+      // Mise à jour visuelle immédiate (Bouton devient gris)
+      updateValidationButtons();
+      
       closeModal('modal-regles-base');
       
-      // Feedback utilisateur
       if (localStorage.getItem('vm_pact_read') === 'true') {
           showNotification("🔓 Accès Autorisé", "Tu as tout validé. Le Village s'ouvre à toi.");
       } else {
-          showNotification("📜 Règles Validées", "Parfait. Maintenant, va signer le Pacte Maudit dans le menu.");
+          showNotification("📜 Règles Validées", "Parfait. Maintenant, va signer le Pacte Maudit.");
       }
       
-      // On vérifie si on peut débloquer le jeu
       checkGameUnlock();
   };
 
-  // D. Signature Manuelle du Pacte (Bouton bas de page)
+  // D. Signature Manuelle du Pacte
   window.signPact = function() {
       localStorage.setItem('vm_pact_read', 'true');
+      
+      // Mise à jour visuelle immédiate (Bouton devient gris)
+      updateValidationButtons();
+
       closeModal('modal-regles');
       
-      // Feedback utilisateur
       if (localStorage.getItem('vm_rules_read') === 'true') {
           showNotification("🩸 Pacte Signé", "Le sang est versé. Le Village s'ouvre à toi.");
       } else {
-          showNotification("✍️ Pacte Signé", "C'est noté. N'oublie pas de lire les Règles de base pour débloquer le jeu.");
+          showNotification("✍️ Pacte Signé", "C'est noté. N'oublie pas de lire les Règles.");
       }
       
-      // On vérifie si on peut débloquer le jeu
       checkGameUnlock();
   };
 
@@ -2078,26 +2079,50 @@ document.addEventListener('DOMContentLoaded', function() {
       const pactRead = localStorage.getItem('vm_pact_read') === 'true';
 
       if (rulesRead && pactRead) {
-          // Tout est bon : on enlève le filtre gris
           document.body.classList.remove('locked-game');
       } else {
-          // Manque quelque chose : on met le filtre gris
           document.body.classList.add('locked-game');
       }
   }
 
-  // F. Lancement de l'Intro au démarrage (Si nécessaire)
+  // F. Fonction pour griser les boutons (NOUVEAU)
+  function updateValidationButtons() {
+      const rulesRead = localStorage.getItem('vm_rules_read') === 'true';
+      const pactRead = localStorage.getItem('vm_pact_read') === 'true';
+
+      // Bouton des Règles
+      // On cible tous les boutons qui lancent finishRules (Menu + Slide fin)
+      const btnsRules = document.querySelectorAll('button[onclick="finishRules()"], a[onclick="openModal(\'modal-regles-base\')"]');
+      
+      // Cas spécifique pour le bouton de validation dans le slide
+      const validateBtnRules = document.querySelector('#modal-regles-base .btn-validate');
+      if (validateBtnRules && rulesRead) {
+          validateBtnRules.classList.add('disabled');
+          validateBtnRules.innerHTML = "✅ Règles Validées";
+          validateBtnRules.removeAttribute('onclick'); // Sécurité supplémentaire
+      }
+
+      // Bouton du Pacte
+      const validateBtnPact = document.querySelector('#modal-regles .btn-validate');
+      if (validateBtnPact && pactRead) {
+          validateBtnPact.classList.add('disabled');
+          validateBtnPact.innerHTML = "✅ Pacte Signé";
+          validateBtnPact.removeAttribute('onclick'); // Sécurité supplémentaire
+      }
+  }
+
+  // G. Lancement de l'Intro au démarrage
   function initGameLock() {
       const rulesRead = localStorage.getItem('vm_rules_read') === 'true';
       const pactRead = localStorage.getItem('vm_pact_read') === 'true';
 
-      // Si le jeu n'est pas fini, on affiche le pop-up d'intro
+      // On met à jour l'aspect des boutons au démarrage
+      // (Si le joueur revient, les boutons seront déjà gris)
+      setTimeout(updateValidationButtons, 100); 
+
       if (!rulesRead || !pactRead) {
           document.body.classList.add('locked-game');
-          
-          // Petit délai pour l'animation
           setTimeout(() => {
-              // On utilise openModal pour bénéficier du blocage de scroll
               const modal = document.getElementById('modal-lock-intro');
               if(modal) {
                   modal.classList.add('active');
@@ -2106,7 +2131,6 @@ document.addEventListener('DOMContentLoaded', function() {
               }
           }, 500);
       } else {
-          // Sinon on s'assure que c'est débloqué
           document.body.classList.remove('locked-game');
       }
   }
