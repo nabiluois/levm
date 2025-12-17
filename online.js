@@ -1,5 +1,5 @@
 // ============================================
-// SYSTEME EN LIGNE - V69 (INTEGRAL & CLICS FIXÉS)
+// SYSTEME EN LIGNE - V70 (CORRECTIF SÉLECTION & NOM BOUTON)
 // ============================================
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -744,7 +744,8 @@ window.generateResurrectionGrid = function(mode = 'single') {
                 }
                 
                 div.innerHTML += `<img src="${role.image}" loading="eager" style="width:100%; border-radius:6px; display:block;">`;
-                div.onclick = () => mode === 'multi' ? handleMultiSelection(role.id, div) : window.assignRoleToPlayer(role.id);
+                // CORRECTION : Appel à window.handleMultiSelection pour le mode multi
+                div.onclick = () => mode === 'multi' ? window.handleMultiSelection(role.id, div) : window.assignRoleToPlayer(role.id);
                 catGrid.appendChild(div);
             });
             mainFragment.appendChild(catGrid);
@@ -758,6 +759,11 @@ window.openDistributionSelector = function() {
     if (!detectedRoles || detectedRoles.length === 0) {
         scanContentFromHTML();
     }
+    // Petite sécurité supplémentaire
+    if (!detectedRoles || detectedRoles.length === 0) {
+        alert("Erreur : Aucun rôle détecté. La page est-elle bien chargée ?");
+        return;
+    }
 
     // 1. On génère la grille
     window.generateResurrectionGrid('multi');
@@ -766,7 +772,7 @@ window.openDistributionSelector = function() {
     const modal = document.getElementById('modal-role-selector');
     if(modal) {
         // CORRECTION : Z-Index Maximum pour passer devant le dashboard Admin
-        modal.style.zIndex = "99999"; 
+        modal.style.zIndex = "999999"; 
         
         // On cache le titre par défaut car on a le dashboard (stats en haut)
         const h2 = modal.querySelector('h2');
@@ -795,7 +801,8 @@ window.openResurrectModal = function(playerId) {
     window.openModal('modal-role-selector');
 };
 
-function handleMultiSelection(roleId, divElement) {
+// CORRECTION : On attache la fonction à "window" pour qu'elle soit vue par le HTML
+window.handleMultiSelection = function(roleId, divElement) {
     let currentCount = distributionSelection.filter(id => id === roleId).length;
     let newCount = 0;
     
@@ -830,8 +837,12 @@ function handleMultiSelection(roleId, divElement) {
     } else {
         divElement.classList.remove('selected'); 
     }
-    updateDistributionDashboard();
-}
+    
+    // Mise à jour des stats du dashboard
+    if(typeof updateDistributionDashboard === 'function') {
+        updateDistributionDashboard();
+    }
+};
 
 window.validateDistribution = function() {
     window.closeModal('modal-role-selector');
