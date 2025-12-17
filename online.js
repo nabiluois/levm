@@ -1,5 +1,5 @@
 // ============================================
-// SYSTEME EN LIGNE - V70 (CORRECTIF SÉLECTION & NOM BOUTON)
+// SYSTEME EN LIGNE - V71 (CORRECTIF FINAL DASHBOARD)
 // ============================================
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -264,7 +264,7 @@ function setupAdminListeners() {
 }
 
 // ============================================
-// C. LOGIQUE SÉLECTION & DASHBOARD (CLIC FIXÉ)
+// C. LOGIQUE SÉLECTION & DASHBOARD
 // ============================================
 
 function updateAdminUI(players) {
@@ -439,7 +439,7 @@ window.resetGameToLobby = function() {
 };
 
 // ============================================
-// D. TABLEAU RÉPARTITION (V67 - CLICS OK)
+// D. TABLEAU RÉPARTITION
 // ============================================
 
 window.openRoleSummaryPanel = function() {
@@ -475,7 +475,6 @@ window.openRoleSummaryPanel = function() {
             }
 
             let actionBtn = "";
-            // Bouton visible même en draft, si rôle interactif et pas mort
             if (interactiveRoles.includes(roleId) && !isDead) {
                 actionBtn = `
                     <button onclick="event.stopPropagation(); window.openPlayerSelectorForAction('${roleId}', '${playerId}')" 
@@ -485,7 +484,6 @@ window.openRoleSummaryPanel = function() {
                 `;
             }
 
-            // MISE EN PAGE : Clic sur la div principale, et stopPropagation sur le bouton
             html = `
                 <div class="summary-list-item" style="${style} display:flex; align-items:center; gap:15px; padding:10px 10px; margin:8px 0; border-radius:15px; width:96%; position:relative;">
                     
@@ -678,7 +676,7 @@ window.togglePlayerSelection = function(targetPid, baseAttrKey, maxLimit, unique
     });
 };
 
-// --- FONCTIONS DISTRIBUTION & MÉLANGE MANQUANTES AJOUTÉES ---
+// --- FONCTIONS DISTRIBUTION & MÉLANGE ---
 
 window.generateResurrectionGrid = function(mode = 'single') {
     // SÉCURITÉ : Si la liste est vide, on la remplit de force maintenant
@@ -842,6 +840,29 @@ window.handleMultiSelection = function(roleId, divElement) {
     if(typeof updateDistributionDashboard === 'function') {
         updateDistributionDashboard();
     }
+};
+
+// AJOUT DE LA FONCTION MANQUANTE QUI CAUSAIT LE BUG
+window.updateDistributionDashboard = function() {
+    let cVillage = 0, cLoups = 0, cSolo = 0, total = 0;
+    
+    distributionSelection.forEach(id => {
+        const role = detectedRoles.find(r => r.id === id);
+        if (role) {
+            if (role.category === 'village') cVillage++;
+            else if (role.category === 'loups') cLoups++;
+            else cSolo++; // Solos + Vampires + Autres
+            total++;
+        }
+    });
+
+    const setTxt = (id, val) => { const el = document.getElementById(id); if(el) el.innerText = val; };
+    
+    setTxt('pop-count-village', cVillage);
+    setTxt('pop-count-loup', cLoups);
+    setTxt('pop-count-solo', cSolo);
+    setTxt('pop-total', total);
+    setTxt('ctrl-total', total);
 };
 
 window.validateDistribution = function() {
