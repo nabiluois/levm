@@ -1,5 +1,5 @@
 // ============================================
-// SYSTEME EN LIGNE - V82 (FINAL : FLUIDITÉ TOTALE)
+// SYSTEME EN LIGNE - V84 (FINAL GOLD : CONSISTANCE TOTALE)
 // ============================================
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -37,14 +37,13 @@ let currentPlayersData = {};
 // Variables Action
 let actionSourceRole = null;
 let actionSourceId = null;
-let currentlyOpenedPlayerId = null; // Pour le rafraîchissement auto du profil
+let currentlyOpenedPlayerId = null; 
 
 // ============================================
 // A. INITIALISATION
 // ============================================
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Scan immédiat et sécurisé
     try { scanContentFromHTML(); } catch(e) { console.error("Erreur Scan:", e); }
     
     const btnJoin = document.getElementById('btn-join-action');
@@ -71,6 +70,36 @@ function attachCreateEvent() {
         });
         btnCreate.setAttribute('data-ready', 'true');
     }
+}
+
+// --- UTILITAIRES D'AFFICHAGE ---
+
+// Générateur d'avatar centralisé (Utilisé partout : Grille, Panini, Tableau, Sélecteur)
+function generateAvatarWithBadges(player, size = "60px", border = "1px solid var(--gold)") {
+    const avatarSrc = player.avatar || "icon.png";
+    const isMayor = player.isMayor;
+    let iconsHtml = "";
+
+    if (player.attributes) {
+        const attrs = Object.keys(player.attributes);
+        // Emojis positionnés autour de l'avatar
+        if (attrs.some(k => k.startsWith('lover'))) iconsHtml += `<span style="position:absolute; top:-5px; left:-5px; font-size:1.2em; text-shadow:0 0 3px black; z-index:10;">💘</span>`;
+        if (attrs.some(k => k.startsWith('target'))) iconsHtml += `<span style="position:absolute; bottom:-5px; left:-5px; font-size:1.2em; text-shadow:0 0 3px black; z-index:10;">🎯</span>`;
+        if (attrs.some(k => k.startsWith('infected'))) iconsHtml += `<span style="position:absolute; bottom:-5px; right:-5px; font-size:1.2em; text-shadow:0 0 3px black; z-index:10;">🐾</span>`;
+        if (attrs.some(k => k.startsWith('linked_red'))) iconsHtml += `<span style="position:absolute; top:-5px; right:-5px; font-size:1.2em; text-shadow:0 0 3px black; z-index:10;">❤️</span>`;
+        if (attrs.some(k => k.startsWith('cursed_mentor'))) iconsHtml += `<span style="position:absolute; top:-8px; left:50%; transform:translateX(-50%); font-size:1em; text-shadow:0 0 3px black; z-index:10;">🌙</span>`;
+    }
+
+    if (isMayor) {
+        iconsHtml += `<span style="position:absolute; top:-12px; left:-12px; font-size:1.8em; z-index:20; text-shadow:0 0 4px black; filter:drop-shadow(0 2px 2px rgba(0,0,0,0.5));">🎖️</span>`;
+    }
+
+    return `
+        <div style="position:relative; width:${size}; height:${size}; flex-shrink:0;">
+            <img src="${avatarSrc}" style="width:100%; height:100%; object-fit:cover; border-radius:50%; border:${border}; box-shadow:0 2px 5px rgba(0,0,0,0.5);">
+            ${iconsHtml}
+        </div>
+    `;
 }
 
 // --- GESTION PHOTO ---
@@ -256,7 +285,6 @@ function setupAdminListeners() {
             const p = players[currentlyOpenedPlayerId];
             const roleId = p.draftRole || p.role;
             const isDead = p.status === 'dead';
-            // On met à jour le contenu visuel sans fermer/rouvrir la modale
             refreshAdminPlayerContent(currentlyOpenedPlayerId, p.name, roleId, isDead, p.avatar, p.isMayor, p);
         }
     });
@@ -300,25 +328,17 @@ function updateAdminUI(players) {
             let currentRoleId = p.draftRole || p.role;
             let roleTitle = "";
             let roleCategory = "inconnu";
-            let roleImageSrc = "icon.png"; 
-
+            
             if(currentRoleId && detectedRoles.length > 0) {
                 const r = detectedRoles.find(x => x.id === currentRoleId);
                 if(r) { 
                     roleTitle = r.title;
                     roleCategory = r.category;
-                    roleImageSrc = r.image;
                 }
             }
 
-            let displayAvatar = p.avatar ? p.avatar : (currentRoleId ? roleImageSrc : "icon.png");
             const isDead = p.status === 'dead';
-            
-            let attrIcons = "";
-            if(hasAttribute(p, 'infected')) attrIcons += `<span class="attr-icon" style="bottom:0; right:0;">🐾</span>`;
-            if(hasAttribute(p, 'target')) attrIcons += `<span class="attr-icon" style="bottom:0; left:0;">🎯</span>`;
-            if(hasAttribute(p, 'linked_red')) attrIcons += `<span class="attr-icon" style="top:0; right:0;">❤️</span>`;
-            if(hasAttribute(p, 'lover')) attrIcons += `<span class="attr-icon" style="top:0; left:0;">💘</span>`;
+            const avatarHtml = generateAvatarWithBadges(p, "60px", isDead ? "1px solid #555" : "1px solid var(--gold)");
 
             let draftBtn = "";
             if(isDraft) {
@@ -326,13 +346,11 @@ function updateAdminUI(players) {
             }
 
             gridHTML += `
-                <div class="admin-player-card ${isDead ? 'dead' : ''}" style="position:relative; cursor:pointer;" onclick="window.openAdminPlayerDetail('${id}', '${p.name}', '${currentRoleId || ''}', ${isDead}, '${displayAvatar}', ${p.isMayor})">
+                <div class="admin-player-card ${isDead ? 'dead' : ''}" style="position:relative; cursor:pointer;" onclick="window.openAdminPlayerDetail('${id}', '${p.name}', '${currentRoleId || ''}', ${isDead}, '${p.avatar}', ${p.isMayor})">
                     ${isDraft ? '<div style="background:#e67e22; color:white; font-size:0.6em; padding:2px 5px; border-radius:4px; position:absolute; top:3px; left:3px; z-index:10; font-weight:bold;">PROV.</div>' : ''}
                     
-                    <div class="admin-avatar-container">
-                        <img src="${displayAvatar}" alt="Avatar">
-                        ${p.isMayor ? `<span class="mayor-badge">🎖️</span>` : ''}
-                        ${attrIcons}
+                    <div class="admin-avatar-container" style="border:none; width:auto; height:auto; background:transparent;">
+                        ${avatarHtml}
                     </div>
                     
                     <strong style="font-size:0.9em;">${p.name}</strong>
@@ -457,17 +475,8 @@ window.openRoleSummaryPanel = function() {
                 ? "background:#2c3e50; color:#95a5a6; text-decoration:line-through; border:1px solid #7f8c8d; opacity:0.7;" 
                 : "background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,215,0,0.3);";
             
-            const avatar = playerObj.avatar || "icon.png";
-            
-            let icons = "";
-            if(playerObj.attributes) {
-                const attrs = Object.keys(playerObj.attributes);
-                if(attrs.some(k => k.startsWith('lover'))) icons += "💘 ";
-                if(attrs.some(k => k.startsWith('target'))) icons += "🎯 ";
-                if(attrs.some(k => k.startsWith('infected'))) icons += "🐾 ";
-                if(attrs.some(k => k.startsWith('linked_red'))) icons += "❤️ ";
-                if(attrs.some(k => k.startsWith('cursed_mentor'))) icons += "🌙 ";
-            }
+            // UTILISATION DE LA FONCTION STANDARDISÉE
+            const avatarHtml = generateAvatarWithBadges(playerObj, "55px");
 
             let actionBtn = "";
             if (interactiveRoles.includes(roleId) && !isDead) {
@@ -482,11 +491,8 @@ window.openRoleSummaryPanel = function() {
             html = `
                 <div class="summary-list-item" style="${style} display:flex; align-items:center; gap:15px; padding:10px 10px; margin:8px 0; border-radius:15px; width:96%; position:relative;">
                     
-                    <div style="flex:1; display:flex; align-items:center; gap:15px; cursor:pointer; pointer-events:auto;" onclick="window.openAdminPlayerDetail('${playerId}', '${playerObj.name}', '${roleId}', ${isDead}, '${avatar}', ${playerObj.isMayor})">
-                        <div style="position:relative; width:55px; height:55px;">
-                            <img src="${avatar}" style="width:55px; height:55px; border-radius:50%; object-fit:cover; border:2px solid gold;">
-                            ${icons ? `<div style="position:absolute; bottom:-5px; right:-5px; background:rgba(0,0,0,0.8); border-radius:10px; padding:2px; font-size:1em; border:1px solid white;">${icons}</div>` : ''}
-                        </div>
+                    <div style="flex:1; display:flex; align-items:center; gap:15px; cursor:pointer; pointer-events:auto;" onclick="window.openAdminPlayerDetail('${playerId}', '${playerObj.name}', '${roleId}', ${isDead}, '${playerObj.avatar}', ${playerObj.isMayor})">
+                        ${avatarHtml}
                         <div style="display:flex; flex-direction:column;">
                             <span style="font-family:'Almendra'; font-size:1.3em; font-weight:bold; line-height:1.1;">${playerObj.name}</span>
                             <span style="font-size:1em; color:#ddd;">${role.title}</span>
@@ -583,23 +589,31 @@ window.openPlayerSelectorForAction = function(roleType, sourceId) {
     const modal = document.getElementById('modal-role-selector');
     if(!grid || !modal) return;
 
-    const defaultH2 = modal.querySelector('h2');
-    if(defaultH2) defaultH2.style.display = 'none';
+    // Supprimer la phrase "clique sur une carte..." si elle existe
+    const ps = modal.querySelectorAll('p');
+    ps.forEach(p => p.style.display = 'none');
+    const h2 = modal.querySelector('h2');
+    if(h2) h2.style.display = 'none';
 
     grid.style.display = "block"; 
     grid.innerHTML = "";
 
     const initiator = currentPlayersData[sourceId];
+    const roleObj = detectedRoles.find(r => r.id === (initiator.role || initiator.draftRole));
+    const roleName = roleObj ? roleObj.title : "";
+    
     const headerDiv = document.createElement('div');
     headerDiv.className = "initiator-header";
     headerDiv.innerHTML = `
-        <div style="display:flex; flex-direction:column; align-items:center; margin-bottom:20px; border-bottom:1px solid #555; padding-bottom:10px; width:100%;">
-            <span style="color:#aaa; font-size:0.9em; text-transform:uppercase; letter-spacing:1px;">INITIÉ PAR</span>
-            <div style="position:relative; margin-top:5px;">
-                <img src="${initiator.avatar || 'icon.png'}" style="width:80px; height:80px; border-radius:50%; border:3px solid var(--gold); object-fit:cover;">
-                <span style="display:block; color:var(--gold); font-family:'Pirata One'; font-size:1.4em; margin-top:5px;">${initiator.name}</span>
+        <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; margin-bottom:15px; border-bottom:1px solid #555; padding-bottom:10px; width:100%;">
+            <span style="color:#aaa; font-size:0.8em; text-transform:uppercase; letter-spacing:2px; margin-bottom:5px;">INITIÉ PAR</span>
+            <div style="position:relative; margin-bottom:5px;">
+                 ${generateAvatarWithBadges(initiator, "70px", "2px solid var(--gold)")}
             </div>
-            <h3 style="color:white; margin:10px 0 0 0; font-size:1.2em;">${title}</h3>
+            <span style="display:block; color:var(--gold); font-family:'Pirata One'; font-size:1.6em; line-height:1;">${initiator.name}</span>
+            <span style="display:block; color:#ccc; font-size:1em; font-style:italic;">${roleName}</span>
+            
+            <h3 style="color:white; margin:15px 0 5px 0; font-size:1.3em; border:1px solid #444; padding:5px 15px; border-radius:20px; background:rgba(255,255,255,0.1);">${title}</h3>
             <small style="color:#888;">(Max: ${maxSelection})</small>
         </div>
     `;
@@ -626,11 +640,13 @@ window.openPlayerSelectorForAction = function(roleType, sourceId) {
         `;
         
         div.innerHTML = `
-            <img src="${p.avatar || 'icon.png'}" style="width:100%; height:100%; object-fit:cover; opacity:${isSelected ? 1 : 0.6}; transition:opacity 0.2s;">
-            <div style="position:absolute; bottom:0; left:0; width:100%; background:rgba(0,0,0,0.7); color:white; padding:5px; text-align:center; font-size:0.9em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
-                ${p.name}
+            <div style="width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+                ${generateAvatarWithBadges(p, "60px", "none")}
+                <div style="width:100%; background:rgba(0,0,0,0.6); color:white; padding:5px; text-align:center; font-size:0.9em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:5px;">
+                    ${p.name}
+                </div>
             </div>
-            ${isSelected ? '<div style="position:absolute; top:5px; right:5px; background:#2ecc71; color:white; border-radius:50%; width:25px; height:25px; display:flex; align-items:center; justify-content:center; font-weight:bold;">✓</div>' : ''}
+            ${isSelected ? '<div style="position:absolute; top:5px; right:5px; background:#2ecc71; color:white; border-radius:50%; width:25px; height:25px; display:flex; align-items:center; justify-content:center; font-weight:bold; z-index:20;">✓</div>' : ''}
         `;
         
         div.onclick = () => window.togglePlayerSelection(pid, attributeKey, maxSelection, uniqueAttrKey);
@@ -702,6 +718,14 @@ window.generateResurrectionGrid = function(mode = 'single') {
     const grid = document.getElementById('admin-role-grid');
     if(!grid) return; // Si l'élément n'existe pas, on arrête
     
+    // Remettre le titre si besoin (pour mode simple)
+    const h2 = document.querySelector('#modal-role-selector h2');
+    if(h2) h2.style.display = 'block';
+    
+    // Remettre les textes d'aide si besoin
+    const ps = document.querySelectorAll('#modal-role-selector p');
+    ps.forEach(p => p.style.display = 'block');
+
     grid.style.display = "block"; 
     grid.innerHTML = "";
     
@@ -786,6 +810,8 @@ window.openDistributionSelector = function() {
         // On cache le titre par défaut car on a le dashboard (stats en haut)
         const h2 = modal.querySelector('h2');
         if(h2) h2.style.display = "none"; 
+        const ps = modal.querySelectorAll('p');
+        ps.forEach(p => p.style.display = 'none');
         
         // On ouvre via la fonction globale
         window.openModal('modal-role-selector');
@@ -862,28 +888,6 @@ window.handleMultiSelection = function(roleId, divElement) {
     }
 };
 
-window.updateDistributionDashboard = function() {
-    let cVillage = 0, cLoups = 0, cSolo = 0, total = 0;
-    
-    distributionSelection.forEach(id => {
-        const role = detectedRoles.find(r => r.id === id);
-        if (role) {
-            if (role.category === 'village') cVillage++;
-            else if (role.category === 'loups') cLoups++;
-            else cSolo++; // Solos + Vampires + Autres
-            total++;
-        }
-    });
-
-    const setTxt = (id, val) => { const el = document.getElementById(id); if(el) el.innerText = val; };
-    
-    setTxt('pop-count-village', cVillage);
-    setTxt('pop-count-loup', cLoups);
-    setTxt('pop-count-solo', cSolo);
-    setTxt('pop-total', total);
-    setTxt('ctrl-total', total);
-};
-
 window.validateDistribution = function() {
     // NETTOYAGE FORCE DU STYLE
     const modal = document.getElementById('modal-role-selector');
@@ -904,6 +908,8 @@ window.openEventSelector = function(playerId, category) {
     
     const title = document.querySelector('#modal-role-selector h2');
     if(title) { title.style.display = 'block'; title.innerText = `CARTE ${category.toUpperCase()}`; }
+    const ps = document.querySelectorAll('#modal-role-selector p');
+    ps.forEach(p => p.style.display = 'none'); // On cache le texte d'aide
 
     const randomBtn = document.createElement('button');
     randomBtn.className = "btn-validate";
@@ -996,8 +1002,8 @@ window.assignRoleToPlayer = function(newRoleId) {
             if(modal) { modal.style.zIndex = ''; modal.style.display = ''; }
             window.closeModal('modal-role-selector');
             
-            // MODIF MAJEURE : On NE FERME PLUS le profil joueur
-            // window.closeModal('modal-player-detail'); // <--- Supprimé
+            // Fermeture Panini joueur si ouvert
+            // window.closeModal('modal-player-detail'); // <--- NE PAS FERMER (Demandé)
             
             let msg = "Rôle attribué !";
             if (p2Id) msg = "🔄 Échange effectué avec le joueur qui avait ce rôle.";
@@ -1113,7 +1119,14 @@ window.refreshAdminPlayerContent = function(pid, name, roleId, isDead, avatarSrc
     const pActions = document.getElementById('detail-actions');
 
     if(pPseudo) pPseudo.innerText = name;
-    if(pAvatar) pAvatar.src = avatarSrc;
+    
+    // On recrée l'avatar pour le panini (avec les badges)
+    if(pAvatar && pAvatar.parentNode) {
+        // Remplacement complet du conteneur avatar pour inclure les badges
+        const avatarContainer = generateAvatarWithBadges(fullData || {name:name, avatar:avatarSrc, isMayor:isMayor}, "120px", "4px solid var(--gold)");
+        pAvatar.parentNode.innerHTML = avatarContainer;
+        // Note: l'ID 'detail-avatar' est perdu ici mais ce n'est pas grave car on régénère tout
+    }
     
     // LOGIQUE D'AFFICHAGE IMAGE : VM PRIORITAIRE, SINON RÔLE
     let displayImage = "back.png";
@@ -1195,10 +1208,66 @@ window.refreshAdminPlayerContent = function(pid, name, roleId, isDead, avatarSrc
     }
 }
 
+// LOGIQUE DE MORT EN CHAINE
+window.checkLinkedDeaths = function(pid, isKilling) {
+    if (!isKilling) return; // Si on ressuscite, on s'en fiche
+
+    const victim = currentPlayersData[pid];
+    if (!victim || !victim.attributes) return;
+
+    const updates = {};
+    let triggered = false;
+
+    // 1. Vérification AMOUREUX (Cupidon / Orphelin)
+    // On cherche l'attribut qui commence par 'lover_by_'
+    const loverKey = Object.keys(victim.attributes).find(k => k.startsWith('lover_by_'));
+    
+    if (loverKey) {
+        // On cherche QUI D'AUTRE a cette clé
+        Object.entries(currentPlayersData).forEach(([otherPid, p]) => {
+            if (otherPid !== pid && p.status !== 'dead' && p.attributes && p.attributes[loverKey]) {
+                if(confirm(`💔 ${victim.name} est mort(e) ! Son amoureux(se) ${p.name} doit-il/elle mourir aussi ?`)) {
+                    updates[`games/${currentGameCode}/players/${otherPid}/status`] = 'dead';
+                    triggered = true;
+                }
+            }
+        });
+    }
+
+    // 2. Vérification LOUP ROUGE (Lié au cœur)
+    // On cherche l'attribut 'linked_red_by_[WolfID]'
+    // Si la victime a cet attribut, c'est que c'est le Cœur du Loup Rouge
+    const redLinkKey = Object.keys(victim.attributes).find(k => k.startsWith('linked_red_by_'));
+    
+    if (redLinkKey) {
+        // On extrait l'ID du Loup Rouge depuis la clé (linked_red_by_IDDUWOLF)
+        const wolfId = redLinkKey.replace('linked_red_by_', '');
+        const wolf = currentPlayersData[wolfId];
+        
+        if (wolf && wolf.status !== 'dead') {
+            if(confirm(`🩸 ${victim.name} était le Cœur de ${wolf.name} (Loup Rouge). Tuer le Loup Rouge ?`)) {
+                updates[`games/${currentGameCode}/players/${wolfId}/status`] = 'dead';
+                triggered = true;
+            }
+        }
+    }
+
+    if (triggered) {
+        update(ref(db), updates);
+    }
+};
+
 window.togglePlayerStatus = function(pid, newStatus) {
-    // On met à jour la DB. Le listener (onValue) détectera le changement
-    // et appellera refreshAdminPlayerContent automatiquement.
-    update(ref(db, `games/${currentGameCode}/players/${pid}`), { status: newStatus });
+    const isKilling = newStatus === 'dead';
+    
+    update(ref(db, `games/${currentGameCode}/players/${pid}`), { status: newStatus }).then(() => {
+        // On ne ferme PAS la modale
+        // On lance la vérification des morts liées (Amoureux/Loup Rouge)
+        if (isKilling) {
+            window.checkLinkedDeaths(pid, true);
+        }
+        internalShowNotification("Mise à jour", `Joueur ${isKilling ? 'éliminé' : 'ressuscité'}.`);
+    });
 };
 
 window.toggleMayor = function(pid, isMayor) {
@@ -1210,7 +1279,10 @@ window.toggleMayor = function(pid, isMayor) {
     }
     updates[`games/${currentGameCode}/players/${pid}/isMayor`] = isMayor;
     
-    update(ref(db), updates);
+    update(ref(db), updates).then(() => {
+        // On ne ferme PAS la modale
+        internalShowNotification("Maire", isMayor ? "Nouveau Maire nommé !" : "Maire destitué.");
+    });
 };
 
 // CÔTÉ JOUEUR
