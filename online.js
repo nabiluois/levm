@@ -1,5 +1,5 @@
 // ============================================
-// SYSTEME EN LIGNE - V79 (VERSION FINALE CERTIFIÉE)
+// SYSTEME EN LIGNE - V82 (FINAL : FLUIDITÉ TOTALE)
 // ============================================
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -37,13 +37,14 @@ let currentPlayersData = {};
 // Variables Action
 let actionSourceRole = null;
 let actionSourceId = null;
+let currentlyOpenedPlayerId = null; // Pour le rafraîchissement auto du profil
 
 // ============================================
 // A. INITIALISATION
 // ============================================
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Scan immédiat et sécurisé pour peupler detectedRoles
+    // Scan immédiat et sécurisé
     try { scanContentFromHTML(); } catch(e) { console.error("Erreur Scan:", e); }
     
     const btnJoin = document.getElementById('btn-join-action');
@@ -164,7 +165,6 @@ function scanContentFromHTML() {
     detectedRoles = [];
     detectedEvents = { gold: [], silver: [], bronze: [] };
     
-    // On scanne les rôles
     const cards = document.querySelectorAll('.carte-jeu');
     if (cards.length > 0) {
         cards.forEach((card) => {
@@ -176,18 +176,11 @@ function scanContentFromHTML() {
             if (imgTag && titleTag) {
                 const imgSrc = imgTag.getAttribute('src');
                 const id = imgSrc.split('/').pop().replace(/\.[^/.]+$/, "");
-                
-                detectedRoles.push({
-                    id: id,
-                    title: titleTag.innerText.trim(),
-                    image: imgSrc,
-                    category: categoryId
-                });
+                detectedRoles.push({ id: id, title: titleTag.innerText.trim(), image: imgSrc, category: categoryId });
             }
         });
     }
 
-    // On scanne les cartes événements
     document.querySelectorAll('.carte-vm').forEach((card) => {
         const imgTag = card.querySelector('img');
         if (imgTag) {
@@ -257,7 +250,15 @@ function setupAdminListeners() {
         const players = snapshot.val() || {};
         currentPlayersData = players;
         updateAdminUI(players);
-        // Le tableau ne s'ouvre JAMAIS automatiquement
+        
+        // AUTO-REFRESH DU PANINI ADMIN SI OUVERT
+        if (currentlyOpenedPlayerId && players[currentlyOpenedPlayerId]) {
+            const p = players[currentlyOpenedPlayerId];
+            const roleId = p.draftRole || p.role;
+            const isDead = p.status === 'dead';
+            // On met à jour le contenu visuel sans fermer/rouvrir la modale
+            refreshAdminPlayerContent(currentlyOpenedPlayerId, p.name, roleId, isDead, p.avatar, p.isMayor, p);
+        }
     });
 }
 
@@ -990,13 +991,13 @@ window.assignRoleToPlayer = function(newRoleId) {
         }
 
         update(ref(db), updates).then(() => {
-            // Nettoyage style et fermeture
+            // Nettoyage style et fermeture MODALE SÉLECTION
             const modal = document.getElementById('modal-role-selector');
             if(modal) { modal.style.zIndex = ''; modal.style.display = ''; }
             window.closeModal('modal-role-selector');
             
-            // Fermeture Panini joueur si ouvert
-            window.closeModal('modal-player-detail');
+            // MODIF MAJEURE : On NE FERME PLUS le profil joueur
+            // window.closeModal('modal-player-detail'); // <--- Supprimé
             
             let msg = "Rôle attribué !";
             if (p2Id) msg = "🔄 Échange effectué avec le joueur qui avait ce rôle.";
@@ -1090,7 +1091,20 @@ window.openAdminPlayerDetail = function(pid, name, roleId, isDead, avatarSrc, is
     const modal = document.getElementById('modal-player-detail');
     if(!modal) return;
 
-    // Remplissage infos de base
+    currentlyOpenedPlayerId = pid; // Sauvegarde pour auto-refresh
+
+    // Mettre à jour visuellement le contenu (Fonction séparée pour pouvoir la rappeler)
+    const players = currentPlayersData || {};
+    const fullData = players[pid]; // Données complètes pour avoir drawnCard
+    refreshAdminPlayerContent(pid, name, roleId, isDead, avatarSrc, isMayor, fullData);
+
+    // Ouverture Modale
+    modal.style.zIndex = "20000";
+    window.openModal('modal-player-detail');
+};
+
+// Nouvelle fonction pour mettre à jour le contenu SANS ouvrir la modale
+window.refreshAdminPlayerContent = function(pid, name, roleId, isDead, avatarSrc, isMayor, fullData) {
     const pPseudo = document.getElementById('detail-pseudo');
     const pAvatar = document.getElementById('detail-avatar');
     const pRoleName = document.getElementById('detail-role-name');
@@ -1101,10 +1115,24 @@ window.openAdminPlayerDetail = function(pid, name, roleId, isDead, avatarSrc, is
     if(pPseudo) pPseudo.innerText = name;
     if(pAvatar) pAvatar.src = avatarSrc;
     
-    // Récupération infos du rôle
+    // LOGIQUE D'AFFICHAGE IMAGE : VM PRIORITAIRE, SINON RÔLE
+    let displayImage = "back.png";
+    let displayName = "Aucun rôle";
+
+    // 1. Chercher le rôle de base
     const r = detectedRoles.find(x => x.id === roleId);
-    if(pRoleName) pRoleName.innerText = r ? r.title : (roleId || "Aucun rôle");
-    if(pCard) pCard.src = r ? r.image : "back.png";
+    if(r) {
+        displayImage = r.image;
+        displayName = r.title;
+    }
+
+    // 2. Si une carte VM est piochée, on l'affiche à la place
+    if (fullData && fullData.drawnCard && fullData.drawnCard.image) {
+        displayImage = fullData.drawnCard.image;
+    }
+
+    if(pRoleName) pRoleName.innerText = displayName;
+    if(pCard) pCard.src = displayImage;
 
     // Statut
     if(pStatus) {
@@ -1127,6 +1155,7 @@ window.openAdminPlayerDetail = function(pid, name, roleId, isDead, avatarSrc, is
         btnState.style.background = isDead ? "#27ae60" : "#c0392b";
         btnState.style.color = "white";
         btnState.innerText = isDead ? "💊 RESSUSCITER" : "☠️ TUER";
+        // On ne ferme plus la modale !
         btnState.onclick = () => window.togglePlayerStatus(pid, isDead ? 'alive' : 'dead');
         pActions.appendChild(btnState);
 
@@ -1164,17 +1193,12 @@ window.openAdminPlayerDetail = function(pid, name, roleId, isDead, avatarSrc, is
             });
         }
     }
-
-    // Ouverture Modale
-    modal.style.zIndex = "20000";
-    window.openModal('modal-player-detail');
-};
+}
 
 window.togglePlayerStatus = function(pid, newStatus) {
-    update(ref(db, `games/${currentGameCode}/players/${pid}`), { status: newStatus }).then(() => {
-        window.closeModal('modal-player-detail');
-        internalShowNotification("Mise à jour", `Joueur ${newStatus === 'dead' ? 'éliminé' : 'ressuscité'}.`);
-    });
+    // On met à jour la DB. Le listener (onValue) détectera le changement
+    // et appellera refreshAdminPlayerContent automatiquement.
+    update(ref(db, `games/${currentGameCode}/players/${pid}`), { status: newStatus });
 };
 
 window.toggleMayor = function(pid, isMayor) {
@@ -1186,10 +1210,7 @@ window.toggleMayor = function(pid, isMayor) {
     }
     updates[`games/${currentGameCode}/players/${pid}/isMayor`] = isMayor;
     
-    update(ref(db), updates).then(() => {
-        window.closeModal('modal-player-detail');
-        internalShowNotification("Maire", isMayor ? "Nouveau Maire nommé !" : "Maire destitué.");
-    });
+    update(ref(db), updates);
 };
 
 // CÔTÉ JOUEUR
@@ -1243,10 +1264,11 @@ function listenForPlayerUpdates() {
             document.body.classList.add('dead-state'); 
             uiHtml += `<h1 style="color:#c0392b; font-size:3em; text-align:center;">TU ES MORT 💀</h1>`;
             
-            // Mise à jour visuelle carte SI ouverte
-            const cardEl = document.querySelector('.carte-jeu');
+            // FIX: CIBLAGE PRÉCIS DE LA CARTE ONLINE UNIQUEMENT
+            const cardEl = document.querySelector('#online-content-wrapper .carte-jeu');
             if(cardEl) {
                 cardEl.style.filter = "grayscale(100%)";
+                cardEl.classList.remove('flipped'); // Retour au verso (logo)
                 cardEl.onclick = null; 
             }
         } else {
@@ -1254,7 +1276,7 @@ function listenForPlayerUpdates() {
             uiHtml += `<h3 style="color:var(--gold);">Tu es en jeu !</h3>`;
             
             // Réactivation carte SI ouverte
-            const cardEl = document.querySelector('.carte-jeu');
+            const cardEl = document.querySelector('#online-content-wrapper .carte-jeu');
             if(cardEl) {
                 cardEl.style.filter = "none";
                 cardEl.onclick = function() { this.classList.toggle('flipped'); };
@@ -1375,6 +1397,7 @@ function revealRole(roleId, status, isMayor) {
 }
 
 window.internalCloseDetails = function() {
+    currentlyOpenedPlayerId = null; // Arrête l'auto-refresh
     const panel = document.querySelector('.details-panel');
     const overlay = document.querySelector('.details-overlay');
     if(panel) panel.classList.remove('active');
