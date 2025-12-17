@@ -1,5 +1,5 @@
 // ============================================
-// SYSTEME EN LIGNE - V84 (FINAL GOLD : CONSISTANCE TOTALE)
+// SYSTEME EN LIGNE - V86 (FINAL GOLD CERTIFIÉ)
 // ============================================
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -72,9 +72,8 @@ function attachCreateEvent() {
     }
 }
 
-// --- UTILITAIRES D'AFFICHAGE ---
+// --- UTILITAIRES D'AFFICHAGE (PHOTOS RONDES & EMOJIS PARTOUT) ---
 
-// Générateur d'avatar centralisé (Utilisé partout : Grille, Panini, Tableau, Sélecteur)
 function generateAvatarWithBadges(player, size = "60px", border = "1px solid var(--gold)") {
     const avatarSrc = player.avatar || "icon.png";
     const isMayor = player.isMayor;
@@ -82,21 +81,26 @@ function generateAvatarWithBadges(player, size = "60px", border = "1px solid var
 
     if (player.attributes) {
         const attrs = Object.keys(player.attributes);
-        // Emojis positionnés autour de l'avatar
+        // Emojis avec positions absolues pour entourer la photo
         if (attrs.some(k => k.startsWith('lover'))) iconsHtml += `<span style="position:absolute; top:-5px; left:-5px; font-size:1.2em; text-shadow:0 0 3px black; z-index:10;">💘</span>`;
         if (attrs.some(k => k.startsWith('target'))) iconsHtml += `<span style="position:absolute; bottom:-5px; left:-5px; font-size:1.2em; text-shadow:0 0 3px black; z-index:10;">🎯</span>`;
         if (attrs.some(k => k.startsWith('infected'))) iconsHtml += `<span style="position:absolute; bottom:-5px; right:-5px; font-size:1.2em; text-shadow:0 0 3px black; z-index:10;">🐾</span>`;
         if (attrs.some(k => k.startsWith('linked_red'))) iconsHtml += `<span style="position:absolute; top:-5px; right:-5px; font-size:1.2em; text-shadow:0 0 3px black; z-index:10;">❤️</span>`;
         if (attrs.some(k => k.startsWith('cursed_mentor'))) iconsHtml += `<span style="position:absolute; top:-8px; left:50%; transform:translateX(-50%); font-size:1em; text-shadow:0 0 3px black; z-index:10;">🌙</span>`;
+        
+        // Emojis Chuchoteur et Marabout
+        if (attrs.some(k => k.startsWith('silenced'))) iconsHtml += `<span style="position:absolute; bottom:5px; left:50%; transform:translateX(-50%); font-size:1.4em; text-shadow:0 0 3px black; z-index:15;">🤐</span>`;
+        if (attrs.some(k => k.startsWith('bewitched'))) iconsHtml += `<span style="position:absolute; top:5px; left:50%; transform:translateX(-50%); font-size:1.4em; text-shadow:0 0 3px black; z-index:15;">😵‍💫</span>`;
     }
 
     if (isMayor) {
         iconsHtml += `<span style="position:absolute; top:-12px; left:-12px; font-size:1.8em; z-index:20; text-shadow:0 0 4px black; filter:drop-shadow(0 2px 2px rgba(0,0,0,0.5));">🎖️</span>`;
     }
 
+    // STYLE BLINDÉ : min-width/height + flex-shrink:0 pour empêcher l'écrasement ovale
     return `
-        <div style="position:relative; width:${size}; height:${size}; flex-shrink:0;">
-            <img src="${avatarSrc}" style="width:100%; height:100%; object-fit:cover; border-radius:50%; border:${border}; box-shadow:0 2px 5px rgba(0,0,0,0.5);">
+        <div style="position:relative; width:${size}; height:${size}; min-width:${size}; min-height:${size}; flex-shrink:0;">
+            <img src="${avatarSrc}" style="width:100%; height:100%; object-fit:cover; border-radius:50%; border:${border}; box-shadow:0 2px 5px rgba(0,0,0,0.5); display:block;">
             ${iconsHtml}
         </div>
     `;
@@ -280,7 +284,6 @@ function setupAdminListeners() {
         currentPlayersData = players;
         updateAdminUI(players);
         
-        // AUTO-REFRESH DU PANINI ADMIN SI OUVERT
         if (currentlyOpenedPlayerId && players[currentlyOpenedPlayerId]) {
             const p = players[currentlyOpenedPlayerId];
             const roleId = p.draftRole || p.role;
@@ -338,6 +341,7 @@ function updateAdminUI(players) {
             }
 
             const isDead = p.status === 'dead';
+            // Utilisation du générateur d'avatar centralisé (Pour avoir les émojis)
             const avatarHtml = generateAvatarWithBadges(p, "60px", isDead ? "1px solid #555" : "1px solid var(--gold)");
 
             let draftBtn = "";
@@ -578,11 +582,14 @@ window.openPlayerSelectorForAction = function(roleType, sourceId) {
     let maxSelection = 1;
     let attributeKey = "";
     
+    // LOGIQUE DE SÉLECTION & ATTRIBUTS
     if(roleType === 'l_orphelin') { title = "CHOISIR LES 2 AMOUREUX"; maxSelection = 2; attributeKey = "lover"; }
     else if(roleType === 'target') { title = "DÉTOURNEMENT"; attributeKey = "target"; }
     else if(roleType === 'le_loup_garou_rouge') { title = "LIER AU CŒUR"; attributeKey = "linked_red"; }
     else if(roleType === 'le_loup_garou_maudit') { title = "CHOISIR MENTOR"; attributeKey = "cursed_mentor"; }
     else if(roleType === 'le_papa_des_loups' || roleType === 'le_loup_garou_alpha') { title = "INFECTER"; attributeKey = "infected"; }
+    else if(roleType === 'le_chuchoteur') { title = "RENDRE MUET"; maxSelection = 1; attributeKey = "silenced"; }
+    else if(roleType === 'le_marabout') { title = "MARABOUTER"; maxSelection = 99; attributeKey = "bewitched"; }
     else { title = "ACTION"; attributeKey = "generic_action"; }
 
     const grid = document.getElementById('admin-role-grid');
@@ -639,6 +646,7 @@ window.openPlayerSelectorForAction = function(roleType, sourceId) {
             cursor: pointer;
         `;
         
+        // Utilisation du générateur d'avatar avec badges
         div.innerHTML = `
             <div style="width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center;">
                 ${generateAvatarWithBadges(p, "60px", "none")}
@@ -810,8 +818,6 @@ window.openDistributionSelector = function() {
         // On cache le titre par défaut car on a le dashboard (stats en haut)
         const h2 = modal.querySelector('h2');
         if(h2) h2.style.display = "none"; 
-        const ps = modal.querySelectorAll('p');
-        ps.forEach(p => p.style.display = 'none');
         
         // On ouvre via la fonction globale
         window.openModal('modal-role-selector');
@@ -908,8 +914,6 @@ window.openEventSelector = function(playerId, category) {
     
     const title = document.querySelector('#modal-role-selector h2');
     if(title) { title.style.display = 'block'; title.innerText = `CARTE ${category.toUpperCase()}`; }
-    const ps = document.querySelectorAll('#modal-role-selector p');
-    ps.forEach(p => p.style.display = 'none'); // On cache le texte d'aide
 
     const randomBtn = document.createElement('button');
     randomBtn.className = "btn-validate";
