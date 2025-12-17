@@ -643,7 +643,8 @@ window.openPlayerSelectorForAction = function(roleType, sourceId) {
     });
     grid.appendChild(catGrid);
     
-    modal.style.zIndex = "20000"; 
+    // CORRECTION : Z-Index très élevé ici aussi
+    modal.style.zIndex = "30000"; 
     window.openModal('modal-role-selector');
 };
 
@@ -871,8 +872,14 @@ window.adminDrawEvent = function(pid, cat) { window.openEventSelector(pid, cat);
 window.generateResurrectionGrid = function(mode = 'single') {
     const grid = document.getElementById('admin-role-grid');
     if(!grid) return;
-    if (detectedRoles.length === 0) scanContentFromHTML();
-    grid.style.display = "block"; grid.innerHTML = "";
+    
+    // SÉCURITÉ : Si la liste est vide, on la remplit de force
+    if (detectedRoles.length === 0) {
+        scanContentFromHTML();
+    }
+
+    grid.style.display = "block"; 
+    grid.innerHTML = "";
     
     if (mode === 'multi') {
         const dashboard = document.createElement('div');
@@ -928,7 +935,8 @@ window.openDistributionSelector = function() {
     window.generateResurrectionGrid('multi');
     const modal = document.getElementById('modal-role-selector');
     if(modal) {
-        modal.style.zIndex = "20000"; 
+        // CORRECTION : Z-Index très élevé pour passer devant le dashboard Admin (10000) et le Panini (20000)
+        modal.style.zIndex = "30000"; 
         const h2 = modal.querySelector('h2');
         if(h2) h2.style.display = "none"; 
         window.openModal('modal-role-selector');
