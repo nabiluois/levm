@@ -2501,5 +2501,40 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // LANCEMENT INITIAL
   initGameLock();
+  
+  // ===============================
+  // 14. EMOJIS DOS DE CARTE (CLIENT)
+  // ===============================
+  window.updateCardBackEmojis = function(attributes) {
+      const container = document.getElementById('card-emoji-container');
+      if (!container) return; // Si la carte n'est pas affichée, on ne fait rien
+
+      container.innerHTML = ""; // Reset
+
+      if (!attributes) return;
+
+      // Logique d'affichage : on vérifie s'il y a des clés qui commencent par...
+      const hasLover = Object.keys(attributes).some(k => k.startsWith('lover'));
+      const hasTarget = Object.keys(attributes).some(k => k.startsWith('target'));
+      const hasRed = Object.keys(attributes).some(k => k.startsWith('linked_red'));
+      const hasInfected = Object.keys(attributes).some(k => k.startsWith('infected'));
+      const hasMentor = Object.keys(attributes).some(k => k.startsWith('cursed_mentor'));
+
+      if (hasLover) {
+          container.innerHTML += `<div style="font-size:2em; filter:drop-shadow(0 0 3px black);">💘</div>`;
+      }
+      if (hasTarget) {
+          container.innerHTML += `<div style="font-size:2em; filter:drop-shadow(0 0 3px black);">🎯</div>`;
+      }
+      if (hasRed) {
+          container.innerHTML += `<div style="font-size:2em; filter:drop-shadow(0 0 3px black);">❤️</div>`;
+      }
+      if (hasInfected) {
+          container.innerHTML += `<div style="font-size:2em; filter:drop-shadow(0 0 3px black);">🐾</div>`;
+      }
+      if (hasMentor) {
+          container.innerHTML += `<div style="font-size:2em; filter:drop-shadow(0 0 3px black);">🌙</div>`;
+      }
+  };
 
 }); // FIN DOMContentLoaded

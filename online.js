@@ -1,5 +1,5 @@
 // ============================================
-// SYSTEME EN LIGNE - V61 (PRELOAD & VITESSE)
+// SYSTEME EN LIGNE - V65 (INTERACTIONS OPTIMISÉES)
 // ============================================
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -34,10 +34,9 @@ let playerPhotoData = null;
 let distributionSelection = [];
 let currentPlayersData = {}; 
 
-// Variables pour les Liaisons
+// Variables pour les Liaisons (Action)
 let actionSourceRole = null;
-let actionStep = 0;
-let tempSelection = [];
+let actionSourceId = null; // ID du joueur qui initie l'action (ex: l'Orphelin)
 
 // ============================================
 // A. INITIALISATION
@@ -134,7 +133,7 @@ function restorePlayerSession(code, id) {
             if(lobbyStatus) lobbyStatus.style.display = 'block';
             
             if(window.closeModal) window.closeModal('modal-online-menu'); 
-            if(window.openModal) window.openModal('modal-join-game');      
+            if(window.openModal) window.openModal('modal-join-game');       
             listenForPlayerUpdates();
         } else {
             internalShowNotification("Info", "Partie terminée ou expirée.");
@@ -180,7 +179,7 @@ function scanContentFromHTML() {
                 category: categoryId
             });
 
-            // OPTIMISATION V61 : PRELOAD
+            // PRELOAD
             const preloadImg = new Image();
             preloadImg.src = imgSrc;
         }
@@ -194,7 +193,7 @@ function scanContentFromHTML() {
             else if (card.classList.contains('silver')) detectedEvents.silver.push(imgSrc);
             else if (card.classList.contains('bronze')) detectedEvents.bronze.push(imgSrc);
             
-            // OPTIMISATION V61 : PRELOAD
+            // PRELOAD
             const preloadImg = new Image();
             preloadImg.src = imgSrc;
         }
@@ -259,7 +258,7 @@ function setupAdminListeners() {
         const players = snapshot.val() || {};
         currentPlayersData = players;
         updateAdminUI(players);
-        // Si le tableau de répartition est ouvert, on le rafraîchit en temps réel
+        // Rafraichit le tableau s'il est déjà ouvert
         if(document.querySelector('.panini-admin-header') && document.querySelector('.summary-container')) {
             window.openRoleSummaryPanel();
         }
@@ -315,7 +314,9 @@ function updateAdminUI(players) {
                 }
             }
 
+            // MODIF : Photo prioritaire
             let displayAvatar = p.avatar ? p.avatar : (currentRoleId ? roleImageSrc : "icon.png");
+            
             const isDead = p.status === 'dead';
             
             const cardDiv = document.createElement('div');
@@ -327,10 +328,10 @@ function updateAdminUI(players) {
                 <div class="admin-avatar-container">
                     <img src="${displayAvatar}" alt="Avatar">
                     ${p.isMayor ? `<span class="mayor-badge">🎖️</span>` : ''}
-                    ${p.attributes && p.attributes.infected ? `<span style="position:absolute; bottom:0; right:0; font-size:1.5em; filter:drop-shadow(0 0 2px black);">🐾</span>` : ''}
-                    ${p.attributes && p.attributes.target ? `<span style="position:absolute; bottom:0; left:0; font-size:1.5em; filter:drop-shadow(0 0 2px black);">🎯</span>` : ''}
-                    ${p.attributes && p.attributes.linked_red ? `<span style="position:absolute; top:0; right:0; font-size:1.5em; filter:drop-shadow(0 0 2px black);">❤️</span>` : ''}
-                    ${p.attributes && p.attributes.lover ? `<span style="position:absolute; top:0; right:0; font-size:1.5em; filter:drop-shadow(0 0 2px black);">💘</span>` : ''}
+                    ${hasAttribute(p, 'infected') ? `<span class="attr-icon" style="bottom:0; right:0;">🐾</span>` : ''}
+                    ${hasAttribute(p, 'target') ? `<span class="attr-icon" style="bottom:0; left:0;">🎯</span>` : ''}
+                    ${hasAttribute(p, 'linked_red') ? `<span class="attr-icon" style="top:0; right:0;">❤️</span>` : ''}
+                    ${hasAttribute(p, 'lover') ? `<span class="attr-icon" style="top:0; left:0;">💘</span>` : ''}
                 </div>
                 <strong style="font-size:0.9em;">${p.name}</strong>
             `;
@@ -356,12 +357,15 @@ function updateAdminUI(players) {
     updateAdminButtons(count);
 }
 
+// Fonction helper pour vérifier les attributs (avec les nouvelles clés dynamiques)
+function hasAttribute(player, attrType) {
+    if (!player.attributes) return false;
+    return Object.keys(player.attributes).some(key => key.startsWith(attrType));
+}
+
 function generateDashboardControls() {
     const container = document.getElementById('roles-selection-list');
     if(!container) return;
-    
-    const countSpan = document.getElementById('role-count');
-    if(countSpan && countSpan.parentElement) countSpan.parentElement.style.display = 'none';
     
     container.innerHTML = "";
     container.style.border = "none";
@@ -387,6 +391,14 @@ function generateDashboardControls() {
     btnSelect.innerHTML = "📂 MODIFIER SÉLECTION";
     btnSelect.onclick = () => window.openDistributionSelector();
     wrapper.appendChild(btnSelect);
+
+    // --- BOUTON DÉSICÔNISER (RESET) DEMANDÉ ---
+    const btnReset = document.createElement('button');
+    btnReset.className = "btn-admin-action";
+    btnReset.style.cssText = "background:#c0392b; color:white; border:1px solid #e74c3c; padding:8px; width:100%; border-radius:6px; font-family:'Pirata One'; font-size:1em; cursor:pointer; opacity:0.8;";
+    btnReset.innerHTML = "🗑️ DÉSICÔNISER (RESET)";
+    btnReset.onclick = () => window.resetGameToLobby();
+    wrapper.appendChild(btnReset);
 
     const btnDistribute = document.createElement('button');
     btnDistribute.id = "btn-distribute";
@@ -414,6 +426,25 @@ function generateDashboardControls() {
     });
 }
 
+// Fonction Reset Total
+window.resetGameToLobby = function() {
+    if(!confirm("⚠️ ATTENTION : Cela va remettre TOUS les joueurs à l'état initial (vivants, sans rôle, sans maire). Êtes-vous sûr ?")) return;
+
+    const updates = {};
+    Object.keys(currentPlayersData).forEach(pid => {
+        updates[`games/${currentGameCode}/players/${pid}/role`] = null;
+        updates[`games/${currentGameCode}/players/${pid}/draftRole`] = null;
+        updates[`games/${currentGameCode}/players/${pid}/status`] = 'alive';
+        updates[`games/${currentGameCode}/players/${pid}/isMayor`] = false;
+        updates[`games/${currentGameCode}/players/${pid}/attributes`] = null;
+        updates[`games/${currentGameCode}/players/${pid}/drawnCard`] = null;
+    });
+
+    update(ref(db), updates).then(() => {
+        internalShowNotification("Reset", "Le jeu a été réinitialisé.");
+    });
+};
+
 // ============================================
 // D. TABLEAU RÉPARTITION & LOGIQUE SPECIALE
 // ============================================
@@ -426,51 +457,50 @@ window.openRoleSummaryPanel = function() {
     
     const hasActivePlayers = Object.keys(currentPlayersData).length > 0;
     
-    // LOGIQUE DE CLIC POUR RÔLES SPÉCIAUX
-    window.handleTableRoleClick = function(roleId, playerId) {
-        if(isDraftMode) return;
-        const specialRoles = ['l_orphelin', 'target', 'le_loup_garou_rouge', 'le_loup_garou_maudit', 'le_loup_garou_alpha', 'le_papa_des_loups'];
-        if (specialRoles.includes(roleId)) {
-            window.openPlayerSelectorForAction(roleId, playerId);
-        } else {
-            const p = currentPlayersData[playerId];
-            if(p) window.openAdminPlayerDetail(playerId, p.name, roleId, p.status === 'dead', p.avatar || 'icon.png', p.isMayor);
-        }
-    };
+    // LISTE DES RÔLES INTERACTIFS QUI ONT LE BOUTON ÉCLAIR
+    const interactiveRoles = ['l_orphelin', 'target', 'le_loup_garou_rouge', 'le_loup_garou_maudit', 'le_loup_garou_alpha', 'le_papa_des_loups', 'le_chuchoteur', 'le_marabout'];
 
     const createLine = (roleId, playerObj, playerId) => {
         const role = detectedRoles.find(r => r.id === roleId);
         if(!role) return null;
+        
         let html = "";
         
         if (hasActivePlayers && playerObj) {
             const isDead = playerObj.status === 'dead';
             const style = isDead 
                 ? "background:#2c3e50; color:#95a5a6; text-decoration:line-through; border:1px solid #7f8c8d; opacity:0.7;" 
-                : "background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,215,0,0.3); cursor:pointer;";
+                : "background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,215,0,0.3);";
             
             const avatar = playerObj.avatar || "icon.png";
             
-            let icons = "";
-            if(playerObj.attributes) {
-                if(playerObj.attributes.lover) icons += "💘 ";
-                if(playerObj.attributes.target) icons += "🎯 ";
-                if(playerObj.attributes.infected) icons += "🐾 ";
-                if(playerObj.attributes.linked_red) icons += "❤️ ";
-                if(playerObj.attributes.cursed_mentor) icons += "🌙 ";
+            // --- BOUTON D'ACTION SÉPARÉ (DEMANDE SPÉCIFIQUE) ---
+            let actionBtn = "";
+            if (interactiveRoles.includes(roleId) && !isDead && !isDraftMode) {
+                actionBtn = `
+                    <button onclick="event.stopPropagation(); window.openPlayerSelectorForAction('${roleId}', '${playerId}')" 
+                        style="background:linear-gradient(135deg, #f1c40f, #d35400); border:1px solid white; border-radius:50%; width:45px; height:45px; display:flex; align-items:center; justify-content:center; font-size:1.5em; cursor:pointer; box-shadow:0 0 10px rgba(243, 156, 18, 0.5); margin-left:auto; flex-shrink:0;">
+                        ⚡
+                    </button>
+                `;
             }
 
-            // --- MISE EN PAGE SPACIEUSE (XXL) ---
-            html = `<div class="summary-list-item" onclick="window.handleTableRoleClick('${roleId}', '${playerId}')" 
-                style="${style} display:flex; align-items:center; gap:20px; padding:12px 15px; margin:8px 0; border-radius:15px; justify-content:flex-start; width:95%;">
-                
-                <img src="${avatar}" style="width:60px; height:60px; min-width:60px; border-radius:50%; object-fit:cover; border:3px solid gold; box-shadow:0 0 10px rgba(0,0,0,0.5);">
-                
-                <div style="display:flex; flex-direction:column; align-items:flex-start; overflow:hidden;">
-                    <span style="font-family:'Almendra'; font-size:1.4em; font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${playerObj.name}</span>
-                    <span style="font-size:1.1em; color:#ddd; margin-top:2px;">${role.title} ${icons}</span>
-                </div>
-            </div>`;
+            // MISE EN PAGE : Div principale clicable pour profil + Bouton séparé
+            html = `
+                <div class="summary-list-item" style="${style} display:flex; align-items:center; gap:15px; padding:10px 10px; margin:8px 0; border-radius:15px; width:96%; position:relative;">
+                    
+                    <div style="flex:1; display:flex; align-items:center; gap:15px; cursor:pointer;" onclick="window.openAdminPlayerDetail('${playerId}', '${playerObj.name}', '${roleId}', ${isDead}, '${avatar}', ${playerObj.isMayor})">
+                        <div style="position:relative; width:55px; height:55px;">
+                            <img src="${avatar}" style="width:55px; height:55px; border-radius:50%; object-fit:cover; border:2px solid gold;">
+                        </div>
+                        <div style="display:flex; flex-direction:column;">
+                            <span style="font-family:'Almendra'; font-size:1.3em; font-weight:bold; line-height:1.1;">${playerObj.name}</span>
+                            <span style="font-size:1em; color:#ddd;">${role.title}</span>
+                        </div>
+                    </div>
+
+                    ${actionBtn}
+                </div>`;
         } else {
             html = `<div class="summary-list-item" style="color:#ddd; padding:8px; font-size:1.1em;">${role.title}</div>`;
         }
@@ -532,124 +562,119 @@ window.openRoleSummaryPanel = function() {
     }
 }
 
-// --- LOGIQUE SÉLECTEUR DE JOUEURS POUR ACTIONS (AVEC VISUEL ON/OFF) ---
+// --- SÉLECTEUR D'ACTIONS (V65 - COMPATIBLE DOUBLONS & TOGGLE) ---
 window.openPlayerSelectorForAction = function(roleType, sourceId) {
     actionSourceRole = roleType;
-    actionStep = 1;
-    tempSelection = []; 
+    actionSourceId = sourceId; 
     
-    let title = "CHOISIR UNE CIBLE";
-    if(roleType === 'l_orphelin') title = "CHOISIR AMOUREUX 1";
-    if(roleType === 'target') title = "CHOISIR CIBLE MIROIR";
-    if(roleType === 'le_loup_garou_rouge') title = "CHOISIR CŒUR";
-    if(roleType === 'le_loup_garou_maudit') title = "CHOISIR MENTOR";
-    if(roleType === 'le_papa_des_loups' || roleType === 'le_loup_garou_alpha') title = "INFECTER QUI ?";
+    let title = "CHOISIR CIBLE";
+    let maxSelection = 1;
+    let attributeKey = "";
+    
+    if(roleType === 'l_orphelin') { 
+        title = "CHOISIR LES 2 AMOUREUX"; 
+        maxSelection = 2; 
+        attributeKey = "lover"; 
+    }
+    else if(roleType === 'target') { title = "DÉTOURNEMENT"; attributeKey = "target"; }
+    else if(roleType === 'le_loup_garou_rouge') { title = "LIER AU CŒUR"; attributeKey = "linked_red"; }
+    else if(roleType === 'le_loup_garou_maudit') { title = "CHOISIR MENTOR"; attributeKey = "cursed_mentor"; }
+    else if(roleType === 'le_papa_des_loups' || roleType === 'le_loup_garou_alpha') { title = "INFECTER"; attributeKey = "infected"; }
+    else { title = "ACTION"; attributeKey = "generic_action"; }
 
     const grid = document.getElementById('admin-role-grid');
-    if(!grid) return;
-    
-    const modalTitle = document.querySelector('#modal-role-selector h2');
-    if(modalTitle) {
-        modalTitle.style.display = 'block';
-        modalTitle.innerText = title;
-    }
-    
-    grid.style.display = "block"; grid.innerHTML = "";
-    
+    const modal = document.getElementById('modal-role-selector');
+    if(!grid || !modal) return;
+
+    // Masquer le titre par défaut pour mettre le Header custom
+    const defaultH2 = modal.querySelector('h2');
+    if(defaultH2) defaultH2.style.display = 'none';
+
+    grid.style.display = "block"; 
+    grid.innerHTML = "";
+
+    // 1. Header Initiateur (Visualisation de qui fait l'action)
+    const initiator = currentPlayersData[sourceId];
+    const headerDiv = document.createElement('div');
+    headerDiv.className = "initiator-header";
+    headerDiv.innerHTML = `
+        <div style="display:flex; flex-direction:column; align-items:center; margin-bottom:20px; border-bottom:1px solid #555; padding-bottom:10px; width:100%;">
+            <span style="color:#aaa; font-size:0.9em; text-transform:uppercase; letter-spacing:1px;">INITIÉ PAR</span>
+            <div style="position:relative; margin-top:5px;">
+                <img src="${initiator.avatar || 'icon.png'}" style="width:80px; height:80px; border-radius:50%; border:3px solid var(--gold); object-fit:cover;">
+                <span style="display:block; color:var(--gold); font-family:'Pirata One'; font-size:1.4em; margin-top:5px;">${initiator.name}</span>
+            </div>
+            <h3 style="color:white; margin:10px 0 0 0; font-size:1.2em;">${title}</h3>
+            <small style="color:#888;">(Max: ${maxSelection})</small>
+        </div>
+    `;
+    grid.appendChild(headerDiv);
+
+    // 2. Grille 2 Colonnes
     const catGrid = document.createElement('div');
-    catGrid.className = "admin-grid-container";
-    
+    catGrid.className = "player-selector-grid"; 
+    catGrid.style.cssText = "display:grid; grid-template-columns: 1fr 1fr; gap:10px; padding-bottom:50px;";
+
     Object.entries(currentPlayersData).forEach(([pid, p]) => {
-        if (pid === sourceId && roleType !== 'l_orphelin') return;
-        
+        // Clé unique pour gérer les doublons (ex: lover_by_ID1 vs lover_by_ID2)
+        const uniqueAttrKey = `${attributeKey}_by_${sourceId}`; 
+        const isSelected = p.attributes && p.attributes[uniqueAttrKey];
+
         const div = document.createElement('div');
-        div.className = "role-select-item player-selector-item";
-        
-        // STYLE PAR DÉFAUT : GRISÉ + OPTIMISATION IMAGE V61
-        div.innerHTML = `
-            <img src="${p.avatar || 'icon.png'}" loading="eager" style="width:100%; aspect-ratio:1/1; object-fit:cover; border-radius:50%; border:2px solid #555; filter:grayscale(100%); opacity:0.6; transition:all 0.2s ease;">
-            <div style="color:#aaa; font-weight:bold; margin-top:5px; transition:color 0.2s;">${p.name}</div>
+        div.className = `player-select-card ${isSelected ? 'active' : ''}`;
+        div.style.cssText = `
+            position: relative; 
+            background: rgba(255,255,255,0.05); 
+            border-radius: 12px; 
+            overflow: hidden; 
+            aspect-ratio: 1/1;
+            border: 2px solid ${isSelected ? '#2ecc71' : 'transparent'};
+            cursor: pointer;
         `;
         
-        // INTERACTION : CLIC
-        div.onclick = function() {
-            // 1. Visuel : On allume
-            const img = this.querySelector('img');
-            const txt = this.querySelector('div');
-            
-            img.style.filter = "none";
-            img.style.opacity = "1";
-            img.style.borderColor = "#2ecc71"; // Vert de validation
-            img.style.transform = "scale(1.1)";
-            txt.style.color = "white";
-            
-            // 2. Action après petit délai pour voir l'effet
-            setTimeout(() => {
-                window.handleActionSelection(roleType, sourceId, pid);
-            }, 300);
-        };
+        div.innerHTML = `
+            <img src="${p.avatar || 'icon.png'}" style="width:100%; height:100%; object-fit:cover; opacity:${isSelected ? 1 : 0.6}; transition:opacity 0.2s;">
+            <div style="position:absolute; bottom:0; left:0; width:100%; background:rgba(0,0,0,0.7); color:white; padding:5px; text-align:center; font-size:0.9em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                ${p.name}
+            </div>
+            ${isSelected ? '<div style="position:absolute; top:5px; right:5px; background:#2ecc71; color:white; border-radius:50%; width:25px; height:25px; display:flex; align-items:center; justify-content:center; font-weight:bold;">✓</div>' : ''}
+        `;
         
+        div.onclick = () => window.togglePlayerSelection(pid, attributeKey, maxSelection, uniqueAttrKey);
         catGrid.appendChild(div);
     });
     grid.appendChild(catGrid);
     
-    document.getElementById('modal-role-selector').style.zIndex = "20000"; 
+    modal.style.zIndex = "20000"; 
     window.openModal('modal-role-selector');
 };
 
-window.handleActionSelection = function(roleType, sourceId, selectedPid) {
-    if (roleType === 'l_orphelin') {
-        if (actionStep === 1) {
-            tempSelection.push(selectedPid);
-            actionStep = 2;
-            document.querySelector('#modal-role-selector h2').innerText = "CHOISIR AMOUREUX 2";
-            
-            // On rafraîchit la grille pour exclure le 1er choix (ou le marquer)
-            // Mais pour faire simple et rapide, on garde la grille ouverte
-            // On pourrait marquer visuellement le 1er choix ici si on voulait
-            return; 
-        } else if (actionStep === 2) {
-            const lover1 = tempSelection[0];
-            const lover2 = selectedPid;
-            
-            if(lover1 === lover2) { alert("Il faut deux joueurs différents !"); return; }
+window.togglePlayerSelection = function(targetPid, baseAttrKey, maxLimit, uniqueAttrKey) {
+    let currentCount = 0;
+    Object.values(currentPlayersData).forEach(p => {
+        if(p.attributes && p.attributes[uniqueAttrKey]) currentCount++;
+    });
 
-            const updates = {};
-            updates[`games/${currentGameCode}/players/${lover1}/attributes/lover`] = lover2;
-            updates[`games/${currentGameCode}/players/${lover2}/attributes/lover`] = lover1;
-            
-            update(ref(db), updates).then(() => {
-                internalShowNotification("❤️", "Le couple est formé !");
-                window.closeModal('modal-role-selector');
-                window.openRoleSummaryPanel();
-            });
-        }
-    } 
-    else {
-        const updates = {};
-        
-        if (roleType === 'target') {
-            updates[`games/${currentGameCode}/players/${selectedPid}/attributes/target`] = true;
-            internalShowNotification("🎯", "Cible verrouillée !");
-        }
-        else if (roleType === 'le_loup_garou_rouge') {
-            updates[`games/${currentGameCode}/players/${selectedPid}/attributes/linked_red`] = sourceId;
-            internalShowNotification("❤️", "Cœur lié au Loup Rouge !");
-        }
-        else if (roleType === 'le_loup_garou_maudit') {
-            updates[`games/${currentGameCode}/players/${selectedPid}/attributes/cursed_mentor`] = true;
-            internalShowNotification("🌙", "Mentor désigné !");
-        }
-        else if (roleType === 'le_papa_des_loups' || roleType === 'le_loup_garou_alpha') {
-            updates[`games/${currentGameCode}/players/${selectedPid}/attributes/infected`] = true;
-            internalShowNotification("🐾", "Joueur infecté !");
-        }
+    const targetPlayer = currentPlayersData[targetPid];
+    const isCurrentlySelected = targetPlayer.attributes && targetPlayer.attributes[uniqueAttrKey];
 
-        update(ref(db), updates).then(() => {
-            window.closeModal('modal-role-selector');
-            window.openRoleSummaryPanel();
-        });
+    const updates = {};
+
+    if (isCurrentlySelected) {
+        updates[`games/${currentGameCode}/players/${targetPid}/attributes/${uniqueAttrKey}`] = null;
+    } else {
+        if (currentCount >= maxLimit) {
+            alert(`Maximum ${maxLimit} joueur(s) déjà sélectionné(s) ! Désélectionnez-en un d'abord.`);
+            return;
+        }
+        updates[`games/${currentGameCode}/players/${targetPid}/attributes/${uniqueAttrKey}`] = true;
     }
+
+    update(ref(db), updates).then(() => {
+        window.openPlayerSelectorForAction(actionSourceRole, actionSourceId);
+        if(!isCurrentlySelected) internalShowNotification("Action", "Joueur sélectionné.");
+        else internalShowNotification("Action", "Joueur retiré.");
+    });
 };
 
 // --- FICHE JOUEUR PANINI (ADMIN) ---
@@ -678,6 +703,29 @@ window.openAdminPlayerDetail = function(playerId, playerPseudo, roleId, isDead, 
     if(isDead) statusHTML += `<span style="color:#c0392b; margin-right:10px; font-weight:bold;">MORT 💀</span>`;
     if(isMayor) statusHTML += `<span style="color:gold; font-weight:bold;">MAIRE 🎖️</span>`;
 
+    // GESTION DES BOUTONS DE DESINCHRONISATION (AVEC NOUVELLES CLES)
+    let effectsHTML = "";
+    const p = currentPlayersData[playerId];
+    if (p && p.attributes) {
+        Object.keys(p.attributes).forEach(key => {
+            if (key.startsWith('lover_by_')) {
+                effectsHTML += `<button class="btn-admin-action" style="background:#e74c3c; color:white; border:1px solid white;" onclick="window.removePlayerAttribute('${playerId}', '${key}')">💔 BRISER COUPLE</button>`;
+            }
+            if (key.startsWith('infected_by_')) {
+                effectsHTML += `<button class="btn-admin-action" style="background:#8e44ad; color:white; border:1px solid white;" onclick="window.removePlayerAttribute('${playerId}', '${key}')">💉 SOIGNER INFECTION</button>`;
+            }
+            if (key.startsWith('target_by_')) {
+                effectsHTML += `<button class="btn-admin-action" style="background:#34495e; color:white; border:1px solid white;" onclick="window.removePlayerAttribute('${playerId}', '${key}')">🚫 RETIRER CIBLE</button>`;
+            }
+            if (key.startsWith('linked_red_by_')) {
+                effectsHTML += `<button class="btn-admin-action" style="background:#c0392b; color:white; border:1px solid white;" onclick="window.removePlayerAttribute('${playerId}', '${key}')">🩸 DÉLIER LOUP ROUGE</button>`;
+            }
+            if (key.startsWith('cursed_mentor_by_')) {
+                effectsHTML += `<button class="btn-admin-action" style="background:#f39c12; color:white; border:1px solid white;" onclick="window.removePlayerAttribute('${playerId}', '${key}')">🌙 RETIRER MENTOR</button>`;
+            }
+        });
+    }
+
     const htmlContent = `
         <div class="panini-admin-header">
             <button class="close-details" onclick="window.internalCloseDetails()" style="position:absolute; right:0; top:0; background:transparent; border:none; color:gold; font-size:1.5em; cursor:pointer; z-index:11100;">✕</button>
@@ -696,6 +744,8 @@ window.openAdminPlayerDetail = function(playerId, playerPseudo, roleId, isDead, 
                 onclick="window.toggleMayor('${playerId}', ${!isMayor}, this)">
                 ${isMayor ? '❌ DESTITUER MAIRE' : '🎖️ NOMMER MAIRE'}
             </button>
+
+            ${effectsHTML} 
 
             <button id="btn-life" class="btn-admin-action" style="background:${isDead ? '#2ecc71' : '#c0392b'}; color:#fff; border:2px solid #fff; padding:12px; border-radius:8px; font-weight:bold; cursor:pointer;"
                 onclick="window.toggleLife('${playerId}', ${!isDead}, this)">
@@ -720,8 +770,8 @@ window.openAdminPlayerDetail = function(playerId, playerPseudo, roleId, isDead, 
 
     let contentDiv = panel.querySelector('.details-content');
     if(!contentDiv) {
-         panel.innerHTML = '<div class="details-content"></div>';
-         contentDiv = panel.querySelector('.details-content');
+          panel.innerHTML = '<div class="details-content"></div>';
+          contentDiv = panel.querySelector('.details-content');
     }
     contentDiv.innerHTML = htmlContent;
     panel.classList.add('active');
@@ -732,6 +782,15 @@ window.openAdminPlayerDetail = function(playerId, playerPseudo, roleId, isDead, 
 // ============================================
 // E. FONCTIONS UTILITAIRES (AVEC LOGIQUE MORT EN CHAINE)
 // ============================================
+
+window.removePlayerAttribute = function(pid, attrKey) {
+    if(!confirm("Retirer cet effet ?")) return;
+    
+    update(ref(db, `games/${currentGameCode}/players/${pid}/attributes/${attrKey}`), null).then(() => {
+        window.internalCloseDetails(); 
+        internalShowNotification("Effet", "L'effet a été retiré.");
+    });
+};
 
 window.toggleMayor = function(pid, state, btn) {
     if(btn) {
@@ -752,21 +811,30 @@ window.toggleLife = function(pid, state, btn) {
         const victim = currentPlayersData[pid];
         if (victim && victim.attributes) {
             
-            // 1. Amoureux (Cupidon/Orphelin)
-            if (victim.attributes.lover) {
-                const partnerId = victim.attributes.lover;
-                const partner = currentPlayersData[partnerId];
-                if (partner && partner.status !== 'dead') {
-                    setTimeout(() => {
-                        alert(`💔 ${victim.name} est mort... Son amour ${partner.name} se suicide !`);
-                        window.toggleLife(partnerId, false);
-                    }, 500);
+            // 1. Amoureux (On cherche les clés commencant par lover_by_)
+            const loverKeys = Object.keys(victim.attributes).filter(k => k.startsWith('lover_by_'));
+            
+            loverKeys.forEach(loverKey => {
+                // Trouver le PARTENAIRE qui a la MÊME clé
+                const partnerEntry = Object.entries(currentPlayersData).find(([pId, p]) => {
+                    return pId !== pid && p.attributes && p.attributes[loverKey];
+                });
+
+                if (partnerEntry) {
+                    const [partnerId, partner] = partnerEntry;
+                    if (partner.status !== 'dead') {
+                        setTimeout(() => {
+                            alert(`💔 ${victim.name} est mort... Son amour ${partner.name} se suicide !`);
+                            window.toggleLife(partnerId, false);
+                        }, 500);
+                    }
                 }
-            }
+            });
 
             // 2. Lié au Loup Rouge
-            if (victim.attributes.linked_red) {
-                const redWolfId = victim.attributes.linked_red;
+            const redKey = Object.keys(victim.attributes).find(k => k.startsWith('linked_red_by_'));
+            if(redKey) {
+                const redWolfId = redKey.replace('linked_red_by_', '');
                 const redWolf = currentPlayersData[redWolfId];
                 if (redWolf && redWolf.status !== 'dead') {
                     setTimeout(() => {
@@ -777,7 +845,7 @@ window.toggleLife = function(pid, state, btn) {
             }
 
             // 3. Mentor du Maudit
-            if (victim.attributes.cursed_mentor) {
+            if (hasAttribute(victim, 'cursed_mentor_by')) {
                 setTimeout(() => {
                     alert(`🐺 ATTENTION MJ : Le Mentor est mort. Le Loup-Garou Maudit doit se réveiller et rejoindre la meute !`);
                 }, 500);
@@ -874,7 +942,6 @@ window.generateResurrectionGrid = function(mode = 'single') {
                         div.innerHTML += `<div class="qty-badge">x${count}</div>`;
                     }
                 }
-                // OPTIMISATION V61 : LOADING EAGER (POUR QUE ÇA S'AFFICHE VITE)
                 div.innerHTML += `<img src="${role.image}" loading="eager" style="width:100%; border-radius:6px; display:block;">`;
                 div.onclick = () => mode === 'multi' ? handleMultiSelection(role.id, div) : window.assignRoleToPlayer(role.id);
                 catGrid.appendChild(div);
@@ -883,6 +950,29 @@ window.generateResurrectionGrid = function(mode = 'single') {
         }
     }
     grid.appendChild(mainFragment);
+};
+
+window.openDistributionSelector = function() {
+    window.generateResurrectionGrid('multi');
+    const modal = document.getElementById('modal-role-selector');
+    if(modal) {
+        modal.style.zIndex = "20000"; 
+        const h2 = modal.querySelector('h2');
+        if(h2) h2.style.display = "none"; // CACHÉ
+        window.openModal('modal-role-selector');
+    }
+};
+
+window.openResurrectModal = function(playerId) {
+    targetResurrectId = playerId;
+    window.generateResurrectionGrid('single'); 
+    const modalTitle = document.querySelector('#modal-role-selector h2');
+    if(modalTitle) {
+        modalTitle.style.display = 'block';
+        modalTitle.innerText = isDraftMode ? "CHANGER CARTE" : "RESSUSCITER";
+    }
+    document.getElementById('modal-role-selector').style.zIndex = "20000"; 
+    window.openModal('modal-role-selector');
 };
 
 function handleMultiSelection(roleId, divElement) {
@@ -926,27 +1016,6 @@ function handleMultiSelection(roleId, divElement) {
 window.validateDistribution = function() {
     window.closeModal('modal-role-selector');
     generateDashboardControls(); 
-};
-
-window.openDistributionSelector = function() {
-    window.generateResurrectionGrid('multi');
-    const modal = document.getElementById('modal-role-selector');
-    if(modal) {
-        modal.style.zIndex = "20000"; 
-        window.openModal('modal-role-selector');
-    }
-};
-
-window.openResurrectModal = function(playerId) {
-    targetResurrectId = playerId;
-    window.generateResurrectionGrid('single'); 
-    const modalTitle = document.querySelector('#modal-role-selector h2');
-    if(modalTitle) {
-        modalTitle.style.display = 'block';
-        modalTitle.innerText = isDraftMode ? "CHANGER CARTE" : "RESSUSCITER";
-    }
-    document.getElementById('modal-role-selector').style.zIndex = "20000"; 
-    window.openModal('modal-role-selector');
 };
 
 window.openEventSelector = function(playerId, category) {
@@ -1070,11 +1139,11 @@ function distributeRoles() {
         playerIds.forEach((id, index) => {
             if (selectedRoles[index]) {
                 updates[`games/${currentGameCode}/players/${id}/draftRole`] = selectedRoles[index];
-                // V60 : RESET TOTAL DES ATTRIBUTS
                 updates[`games/${currentGameCode}/players/${id}/attributes`] = null; 
             }
         });
         update(ref(db), updates);
+        internalShowNotification("Mélange", "Les rôles ont été mélangés !");
     });
 }
 
@@ -1163,6 +1232,7 @@ function listenForPlayerUpdates() {
     const myPlayerRef = ref(db, `games/${currentGameCode}/players/${myPlayerId}`);
     let lastRole = null;
     let lastCardImg = null;
+    let currentAttributes = {}; // Pour suivre les changements d'emojis
     
     onValue(myPlayerRef, (snapshot) => {
         const data = snapshot.val();
@@ -1175,10 +1245,6 @@ function listenForPlayerUpdates() {
             document.body.classList.add('dead-state'); 
             const lobbyStatus = document.getElementById('player-lobby-status');
             if(lobbyStatus) lobbyStatus.innerHTML = `<h1 style="color:#c0392b; font-size:3em; text-align:center;">TU ES MORT 💀</h1>`;
-            
-            if(panel && panel.classList.contains('active') && !data.drawnCard) {
-                 // window.internalCloseDetails();
-            }
         } else {
             document.body.classList.remove('dead-state');
         }
@@ -1224,6 +1290,12 @@ function listenForPlayerUpdates() {
             }
         }
 
+        // --- GESTION DES EMOJIS AU DOS DE LA CARTE ---
+        if (JSON.stringify(data.attributes) !== JSON.stringify(currentAttributes)) {
+            currentAttributes = data.attributes || {};
+            window.updateCardBackEmojis(currentAttributes);
+        }
+
         if (data.isMayor) {
             if (!document.getElementById('player-medal')) {
                 const medal = document.createElement('div');
@@ -1258,7 +1330,10 @@ function revealRole(roleId) {
             <button class="close-details" onclick="window.internalCloseDetails()" style="position:absolute; top:20px; right:20px; z-index:100; background:rgba(0,0,0,0.6); color:white; border:1px solid gold; border-radius:50%; width:40px; height:40px; font-size:20px;">✕</button>
             <div class="scene-flip" onclick="this.classList.toggle('is-flipped')" style="margin:0;">
                 <div class="card-object">
-                    <div class="card-face face-front"><img src="back.png" class="card-back-img" style="width:100%; height:100%; object-fit:cover; border-radius:15px;"></div>
+                    <div class="card-face face-front">
+                        <img src="back.png" class="card-back-img" style="width:100%; height:100%; object-fit:cover; border-radius:15px;">
+                        <div id="card-emoji-container" style="position:absolute; top:10px; left:10px; display:flex; flex-direction:column; gap:5px; z-index:50;"></div>
+                    </div>
                     <div class="card-face face-back"><img src="${roleData.image}" style="width:100%; height:100%; object-fit:cover; border-radius:15px;"></div>
                 </div>
             </div>

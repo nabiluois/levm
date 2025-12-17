@@ -1052,18 +1052,18 @@ button[onclick="signPact()"]::before {
 
 /* Style du badge Rôle (sous le pseudo) */
 .role-text-badge {
-    font-size: 0.75em;
+    font-size: 0.7em; /* Réduit un peu pour que ça rentre */
     font-family: 'Helvetica', sans-serif;
     font-weight: bold;
-    padding: 3px 8px;
+    padding: 3px 5px;
     border-radius: 10px;
     color: white;
     margin-top: 4px;
-    width: 95%;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    width: 98%;
+    /* MODIF POUR NOM COMPLET */
+    white-space: normal; /* Permet le retour à la ligne */
     text-align: center;
+    line-height: 1.1;
     border: 1px solid rgba(255,255,255,0.4);
     box-shadow: 0 2px 4px rgba(0,0,0,0.5);
 }
@@ -1240,3 +1240,62 @@ button[onclick="signPact()"]::before {
     transition: transform 0.1s;
 }
 .btn-event:active { transform: scale(0.95); }
+
+/* ============================================
+   28. NOUVELLES INTERACTIONS (V64) - ADDITIONNEL
+   ============================================ */
+
+/* En-tête de la modale de sélection (L'initiateur) */
+.initiator-header {
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 15px;
+    border: 1px solid var(--gold);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Grille 2 colonnes pour la sélection */
+.player-selector-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* 2 colonnes strictes */
+    gap: 15px;
+    padding: 10px;
+    padding-bottom: 50px;
+}
+
+/* Carte de joueur dans le sélecteur (Carré) */
+.player-select-card {
+    position: relative;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 15px;
+    overflow: hidden;
+    aspect-ratio: 1 / 1; /* Force le carré */
+    border: 3px solid transparent;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    transition: transform 0.2s, border-color 0.2s;
+}
+
+.player-select-card:active {
+    transform: scale(0.95);
+}
+
+/* État sélectionné (Bordure verte) */
+.player-select-card.active {
+    border-color: #2ecc71 !important;
+    box-shadow: 0 0 15px rgba(46, 204, 113, 0.4);
+}
+
+.player-select-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: opacity 0.3s;
+}
+
+.player-select-card.active img {
+    opacity: 1 !important;
+}
