@@ -1,5 +1,5 @@
 // ============================================
-// SYSTEME EN LIGNE - V73 (PANINI JOUEUR & FLIP FIXÉ)
+// SYSTEME EN LIGNE - V76 (FINAL : CSS FIX, MORT & PANINI)
 // ============================================
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -639,8 +639,8 @@ window.openPlayerSelectorForAction = function(roleType, sourceId) {
     });
     grid.appendChild(catGrid);
     
-    // CORRECTION : Z-Index très élevé ici aussi
-    modal.style.zIndex = "30000"; 
+    // Z-Index plus élevé pour passer au-dessus de la fiche joueur
+    modal.style.zIndex = "25000"; 
     window.openModal('modal-role-selector');
 };
 
@@ -670,181 +670,6 @@ window.togglePlayerSelection = function(targetPid, baseAttrKey, maxLimit, unique
         if(!isCurrentlySelected) internalShowNotification("Action", "Joueur sélectionné.");
         else internalShowNotification("Action", "Joueur retiré.");
     });
-};
-
-// --- FONCTIONS DISTRIBUTION & MÉLANGE ---
-
-window.generateResurrectionGrid = function(mode = 'single') {
-    // SÉCURITÉ : Si la liste est vide, on la remplit de force maintenant
-    if (!detectedRoles || detectedRoles.length === 0) {
-        scanContentFromHTML();
-    }
-
-    const grid = document.getElementById('admin-role-grid');
-    if(!grid) return; // Si l'élément n'existe pas, on arrête
-    
-    grid.style.display = "block"; 
-    grid.innerHTML = "";
-    
-    // Ajout du tableau de bord si on est en mode sélection multiple
-    if (mode === 'multi') {
-        const dashboard = document.createElement('div');
-        dashboard.className = "selection-dashboard";
-        dashboard.innerHTML = `
-            <div class="dashboard-stats">
-                <div class="stat-item"><img src="Village.svg"><span id="pop-count-village">0</span></div>
-                <div class="stat-item"><img src="Loup.svg"><span id="pop-count-loup">0</span></div>
-                <div class="stat-item"><img src="Solo.svg"><span id="pop-count-solo">0</span></div>
-            </div>
-            <button class="btn-compact" onclick="window.validateDistribution()">OK (<span id="pop-total">0</span>)</button>
-        `;
-        grid.appendChild(dashboard);
-        setTimeout(updateDistributionDashboard, 50); 
-    }
-
-    const categoriesOrder = { 
-        'village': '<img src="Village.svg" style="width:25px; vertical-align:middle; margin-right:8px;"> VILLAGE', 
-        'loups': '<img src="Loup.svg" style="width:25px; vertical-align:middle; margin-right:8px;"> LOUPS', 
-        'solo': '<img src="Solo.svg" style="width:25px; vertical-align:middle; margin-right:8px;"> SOLOS', 
-        'vampires': '<img src="Vampires.svg" style="width:25px; vertical-align:middle; margin-right:8px;"> VAMPIRES' 
-    };
-
-    const mainFragment = document.createDocumentFragment();
-
-    for (const [catKey, catTitleHTML] of Object.entries(categoriesOrder)) {
-        const rolesInCat = detectedRoles.filter(r => r.category === catKey);
-        if (rolesInCat.length > 0) {
-            const titleDiv = document.createElement('div');
-            titleDiv.className = "category-separator";
-            titleDiv.style.cssText = "margin-top:25px; margin-bottom:10px; padding-bottom:5px; border-bottom:1px solid #555; display:flex; align-items:center; color:var(--gold); font-family:'Pirata One'; font-size:1.4em; clear:both;";
-            titleDiv.innerHTML = catTitleHTML;
-            mainFragment.appendChild(titleDiv);
-            
-            const catGrid = document.createElement('div');
-            catGrid.className = "admin-grid-container";
-            
-            rolesInCat.sort((a, b) => a.title.localeCompare(b.title));
-            rolesInCat.forEach(role => {
-                const div = document.createElement('div');
-                div.className = "role-select-item";
-                
-                // Si on est en mode multi, on vérifie si le rôle est sélectionné
-                if (mode === 'multi') {
-                    const count = distributionSelection.filter(id => id === role.id).length;
-                    if (count > 0) {
-                        div.classList.add('selected');
-                        div.innerHTML += `<div class="qty-badge">x${count}</div>`;
-                    }
-                }
-                
-                div.innerHTML += `<img src="${role.image}" loading="eager" style="width:100%; border-radius:6px; display:block;">`;
-                // CORRECTION : Appel à window.handleMultiSelection pour le mode multi
-                div.onclick = () => mode === 'multi' ? window.handleMultiSelection(role.id, div) : window.assignRoleToPlayer(role.id);
-                catGrid.appendChild(div);
-            });
-            mainFragment.appendChild(catGrid);
-        }
-    }
-    grid.appendChild(mainFragment);
-};
-
-window.openDistributionSelector = function() {
-    // SÉCURITÉ : Si aucun rôle n'est détecté, on scanne le HTML maintenant
-    if (!detectedRoles || detectedRoles.length === 0) {
-        scanContentFromHTML();
-    }
-    // Petite sécurité supplémentaire
-    if (!detectedRoles || detectedRoles.length === 0) {
-        alert("Erreur : Aucun rôle détecté. La page est-elle bien chargée ?");
-        return;
-    }
-
-    // 1. On génère la grille
-    window.generateResurrectionGrid('multi');
-    
-    // 2. On récupère la modale
-    const modal = document.getElementById('modal-role-selector');
-    if(modal) {
-        // CORRECTION : Z-Index Maximum pour passer devant le dashboard Admin
-        modal.style.zIndex = "999999"; 
-        
-        // On cache le titre par défaut car on a le dashboard (stats en haut)
-        const h2 = modal.querySelector('h2');
-        if(h2) h2.style.display = "none"; 
-        
-        // On ouvre via la fonction globale
-        window.openModal('modal-role-selector');
-        
-        // Sécurité supplémentaire : on force l'affichage CSS
-        modal.classList.add('active');
-        
-        // Hack pour nettoyer le style quand on ferme via la croix
-        const closeBtn = modal.querySelector('.close-modal');
-        if(closeBtn) {
-            closeBtn.onclick = function() {
-                modal.style.display = ''; // On vide le style inline
-                modal.style.zIndex = '';  // On vide le z-index
-                window.closeModal('modal-role-selector');
-            };
-        }
-    } else {
-        alert("Erreur: Modale de sélection introuvable dans le HTML.");
-    }
-};
-
-window.openResurrectModal = function(playerId) {
-    targetResurrectId = playerId;
-    window.generateResurrectionGrid('single'); 
-    const modalTitle = document.querySelector('#modal-role-selector h2');
-    if(modalTitle) {
-        modalTitle.style.display = 'block';
-        modalTitle.innerText = isDraftMode ? "CHANGER CARTE" : "RESSUSCITER";
-    }
-    document.getElementById('modal-role-selector').style.zIndex = "20000"; 
-    window.openModal('modal-role-selector');
-};
-
-// CORRECTION : On attache la fonction à "window" pour qu'elle soit vue par le HTML
-window.handleMultiSelection = function(roleId, divElement) {
-    let currentCount = distributionSelection.filter(id => id === roleId).length;
-    let newCount = 0;
-    
-    const isMultiCard = (roleId === 'le_paysan' || roleId === 'le_loup_garou');
-    const isDuoCard = (roleId === 'olaf_et_pilaf' || roleId === 'les_jumeaux_explosifs');
-
-    if (isMultiCard) {
-        let input = prompt(`Combien ?`, currentCount || 0);
-        if (input === null) return; 
-        newCount = Math.max(0, parseInt(input) || 0);
-    } 
-    else if (isDuoCard) {
-        let input = prompt(`Duo (0 ou 2) ?`, currentCount || 0);
-        if (input === null) return;
-        newCount = parseInt(input);
-        if(newCount !== 2 && newCount !== 0) newCount = 0;
-    }
-    else { newCount = currentCount > 0 ? 0 : 1; }
-
-    distributionSelection = distributionSelection.filter(id => id !== roleId);
-    for(let i=0; i<newCount; i++) distributionSelection.push(roleId);
-
-    const existingBadge = divElement.querySelector('.qty-badge');
-    if(existingBadge) existingBadge.remove();
-
-    if (newCount > 0) {
-        divElement.classList.add('selected'); 
-        const badge = document.createElement('div');
-        badge.className = 'qty-badge';
-        badge.innerText = `x${newCount}`;
-        divElement.appendChild(badge);
-    } else {
-        divElement.classList.remove('selected'); 
-    }
-    
-    // Mise à jour des stats du dashboard
-    if(typeof updateDistributionDashboard === 'function') {
-        updateDistributionDashboard();
-    }
 };
 
 window.updateDistributionDashboard = function() {
@@ -902,12 +727,12 @@ window.openEventSelector = function(playerId, category) {
     cards.forEach(imgSrc => {
         const div = document.createElement('div');
         div.className = "role-select-item";
-        div.innerHTML = `<img src="${imgSrc}" loading="lazy" style="width:100%; border-radius:6px;">`;
+        div.innerHTML = `<img src="${imgSrc}" loading="eager" style="width:100%; border-radius:6px;">`;
         div.onclick = function() { window.adminDraw(playerId, category, false, imgSrc); };
         catGrid.appendChild(div);
     });
     grid.appendChild(catGrid);
-    document.getElementById('modal-role-selector').style.zIndex = "20000"; 
+    document.getElementById('modal-role-selector').style.zIndex = "25000"; 
     window.openModal('modal-role-selector');
 };
 
@@ -927,6 +752,7 @@ window.adminDraw = function(playerId, category, isRandom, manualImg) {
 window.assignRoleToPlayer = function(newRoleId) {
     if(!targetResurrectId) return;
 
+    // NOTE : En mode "ressusciter/changer", on autorise les doublons car la partie est déjà lancée
     const multiRoles = ['le_paysan', 'le_loup_garou']; 
     const playersRef = child(ref(db), `games/${currentGameCode}/players`);
     
@@ -936,7 +762,8 @@ window.assignRoleToPlayer = function(newRoleId) {
         const p1Id = targetResurrectId;
         const p1Data = players[p1Id];
         const p1OldRole = isDraftMode ? p1Data.draftRole : p1Data.role;
-        const allowDuplicates = multiRoles.includes(newRoleId) || !isDraftMode;
+        // Si on est en mode Draft, on applique la règle stricte. Sinon (jeu en cours), on autorise tout.
+        const allowDuplicates = !isDraftMode ? true : (multiRoles.includes(newRoleId));
         let p2Id = null;
 
         if (!allowDuplicates) {
@@ -974,8 +801,13 @@ window.assignRoleToPlayer = function(newRoleId) {
         }
 
         update(ref(db), updates).then(() => {
+            // Nettoyage style et fermeture
+            const modal = document.getElementById('modal-role-selector');
+            if(modal) { modal.style.zIndex = ''; modal.style.display = ''; }
             window.closeModal('modal-role-selector');
-            window.internalCloseDetails(); 
+            
+            // Fermeture Panini joueur si ouvert
+            window.closeModal('modal-player-detail');
             
             let msg = "Rôle attribué !";
             if (p2Id) msg = "🔄 Échange effectué avec le joueur qui avait ce rôle.";
@@ -1102,7 +934,7 @@ window.openAdminPlayerDetail = function(pid, name, roleId, isDead, avatarSrc, is
 
         // Bouton Tuer/Ressusciter
         const btnState = document.createElement('button');
-        btnState.className = isDead ? "btn-validate" : "btn-submit"; // Vert si ressusciter, rouge sinon
+        btnState.className = isDead ? "btn-validate" : "btn-submit"; 
         btnState.style.background = isDead ? "#27ae60" : "#c0392b";
         btnState.style.color = "white";
         btnState.innerText = isDead ? "💊 RESSUSCITER" : "☠️ TUER";
@@ -1118,23 +950,31 @@ window.openAdminPlayerDetail = function(pid, name, roleId, isDead, avatarSrc, is
         btnMayor.onclick = () => window.toggleMayor(pid, !isMayor);
         pActions.appendChild(btnMayor);
 
-        // Bouton Cartes VM (OR/ARGENT/BRONZE)
+        // NOUVEAU BOUTON : Changer Rôle (via sélection)
+        const btnChangeRole = document.createElement('button');
+        btnChangeRole.className = "btn-submit";
+        btnChangeRole.style.cssText = "background:#3498db; color:white; grid-column: 1 / -1;";
+        btnChangeRole.innerText = "🎭 CHANGER RÔLE";
+        btnChangeRole.onclick = () => window.openResurrectModal(pid);
+        pActions.appendChild(btnChangeRole);
+
+        // Bouton Cartes VM (OR/ARGENT/BRONZE) - Texte au lieu d'emoji
         const categories = [
-            {id:'gold', icon:'🏆', color:'gold'},
-            {id:'silver', icon:'🥈', color:'silver'},
-            {id:'bronze', icon:'🥉', color:'#cd7f32'}
+            {id:'gold', label:'VM OR', color:'gold'},
+            {id:'silver', label:'VM ARGENT', color:'silver'},
+            {id:'bronze', label:'VM BRONZE', color:'#cd7f32'}
         ];
         
         categories.forEach(cat => {
             const btn = document.createElement('button');
-            btn.style.cssText = `background:transparent; border:1px solid ${cat.color}; color:${cat.color}; padding:8px; border-radius:5px; cursor:pointer; font-size:1.2em;`;
-            btn.innerHTML = cat.icon;
+            btn.style.cssText = `background:transparent; border:1px solid ${cat.color}; color:${cat.color}; padding:8px; border-radius:5px; cursor:pointer; font-size:0.9em; font-family:'Pirata One'; font-weight:bold;`;
+            btn.innerHTML = cat.label;
             btn.onclick = () => window.openEventSelector(pid, cat.id);
             pActions.appendChild(btn);
         });
     }
 
-    // Ouverture Modale (Z-Index élevé pour passer au-dessus du reste)
+    // Ouverture Modale
     modal.style.zIndex = "20000";
     window.openModal('modal-player-detail');
 };
@@ -1148,7 +988,6 @@ window.togglePlayerStatus = function(pid, newStatus) {
 
 window.toggleMayor = function(pid, isMayor) {
     const updates = {};
-    // Si on nomme un nouveau maire, on destitue les autres d'abord
     if(isMayor) {
         Object.keys(currentPlayersData).forEach(p => {
             updates[`games/${currentGameCode}/players/${p}/isMayor`] = false;
@@ -1196,38 +1035,62 @@ function listenForPlayerUpdates() {
     let lastRole = null;
     let lastCardImg = null;
     let currentAttributes = {}; 
+    let currentStatus = 'alive';
     
     onValue(myPlayerRef, (snapshot) => {
         const data = snapshot.val();
         if (!data) return;
         
+        currentStatus = data.status || 'alive';
         const panel = document.querySelector('.details-panel');
         const overlay = document.querySelector('.details-overlay');
 
-        if (data.status === 'dead') {
+        let uiHtml = "";
+
+        if (currentStatus === 'dead') {
             document.body.classList.add('dead-state'); 
-            const lobbyStatus = document.getElementById('player-lobby-status');
-            if(lobbyStatus) lobbyStatus.innerHTML = `<h1 style="color:#c0392b; font-size:3em; text-align:center;">TU ES MORT 💀</h1>`;
+            uiHtml += `<h1 style="color:#c0392b; font-size:3em; text-align:center;">TU ES MORT 💀</h1>`;
+            
+            // Mise à jour visuelle carte SI ouverte
+            const cardEl = document.querySelector('.carte-jeu');
+            if(cardEl) {
+                cardEl.style.filter = "grayscale(100%)";
+                cardEl.onclick = null; 
+            }
         } else {
             document.body.classList.remove('dead-state');
+            uiHtml += `<h3 style="color:var(--gold);">Tu es en jeu !</h3>`;
+            
+            // Réactivation carte SI ouverte
+            const cardEl = document.querySelector('.carte-jeu');
+            if(cardEl) {
+                cardEl.style.filter = "none";
+                cardEl.onclick = function() { this.classList.toggle('flipped'); };
+            }
         }
 
         if (data.role) {
             myCurrentRoleId = data.role; 
             if (data.role !== lastRole) { 
                 lastRole = data.role; 
-                revealRole(data.role); 
+                revealRole(data.role, currentStatus); 
             }
-            if (data.status !== 'dead') {
-                const lobbyStatus = document.getElementById('player-lobby-status');
-                let statusHTML = `
-                    <h3 style="color:var(--gold);">Tu es en jeu !</h3>
-                    <div style="margin:20px 0;">
-                        <button class="btn-menu" style="background:var(--gold); color:black; font-weight:bold; padding:15px; width:100%; border:2px solid #fff;" onclick="window.showMyRoleAgain()">🃏 VOIR MA CARTE</button>
-                    </div>
-                `;
-                if(lobbyStatus) lobbyStatus.innerHTML = statusHTML;
-            }
+            
+            // BOUTON TOUJOURS PRÉSENT (Même si mort)
+            // Mais style différent
+            const btnColor = currentStatus === 'dead' ? '#555' : 'var(--gold)';
+            const btnText = currentStatus === 'dead' ? '#999' : 'black';
+            const btnLabel = currentStatus === 'dead' ? '🃏 VOIR MA CARTE (MÉMOIRE)' : '🃏 VOIR MA CARTE';
+            
+            uiHtml += `
+            <div style="margin:20px 0;">
+                <button class="btn-menu" style="background:${btnColor}; color:${btnText}; font-weight:bold; padding:15px; width:100%; border:2px solid #fff;" onclick="window.showMyRoleAgain()">
+                    ${btnLabel}
+                </button>
+            </div>`;
+            
+            const lobbyStatus = document.getElementById('player-lobby-status');
+            if(lobbyStatus) lobbyStatus.innerHTML = uiHtml;
         }
 
         if (data.drawnCard && data.drawnCard.image !== lastCardImg) {
@@ -1275,9 +1138,9 @@ function listenForPlayerUpdates() {
     });
 }
 
-window.showMyRoleAgain = function() { if(!myCurrentRoleId) return; revealRole(myCurrentRoleId); };
+window.showMyRoleAgain = function() { if(!myCurrentRoleId) return; revealRole(myCurrentRoleId, document.body.classList.contains('dead-state') ? 'dead' : 'alive'); };
 
-function revealRole(roleId) {
+function revealRole(roleId, status) {
     if(window.closeModal) {
         window.closeModal('modal-join-game'); 
         window.closeModal('modal-online-menu');
@@ -1289,12 +1152,18 @@ function revealRole(roleId) {
         const overlay = document.querySelector('.details-overlay');
         if(!panel || !overlay) return;
         
-        // CORRECTION MAJEURE : On utilise la même structure HTML que dans index.html pour le CSS
+        // Configuration selon le statut
+        const isDead = status === 'dead';
+        const filterStyle = isDead ? "grayscale(100%)" : "none";
+        const clickAction = isDead ? "" : "this.classList.toggle('flipped')";
+        const instructionText = isDead ? "TU ES MORT" : "CLIQUE POUR RETOURNER";
+        
+        // CSS FIX: On remet les classes carte-jeu, carte-inner, carte-front, carte-back
         panel.innerHTML = `
         <div id="online-content-wrapper" style="height:100%; display:flex; flex-direction:column; justify-content:center; align-items:center;">
             <button class="close-details" onclick="window.internalCloseDetails()" style="position:absolute; top:20px; right:20px; z-index:100; background:rgba(0,0,0,0.6); color:white; border:1px solid gold; border-radius:50%; width:40px; height:40px; font-size:20px;">✕</button>
             
-            <div class="carte-jeu visible" onclick="this.classList.toggle('flipped')" style="width:300px; height:450px; margin:0 auto; transform:translateY(0); opacity:1;">
+            <div class="carte-jeu visible" onclick="${clickAction}" style="width:300px; height:450px; margin:0 auto; transform:translateY(0); opacity:1; filter:${filterStyle}; transition:filter 0.5s;">
                 <div class="carte-inner">
                     <div class="carte-front">
                         <img src="back.png" style="width:100%; height:100%; object-fit:cover;">
@@ -1306,7 +1175,7 @@ function revealRole(roleId) {
                 </div>
             </div>
             
-            <p style="color:white; margin-top:20px; font-family:'Pirata One'; font-size:1.5em; text-shadow:0 0 5px black;">CLIQUE POUR RETOURNER</p>
+            <p style="color:${isDead ? '#c0392b' : 'white'}; margin-top:20px; font-family:'Pirata One'; font-size:1.5em; text-shadow:0 0 5px black;">${instructionText}</p>
         </div>`;
         panel.classList.add('active'); overlay.classList.add('active');
     }
