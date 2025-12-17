@@ -1,5 +1,5 @@
 // ============================================
-// SYSTEME EN LIGNE - V72 (CORRECTIF FERMETURE MODALE)
+// SYSTEME EN LIGNE - V73 (PANINI JOUEUR & FLIP FIXÉ)
 // ============================================
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -295,7 +295,6 @@ function updateAdminUI(players) {
             return a.name.localeCompare(b.name);
         });
 
-        // CONSTRUCTION PAR STRING HTML (PLUS ROBUSTE POUR LES CLICS)
         let gridHTML = "";
 
         sortedPlayers.forEach(([id, p]) => {
@@ -316,20 +315,17 @@ function updateAdminUI(players) {
             let displayAvatar = p.avatar ? p.avatar : (currentRoleId ? roleImageSrc : "icon.png");
             const isDead = p.status === 'dead';
             
-            // On prépare les attributs pour l'affichage icône (sans bloquer le clic)
             let attrIcons = "";
             if(hasAttribute(p, 'infected')) attrIcons += `<span class="attr-icon" style="bottom:0; right:0;">🐾</span>`;
             if(hasAttribute(p, 'target')) attrIcons += `<span class="attr-icon" style="bottom:0; left:0;">🎯</span>`;
             if(hasAttribute(p, 'linked_red')) attrIcons += `<span class="attr-icon" style="top:0; right:0;">❤️</span>`;
             if(hasAttribute(p, 'lover')) attrIcons += `<span class="attr-icon" style="top:0; left:0;">💘</span>`;
 
-            // Bouton changer en mode draft
             let draftBtn = "";
             if(isDraft) {
                 draftBtn = `<button class="btn-admin-mini" style="background:#3498db; color:white; width:100%; border:none; padding:8px; font-family:'Pirata One'; font-size:1em; margin-top:3px; position:relative; z-index:100;" onclick="event.stopPropagation(); window.openResurrectModal('${id}')">🔄 CHANGER</button>`;
             }
 
-            // On construit la DIV en string avec le onclick DIRECTEMENT dedans
             gridHTML += `
                 <div class="admin-player-card ${isDead ? 'dead' : ''}" style="position:relative; cursor:pointer;" onclick="window.openAdminPlayerDetail('${id}', '${p.name}', '${currentRoleId || ''}', ${isDead}, '${displayAvatar}', ${p.isMayor})">
                     ${isDraft ? '<div style="background:#e67e22; color:white; font-size:0.6em; padding:2px 5px; border-radius:4px; position:absolute; top:3px; left:3px; z-index:10; font-weight:bold;">PROV.</div>' : ''}
@@ -851,7 +847,6 @@ window.handleMultiSelection = function(roleId, divElement) {
     }
 };
 
-// AJOUT DE LA FONCTION MANQUANTE QUI CAUSAIT LE BUG
 window.updateDistributionDashboard = function() {
     let cVillage = 0, cLoups = 0, cSolo = 0, total = 0;
     
@@ -1066,6 +1061,107 @@ function updateAdminButtons(playerCount) {
     btnReveal.style.display = isDraftMode ? "block" : "none";
 }
 
+// ============================================
+// E. PANINI JOUEUR (ADMIN)
+// ============================================
+
+window.openAdminPlayerDetail = function(pid, name, roleId, isDead, avatarSrc, isMayor) {
+    const modal = document.getElementById('modal-player-detail');
+    if(!modal) return;
+
+    // Remplissage infos de base
+    const pPseudo = document.getElementById('detail-pseudo');
+    const pAvatar = document.getElementById('detail-avatar');
+    const pRoleName = document.getElementById('detail-role-name');
+    const pCard = document.getElementById('detail-card');
+    const pStatus = document.getElementById('detail-status');
+    const pActions = document.getElementById('detail-actions');
+
+    if(pPseudo) pPseudo.innerText = name;
+    if(pAvatar) pAvatar.src = avatarSrc;
+    
+    // Récupération infos du rôle
+    const r = detectedRoles.find(x => x.id === roleId);
+    if(pRoleName) pRoleName.innerText = r ? r.title : (roleId || "Aucun rôle");
+    if(pCard) pCard.src = r ? r.image : "back.png";
+
+    // Statut
+    if(pStatus) {
+        if(isDead) {
+            pStatus.innerText = "MORT";
+            pStatus.style.color = "#c0392b";
+        } else {
+            pStatus.innerText = "VIVANT";
+            pStatus.style.color = "#2ecc71";
+        }
+    }
+
+    // Actions
+    if(pActions) {
+        pActions.innerHTML = ""; // Reset
+
+        // Bouton Tuer/Ressusciter
+        const btnState = document.createElement('button');
+        btnState.className = isDead ? "btn-validate" : "btn-submit"; // Vert si ressusciter, rouge sinon
+        btnState.style.background = isDead ? "#27ae60" : "#c0392b";
+        btnState.style.color = "white";
+        btnState.innerText = isDead ? "💊 RESSUSCITER" : "☠️ TUER";
+        btnState.onclick = () => window.togglePlayerStatus(pid, isDead ? 'alive' : 'dead');
+        pActions.appendChild(btnState);
+
+        // Bouton Maire
+        const btnMayor = document.createElement('button');
+        btnMayor.className = "btn-submit";
+        btnMayor.style.background = isMayor ? "#7f8c8d" : "#f1c40f";
+        btnMayor.style.color = isMayor ? "white" : "black";
+        btnMayor.innerText = isMayor ? "❌ DESTITUER" : "🎖️ NOMMER MAIRE";
+        btnMayor.onclick = () => window.toggleMayor(pid, !isMayor);
+        pActions.appendChild(btnMayor);
+
+        // Bouton Cartes VM (OR/ARGENT/BRONZE)
+        const categories = [
+            {id:'gold', icon:'🏆', color:'gold'},
+            {id:'silver', icon:'🥈', color:'silver'},
+            {id:'bronze', icon:'🥉', color:'#cd7f32'}
+        ];
+        
+        categories.forEach(cat => {
+            const btn = document.createElement('button');
+            btn.style.cssText = `background:transparent; border:1px solid ${cat.color}; color:${cat.color}; padding:8px; border-radius:5px; cursor:pointer; font-size:1.2em;`;
+            btn.innerHTML = cat.icon;
+            btn.onclick = () => window.openEventSelector(pid, cat.id);
+            pActions.appendChild(btn);
+        });
+    }
+
+    // Ouverture Modale (Z-Index élevé pour passer au-dessus du reste)
+    modal.style.zIndex = "20000";
+    window.openModal('modal-player-detail');
+};
+
+window.togglePlayerStatus = function(pid, newStatus) {
+    update(ref(db, `games/${currentGameCode}/players/${pid}`), { status: newStatus }).then(() => {
+        window.closeModal('modal-player-detail');
+        internalShowNotification("Mise à jour", `Joueur ${newStatus === 'dead' ? 'éliminé' : 'ressuscité'}.`);
+    });
+};
+
+window.toggleMayor = function(pid, isMayor) {
+    const updates = {};
+    // Si on nomme un nouveau maire, on destitue les autres d'abord
+    if(isMayor) {
+        Object.keys(currentPlayersData).forEach(p => {
+            updates[`games/${currentGameCode}/players/${p}/isMayor`] = false;
+        });
+    }
+    updates[`games/${currentGameCode}/players/${pid}/isMayor`] = isMayor;
+    
+    update(ref(db), updates).then(() => {
+        window.closeModal('modal-player-detail');
+        internalShowNotification("Maire", isMayor ? "Nouveau Maire nommé !" : "Maire destitué.");
+    });
+};
+
 // CÔTÉ JOUEUR
 function joinGame() {
     const pseudo = document.getElementById('join-pseudo').value.trim();
@@ -1143,13 +1239,14 @@ function listenForPlayerUpdates() {
             else if (cat.includes('BRONZE')) backImage = "back_bronze.png";
             
             if(panel && overlay) {
+                // STRUCTURE FLIP IDENTIQUE AU CSS
                 panel.innerHTML = `
                 <div id="online-content-wrapper" style="height:100%; display:flex; flex-direction:column; justify-content:center; align-items:center;">
                     <button class="close-details" onclick="window.internalCloseDetails()" style="position:absolute; top:20px; right:20px; z-index:100; background:rgba(0,0,0,0.6); color:white; border:1px solid gold; border-radius:50%; width:40px; height:40px; font-size:20px;">✕</button>
-                    <div class="scene-flip" onclick="this.classList.toggle('is-flipped')" style="margin:0;">
-                        <div class="card-object">
-                            <div class="card-face face-front"><img src="${backImage}" class="card-back-img" style="width:100%; height:100%; object-fit:cover; border-radius:15px;"></div>
-                            <div class="card-face face-back"><img src="${data.drawnCard.image}" style="width:100%; height:100%; object-fit:cover; border-radius:15px;"></div>
+                    <div class="carte-jeu visible" onclick="this.classList.toggle('flipped')" style="width:300px; height:450px; margin:0 auto; transform:translateY(0); opacity:1;">
+                        <div class="carte-inner">
+                            <div class="carte-front"><img src="${backImage}" style="width:100%; height:100%; object-fit:cover;"></div>
+                            <div class="carte-back" style="padding:0;"><img src="${data.drawnCard.image}" style="width:100%; height:100%; object-fit:cover; border-radius:12px;"></div>
                         </div>
                     </div>
                 </div>`;
@@ -1192,18 +1289,24 @@ function revealRole(roleId) {
         const overlay = document.querySelector('.details-overlay');
         if(!panel || !overlay) return;
         
+        // CORRECTION MAJEURE : On utilise la même structure HTML que dans index.html pour le CSS
         panel.innerHTML = `
         <div id="online-content-wrapper" style="height:100%; display:flex; flex-direction:column; justify-content:center; align-items:center;">
             <button class="close-details" onclick="window.internalCloseDetails()" style="position:absolute; top:20px; right:20px; z-index:100; background:rgba(0,0,0,0.6); color:white; border:1px solid gold; border-radius:50%; width:40px; height:40px; font-size:20px;">✕</button>
-            <div class="scene-flip" onclick="this.classList.toggle('is-flipped')" style="margin:0;">
-                <div class="card-object">
-                    <div class="card-face face-front">
-                        <img src="back.png" class="card-back-img" style="width:100%; height:100%; object-fit:cover; border-radius:15px;">
+            
+            <div class="carte-jeu visible" onclick="this.classList.toggle('flipped')" style="width:300px; height:450px; margin:0 auto; transform:translateY(0); opacity:1;">
+                <div class="carte-inner">
+                    <div class="carte-front">
+                        <img src="back.png" style="width:100%; height:100%; object-fit:cover;">
                         <div id="card-emoji-container" style="position:absolute; top:10px; left:10px; display:flex; flex-direction:column; gap:5px; z-index:50;"></div>
                     </div>
-                    <div class="card-face face-back"><img src="${roleData.image}" style="width:100%; height:100%; object-fit:cover; border-radius:15px;"></div>
+                    <div class="carte-back" style="padding:0; border:none;">
+                        <img src="${roleData.image}" style="width:100%; height:100%; object-fit:cover; border-radius:12px;">
+                    </div>
                 </div>
             </div>
+            
+            <p style="color:white; margin-top:20px; font-family:'Pirata One'; font-size:1.5em; text-shadow:0 0 5px black;">CLIQUE POUR RETOURNER</p>
         </div>`;
         panel.classList.add('active'); overlay.classList.add('active');
     }
