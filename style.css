@@ -1327,3 +1327,47 @@ button.btn-validate.disabled {
     content: "" !important;
     display: none !important;
 }
+
+/* ============================================
+   30. CORRECTIF CLICS ADMIN (URGENT)
+   ============================================ */
+
+/* Force le Panini au-dessus de tout le reste */
+.details-panel {
+    z-index: 20000 !important; /* Très haut */
+}
+.details-overlay {
+    z-index: 19999 !important;
+}
+.close-details {
+    z-index: 20001 !important;
+}
+
+/* Rend les cartes joueurs Admin bien cliquables */
+.admin-player-card {
+    cursor: pointer !important;
+    pointer-events: auto !important;
+    user-select: none;
+    z-index: 1; /* Base */
+}
+
+/* Le bouton CHANGER en mode Prov ne doit pas bloquer le reste */
+.admin-player-card .btn-admin-mini {
+    position: relative;
+    z-index: 100; /* Passe au-dessus de la carte */
+}
+
+/* Lignes du tableau des rôles */
+.summary-list-item {
+    cursor: pointer !important;
+    pointer-events: auto !important;
+    position: relative;
+    z-index: 5;
+}
+
+/* Bouton Éclair dans le tableau */
+.summary-list-item button {
+    position: relative !important;
+    z-index: 50 !important; /* Passe LARGEMENT au-dessus du texte */
+    pointer-events: auto !important;
+}
