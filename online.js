@@ -1,5 +1,5 @@
 // ============================================
-// SYSTEME EN LIGNE - V71 (CORRECTIF FINAL DASHBOARD)
+// SYSTEME EN LIGNE - V72 (CORRECTIF FERMETURE MODALE)
 // ============================================
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -781,7 +781,16 @@ window.openDistributionSelector = function() {
         
         // Sécurité supplémentaire : on force l'affichage CSS
         modal.classList.add('active');
-        modal.style.display = 'flex';
+        
+        // Hack pour nettoyer le style quand on ferme via la croix
+        const closeBtn = modal.querySelector('.close-modal');
+        if(closeBtn) {
+            closeBtn.onclick = function() {
+                modal.style.display = ''; // On vide le style inline
+                modal.style.zIndex = '';  // On vide le z-index
+                window.closeModal('modal-role-selector');
+            };
+        }
     } else {
         alert("Erreur: Modale de sélection introuvable dans le HTML.");
     }
@@ -866,6 +875,12 @@ window.updateDistributionDashboard = function() {
 };
 
 window.validateDistribution = function() {
+    // NETTOYAGE FORCE DU STYLE
+    const modal = document.getElementById('modal-role-selector');
+    if(modal) {
+        modal.style.display = '';
+        modal.style.zIndex = '';
+    }
     window.closeModal('modal-role-selector');
     generateDashboardControls(); 
 };
