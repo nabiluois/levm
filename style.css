@@ -1299,3 +1299,22 @@ button[onclick="signPact()"]::before {
 .player-select-card.active img {
     opacity: 1 !important;
 }
+
+/* ============================================
+   29. BOUTONS VALIDÉS (GRISÉS)
+   ============================================ */
+.btn-validate.disabled {
+    background: #555 !important;       /* Fond gris foncé */
+    border-color: #777 !important;     /* Bordure grise */
+    color: #aaa !important;            /* Texte gris clair */
+    cursor: not-allowed !important;    /* Curseur interdit */
+    box-shadow: none !important;       /* Pas d'ombre */
+    animation: none !important;        /* Pas de pulsation */
+    pointer-events: none !important;   /* Empêche le clic */
+    transform: none !important;        /* Pas de zoom */
+}
+
+/* On enlève le petit doigt 👇 quand c'est validé */
+.btn-validate.disabled::before {
+    content: "" !important;
+}
