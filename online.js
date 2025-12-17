@@ -1,5 +1,5 @@
 // ============================================
-// SYSTEME EN LIGNE - V86 (FINAL GOLD CERTIFIÉ)
+// SYSTEME EN LIGNE - V88 (FINAL : UNIFORMISATION TOTALE)
 // ============================================
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -74,7 +74,8 @@ function attachCreateEvent() {
 
 // --- UTILITAIRES D'AFFICHAGE (PHOTOS RONDES & EMOJIS PARTOUT) ---
 
-function generateAvatarWithBadges(player, size = "60px", border = "1px solid var(--gold)") {
+// Ajout du paramètre imgId pour ne pas perdre la référence dans le DOM lors du refresh
+function generateAvatarWithBadges(player, size = "60px", border = "1px solid var(--gold)", imgId = "") {
     const avatarSrc = player.avatar || "icon.png";
     const isMayor = player.isMayor;
     let iconsHtml = "";
@@ -97,10 +98,10 @@ function generateAvatarWithBadges(player, size = "60px", border = "1px solid var
         iconsHtml += `<span style="position:absolute; top:-12px; left:-12px; font-size:1.8em; z-index:20; text-shadow:0 0 4px black; filter:drop-shadow(0 2px 2px rgba(0,0,0,0.5));">🎖️</span>`;
     }
 
-    // STYLE BLINDÉ : min-width/height + flex-shrink:0 pour empêcher l'écrasement ovale
+    // STYLE BLINDÉ : aspect-ratio + object-fit: cover pour un rond parfait
     return `
-        <div style="position:relative; width:${size}; height:${size}; min-width:${size}; min-height:${size}; flex-shrink:0;">
-            <img src="${avatarSrc}" style="width:100%; height:100%; object-fit:cover; border-radius:50%; border:${border}; box-shadow:0 2px 5px rgba(0,0,0,0.5); display:block;">
+        <div style="position:relative; width:${size}; height:${size}; min-width:${size}; min-height:${size}; flex-shrink:0; margin: 0 auto; aspect-ratio: 1 / 1;">
+            <img ${imgId ? `id="${imgId}"` : ''} src="${avatarSrc}" style="width:100%; height:100%; object-fit:cover; border-radius:50%; border:${border}; box-shadow:0 2px 5px rgba(0,0,0,0.5); display:block; box-sizing:border-box;">
             ${iconsHtml}
         </div>
     `;
@@ -479,7 +480,7 @@ window.openRoleSummaryPanel = function() {
                 ? "background:#2c3e50; color:#95a5a6; text-decoration:line-through; border:1px solid #7f8c8d; opacity:0.7;" 
                 : "background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,215,0,0.3);";
             
-            // UTILISATION DE LA FONCTION STANDARDISÉE
+            // MODIFICATION MAJEURE : On utilise generateAvatarWithBadges ici aussi !
             const avatarHtml = generateAvatarWithBadges(playerObj, "55px");
 
             let actionBtn = "";
@@ -717,183 +718,6 @@ window.updateDistributionDashboard = function() {
     setTxt('ctrl-total', total);
 };
 
-window.generateResurrectionGrid = function(mode = 'single') {
-    // FORCE SCAN
-    if (!detectedRoles || detectedRoles.length === 0) {
-        try { scanContentFromHTML(); } catch(e) { console.warn(e); }
-    }
-
-    const grid = document.getElementById('admin-role-grid');
-    if(!grid) return; // Si l'élément n'existe pas, on arrête
-    
-    // Remettre le titre si besoin (pour mode simple)
-    const h2 = document.querySelector('#modal-role-selector h2');
-    if(h2) h2.style.display = 'block';
-    
-    // Remettre les textes d'aide si besoin
-    const ps = document.querySelectorAll('#modal-role-selector p');
-    ps.forEach(p => p.style.display = 'block');
-
-    grid.style.display = "block"; 
-    grid.innerHTML = "";
-    
-    // Ajout du tableau de bord si on est en mode sélection multiple
-    if (mode === 'multi') {
-        const dashboard = document.createElement('div');
-        dashboard.className = "selection-dashboard";
-        dashboard.innerHTML = `
-            <div class="dashboard-stats">
-                <div class="stat-item"><img src="Village.svg"><span id="pop-count-village">0</span></div>
-                <div class="stat-item"><img src="Loup.svg"><span id="pop-count-loup">0</span></div>
-                <div class="stat-item"><img src="Solo.svg"><span id="pop-count-solo">0</span></div>
-            </div>
-            <button class="btn-compact" onclick="window.validateDistribution()">OK (<span id="pop-total">0</span>)</button>
-        `;
-        grid.appendChild(dashboard);
-        setTimeout(updateDistributionDashboard, 50); 
-    }
-
-    const categoriesOrder = { 
-        'village': '<img src="Village.svg" style="width:25px; vertical-align:middle; margin-right:8px;"> VILLAGE', 
-        'loups': '<img src="Loup.svg" style="width:25px; vertical-align:middle; margin-right:8px;"> LOUPS', 
-        'solo': '<img src="Solo.svg" style="width:25px; vertical-align:middle; margin-right:8px;"> SOLOS', 
-        'vampires': '<img src="Vampires.svg" style="width:25px; vertical-align:middle; margin-right:8px;"> VAMPIRES' 
-    };
-
-    const mainFragment = document.createDocumentFragment();
-
-    for (const [catKey, catTitleHTML] of Object.entries(categoriesOrder)) {
-        const rolesInCat = detectedRoles.filter(r => r.category === catKey);
-        if (rolesInCat.length > 0) {
-            const titleDiv = document.createElement('div');
-            titleDiv.className = "category-separator";
-            titleDiv.style.cssText = "margin-top:25px; margin-bottom:10px; padding-bottom:5px; border-bottom:1px solid #555; display:flex; align-items:center; color:var(--gold); font-family:'Pirata One'; font-size:1.4em; clear:both;";
-            titleDiv.innerHTML = catTitleHTML;
-            mainFragment.appendChild(titleDiv);
-            
-            const catGrid = document.createElement('div');
-            catGrid.className = "admin-grid-container";
-            
-            rolesInCat.sort((a, b) => a.title.localeCompare(b.title));
-            rolesInCat.forEach(role => {
-                const div = document.createElement('div');
-                div.className = "role-select-item";
-                
-                // Si on est en mode multi, on vérifie si le rôle est sélectionné
-                if (mode === 'multi') {
-                    const count = distributionSelection.filter(id => id === role.id).length;
-                    if (count > 0) {
-                        div.classList.add('selected');
-                        div.innerHTML += `<div class="qty-badge">x${count}</div>`;
-                    }
-                }
-                
-                // EAGER LOADING FORCE
-                div.innerHTML += `<img src="${role.image}" loading="eager" style="width:100%; border-radius:6px; display:block;">`;
-                
-                div.onclick = () => mode === 'multi' ? window.handleMultiSelection(role.id, div) : window.assignRoleToPlayer(role.id);
-                catGrid.appendChild(div);
-            });
-            mainFragment.appendChild(catGrid);
-        }
-    }
-    grid.appendChild(mainFragment);
-};
-
-window.openDistributionSelector = function() {
-    // SÉCURITÉ : Scan forcé
-    if (!detectedRoles || detectedRoles.length === 0) {
-        scanContentFromHTML();
-    }
-
-    // 1. On génère la grille
-    window.generateResurrectionGrid('multi');
-    
-    // 2. On récupère la modale
-    const modal = document.getElementById('modal-role-selector');
-    if(modal) {
-        // CORRECTION : Z-Index Maximum pour passer devant le dashboard Admin
-        modal.style.zIndex = "999999"; 
-        
-        // On cache le titre par défaut car on a le dashboard (stats en haut)
-        const h2 = modal.querySelector('h2');
-        if(h2) h2.style.display = "none"; 
-        
-        // On ouvre via la fonction globale
-        window.openModal('modal-role-selector');
-        
-        // Sécurité supplémentaire : on force l'affichage CSS
-        modal.classList.add('active');
-        
-        // Hack pour nettoyer le style quand on ferme via la croix
-        const closeBtn = modal.querySelector('.close-modal');
-        if(closeBtn) {
-            closeBtn.onclick = function() {
-                modal.style.display = ''; // On vide le style inline
-                modal.style.zIndex = '';  // On vide le z-index
-                window.closeModal('modal-role-selector');
-            };
-        }
-    } else {
-        alert("Erreur: Modale de sélection introuvable dans le HTML.");
-    }
-};
-
-window.openResurrectModal = function(playerId) {
-    targetResurrectId = playerId;
-    window.generateResurrectionGrid('single'); 
-    const modalTitle = document.querySelector('#modal-role-selector h2');
-    if(modalTitle) {
-        modalTitle.style.display = 'block';
-        modalTitle.innerText = isDraftMode ? "CHANGER CARTE" : "RESSUSCITER";
-    }
-    document.getElementById('modal-role-selector').style.zIndex = "25000"; 
-    window.openModal('modal-role-selector');
-};
-
-// CORRECTION : On attache la fonction à "window" pour qu'elle soit vue par le HTML
-window.handleMultiSelection = function(roleId, divElement) {
-    let currentCount = distributionSelection.filter(id => id === roleId).length;
-    let newCount = 0;
-    
-    const isMultiCard = (roleId === 'le_paysan' || roleId === 'le_loup_garou');
-    const isDuoCard = (roleId === 'olaf_et_pilaf' || roleId === 'les_jumeaux_explosifs');
-
-    if (isMultiCard) {
-        let input = prompt(`Combien ?`, currentCount || 0);
-        if (input === null) return; 
-        newCount = Math.max(0, parseInt(input) || 0);
-    } 
-    else if (isDuoCard) {
-        let input = prompt(`Duo (0 ou 2) ?`, currentCount || 0);
-        if (input === null) return;
-        newCount = parseInt(input);
-        if(newCount !== 2 && newCount !== 0) newCount = 0;
-    }
-    else { newCount = currentCount > 0 ? 0 : 1; }
-
-    distributionSelection = distributionSelection.filter(id => id !== roleId);
-    for(let i=0; i<newCount; i++) distributionSelection.push(roleId);
-
-    const existingBadge = divElement.querySelector('.qty-badge');
-    if(existingBadge) existingBadge.remove();
-
-    if (newCount > 0) {
-        divElement.classList.add('selected'); 
-        const badge = document.createElement('div');
-        badge.className = 'qty-badge';
-        badge.innerText = `x${newCount}`;
-        divElement.appendChild(badge);
-    } else {
-        divElement.classList.remove('selected'); 
-    }
-    
-    // Mise à jour des stats du dashboard
-    if(typeof updateDistributionDashboard === 'function') {
-        updateDistributionDashboard();
-    }
-};
-
 window.validateDistribution = function() {
     // NETTOYAGE FORCE DU STYLE
     const modal = document.getElementById('modal-role-selector');
@@ -1125,11 +949,24 @@ window.refreshAdminPlayerContent = function(pid, name, roleId, isDead, avatarSrc
     if(pPseudo) pPseudo.innerText = name;
     
     // On recrée l'avatar pour le panini (avec les badges)
-    if(pAvatar && pAvatar.parentNode) {
-        // Remplacement complet du conteneur avatar pour inclure les badges
-        const avatarContainer = generateAvatarWithBadges(fullData || {name:name, avatar:avatarSrc, isMayor:isMayor}, "120px", "4px solid var(--gold)");
-        pAvatar.parentNode.innerHTML = avatarContainer;
-        // Note: l'ID 'detail-avatar' est perdu ici mais ce n'est pas grave car on régénère tout
+    if(pAvatar) {
+        const parent = pAvatar.closest('div'); // On cherche le parent DIV de l'image
+        if(parent && parent.parentNode) {
+             // On s'assure de nettoyer les styles du conteneur parent dans le HTML
+             // pour qu'il n'interfère pas avec notre nouveau générateur
+             parent.style.border = "none";
+             parent.style.borderRadius = "0";
+             parent.style.background = "transparent";
+             parent.style.width = "auto";
+             parent.style.height = "auto";
+             parent.style.overflow = "visible"; // TRES IMPORTANT pour que les emojis dépassent
+
+             // IMPORTANT: On passe l'ID 'detail-avatar' pour ne pas perdre la référence au prochain refresh
+             const avatarContainer = generateAvatarWithBadges(fullData || {name:name, avatar:avatarSrc, isMayor:isMayor, attributes:fullData?.attributes}, "120px", "4px solid var(--gold)", "detail-avatar");
+             
+             // On remplace le parent par notre nouveau conteneur
+             parent.outerHTML = avatarContainer;
+        }
     }
     
     // LOGIQUE D'AFFICHAGE IMAGE : VM PRIORITAIRE, SINON RÔLE
