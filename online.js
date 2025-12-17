@@ -383,7 +383,7 @@ function generateDashboardControls() {
     const btnSelect = document.createElement('button');
     btnSelect.className = "btn-admin-action";
     btnSelect.style.cssText = "background:#2c3e50; color:#bdc3c7; border:1px solid #7f8c8d; padding:10px; width:100%; border-radius:6px; font-family:'Pirata One'; font-size:1.1em; cursor:pointer;";
-    btnSelect.innerHTML = "📂 MODIFIER SÉLECTION";
+    btnSelect.innerHTML = "📂 RÔLES SÉLECTION";
     btnSelect.onclick = () => window.openDistributionSelector();
     wrapper.appendChild(btnSelect);
 
@@ -754,6 +754,11 @@ window.generateResurrectionGrid = function(mode = 'single') {
 };
 
 window.openDistributionSelector = function() {
+    // SÉCURITÉ : Si aucun rôle n'est détecté, on scanne le HTML maintenant
+    if (!detectedRoles || detectedRoles.length === 0) {
+        scanContentFromHTML();
+    }
+
     // 1. On génère la grille
     window.generateResurrectionGrid('multi');
     
@@ -763,14 +768,14 @@ window.openDistributionSelector = function() {
         // CORRECTION : Z-Index Maximum pour passer devant le dashboard Admin
         modal.style.zIndex = "99999"; 
         
-        // On cache le titre par défaut car on a le dashboard
+        // On cache le titre par défaut car on a le dashboard (stats en haut)
         const h2 = modal.querySelector('h2');
         if(h2) h2.style.display = "none"; 
         
         // On ouvre via la fonction globale
         window.openModal('modal-role-selector');
         
-        // Sécurité supplémentaire : on force l'affichage
+        // Sécurité supplémentaire : on force l'affichage CSS
         modal.classList.add('active');
         modal.style.display = 'flex';
     } else {
