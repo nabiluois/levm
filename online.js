@@ -1,5 +1,5 @@
 // ============================================
-// SYSTEME EN LIGNE - V68 (INTEGRAL & CLICS FIXÉS)
+// SYSTEME EN LIGNE - V69 (INTEGRAL & CLICS FIXÉS)
 // ============================================
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -163,26 +163,30 @@ function scanContentFromHTML() {
     detectedRoles = [];
     detectedEvents = { gold: [], silver: [], bronze: [] };
     
-    document.querySelectorAll('.carte-jeu').forEach((card) => {
-        const imgTag = card.querySelector('.carte-front img');
-        const titleTag = card.querySelector('.carte-back h3'); 
-        const section = card.closest('section');
-        const categoryId = section ? section.id : 'village'; 
-        
-        if (imgTag && titleTag) {
-            const imgSrc = imgTag.getAttribute('src');
-            const id = imgSrc.split('/').pop().replace(/\.[^/.]+$/, "");
-            detectedRoles.push({
-                id: id,
-                title: titleTag.innerText.trim(),
-                image: imgSrc,
-                category: categoryId
-            });
-            const preloadImg = new Image();
-            preloadImg.src = imgSrc;
-        }
-    });
+    // On scanne les rôles
+    const cards = document.querySelectorAll('.carte-jeu');
+    if (cards.length > 0) {
+        cards.forEach((card) => {
+            const imgTag = card.querySelector('.carte-front img');
+            const titleTag = card.querySelector('.carte-back h3'); 
+            const section = card.closest('section');
+            const categoryId = section ? section.id : 'village'; 
+            
+            if (imgTag && titleTag) {
+                const imgSrc = imgTag.getAttribute('src');
+                const id = imgSrc.split('/').pop().replace(/\.[^/.]+$/, "");
+                
+                detectedRoles.push({
+                    id: id,
+                    title: titleTag.innerText.trim(),
+                    image: imgSrc,
+                    category: categoryId
+                });
+            }
+        });
+    }
 
+    // On scanne les cartes événements
     document.querySelectorAll('.carte-vm').forEach((card) => {
         const imgTag = card.querySelector('img');
         if (imgTag) {
@@ -190,8 +194,6 @@ function scanContentFromHTML() {
             if (card.classList.contains('gold')) detectedEvents.gold.push(imgSrc);
             else if (card.classList.contains('silver')) detectedEvents.silver.push(imgSrc);
             else if (card.classList.contains('bronze')) detectedEvents.bronze.push(imgSrc);
-            const preloadImg = new Image();
-            preloadImg.src = imgSrc;
         }
     });
 }
@@ -676,215 +678,32 @@ window.togglePlayerSelection = function(targetPid, baseAttrKey, maxLimit, unique
     });
 };
 
-// --- FICHE JOUEUR PANINI (ADMIN) ---
-window.openAdminPlayerDetail = function(playerId, playerPseudo, roleId, isDead, avatarBase64, isMayor) {
-    const panel = document.querySelector('.details-panel');
-    const overlay = document.querySelector('.details-overlay');
-    if(!panel || !overlay) return;
-
-    let roleImg = "back.png";
-    let roleTitle = "En attente...";
-    let campIcon = "";
-
-    if(roleId && detectedRoles.length > 0) {
-        const r = detectedRoles.find(x => x.id === roleId);
-        if(r) { 
-            roleImg = r.image; 
-            roleTitle = r.title; 
-            if(r.category === 'loups') campIcon = `<img src="Loup.svg" style="width:30px; vertical-align:middle; margin-right:5px;">`;
-            else if(r.category === 'solo') campIcon = `<img src="Solo.svg" style="width:30px; vertical-align:middle; margin-right:5px;">`;
-            else if(r.category === 'vampires') campIcon = `<img src="Vampires.svg" style="width:30px; vertical-align:middle; margin-right:5px;">`;
-            else campIcon = `<img src="Village.svg" style="width:30px; vertical-align:middle; margin-right:5px;">`;
-        }
-    }
-
-    let statusHTML = "";
-    if(isDead) statusHTML += `<span style="color:#c0392b; margin-right:10px; font-weight:bold;">MORT 💀</span>`;
-    if(isMayor) statusHTML += `<span style="color:gold; font-weight:bold;">MAIRE 🎖️</span>`;
-
-    let effectsHTML = "";
-    const p = currentPlayersData[playerId];
-    if (p && p.attributes) {
-        Object.keys(p.attributes).forEach(key => {
-            if (key.startsWith('lover_by_')) {
-                effectsHTML += `<button class="btn-admin-action" style="background:#e74c3c; color:white; border:1px solid white;" onclick="window.removePlayerAttribute('${playerId}', '${key}')">💔 BRISER COUPLE</button>`;
-            }
-            if (key.startsWith('infected_by_')) {
-                effectsHTML += `<button class="btn-admin-action" style="background:#8e44ad; color:white; border:1px solid white;" onclick="window.removePlayerAttribute('${playerId}', '${key}')">💉 SOIGNER INFECTION</button>`;
-            }
-            if (key.startsWith('target_by_')) {
-                effectsHTML += `<button class="btn-admin-action" style="background:#34495e; color:white; border:1px solid white;" onclick="window.removePlayerAttribute('${playerId}', '${key}')">🚫 RETIRER CIBLE</button>`;
-            }
-            if (key.startsWith('linked_red_by_')) {
-                effectsHTML += `<button class="btn-admin-action" style="background:#c0392b; color:white; border:1px solid white;" onclick="window.removePlayerAttribute('${playerId}', '${key}')">🩸 DÉLIER LOUP ROUGE</button>`;
-            }
-            if (key.startsWith('cursed_mentor_by_')) {
-                effectsHTML += `<button class="btn-admin-action" style="background:#f39c12; color:white; border:1px solid white;" onclick="window.removePlayerAttribute('${playerId}', '${key}')">🌙 RETIRER MENTOR</button>`;
-            }
-        });
-    }
-
-    const htmlContent = `
-        <div class="panini-admin-header">
-            <button class="close-details" onclick="window.internalCloseDetails()" style="position:absolute; right:0; top:0; background:transparent; border:none; color:gold; font-size:1.5em; cursor:pointer; z-index:11100;">✕</button>
-            <img src="${avatarBase64}" class="panini-big-avatar">
-            <h2 style="color:var(--gold); margin:0; font-size:1.8em;">${playerPseudo}</h2>
-            <div style="font-size:1.2em; margin-top:5px;">${statusHTML}</div>
-        </div>
-
-        <div style="text-align:center; margin-bottom:20px;">
-            <div style="display:flex; align-items:center; justify-content:center; margin-bottom:5px;">${campIcon} <span style="font-family:'Almendra'; font-size:1.4em; color:#fff;">${roleTitle}</span></div>
-            <img src="${roleImg}" class="panini-big-card" style="filter:${isDead ? 'grayscale(100%)' : 'none'}">
-        </div>
-
-        <div class="admin-actions-grid">
-            <button id="btn-mayor" class="btn-admin-action" style="background:${isMayor ? '#7f8c8d' : '#f1c40f'}; color:${isMayor ? '#fff' : '#000'}; border:2px solid #fff; padding:12px; border-radius:8px; font-weight:bold; cursor:pointer;"
-                onclick="window.toggleMayor('${playerId}', ${!isMayor}, this)">
-                ${isMayor ? '❌ DESTITUER MAIRE' : '🎖️ NOMMER MAIRE'}
-            </button>
-
-            ${effectsHTML} 
-
-            <button id="btn-life" class="btn-admin-action" style="background:${isDead ? '#2ecc71' : '#c0392b'}; color:#fff; border:2px solid #fff; padding:12px; border-radius:8px; font-weight:bold; cursor:pointer;"
-                onclick="window.toggleLife('${playerId}', ${!isDead}, this)">
-                ${isDead ? '♻️ RESSUSCITER' : '💀 TUER LE JOUEUR'}
-            </button>
-
-            <button class="btn-admin-action" style="background:#3498db; color:#fff; border:2px solid #fff; padding:12px; border-radius:8px; font-weight:bold; cursor:pointer;"
-                onclick="window.internalCloseDetails(); window.openResurrectModal('${playerId}')">
-                🔄 CHANGER LE RÔLE
-            </button>
-        </div>
-
-        ${isDead ? `
-            <div class="event-buttons-row">
-                <button class="btn-event" style="background:gold;" onclick="window.adminDrawEvent('${playerId}', 'gold')">OR</button>
-                <button class="btn-event" style="background:silver;" onclick="window.adminDrawEvent('${playerId}', 'silver')">ARGENT</button>
-                <button class="btn-event" style="background:#cd7f32;" onclick="window.adminDrawEvent('${playerId}', 'bronze')">BRONZE</button>
-            </div>
-        ` : ''}
-        <br><br><br>
-    `;
-
-    let contentDiv = panel.querySelector('.details-content');
-    if(!contentDiv) {
-          panel.innerHTML = '<div class="details-content"></div>';
-          contentDiv = panel.querySelector('.details-content');
-    }
-    contentDiv.innerHTML = htmlContent;
-    panel.classList.add('active');
-    overlay.classList.add('active');
-    document.body.classList.add('no-scroll');
-};
-
-// ============================================
-// E. FONCTIONS UTILITAIRES (AVEC LOGIQUE MORT EN CHAINE)
-// ============================================
-
-window.removePlayerAttribute = function(pid, attrKey) {
-    if(!confirm("Retirer cet effet ?")) return;
-    
-    update(ref(db, `games/${currentGameCode}/players/${pid}/attributes/${attrKey}`), null).then(() => {
-        window.internalCloseDetails(); 
-        internalShowNotification("Effet", "L'effet a été retiré.");
-    });
-};
-
-window.toggleMayor = function(pid, state, btn) {
-    if(btn) {
-        btn.style.background = state ? "#7f8c8d" : "#f1c40f";
-        btn.style.color = state ? "#fff" : "#000";
-        btn.innerText = state ? '❌ DESTITUER MAIRE' : '🎖️ NOMMER MAIRE';
-        btn.setAttribute('onclick', `window.toggleMayor('${pid}', ${!state}, this)`);
-    }
-    update(ref(db, `games/${currentGameCode}/players/${pid}`), { isMayor: state });
-};
-
-window.toggleLife = function(pid, state, btn) {
-    const status = state ? 'alive' : 'dead';
-    if(!state && !confirm("Tuer ce joueur ?")) return;
-    
-    if (!state) { // Si on tue (state = false = mort)
-        const victim = currentPlayersData[pid];
-        if (victim && victim.attributes) {
-            
-            const loverKeys = Object.keys(victim.attributes).filter(k => k.startsWith('lover_by_'));
-            loverKeys.forEach(loverKey => {
-                const partnerEntry = Object.entries(currentPlayersData).find(([pId, p]) => {
-                    return pId !== pid && p.attributes && p.attributes[loverKey];
-                });
-                if (partnerEntry) {
-                    const [partnerId, partner] = partnerEntry;
-                    if (partner.status !== 'dead') {
-                        setTimeout(() => {
-                            alert(`💔 ${victim.name} est mort... Son amour ${partner.name} se suicide !`);
-                            window.toggleLife(partnerId, false);
-                        }, 500);
-                    }
-                }
-            });
-
-            const redKey = Object.keys(victim.attributes).find(k => k.startsWith('linked_red_by_'));
-            if(redKey) {
-                const redWolfId = redKey.replace('linked_red_by_', '');
-                const redWolf = currentPlayersData[redWolfId];
-                if (redWolf && redWolf.status !== 'dead') {
-                    setTimeout(() => {
-                        alert(`🩸 Le cœur du Loup Garou Rouge (${redWolf.name}) a cessé de battre... Il meurt !`);
-                        window.toggleLife(redWolfId, false);
-                    }, 800);
-                }
-            }
-
-            if (hasAttribute(victim, 'cursed_mentor_by')) {
-                setTimeout(() => {
-                    alert(`🐺 ATTENTION MJ : Le Mentor est mort. Le Loup-Garou Maudit doit se réveiller et rejoindre la meute !`);
-                }, 500);
-            }
-        }
-    }
-
-    if(btn) {
-        btn.style.background = state ? "#c0392b" : "#2ecc71"; 
-        btn.innerText = state ? '💀 TUER LE JOUEUR' : '♻️ RESSUSCITER';
-        btn.setAttribute('onclick', `window.toggleLife('${pid}', ${!state}, this)`);
-        
-        const cardImg = document.querySelector('.panini-big-card');
-        if(cardImg) cardImg.style.filter = state ? 'none' : 'grayscale(100%)';
-        
-        const contentDiv = document.querySelector('.details-content');
-        const existingRow = document.querySelector('.event-buttons-row');
-        if(!state && !existingRow && contentDiv) {
-             const row = document.createElement('div');
-             row.className = 'event-buttons-row';
-             row.innerHTML = `<button class="btn-event" style="background:gold;" onclick="window.adminDrawEvent('${pid}', 'gold')">OR</button><button class="btn-event" style="background:silver;" onclick="window.adminDrawEvent('${pid}', 'silver')">ARGENT</button><button class="btn-event" style="background:#cd7f32;" onclick="window.adminDrawEvent('${pid}', 'bronze')">BRONZE</button>`;
-             contentDiv.appendChild(row);
-        } else if (state && existingRow) { existingRow.remove(); }
-    }
-    
-    update(ref(db, `games/${currentGameCode}/players/${pid}`), { status: status });
-};
-
-window.adminDrawEvent = function(pid, cat) { window.openEventSelector(pid, cat); };
-
 // --- FONCTIONS DISTRIBUTION & MÉLANGE MANQUANTES AJOUTÉES ---
 
 window.generateResurrectionGrid = function(mode = 'single') {
-    const grid = document.getElementById('admin-role-grid');
-    if(!grid) return;
-    
-    // SÉCURITÉ : Si la liste est vide, on la remplit de force
-    if (detectedRoles.length === 0) {
+    // SÉCURITÉ : Si la liste est vide, on la remplit de force maintenant
+    if (!detectedRoles || detectedRoles.length === 0) {
         scanContentFromHTML();
     }
 
+    const grid = document.getElementById('admin-role-grid');
+    if(!grid) return; // Si l'élément n'existe pas, on arrête
+    
     grid.style.display = "block"; 
     grid.innerHTML = "";
     
+    // Ajout du tableau de bord si on est en mode sélection multiple
     if (mode === 'multi') {
         const dashboard = document.createElement('div');
         dashboard.className = "selection-dashboard";
-        dashboard.innerHTML = `<div class="dashboard-stats"><div class="stat-item"><img src="Village.svg"><span id="pop-count-village">0</span></div><div class="stat-item"><img src="Loup.svg"><span id="pop-count-loup">0</span></div><div class="stat-item"><img src="Solo.svg"><span id="pop-count-solo">0</span></div></div><button class="btn-compact" onclick="window.validateDistribution()">OK (<span id="pop-total">0</span>)</button>`;
+        dashboard.innerHTML = `
+            <div class="dashboard-stats">
+                <div class="stat-item"><img src="Village.svg"><span id="pop-count-village">0</span></div>
+                <div class="stat-item"><img src="Loup.svg"><span id="pop-count-loup">0</span></div>
+                <div class="stat-item"><img src="Solo.svg"><span id="pop-count-solo">0</span></div>
+            </div>
+            <button class="btn-compact" onclick="window.validateDistribution()">OK (<span id="pop-total">0</span>)</button>
+        `;
         grid.appendChild(dashboard);
         setTimeout(updateDistributionDashboard, 50); 
     }
@@ -914,6 +733,8 @@ window.generateResurrectionGrid = function(mode = 'single') {
             rolesInCat.forEach(role => {
                 const div = document.createElement('div');
                 div.className = "role-select-item";
+                
+                // Si on est en mode multi, on vérifie si le rôle est sélectionné
                 if (mode === 'multi') {
                     const count = distributionSelection.filter(id => id === role.id).length;
                     if (count > 0) {
@@ -921,6 +742,7 @@ window.generateResurrectionGrid = function(mode = 'single') {
                         div.innerHTML += `<div class="qty-badge">x${count}</div>`;
                     }
                 }
+                
                 div.innerHTML += `<img src="${role.image}" loading="eager" style="width:100%; border-radius:6px; display:block;">`;
                 div.onclick = () => mode === 'multi' ? handleMultiSelection(role.id, div) : window.assignRoleToPlayer(role.id);
                 catGrid.appendChild(div);
@@ -932,14 +754,27 @@ window.generateResurrectionGrid = function(mode = 'single') {
 };
 
 window.openDistributionSelector = function() {
+    // 1. On génère la grille
     window.generateResurrectionGrid('multi');
+    
+    // 2. On récupère la modale
     const modal = document.getElementById('modal-role-selector');
     if(modal) {
-        // CORRECTION : Z-Index très élevé pour passer devant le dashboard Admin (10000) et le Panini (20000)
-        modal.style.zIndex = "30000"; 
+        // CORRECTION : Z-Index Maximum pour passer devant le dashboard Admin
+        modal.style.zIndex = "99999"; 
+        
+        // On cache le titre par défaut car on a le dashboard
         const h2 = modal.querySelector('h2');
         if(h2) h2.style.display = "none"; 
+        
+        // On ouvre via la fonction globale
         window.openModal('modal-role-selector');
+        
+        // Sécurité supplémentaire : on force l'affichage
+        modal.classList.add('active');
+        modal.style.display = 'flex';
+    } else {
+        alert("Erreur: Modale de sélection introuvable dans le HTML.");
     }
 };
 

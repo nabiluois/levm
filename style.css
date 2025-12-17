@@ -43,7 +43,7 @@ body.no-scroll {
     height: 100vh !important; 
     position: fixed !important; 
     width: 100% !important;
-    touch-action: none !important; /* Empêche le glissement sur mobile */
+    touch-action: none !important; 
 }
 
 /* ============================================
@@ -135,7 +135,7 @@ body.no-scroll {
 .extra-footer { margin-top: auto; text-align: center; font-size: 0.8em; opacity: 0.5; color: var(--gold); }
 
 /* ============================================
-   5. MODALES (STYLES DE BASE & ESPACEMENT RÉDUIT)
+   5. MODALES (STYLES DE BASE & ESPACEMENT)
    ============================================ */
 .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.85); z-index: 4000; justify-content: center; align-items: center; padding: 20px; backdrop-filter: blur(5px); }
 .modal.active { display: flex; animation: fadeIn 0.3s; }
@@ -145,7 +145,6 @@ body.no-scroll {
     border: 2px solid var(--gold); border-radius: 15px; 
     margin-top: calc(env(safe-area-inset-top) + 20px); 
     max-height: calc(100dvh - 80px); 
-    /* ESPACE RÉDUIT ICI (20px au lieu de 50px) */
     padding: 20px 25px 25px 25px !important; 
     width: 100%; max-width: 500px; 
     overflow-y: auto; position: relative; 
@@ -153,7 +152,6 @@ body.no-scroll {
     overscroll-behavior: contain; 
 }
 
-/* Croix de fermeture */
 .close-modal { 
     position: absolute; top: 15px; right: 15px; color: var(--gold); 
     font-size: 1.5em; cursor: pointer; z-index: 20; 
@@ -162,15 +160,12 @@ body.no-scroll {
     line-height: 1; border: 1px solid rgba(212, 175, 55, 0.3); 
 }
 
-/* Correctif Mobile pour les Modales */
 @media (max-width: 768px) {
-  /* ESPACE RÉDUIT MOBILE (20px au lieu de 45px) */
   .modal-content:not(.modal-large) { padding-top: 20px !important; }
   .close-modal { top: 5px !important; right: 5px !important; width: 32px !important; height: 32px !important; line-height: 30px !important; z-index: 500 !important; }
   .modal h2 { margin-top: 5px !important; white-space: normal !important; text-align: center !important; font-size: 1.4em !important; border: none !important; }
 }
 
-/* Formulaires dans les modales */
 .form-group { margin-bottom: 15px; }
 .form-group label { display: block; color: var(--gold); margin-bottom: 5px; font-family: 'Pirata One'; font-size: 1.1em; }
 .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.3); border: 1px solid #5a4633; color: #f5e6b3; font-family: 'Almendra'; font-size: 1em; }
@@ -184,7 +179,6 @@ body.no-scroll {
 .modal-large { max-width: 600px; height: 85vh; display: flex; flex-direction: column; padding: 0 !important; overflow: hidden !important; }
 .slides-container { 
     flex: 1; position: relative; width: 100%; overflow-y: auto !important; 
-    /* ESPACE RÉDUIT RÈGLES (10px au lieu de 70px) */
     padding: 10px 20px 20px 20px !important; 
     overscroll-behavior: contain; 
     mask-image: linear-gradient(to bottom, transparent 0%, black 10%, black 90%, transparent 100%);
@@ -202,7 +196,6 @@ body.no-scroll {
 .slide-subtitle { font-family: 'Almendra'; color: #f5e6b3; font-size: 1.2em; margin-bottom: 20px; opacity: 0.8; }
 .slide-text, .slide-intro { font-size: 1.1em; text-align: center; margin-bottom: 20px; }
 
-/* Composants des Slides (Steps, Infos, Roles) */
 .step-box { background: rgba(255,255,255,0.05); border-left: 3px solid var(--gold); padding: 15px; margin-bottom: 15px; width: 100%; border-radius: 0 10px 10px 0; display: flex; gap: 15px; }
 .step-num { font-family: 'Pirata One'; font-size: 1.5em; color: var(--gold); min-width: 30px; display: flex; align-items: center; justify-content: center; }
 .step-content strong { color: var(--gold); display: block; margin-bottom: 5px; }
@@ -215,7 +208,6 @@ body.no-scroll {
 .role-action-card { width: 100%; background: #1a120b; border: 1px solid #5a4633; padding: 15px; border-radius: 8px; margin-bottom: 10px; }
 .role-action-card h4 { color: var(--gold); margin-bottom: 5px; font-family: 'Pirata One'; }
 
-/* Timeline Maire (FIX BULLES) */
 .mayor-timeline { display: flex; flex-direction: column; width: 100%; padding: 10px 0; }
 .mayor-bubble { display: flex; align-items: center; gap: 15px; background: rgba(255,255,255,0.05); padding: 8px 15px 8px 8px; border-radius: 50px; border: 1px solid #444; margin: 5px 0; overflow: hidden; position: relative; }
 .mayor-bubble.special { background: rgba(212, 175, 55, 0.15); border-color: var(--gold); }
@@ -224,7 +216,6 @@ body.no-scroll {
 .bubble-content strong { display: block; color: var(--gold); font-family: 'Pirata One'; font-size: 1.1em; }
 .timeline-connector { width: 2px; height: 15px; background: #444; margin-left: 35px; }
 
-/* Pouvoirs & Cycles */
 .mayor-power-main { text-align: center; background: rgba(212, 175, 55, 0.1); border: 2px solid var(--gold); padding: 20px; border-radius: 15px; margin-bottom: 20px; width: 100%; }
 .powers-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; width: 100%; }
 .power-item { background: #120c08; padding: 10px; border-radius: 8px; text-align: center; font-size: 0.9em; border: 1px solid #333; }
@@ -233,7 +224,6 @@ body.no-scroll {
 .phase small { display: block; font-size: 0.75em; opacity: 0.8; margin-top: 5px; line-height: 1.2; max-width: 120px; }
 .arrow { font-size: 2em; color: #5a4633; }
 
-/* Cartes Event Rules */
 .choice-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .choice-item { background: rgba(255,255,255,0.05); padding: 10px; text-align: center; border-radius: 8px; font-size: 0.9em; border: 1px solid #333; }
 .choice-item.highlight { grid-column: 1 / -1; background: rgba(212, 175, 55, 0.1); border-color: var(--gold); color: var(--gold); }
@@ -244,7 +234,6 @@ body.no-scroll {
 .card-type.silver { background: linear-gradient(135deg, #c0c0c0, #e0e0e0); }
 .card-type.bronze { background: linear-gradient(135deg, #cd7f32, #e6b450); }
 
-/* Classes pour les icones SVG (Règles) */
 .power-icon { width: 40px; height: 40px; object-fit: contain; display: block; margin: 0 auto 10px auto; }
 .custom-king-icon { width: 60px; height: auto; display: block; margin: 0 auto 15px auto; }
 .info-icon { width: 30px; height: 30px; object-fit: contain; margin-top: 5px; margin-right: 10px; flex-shrink: 0; display: block; }
@@ -254,10 +243,7 @@ body.no-scroll {
 /* ============================================
    7. PACTE MAUDIT (CORRECTIF ICONES MOBILE)
    ============================================ */
-/* Conteneur principal */
 .rules-container-styled { display: flex; flex-direction: column; gap: 15px; }
-
-/* La boîte de chaque règle */
 .rule-box { 
     background: linear-gradient(145deg, rgba(255, 255, 255, 0.05), rgba(0, 0, 0, 0.2)); 
     border: 1px solid rgba(90, 70, 51, 0.5); 
@@ -265,31 +251,23 @@ body.no-scroll {
     border-radius: 8px; 
     padding: 15px !important; 
     display: flex !important; 
-    align-items: center !important; /* Centre verticalement */
-    flex-direction: row !important; /* Force l'image à gauche */
+    align-items: center !important; 
+    flex-direction: row !important; 
     gap: 15px; 
     transition: transform 0.2s ease, box-shadow 0.2s ease; 
 }
 .rule-box:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(212, 175, 55, 0.15); background: rgba(255, 255, 255, 0.08); border-color: var(--gold); }
 
-/* --- CORRECTIF ICONES PACTE --- */
 #modal-regles .pact-icon {
-    width: 60px !important;       /* Taille fixe */
-    height: 60px !important;      /* Hauteur fixe */
-    min-width: 60px !important;   /* Sécurité */
-    object-fit: contain !important; /* EMPÊCHE LA DÉFORMATION */
-    flex-shrink: 0 !important;    /* Empêche l'image de changer de taille */
-    margin: 0 15px 0 0 !important;
-    background: transparent !important;
-    border: none !important;
+    width: 60px !important; height: 60px !important; min-width: 60px !important;
+    object-fit: contain !important; flex-shrink: 0 !important; margin: 0 15px 0 0 !important;
+    background: transparent !important; border: none !important;
 }
 
-/* Texte du pacte */
 .rule-text { flex: 1; }
 .rule-text h3 { font-family: 'Pirata One', serif; color: var(--gold); font-size: 1.4em; margin: 0 0 5px 0; line-height: 1.2; text-shadow: 0 2px 2px rgba(0,0,0,0.5); }
 .rule-text p { margin: 0; font-family: 'Almendra', serif; font-size: 1em; color: #e0d0b0; line-height: 1.4; opacity: 0.9; white-space: normal !important; }
 
-/* Force Texte Blanc & Visible dans Modales Pacte/Règles (Mode Sombre par défaut) */
 #modal-regles p, #modal-regles li {
     color: #e0e0e0 !important; opacity: 1 !important; visibility: visible !important;
     display: block !important; white-space: normal !important; text-align: left !important;
@@ -337,12 +315,10 @@ h2 {
 .carte-front { background: #120c08; border: 2px solid rgba(212, 175, 55, 0.3); z-index: 2; box-shadow: inset 0 0 20px rgba(0,0,0,0.8); }
 .carte-front img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
-/* CORRECTION DEFILEMENT + BOUTON FIXE */
 .carte-back { 
     background: linear-gradient(145deg, #2a1f15 0%, #120c08 100%); transform: rotateY(180deg); 
     border: 3px solid var(--gold); display: flex; flex-direction: column; 
-    padding: 10px !important; 
-    overflow: hidden !important; /* Le conteneur ne scrolle pas */
+    padding: 10px !important; overflow: hidden !important; 
 }
 .carte-back h3 { display: none !important; } 
 
@@ -350,13 +326,8 @@ h2 {
     font-family: 'Almendra', serif; font-size: 1em !important; line-height: 1.4 !important; 
     color: #f5e6b3; text-align: left !important; text-shadow: none !important;
     white-space: pre-line !important; overflow-wrap: break-word !important; 
-    margin: 0 !important; 
-    /* C'est ici que la magie opère : */
-    flex: 1 1 0 !important; /* Force le texte à prendre l'espace restant, mais pas plus */
-    overflow-y: auto !important; /* SCROLL ACTIF UNIQUEMENT SUR LE TEXTE */
-    -webkit-overflow-scrolling: touch !important; /* Scroll fluide sur iPhone */
-    padding-right: 5px !important;
-    display: block !important;
+    margin: 0 !important; flex: 1 1 0 !important; overflow-y: auto !important; 
+    -webkit-overflow-scrolling: touch !important; padding-right: 5px !important; display: block !important;
 }
 
 .btn-details { 
@@ -364,14 +335,12 @@ h2 {
     padding: 8px !important; border-radius: 6px; font-weight: bold; margin-top: 10px !important; 
     width: 100%; font-family: 'Pirata One'; font-size: 1.1em; cursor: pointer; 
     box-shadow: 0 4px 8px rgba(0,0,0,0.4); position: relative; overflow: hidden; 
-    /* BOUTON FIXE : Il ne rétrécit pas */
-    flex: 0 0 auto !important; 
-    animation: btnBounce 2s infinite ease-in-out !important; display: flex !important; justify-content: center !important; align-items: center !important; min-height: 40px;
+    flex: 0 0 auto !important; animation: btnBounce 2s infinite ease-in-out !important; 
+    display: flex !important; justify-content: center !important; align-items: center !important; min-height: 40px;
 }
 .btn-details img { height: 25px; width: auto; pointer-events: none; display: block; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3)); }
 .btn-details:hover { animation: none !important; transform: scale(1.05) translateY(-2px) !important; box-shadow: 0 0 15px var(--gold) !important; }
 
-/* Pointer events pour que le dos soit cliquable/scrollable */
 .carte-jeu.flipped .carte-back { pointer-events: auto !important; }
 .carte-jeu.flipped .carte-front { pointer-events: none !important; }
 
@@ -380,12 +349,9 @@ h2 {
   50% { transform: translateY(-5px); box-shadow: 0 15px 25px rgba(212, 175, 55, 0.6); }
 }
 
-/* Brillance Cartes */
 @keyframes shine { 0% { left: -100%; opacity: 0; } 20% { opacity: 0.8; } 40% { left: 200%; opacity: 0; } 100% { left: 200%; opacity: 0; } }
 .carte-front::after, .carte-vm::after { content: ''; position: absolute; top: 0; left: -100%; width: 60%; height: 100%; background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.5), transparent); transform: skewX(-25deg); pointer-events: none; z-index: 10; }
 @media (hover: hover) { .carte-jeu:hover .carte-front::after, .carte-vm:hover::after { animation: shine 0.7s ease-in-out; } }
-
-/* Brillance Mobile (Aléatoire) */
 @media (hover: none) { 
   .carte-front::after, .carte-vm::after { animation: shine 8s infinite ease-in-out; } 
   .carte-jeu:nth-child(even) .carte-front::after, .carte-vm:nth-child(even)::after { animation-delay: 4s; } 
@@ -409,23 +375,23 @@ h2 {
 #vm-overlay.active { display: block; }
 
 /* ============================================
-   11. PANEL DÉTAILS (PANINI - FIX VIDÉO)
+   11. PANEL DÉTAILS
    ============================================ */
 .details-panel { 
   position: fixed; top: 0; right: -100%; width: 100%; max-width: 500px; 
-  height: 100vh; height: 100dvh; background: rgba(35, 25, 18, 0.98); 
-  z-index: 2200; overflow-y: auto; -webkit-overflow-scrolling: touch; 
+  height: 100dvh; background: rgba(35, 25, 18, 0.98); 
+  z-index: 11050 !important; overflow-y: auto; -webkit-overflow-scrolling: touch; 
   padding: 25px; padding-bottom: 200px !important; 
-  border-left: 2px solid var(--gold); box-shadow: -10px 0 40px rgba(0,0,0,0.9); 
-  transition: right 0.3s cubic-bezier(0.25, 1, 0.5, 1), transform 0.1s linear; 
+  border-left: 2px solid var(--gold); box-shadow: -5px 0 25px rgba(0,0,0,0.8) !important;
+  transition: right 0.3s cubic-bezier(0.25, 1, 0.5, 1), transform 0.1s linear; filter: none !important; -webkit-filter: none !important;
 }
 .details-panel.active { right: 0; }
 .details-panel::before { content: ''; position: absolute; top: 50%; left: 8px; transform: translateY(-50%); width: 5px; height: 60px; background-color: rgba(212, 175, 55, 0.5); border-radius: 10px; pointer-events: none; box-shadow: 0 0 10px rgba(212, 175, 55, 0.3); }
-.details-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2150; backdrop-filter: blur(3px); }
+.details-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 11000 !important; backdrop-filter: blur(5px); }
 .details-overlay.active { display: block; }
 
 .details-header { display: block !important; text-align: center !important; margin-bottom: 0 !important; padding-bottom: 0 !important; }
-.close-details { position: absolute !important; top: 10px !important; right: 10px !important; width: 40px !important; height: 40px !important; border-radius: 50% !important; border: 1px solid var(--gold); background: rgba(20,14,10,0.8) !important; color: var(--gold); cursor: pointer; z-index: 2500; font-size: 1.5em; }
+.close-details { position: absolute !important; top: 10px !important; right: 10px !important; width: 40px !important; height: 40px !important; border-radius: 50% !important; border: 1px solid var(--gold); background: rgba(20,14,10,0.8) !important; color: var(--gold); cursor: pointer; z-index: 11100 !important; font-size: 1.5em; }
 
 .details-title { 
     font-family: 'Pirata One'; color: var(--gold); font-size: 1.6em !important; 
@@ -434,32 +400,12 @@ h2 {
     width: fit-content !important; max-width: 90% !important; margin-left: auto !important; margin-right: auto !important;
 }
 
-/* --- FIX VIDÉO COMPLETE --- */
 .media-wrapper { 
-    width: 100% !important; 
-    /* On enlève le ratio forcé pour que la vidéo verticale prenne sa place */
-    aspect-ratio: auto !important; 
-    margin-bottom: 15px !important; 
-    border-radius: 12px; 
-    border: 2px solid var(--gold); 
-    background: #000; 
-    margin-top: 0 !important; 
-    overflow: hidden !important; 
-    display: flex !important;
-    align-items: center;
-    justify-content: center;
+    width: 100% !important; aspect-ratio: auto !important; margin-bottom: 15px !important; 
+    border-radius: 12px; border: 2px solid var(--gold); background: #000; 
+    margin-top: 0 !important; overflow: hidden !important; display: flex !important; align-items: center; justify-content: center;
 }
-
-.details-video, .details-image {
-    width: 100% !important;
-    height: auto !important; /* La hauteur s'adapte au contenu */
-    max-height: 70vh !important; /* Empêche que ça soit plus grand que l'écran */
-    object-fit: contain !important; /* Affiche TOUTE l'image sans couper */
-    display: block !important;
-    border: none !important;
-    margin: 0 !important;
-    padding: 0 !important;
-}
+.details-video, .details-image { width: 100% !important; height: auto !important; max-height: 70vh !important; object-fit: contain !important; display: block !important; border: none !important; margin: 0 !important; padding: 0 !important; }
 
 .details-section { font-family: 'Almendra'; font-size: 1.15em; line-height: 1.6; color: #fffce6; background: rgba(20, 14, 10, 0.95); border: 1px solid var(--gold); padding: 25px; border-radius: 12px; margin-top: 20px; }
 .details-section p { display: block; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid rgba(212, 175, 55, 0.3); }
@@ -471,23 +417,7 @@ h2 {
    ============================================ */
 .admin-view { position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; background: #120c08; z-index: 10000; display: flex; flex-direction: column; overflow: hidden; }
 .admin-header-bar { background: #000 !important; border-bottom: 2px solid var(--gold); padding: 5px 10px !important; display: flex; align-items: center; justify-content: space-between; height: 50px !important; z-index: 10; }
-
-/* TITRE ADMIN FIX (Mobile) */
-.admin-header-bar h2 { 
-    font-size: 0.9em !important; /* Un peu plus petit */
-    border: none !important; 
-    background: none !important; 
-    box-shadow: none !important; 
-    /* On enlève la limite de largeur et on laisse le titre prendre la place dispo */
-    flex: 1 !important; 
-    text-align: center !important;
-    white-space: nowrap !important; 
-    overflow: hidden !important; 
-    text-overflow: ellipsis !important; 
-    margin: 0 5px !important; /* Espacement avec les boutons */
-    padding: 0 !important;
-}
-
+.admin-header-bar h2 { font-size: 0.9em !important; border: none !important; background: none !important; box-shadow: none !important; flex: 1 !important; text-align: center !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; margin: 0 5px !important; padding: 0 !important; }
 .btn-quit-admin { background: none; border: 1px solid #c0392b; color: #c0392b; padding: 2px 8px !important; border-radius: 5px; font-family: 'Pirata One'; cursor: pointer; font-size: 0.9em !important; }
 .admin-code-badge { background: rgba(46, 204, 113, 0.1) !important; color: #2ecc71 !important; padding: 2px 8px !important; border-radius: 8px; font-weight: 900 !important; font-family: 'Verdana', sans-serif !important; font-size: 1.2em !important; letter-spacing: 2px !important; border: 1px solid #2ecc71 !important; text-transform: uppercase; margin: 0 !important; }
 
@@ -498,66 +428,22 @@ h2 {
 
 /* Grille Admin */
 .player-grid-admin { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)) !important; gap: 8px !important; }
-.admin-player-card { background: linear-gradient(145deg, #2a1f15, #120c08); border: 1px solid #5a4633; border-radius: 8px; padding: 4px !important; display: flex; flex-direction: column; align-items: center; text-align: center; position: relative; transition: all 0.3s ease; }
+.admin-player-card { background: linear-gradient(145deg, #2a1f15, #120c08); border: 1px solid #5a4633; border-radius: 8px; padding: 4px !important; display: flex; flex-direction: column; align-items: center; text-align: center; position: relative; transition: all 0.3s ease; padding-top: 5px !important; justify-content: flex-start !important; overflow: visible !important; }
 .admin-player-card img { width: 60px !important; height: auto !important; max-height: 90px !important; margin-bottom: 2px !important; border-radius: 5px; border: 1px solid rgba(212, 175, 55, 0.3); }
 .admin-player-card strong { color: var(--gold); font-family: 'Pirata One', serif; font-size: 0.8em !important; margin-bottom: 2px !important; width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .admin-player-card div { font-size: 0.7em !important; line-height: 1 !important; }
-
-/* Morts Admin */
 .admin-player-card.dead { filter: none !important; border: 1px solid #555 !important; background: linear-gradient(145deg, #1a0f0f, #000) !important; }
 .admin-player-card.dead img, .admin-player-card.dead strong, .admin-player-card.dead div:not(.admin-actions) { filter: grayscale(100%); opacity: 0.5; text-decoration: line-through; }
 .admin-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; width: 100%; margin-top: auto; }
 .btn-admin-mini { border: none; border-radius: 4px; padding: 10px 5px !important; font-size: 0.8em !important; font-weight: bold; cursor: pointer; flex-grow: 1; touch-action: manipulation; }
 
-/* Pop-up Sélection Rôles */
-.admin-grid-container { display: grid !important; grid-template-columns: repeat(3, 1fr) !important; gap: 6px !important; padding: 10px 5px !important; width: 100% !important; }
-.role-select-item { cursor: pointer; border: 2px solid transparent; text-align: center; transition: transform 0.2s; width: 100% !important; margin: 0 !important; }
-.role-select-item img { width: 100% !important; aspect-ratio: 2/3 !important; object-fit: cover !important; border-radius: 8px; }
-.role-select-item.multi-mode { opacity: 0.6; filter: grayscale(100%); }
-.role-select-item.multi-mode.selected { opacity: 1; filter: none; transform: scale(1.05); border: 3px solid #d4af37; background: rgba(212, 175, 55, 0.1); }
-.role-select-item.multi-mode.selected::after { content: '✓'; position: absolute; top: -5px; left: auto !important; right: -5px !important; background: #2ecc71; color: white; width: 25px; height: 25px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 2px solid white; }
-.qty-badge { position: absolute; top: -8px; left: -5px !important; right: auto !important; background: #c0392b; color: white; font-weight: bold; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid white; z-index: 20; box-shadow: 0 2px 5px rgba(0,0,0,0.5); }
+/* FIX AVATAR ADMIN */
+.admin-avatar-container { width: 70px; height: 70px; margin: 0 auto 10px auto; position: relative !important; background: #000; border-radius: 50%; border: 2px solid var(--gold); overflow: visible !important; }
+.admin-avatar-container img[alt="Avatar"] { width: 100% !important; height: 100% !important; object-fit: cover !important; border-radius: 50% !important; display: block; }
+.mayor-badge { position: absolute !important; top: -5px !important; left: -5px !important; font-size: 1.5em !important; z-index: 60 !important; filter: drop-shadow(0 2px 2px black); }
+.attr-icon { position: absolute; font-size: 1.3em; filter: drop-shadow(0 0 2px black); z-index: 50; }
 
-/* Dashboard Sélection */
-.selection-dashboard { position: sticky; top: 0; z-index: 500; background: #1a120b; border-bottom: 2px solid var(--gold); padding: 10px; margin: -10px -10px 15px -10px; box-shadow: 0 5px 15px rgba(0,0,0,0.8); }
-.dashboard-stats { display: flex; justify-content: space-around; margin-bottom: 10px; font-family: 'Pirata One'; font-size: 1.1em; color: #aaa; }
-.stat-item span { color: white; font-weight: bold; }
-.stat-village { color: #2ecc71 !important; }
-.stat-loup { color: #e74c3c !important; }
-.stat-solo { color: #9b59b6 !important; }
-.stat-icon { width: 24px; height: 24px; vertical-align: middle; margin-right: 4px; filter: drop-shadow(0 0 2px rgba(255,255,255,0.3)); }
-
-/* Tableau Récapitulatif */
-.summary-container { display: flex; justify-content: space-between; background: rgba(0,0,0,0.3); border: 1px solid #444; border-radius: 8px; padding: 8px !important; margin: 0 0 15px 0 !important; width: 100% !important; box-sizing: border-box !important; }
-.summary-col { flex: 1; display: flex; flex-direction: column; align-items: center; border-right: 1px solid #444; padding: 0 5px; max-height: 300px !important; overflow-y: auto; min-width: 0 !important; }
-.summary-col:last-child { border-right: none; }
-.summary-col img { width: 20px; height: 20px; margin-bottom: 5px; }
-.summary-col strong { color: var(--gold); margin-bottom: 5px; font-family: 'Pirata One'; font-size: 1.2em; }
-.summary-list-item { display: block; border-radius: 12px; padding: 6px 10px !important; margin: 3px auto !important; width: 96% !important; font-size: 0.9em !important; border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 2px 4px rgba(0,0,0,0.3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center; }
-.summary-col:nth-child(1) .summary-list-item { background: rgba(46, 204, 113, 0.15); border-color: rgba(46, 204, 113, 0.5); color: #e8f8f5; }
-.summary-col:nth-child(2) .summary-list-item { background: rgba(231, 76, 60, 0.15); border-color: rgba(231, 76, 60, 0.5); color: #fdedec; }
-.summary-col:nth-child(3) .summary-list-item { background: rgba(155, 89, 182, 0.15); border-color: rgba(155, 89, 182, 0.5); color: #f4ecf7; }
-
-/* Menu Online (Vidéo) */
-#modal-online-menu .modal-content { padding: 0 !important; overflow: hidden !important; display: flex; flex-direction: column; }
-#modal-online-menu video { width: 100% !important; height: auto !important; display: block !important; margin: 0 !important; border: none !important; line-height: 0 !important; border-radius: 0 !important; }
-#modal-online-menu h2, #modal-online-menu .btn-menu, #modal-online-menu p, #modal-online-menu .extra-links { width: 92% !important; margin-left: auto !important; margin-right: auto !important; margin-bottom: 10px !important; }
-#modal-online-menu h2 { margin-top: 15px !important; }
-
-/* Animation Flip Online */
-.scene-flip { width: 280px; height: 420px; margin: 20px auto; perspective: 1000px; cursor: pointer; }
-.card-object { width: 100%; height: 100%; position: relative; transition: transform 0.8s cubic-bezier(0.4, 0.2, 0.2, 1); transform-style: preserve-3d; }
-.scene-flip.is-flipped .card-object { transform: rotateY(180deg); }
-.card-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); overflow: hidden; border: 3px solid var(--gold); }
-.face-front { background: #000; display: flex; align-items: center; justify-content: center; transform: rotateY(0deg); padding: 0; }
-.face-back { transform: rotateY(180deg); background: #000; }
-.card-back-img { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; z-index: 1; }
-#online-content-wrapper { min-height: 100dvh !important; display: flex !important; flex-direction: column !important; justify-content: center !important; align-items: center !important; padding-bottom: 50px !important; }
-
-/* ============================================
-   13. SYSTÈME DE VERROUILLAGE (INTRO & LOCK)
-   ============================================ */
-/* Intro Slider */
+/* 13. SYSTEME DE VERROUILLAGE (RESTORED) */
 .lock-content { max-width: 380px !important; min-height: 450px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; background: linear-gradient(145deg, #1a120b 0%, #0f0804 100%); border: 2px solid var(--gold); padding: 30px 20px !important; }
 .lock-slide { display: none; flex-direction: column; align-items: center; width: 100%; animation: fadeIn 0.5s ease; }
 .lock-slide.active { display: flex; }
@@ -576,318 +462,83 @@ h2 {
 .dot { width: 8px; height: 8px; background: rgba(255,255,255,0.2); border-radius: 50%; transition: all 0.3s; }
 .dot.active { background: var(--gold); transform: scale(1.2); }
 
-/* Jeu Verrouillé */
 body.locked-game .carte-jeu, body.locked-game .carte-vm, body.locked-game section h2 { filter: grayscale(100%) opacity(0.1) blur(1px); pointer-events: none; user-select: none; transition: all 1s ease; }
 body.locked-game header, body.locked-game .extra-menu, body.locked-game .modal, body.locked-game .notification-overlay { filter: none; pointer-events: auto; opacity: 1; }
-body.locked-game .extra-links a[onclick*="modal-propose"], 
-body.locked-game .extra-links a[onclick*="modal-bug"],
-body.locked-game #online-mode-link { opacity: 0.3; filter: grayscale(100%); pointer-events: none; cursor: not-allowed; border-color: #555 !important; color: #888 !important; }
+body.locked-game .extra-links a[onclick*="modal-propose"], body.locked-game .extra-links a[onclick*="modal-bug"], body.locked-game #online-mode-link { opacity: 0.3; filter: grayscale(100%); pointer-events: none; cursor: not-allowed; border-color: #555 !important; color: #888 !important; }
 
-/* ============================================
-   14. BOUTONS & NOTIFICATIONS
-   ============================================ */
+/* 14. BOUTONS ACTIONS */
 .btn-validate { display: block; width: 100%; margin-top: 25px; padding: 15px; font-family: 'Pirata One', serif; font-size: 1.4em; text-align: center; text-transform: uppercase; letter-spacing: 1px; color: #1a120b; background: linear-gradient(135deg, #d4af37, #b8941f); border: 2px solid #8a6e2f; border-radius: 12px; cursor: pointer; box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3); transition: all 0.3s ease; }
 .btn-validate:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 6px 20px rgba(212, 175, 55, 0.5); background: linear-gradient(135deg, #f5e6b3, #d4af37); }
 .btn-validate:active { transform: scale(0.98); }
 
+#modal-regles .btn-validate, #modal-regles-base .btn-validate, button[onclick="finishRules()"], button[onclick="signPact()"] { background: linear-gradient(135deg, #27ae60, #2ecc71) !important; color: #fff !important; font-size: 1.5em !important; padding: 20px !important; margin-top: 30px !important; margin-bottom: 20px !important; border: 3px solid #fff !important; box-shadow: 0 0 20px rgba(46, 204, 113, 0.6) !important; animation: superPulse 2s infinite ease-in-out !important; position: relative; z-index: 100; }
+@keyframes superPulse { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.7); } 50% { transform: scale(1.05); box-shadow: 0 0 20px 10px rgba(46, 204, 113, 0); } 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(46, 204, 113, 0); } }
+button[onclick="finishRules()"]::before, button[onclick="signPact()"]::before { content: "👇 "; font-size: 1.2em; margin-right: 10px; }
+
 .notification-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 5000; justify-content: center; align-items: center; backdrop-filter: blur(3px); animation: fadeIn 0.3s; }
 .notification-overlay.active { display: flex; }
 .notification-box { background: linear-gradient(145deg, #2a1f15 0%, #120c08 100%); border: 2px solid var(--gold); border-radius: 12px; padding: 30px; text-align: center; max-width: 85%; width: 350px; box-shadow: 0 0 20px rgba(212, 175, 55, 0.3); transform: scale(0.9); animation: popIn 0.3s forwards; }
-@keyframes popIn { to { transform: scale(1); } }
 .notification-box h3 { color: var(--gold); font-family: 'Pirata One', serif; font-size: 1.8em; margin-bottom: 15px; }
 .notification-box p { color: #f5e6b3; margin-bottom: 25px; font-size: 1.1em; }
 .notification-box button { background: var(--gold); color: #1a120b; border: none; padding: 10px 25px; font-family: 'Pirata One'; font-size: 1.2em; border-radius: 8px; cursor: pointer; width: 100%; }
 
-/* ============================================
-   15. MODE CLAIR (THEME LIGHT) - CORRIGÉ
-   ============================================ */
+/* 15. MODE CLAIR */
 body.light-mode { background: var(--bg-light); color: var(--text-light); }
-
-/* En-tête */
 body.light-mode .main-header { background: rgba(245, 230, 211, 0.98); border-bottom-color: #8a6e2f; }
 body.light-mode #themeBtn, body.light-mode .burger-btn { color: #5a4633; border-color: #8a6e2f; background: rgba(255,255,255,0.5); }
 body.light-mode .nav-btn { background: rgba(255, 255, 255, 0.6); border-color: #8a6e2f; }
 body.light-mode .nav-btn:hover { background: #8a6e2f; box-shadow: 0 0 10px rgba(138, 110, 47, 0.4); }
-
-/* TITRES PRINCIPAUX (Le problème du cercle incomplet est réglé ici) */
-body.light-mode h2 { 
-    background: rgba(245, 230, 211, 0.95); 
-    color: #1a1a1a !important; 
-    text-shadow: none !important; 
-    border: 3px double #8a6e2f !important; /* Force la bordure complète */
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
-}
+body.light-mode h2 { background: rgba(245, 230, 211, 0.95); color: #1a1a1a !important; text-shadow: none !important; border: 3px double #8a6e2f !important; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
 body.light-mode .section-icon { filter: none; }
-
-/* TITRES SECONDAIRES */
 body.light-mode h3, body.light-mode strong { color: #1a1a1a !important; text-shadow: none !important; }
-
-/* Cartes */
 body.light-mode .carte-back { background: linear-gradient(135deg, #f5e6d3 0%, #fff 100%); }
 body.light-mode .carte-back p { color: #000000 !important; font-weight: 500 !important; }
-
-/* Interface Générale */
 body.light-mode .details-panel, body.light-mode .extra-menu, body.light-mode .modal-content, body.light-mode .lock-content, body.light-mode #admin-dashboard { background: #fffcf5 !important; border-color: #b8860b !important; color: #3e2f23 !important; }
 body.light-mode .details-title, body.light-mode .extra-header h3, body.light-mode .modal h2 { color: #1a120b; text-shadow: none; }
 body.light-mode .details-section { background: rgba(255, 252, 245, 0.95); color: #3e2f23; border: 2px solid #b8860b; }
 body.light-mode .close-details, body.light-mode .close-extra, body.light-mode .close-modal { color: #5a4633 !important; border-color: #5a4633 !important; background: rgba(255,255,255,0.8) !important; }
-
-/* Admin & Inputs */
 body.light-mode .admin-player-card { background: #ffffff !important; border: 1px solid #e5e7eb !important; color: #333 !important; }
 body.light-mode .admin-player-card.dead { background: #f3f4f6 !important; border: 1px solid #9ca3af !important; }
 body.light-mode .role-select-item { background: #ffffff !important; border: 1px solid #e5e7eb !important; }
 body.light-mode .role-select-item span { color: #4b5563 !important; font-weight: bold !important; }
 body.light-mode .qty-badge { border: 2px solid #fff !important; }
 body.light-mode input, body.light-mode select, body.light-mode textarea { background: #ffffff !important; color: #000000 !important; border: 1px solid #8a6e2f !important; }
-
-/* SLIDES & PAGE 7 (CONTRASTE CORRIGÉ) */
 body.light-mode .slide-title { color: #8a6e2f; text-shadow: none; }
 body.light-mode .step-content strong, body.light-mode .info-card strong, body.light-mode .mayor-bubble strong, body.light-mode .role-action-card h4 { color: #8a6e2f; }
 body.light-mode .info-card, body.light-mode .role-action-card, body.light-mode .mayor-power-main, body.light-mode .power-item { background: rgba(255, 255, 255, 0.7); border-color: #b8860b; color: #3e2f23; }
-
-/* PAGE 7 SPÉCIFIQUE : JAUNE FONCÉ POUR LISIBILITÉ */
-body.light-mode .card-type.gold { 
-    background: rgba(255, 223, 0, 0.15) !important; /* Jaune très pâle fond */
-    border: 2px solid #b8860b !important; /* Bordure foncée */
-    color: #5a4633 !important; /* Texte marron foncé */
-}
-body.light-mode .card-type.gold i { color: #b8860b !important; } /* Icône couronne foncée */
-
+body.light-mode .card-type.gold { background: rgba(255, 223, 0, 0.15) !important; border: 2px solid #b8860b !important; color: #5a4633 !important; }
+body.light-mode .card-type.gold i { color: #b8860b !important; }
 body.light-mode .card-type.silver { background: rgba(192, 192, 192, 0.2); color: #333; border-color: #999; }
 body.light-mode .card-type.bronze { background: rgba(205, 127, 50, 0.2); color: #5a4633; border-color: #cd7f32; }
-
-/* Fix Textes Popups */
 body.light-mode #modal-regles p, body.light-mode #modal-regles li, body.light-mode .rule-text p, body.light-mode p { color: #1a120b !important; text-shadow: none !important; }
 
 /* ============================================
-   17. BOUTONS D'ACTION (SUPER VISIBLES)
+   16. BADGE RÔLE COMPLET
    ============================================ */
-
-/* Ciblage spécifique des boutons de validation (Règles & Pacte) */
-#modal-regles .btn-validate, 
-#modal-regles-base .btn-validate, /* Ajouté pour cibler aussi la fin des slides */
-button[onclick="finishRules()"],
-button[onclick="signPact()"] {
-    background: linear-gradient(135deg, #27ae60, #2ecc71) !important; /* Vert Flashy */
-    color: #fff !important;
-    font-size: 1.5em !important;
-    padding: 20px !important;
-    margin-top: 30px !important;
-    margin-bottom: 20px !important;
-    border: 3px solid #fff !important;
-    box-shadow: 0 0 20px rgba(46, 204, 113, 0.6) !important;
-    animation: superPulse 2s infinite ease-in-out !important;
-    position: relative;
-    z-index: 100;
-}
-
-/* Animation de pulsation pour attirer l'oeil */
-@keyframes superPulse {
-    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.7); }
-    50% { transform: scale(1.05); box-shadow: 0 0 20px 10px rgba(46, 204, 113, 0); }
-    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(46, 204, 113, 0); }
-}
-
-/* Petit doigt qui pointe (Pseudo-élément) */
-button[onclick="finishRules()"]::before,
-button[onclick="signPact()"]::before {
-    content: "👇 ";
-    font-size: 1.2em;
-    margin-right: 10px;
-}
-
-/* ============================================
-   18. PHOTOS DE PROFIL & FICHE ADMIN (V34)
-   ============================================ */
-
-/* --- 1. GRILLE JOUEURS (PETITE PASTILLE) --- */
-.admin-player-card {
-    padding-top: 5px !important;
-    overflow: visible !important; /* Permet à la pastille de dépasser un peu */
-}
-
-/* Le conteneur de la photo (Rond) */
-.admin-avatar-container {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    border: 2px solid var(--gold);
-    overflow: hidden;
-    background: #000;
-    margin: 0 auto 5px auto;
-    position: relative; /* Pour positionner la pastille par rapport à ça */
-    box-shadow: 0 4px 8px rgba(0,0,0,0.6);
-}
-
-.admin-avatar-container img {
-    width: 100% !important;
-    height: 100% !important;
-    object-fit: cover !important;
-    margin: 0 !important;
-}
-
-/* La Pastille de Rôle (Bulle en bas à droite) */
-.mini-role-badge {
-    width: 28px !important;
-    height: 28px !important;
-    border-radius: 50%;       /* Rond parfait */
-    border: 2px solid #fff;
-    position: absolute;
-    bottom: -2px;
-    right: -2px;              /* Coin bas-droite de la photo */
-    z-index: 10;
-    background: #000;
-    object-fit: cover;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.8);
-}
-
-/* --- 2. FICHE TECHNIQUE JOUEUR (MODALE) --- */
-.player-sheet-header {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 15px;
-    margin-bottom: 20px;
-    background: rgba(255, 255, 255, 0.05);
-    padding: 15px;
-    border-radius: 12px;
-    border: 1px solid var(--gold);
-}
-
-.sheet-avatar {
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-    border: 3px solid var(--gold);
-    object-fit: cover;
-    background: #000;
-    box-shadow: 0 0 15px rgba(0,0,0,0.5);
-}
-
-.sheet-card {
-    width: 70px;
-    height: 105px; /* Ratio carte */
-    border-radius: 8px;
-    border: 2px solid #fff;
-    object-fit: cover;
-    box-shadow: 0 0 15px rgba(0,0,0,0.5);
-}
-
-.camp-icon {
-    width: 40px;
-    height: 40px;
-    margin-bottom: 5px;
-    filter: drop-shadow(0 0 5px rgba(255,215,0,0.5));
-}
-
-.detail-info-box {
-    margin-bottom: 20px;
-    padding-bottom: 10px;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
-}
-
-/* ============================================
-   20. FIX AVATARS & PANELS (V41)
-   ============================================ */
-
-/* 1. Correction Avatar & Pastille (Zéro superposition) */
-.admin-avatar-container {
-    width: 70px;
-    height: 70px;
-    margin: 0 auto 10px auto;
-    position: relative !important; /* L'ancre */
-    background: #000;
-    border-radius: 50%; /* Le conteneur est rond */
-    border: 2px solid var(--gold);
-    overflow: visible !important; /* IMPORTANT : Laisser dépasser la carte */
-}
-
-/* La photo de profil (Rempli le cercle) */
-.admin-avatar-container img[alt="Avatar"] {
-    width: 100% !important;
-    height: 100% !important;
-    object-fit: cover !important;
-    border-radius: 50% !important;
-    display: block;
-}
-
-/* La Petite Carte (Pastille en bas à droite) */
-.mini-role-badge {
-    position: absolute !important;
-    bottom: -5px !important;
-    right: -10px !important; /* Sort du cadre à droite */
-    width: 30px !important;
-    height: 45px !important; /* Ratio carte vertical */
-    border-radius: 4px !important;
-    border: 1px solid #fff !important;
-    box-shadow: 2px 2px 5px rgba(0,0,0,0.8) !important;
-    z-index: 50 !important; /* Au-dessus de la photo */
-    background: #111;
-}
-
-/* Badge Maire (En haut à gauche) */
-.mayor-badge {
-    position: absolute !important;
-    top: -5px !important;
-    left: -5px !important;
-    font-size: 1.5em !important;
-    z-index: 60 !important;
-    filter: drop-shadow(0 2px 2px black);
-}
-
-/* 2. Styles du Panini Admin (Tableau & Fiche) */
-.panini-admin-header {
-    text-align: center;
-    border-bottom: 1px solid var(--gold);
-    padding-bottom: 20px;
-    margin-bottom: 20px;
-    position: relative;
-}
-
-.panini-big-avatar {
-    width: 130px;
-    height: 130px;
-    border-radius: 50%;
-    border: 4px solid var(--gold);
-    object-fit: cover;
-    box-shadow: 0 0 20px rgba(0,0,0,0.8);
-    margin: 0 auto 15px auto;
-    display: block;
-}
-
-.panini-big-card {
-    width: 120px;
-    height: auto;
+.role-text-badge {
+    font-size: 0.7em; 
+    font-family: 'Helvetica', sans-serif;
+    font-weight: bold;
+    padding: 3px 5px;
     border-radius: 10px;
-    border: 2px solid #fff;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.6);
-    margin: 10px auto;
-    display: block;
+    color: white;
+    margin-top: 4px;
+    width: 98%;
+    white-space: normal; /* Affiche le nom complet */
+    text-align: center;
+    line-height: 1.1;
+    border: 1px solid rgba(255,255,255,0.4);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.5);
 }
-
-/* Grille boutons actions */
-.admin-actions-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
+.badge-village { background: #27ae60; }
+.badge-loups { background: #c0392b; }
+.badge-solo { background: #8e44ad; }
+.badge-vampires { background: #2c3e50; }
+.badge-inconnu { background: #7f8c8d; }
 
 /* ============================================
-   21. FIX SELECTEUR & NETTOYAGE (V39)
+   17. DASHBOARD & MODALES
    ============================================ */
-
-/* Masquer le texte inutile dans la modale */
-#modal-role-selector p { display: none !important; }
-
-/* Remonter le titre et le réduire */
-#modal-role-selector h2 { 
-    margin: 5px 0 10px 0 !important; 
-    font-size: 1.4em !important; 
-    padding: 0 !important;
-    border: none !important;
-}
-
-/* Dashboard de sélection (Compteurs + Bouton compact) */
 .selection-dashboard {
     position: sticky;
     top: 0;
@@ -899,10 +550,8 @@ button[onclick="signPact()"]::before {
     justify-content: space-between;
     align-items: center;
     box-shadow: 0 5px 15px rgba(0,0,0,0.8);
-    margin: -10px -10px 10px -10px; /* Colle aux bords */
+    margin: -10px -10px 10px -10px;
 }
-
-/* Les compteurs (Village / Loup / Solo) */
 .dashboard-stats {
     display: flex;
     gap: 15px;
@@ -912,8 +561,6 @@ button[onclick="signPact()"]::before {
 .stat-item { display: flex; align-items: center; gap: 5px; }
 .stat-item img { width: 24px; height: 24px; }
 .stat-item span { color: #fff; }
-
-/* Bouton Valider Compact */
 .btn-compact {
     background: #2ecc71;
     color: #fff;
@@ -925,8 +572,35 @@ button[onclick="signPact()"]::before {
     cursor: pointer;
     text-transform: uppercase;
 }
-
-/* Titres des catégories bien visibles */
+.role-select-item img {
+    filter: grayscale(100%);
+    opacity: 0.5;
+    transition: all 0.2s ease;
+    border: 2px solid transparent;
+    transform: scale(0.95);
+}
+.role-select-item.selected img {
+    filter: none;
+    opacity: 1;
+    border-color: var(--gold);
+    transform: scale(1);
+    box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
+}
+.role-select-item {
+    position: relative !important;
+    overflow: visible !important;
+}
+.qty-badge {
+    position: absolute;
+    top: -5px; right: 5px;
+    background: #c0392b; color: white;
+    font-family: 'Pirata One'; font-size: 1em;
+    min-width: 25px; height: 25px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    border: 2px solid #fff; z-index: 50;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+}
 .category-separator {
     color: var(--gold);
     font-family: 'Pirata One';
@@ -937,314 +611,37 @@ button[onclick="signPact()"]::before {
     padding-bottom: 2px;
     clear: both;
 }
+.admin-grid-container { display: grid !important; grid-template-columns: repeat(3, 1fr) !important; gap: 6px !important; padding: 10px 5px !important; width: 100% !important; }
+.role-select-item { cursor: pointer; border: 2px solid transparent; text-align: center; transition: transform 0.2s; width: 100% !important; margin: 0 !important; }
 
 /* ============================================
-   22. CORRECTIFS SÉLECTION & BADGES (V40)
+   18. FIX PANINI & Z-INDEX
    ============================================ */
-
-/* 1. Comportement Grisé / Couleur */
-.role-select-item img {
-    filter: grayscale(100%);
-    opacity: 0.5;
-    transition: all 0.2s ease;
-    border: 2px solid transparent;
-    transform: scale(0.95);
-}
-
-/* Quand c'est sélectionné : Couleur + Bordure + Zoom */
-.role-select-item.selected img {
-    filter: none;
-    opacity: 1;
-    border-color: var(--gold);
-    transform: scale(1);
-    box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
-}
-
-/* 2. Positionnement précis de la pastille (Badge) */
-.role-select-item {
-    position: relative !important; /* Indispensable */
-    overflow: visible !important;
-}
-
-.qty-badge {
-    position: absolute;
-    top: -5px;       /* Sort légèrement en haut */
-    right: 5px;      /* Collé à droite */
-    background: #c0392b;
-    color: white;
-    font-family: 'Pirata One';
-    font-size: 1em;
-    min-width: 25px;
-    height: 25px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 2px solid #fff;
-    z-index: 50;     /* Au-dessus de tout */
-    box-shadow: 0 2px 5px rgba(0,0,0,0.5);
-}
+.details-overlay { z-index: 11000 !important; backdrop-filter: blur(5px); }
+.details-panel { z-index: 11050 !important; filter: none !important; -webkit-filter: none !important; box-shadow: -5px 0 25px rgba(0,0,0,0.8) !important; }
+.close-details { z-index: 11100 !important; cursor: pointer; }
+.details-content { padding-bottom: 80px; width: 100%; }
+.summary-container { flex-wrap: wrap; }
 
 /* ============================================
-   23. FIX FINAL PANINI & Z-INDEX (V42)
+   19. PANINI ADMIN
    ============================================ */
-
-/* FORCE LE PANINI AU-DESSUS DU DASHBOARD ADMIN */
-.details-panel, .details-overlay {
-    z-index: 11000 !important; /* Supérieur à 10000 (Admin) */
-}
-
-/* Ajustement pour que la croix de fermeture soit accessible */
-.close-details {
-    z-index: 11001 !important;
-    cursor: pointer;
-}
-
-/* S'assure que le contenu du Panini est scrollable */
-.details-content {
-    padding-bottom: 50px;
-    width: 100%;
-}
-
-/* Fix visuel pour la liste dans le Panini */
-.summary-container {
-    flex-wrap: wrap; /* Permet aux colonnes de s'adapter */
-}
+.panini-admin-header { text-align: center; border-bottom: 1px solid var(--gold); padding-bottom: 20px; margin-bottom: 20px; position: relative; }
+.panini-admin-header h2 { text-align: center; width: 100%; margin-top: 10px; }
+.panini-big-avatar { width: 130px; height: 130px; border-radius: 50%; border: 4px solid var(--gold); object-fit: cover; box-shadow: 0 0 20px rgba(0,0,0,0.8); margin: 0 auto 15px auto; display: block; }
+.panini-big-card { width: 120px; height: auto; border-radius: 10px; border: 2px solid #fff; box-shadow: 0 10px 20px rgba(0,0,0,0.6); margin: 10px auto; display: block; }
+.admin-actions-grid { display: flex; flex-direction: column; gap: 12px; }
+.summary-container { display: flex; justify-content: space-between; background: rgba(0,0,0,0.3); border: 1px solid #444; border-radius: 8px; padding: 8px !important; margin: 0 0 15px 0 !important; width: 100% !important; box-sizing: border-box !important; }
+.summary-col { flex: 1; display: flex; flex-direction: column; align-items: center; border-right: 1px solid #444; padding: 0 5px; max-height: 300px !important; overflow-y: auto; min-width: 0 !important; }
+.summary-col:last-child { border-right: none; }
+.summary-list-item { display: block; border-radius: 12px; padding: 6px 10px !important; margin: 3px auto !important; width: 96% !important; font-size: 0.9em !important; border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 2px 4px rgba(0,0,0,0.3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center; }
+.summary-col:nth-child(1) .summary-list-item { background: rgba(46, 204, 113, 0.15); border-color: rgba(46, 204, 113, 0.5); color: #e8f8f5; }
+.summary-col:nth-child(2) .summary-list-item { background: rgba(231, 76, 60, 0.15); border-color: rgba(231, 76, 60, 0.5); color: #fdedec; }
+.summary-col:nth-child(3) .summary-list-item { background: rgba(155, 89, 182, 0.15); border-color: rgba(155, 89, 182, 0.5); color: #f4ecf7; }
 
 /* ============================================
-   23. FIX FINAL PANINI & FLOU (V43)
+   20. NOUVELLES INTERACTIONS (V64) - ADDITIONNEL
    ============================================ */
-
-/* 1. L'arrière-plan flouté (Derrière) */
-.details-overlay {
-    z-index: 11000 !important; 
-    backdrop-filter: blur(5px); /* Le flou reste derrière */
-}
-
-/* 2. Le Panneau Panini (DEVANT - Net et précis) */
-.details-panel {
-    z-index: 11050 !important; /* Supérieur à l'overlay */
-    filter: none !important;   /* Force la netteté */
-    -webkit-filter: none !important;
-    box-shadow: -5px 0 25px rgba(0,0,0,0.8) !important;
-}
-
-/* 3. La croix de fermeture (Encore plus devant) */
-.close-details {
-    z-index: 11100 !important;
-    cursor: pointer;
-}
-
-/* S'assure que le contenu du Panini est scrollable */
-.details-content {
-    padding-bottom: 80px; /* Espace pour scroller jusqu'au bout */
-    width: 100%;
-}
-
-/* Fix visuel pour la liste dans le Panini */
-.summary-container {
-    flex-wrap: wrap;
-}
-
-/* ============================================
-   24. FIX AVATARS & BADGES RÔLES (V45)
-   ============================================ */
-
-/* Style du badge Rôle (sous le pseudo) */
-.role-text-badge {
-    font-size: 0.7em; /* Réduit un peu pour que ça rentre */
-    font-family: 'Helvetica', sans-serif;
-    font-weight: bold;
-    padding: 3px 5px;
-    border-radius: 10px;
-    color: white;
-    margin-top: 4px;
-    width: 98%;
-    /* MODIF POUR NOM COMPLET */
-    white-space: normal; /* Permet le retour à la ligne */
-    text-align: center;
-    line-height: 1.1;
-    border: 1px solid rgba(255,255,255,0.4);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.5);
-}
-
-/* Couleurs des badges */
-.badge-village { background: #27ae60; } /* Vert */
-.badge-loups { background: #c0392b; }   /* Rouge */
-.badge-solo { background: #8e44ad; }    /* Violet */
-.badge-vampires { background: #2c3e50; } /* Bleu nuit */
-.badge-inconnu { background: #7f8c8d; } /* Gris */
-
-/* Ajustement de la carte joueur pour accueillir le texte */
-.admin-player-card {
-    padding-bottom: 8px !important;
-    justify-content: flex-start !important;
-}
-
-/* On cache définitivement l'ancienne pastille carte si elle traîne */
-.mini-role-badge { display: none !important; }
-
-/* ============================================
-   25. ETAT MORT & UI ADMIN (V47)
-   ============================================ */
-
-/* Côté Joueur : Quand il est mort */
-.dead-state .scene-flip {
-    pointer-events: none !important; /* Empêche le clic */
-    filter: grayscale(100%) brightness(0.7);
-}
-.dead-state .card-object {
-    transform: rotateY(0deg) !important; /* Force le dos (si face front est le dos) */
-    /* Note : Dans ton code, rotateY(0) = Front (Dos image) et rotateY(180) = Back (Rôle) */
-}
-
-/* Badge Maire sur le téléphone du joueur */
-.player-mayor-badge {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    font-size: 3em;
-    z-index: 200;
-    filter: drop-shadow(0 0 10px gold);
-    animation: bounceIn 0.5s;
-}
-
-/* Panini Admin : Centrage Pseudo */
-.panini-admin-header h2 {
-    text-align: center;
-    width: 100%;
-    margin-top: 10px;
-}
-
-/* Boutons Event (Or/Argent/Bronze) */
-.event-buttons-row {
-    display: flex;
-    gap: 10px;
-    margin-top: 15px;
-    border-top: 1px solid #333;
-    padding-top: 15px;
-}
-.btn-event {
-    flex: 1;
-    border: none;
-    padding: 10px;
-    font-weight: bold;
-    font-family: 'Pirata One';
-    color: #000;
-    cursor: pointer;
-    border-radius: 5px;
-}
-
-/* ============================================
-   26. CORRECTIFS V51 (MORT & MÉDAILLE)
-   ============================================ */
-
-/* 1. Médaille Maire sur le téléphone du joueur */
-.player-mayor-badge {
-    position: absolute;
-    top: 15px;
-    left: 15px;
-    font-size: 3.5em;
-    z-index: 200;
-    filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.8));
-    animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    pointer-events: none;
-}
-
-/* 2. État Mort sur le téléphone (Grisé + Retourné + Bloqué) */
-.dead-state .scene-flip {
-    pointer-events: none !important; /* Bloque le clic */
-    filter: grayscale(100%) brightness(0.6) contrast(1.2);
-}
-
-/* Force le côté Verso (Front dans le code CSS) quand mort */
-.dead-state .card-object {
-    transform: rotateY(0deg) !important; 
-}
-
-/* 3. Boutons Events dans le Panini Admin */
-.event-buttons-row {
-    display: flex;
-    gap: 8px;
-    margin-top: 15px;
-    padding-top: 15px;
-    border-top: 1px solid rgba(255,255,255,0.1);
-}
-.btn-event {
-    flex: 1;
-    border: none;
-    padding: 12px 5px;
-    font-weight: bold;
-    font-family: 'Pirata One';
-    font-size: 1.1em;
-    color: #000;
-    cursor: pointer;
-    border-radius: 6px;
-    text-transform: uppercase;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.5);
-}
-
-/* ============================================
-   27. CSS FINAL V53 (MÉDAILLE, MORT & EVENTS)
-   ============================================ */
-
-/* 1. Médaille Maire sur le téléphone du joueur */
-.player-mayor-badge {
-    position: absolute;
-    top: 15px;
-    left: 15px;
-    font-size: 3.5em;
-    z-index: 200;
-    filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.8));
-    animation: popIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55); /* Rebond */
-    pointer-events: none;
-}
-
-@keyframes popIn {
-    0% { transform: scale(0); opacity: 0; }
-    100% { transform: scale(1); opacity: 1; }
-}
-
-/* 2. État Mort sur le téléphone */
-.dead-state .scene-flip {
-    pointer-events: none !important; /* Bloque le clic */
-    filter: grayscale(100%) brightness(0.6) contrast(1.2);
-    transition: filter 1s ease;
-}
-
-/* Force le côté Verso (Front) et empêche le retournement */
-.dead-state .card-object {
-    transform: rotateY(0deg) !important; 
-}
-
-/* 3. Boutons Events (Panini Admin) */
-.event-buttons-row {
-    display: flex;
-    gap: 8px;
-    margin-top: 15px;
-    padding-top: 15px;
-    border-top: 1px solid rgba(255,255,255,0.1);
-}
-.btn-event {
-    flex: 1;
-    border: none;
-    padding: 12px 5px;
-    font-weight: bold;
-    font-family: 'Pirata One';
-    font-size: 1.1em;
-    color: #000;
-    cursor: pointer;
-    border-radius: 6px;
-    text-transform: uppercase;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.5);
-    transition: transform 0.1s;
-}
-.btn-event:active { transform: scale(0.95); }
-
-/* ============================================
-   28. NOUVELLES INTERACTIONS (V64) - ADDITIONNEL
-   ============================================ */
-
 /* En-tête de la modale de sélection (L'initiateur) */
 .initiator-header {
     background: rgba(0, 0, 0, 0.4);
@@ -1256,7 +653,6 @@ button[onclick="signPact()"]::before {
     flex-direction: column;
     align-items: center;
 }
-
 /* Grille 2 colonnes pour la sélection */
 .player-selector-grid {
     display: grid;
@@ -1265,7 +661,6 @@ button[onclick="signPact()"]::before {
     padding: 10px;
     padding-bottom: 50px;
 }
-
 /* Carte de joueur dans le sélecteur (Carré) */
 .player-select-card {
     position: relative;
@@ -1278,32 +673,27 @@ button[onclick="signPact()"]::before {
     box-shadow: 0 4px 10px rgba(0,0,0,0.3);
     transition: transform 0.2s, border-color 0.2s;
 }
-
 .player-select-card:active {
     transform: scale(0.95);
 }
-
 /* État sélectionné (Bordure verte) */
 .player-select-card.active {
     border-color: #2ecc71 !important;
     box-shadow: 0 0 15px rgba(46, 204, 113, 0.4);
 }
-
 .player-select-card img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     transition: opacity 0.3s;
 }
-
 .player-select-card.active img {
     opacity: 1 !important;
 }
 
 /* ============================================
-   29. BOUTONS VALIDÉS (FORCE BRUTE)
+   21. BOUTONS VALIDÉS (FORCE BRUTE)
    ============================================ */
-
 /* On cible précisément les ID pour écraser la couleur verte */
 #modal-regles .btn-validate.disabled,
 #modal-regles-base .btn-validate.disabled,
@@ -1321,7 +711,6 @@ button.btn-validate.disabled {
     transform: none !important;        /* Pas de zoom */
     opacity: 0.6 !important;           /* Rend le bouton terne */
 }
-
 /* On retire le petit doigt 👇 */
 .btn-validate.disabled::before {
     content: "" !important;
@@ -1329,9 +718,8 @@ button.btn-validate.disabled {
 }
 
 /* ============================================
-   30. CORRECTIF CLICS ADMIN (URGENT)
+   22. CORRECTIF CLICS ADMIN (URGENT)
    ============================================ */
-
 /* Force le Panini au-dessus de tout le reste */
 .details-panel {
     z-index: 20000 !important; /* Très haut */
@@ -1342,7 +730,6 @@ button.btn-validate.disabled {
 .close-details {
     z-index: 20001 !important;
 }
-
 /* Rend les cartes joueurs Admin bien cliquables */
 .admin-player-card {
     cursor: pointer !important;
@@ -1350,13 +737,11 @@ button.btn-validate.disabled {
     user-select: none;
     z-index: 1; /* Base */
 }
-
 /* Le bouton CHANGER en mode Prov ne doit pas bloquer le reste */
 .admin-player-card .btn-admin-mini {
     position: relative;
     z-index: 100; /* Passe au-dessus de la carte */
 }
-
 /* Lignes du tableau des rôles */
 .summary-list-item {
     cursor: pointer !important;
@@ -1364,7 +749,6 @@ button.btn-validate.disabled {
     position: relative;
     z-index: 5;
 }
-
 /* Bouton Éclair dans le tableau */
 .summary-list-item button {
     position: relative !important;
