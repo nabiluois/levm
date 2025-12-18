@@ -443,7 +443,7 @@ h2 {
 .emoji-svg { width: 1.3em !important; height: 1.3em !important; vertical-align: text-bottom !important; margin-right: 5px !important; display: inline-block !important; object-fit: contain !important; }
 
 /* ============================================
-   12. ADMIN DASHBOARD (CORRIGÉ & FIX PHOTO OVALE)
+   12. ADMIN DASHBOARD (LOBBY & GRILLE JOUEURS)
    ============================================ */
 .admin-view { position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; background: #120c08; z-index: var(--z-admin); display: flex; flex-direction: column; overflow: hidden; }
 .admin-header-bar { background: #000 !important; border-bottom: 2px solid var(--gold); padding: 5px 10px !important; display: flex; align-items: center; justify-content: space-between; height: 50px !important; z-index: 10; }
@@ -482,7 +482,8 @@ h2 {
     border-radius: 50% !important; 
     flex-shrink: 0; 
     aspect-ratio: 1 / 1; 
-    overflow: hidden !important; 
+    /* IMPORTANT : overflow visible pour voir les badges */
+    overflow: visible !important; 
     display: flex !important; align-items: center; justify-content: center !important;
     box-shadow: 0 0 10px rgba(0,0,0,0.5);
     z-index: 5;
@@ -493,7 +494,7 @@ h2 {
     height: 60px !important; 
 }
 
-/* L'image prend 100% du conteneur et est rognée par le border-radius du parent */
+/* L'image prend 100% du conteneur et est rognée par le border-radius */
 .admin-avatar-container img[alt="Avatar"] { 
     width: 100% !important; 
     height: 100% !important; 

@@ -212,6 +212,10 @@ function scanContentFromHTML() {
                 const imgSrc = imgTag.getAttribute('src');
                 const id = imgSrc.split('/').pop().replace(/\.[^/.]+$/, "");
                 detectedRoles.push({ id: id, title: titleTag.innerText.trim(), image: imgSrc, category: categoryId });
+                
+                // PRÉCHARGEMENT IMMÉDIAT
+                const preloadLink = new Image();
+                preloadLink.src = imgSrc;
             }
         });
     }
@@ -223,18 +227,13 @@ function scanContentFromHTML() {
             if (card.classList.contains('gold')) detectedEvents.gold.push(imgSrc);
             else if (card.classList.contains('silver')) detectedEvents.silver.push(imgSrc);
             else if (card.classList.contains('bronze')) detectedEvents.bronze.push(imgSrc);
+            
+            // PRÉCHARGEMENT IMMÉDIAT
+            const preloadLink = new Image();
+            preloadLink.src = imgSrc;
         }
     });
 }
-
-window.closeAdminPanel = function() {
-    if(confirm("Quitter le mode Admin ?")) {
-        localStorage.removeItem('adminGameCode');
-        document.body.classList.remove('no-scroll'); 
-        location.reload(); 
-    }
-};
-
 /* ============================================
    5. ADMIN : INITIALISATION & CONNEXION
    ============================================ */
@@ -1344,117 +1343,240 @@ function internalShowNotification(title, message) {
 }
 
 /* ============================================
-   15. INTERACTIONS & ACTION SELECTOR (LOGIQUE CORRIGÉE)
+   15. INTERACTIONS & ACTION SELECTOR (FINAL V5 - EMOJIS & LOGIC)
    ============================================ */
+let currentSelection = []; // Liste des ID sélectionnés
+let maxSelection = 1;      // Limite (1 ou 2)
+
+// FONCTION UTILITAIRE : GÉNÉRER LES BADGES (HTML SEUL)
+function getBadgesHTML(player) {
+    let iconsHtml = "";
+    if (player.attributes) {
+        const attrs = Object.keys(player.attributes);
+        if (attrs.some(k => k.startsWith('lover'))) iconsHtml += `<span style="position:absolute; top:0; right:0; font-size:1.2em; text-shadow:0 0 2px black; z-index:50;">💘</span>`;
+        if (attrs.some(k => k.startsWith('target'))) iconsHtml += `<span style="position:absolute; bottom:0; right:0; font-size:1.2em; text-shadow:0 0 2px black; z-index:50;">🎯</span>`;
+        if (attrs.some(k => k.startsWith('infected'))) iconsHtml += `<span style="position:absolute; bottom:0; left:0; font-size:1.2em; text-shadow:0 0 2px black; z-index:50;">🐾</span>`;
+        if (attrs.some(k => k.startsWith('linked_red'))) iconsHtml += `<span style="position:absolute; top:0; left:0; font-size:1.2em; text-shadow:0 0 2px black; z-index:50;">🩸</span>`;
+        if (attrs.some(k => k.startsWith('silenced'))) iconsHtml += `<span style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); font-size:1.5em; z-index:60;">🤐</span>`;
+        if (attrs.some(k => k.startsWith('bewitched'))) iconsHtml += `<span style="position:absolute; top:-5px; left:50%; transform:translateX(-50%); font-size:1.2em; z-index:50;">😵‍💫</span>`;
+    }
+    if (player.isMayor) iconsHtml += `<span style="position:absolute; top:-10px; left:-5px; font-size:1.5em; z-index:70; filter:drop-shadow(0 2px 2px black);">🎖️</span>`;
+    return iconsHtml;
+}
+
 window.openPlayerSelectorForAction = function(sourceRoleId, sourcePlayerId) {
     actionSourceRole = sourceRoleId;
     actionSourceId = sourcePlayerId;
+    currentSelection = []; // Remise à zéro
+
+    // 1. DÉFINITION DE LA LIMITE
+    if (sourceRoleId === 'l_orphelin') maxSelection = 2; // Couple
+    else maxSelection = 1;
 
     const modal = document.getElementById('modal-role-selector');
     if(!modal) return;
 
-    // 1. Récupération des joueurs
+    // 2. Info Source Player
     const players = currentPlayersData || {};
-    const alivePlayers = Object.entries(players).filter(([id, p]) => p.status !== 'dead');
+    const sourcePlayer = players[sourcePlayerId];
+    const sourceRoleName = detectedRoles.find(r=>r.id===sourceRoleId)?.title || 'Rôle Inconnu';
 
-    // 2. Configuration Modale
     const h2 = modal.querySelector('h2');
-    if(h2) { 
-        h2.style.display = 'block'; 
-        h2.innerHTML = `<span style="font-size:0.7em; color:#ccc;">ACTION DE :</span><br>${detectedRoles.find(r=>r.id===sourceRoleId)?.title || 'Rôle'}`; 
-    }
+    if(h2) h2.style.display = 'none'; // Cache le titre par défaut
     
     const ps = modal.querySelectorAll('p');
-    ps.forEach(p => p.style.display = 'none'); 
+    ps.forEach(p => p.style.display = 'none');
 
+    // 3. HEADER CUSTOM (Photo du Donneur d'Ordre)
     const grid = document.getElementById('admin-role-grid');
     grid.innerHTML = "";
-    grid.style.display = "grid";
-    grid.style.gridTemplateColumns = "repeat(3, 1fr)"; // 3 par ligne pour être lisible
-    grid.style.gap = "10px";
-    grid.style.paddingBottom = "50px";
+    
+    const headerDiv = document.createElement('div');
+    headerDiv.className = "initiator-header";
+    headerDiv.innerHTML = `
+        <span style="color:var(--gold); font-family:'Pirata One'; font-size:1.1em; letter-spacing:1px;">ACTION DE :</span>
+        <div style="font-size:1.6em; color:white; font-family:'Pirata One'; margin-bottom:10px; line-height:1;">${sourceRoleName}</div>
+        ${generateAvatarWithBadges(sourcePlayer, "90px", "3px solid white")}
+        <div style="color:#2ecc71; font-size:1em; margin-top:10px; font-weight:bold;">
+            Sélectionne <span id="selection-counter">0</span> / ${maxSelection}
+        </div>
+    `;
+    grid.appendChild(headerDiv);
 
-    // 3. Génération de la grille des CIBLES
+    // 4. GRILLE DES CIBLES (Vivants seulement)
+    const alivePlayers = Object.entries(players).filter(([id, p]) => p.status !== 'dead');
+    const container = document.createElement('div');
+    container.className = "action-grid";
+
     alivePlayers.forEach(([pid, p]) => {
-        // Optionnel : ne pas se cibler soi-même (sauf exceptions)
-        if (pid === sourcePlayerId) return; 
+        // L'Orphelin ne peut pas se choisir lui-même
+        if (pid === sourcePlayerId && sourceRoleId === 'l_orphelin') return; 
+        if (pid === sourcePlayerId) return; // Par défaut, on ne se cible pas soi-même
+
+        const targetRoleName = detectedRoles.find(r => r.id === (p.role || p.draftRole))?.title || "???";
+        const badges = getBadgesHTML(p); // On récupère les emojis
 
         const card = document.createElement('div');
-        card.className = "player-select-card";
-        card.style.cssText = "background:rgba(255,255,255,0.1); border-radius:10px; padding:8px; text-align:center; cursor:pointer; border:1px solid #555; display:flex; flex-direction:column; align-items:center;";
+        card.className = "player-select-card"; // Géré par le CSS (Grayscale -> Couleur)
+        card.id = `card-${pid}`;
         
-        // Image ronde et propre
         card.innerHTML = `
-            <div style="width:60px; height:60px; border-radius:50%; overflow:hidden; border:2px solid #888; margin-bottom:5px;">
-                <img src="${p.avatar || 'icon.png'}" loading="eager" style="width:100%; height:100%; object-fit:cover;">
+            <div style="position:relative; width:60px; height:60px; margin-bottom:5px;">
+                <img src="${p.avatar || 'icon.png'}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">
+                ${badges}
             </div>
-            <div style="font-size:0.85em; color:white; font-weight:bold; overflow:hidden; text-overflow:ellipsis; width:100%;">${p.name}</div>
+            <strong>${p.name}</strong>
+            <small>${targetRoleName}</small>
         `;
 
-        card.onclick = () => {
-            if(confirm(`Confirmer l'action sur ${p.name} ?`)) {
-                applyActionLogic(sourceRoleId, sourcePlayerId, pid, p.name);
-            }
-        };
-        grid.appendChild(card);
+        card.onclick = () => toggleSelection(pid, card);
+        container.appendChild(card);
     });
+    grid.appendChild(container);
 
-    // 4. FIX Z-INDEX : Très haut pour passer devant le tableau Panini (99999)
+    // 5. BOUTON VALIDER
+    const btnValider = document.createElement('button');
+    btnValider.className = "btn-confirm-action";
+    btnValider.innerText = "VALIDER";
+    btnValider.onclick = confirmActionSelection;
+    grid.appendChild(btnValider);
+
+    // 6. Z-Index MAX (Passe devant tout)
     modal.style.zIndex = "200000"; 
     window.openModal('modal-role-selector');
 };
 
-// LOGIQUE D'ÉCRITURE EN BASE DE DONNÉES (C'est ça qui manquait !)
-function applyActionLogic(roleId, sourcePid, targetPid, targetName) {
+function toggleSelection(pid, cardElement) {
+    if (currentSelection.includes(pid)) {
+        currentSelection = currentSelection.filter(id => id !== pid);
+        cardElement.classList.remove('selected');
+    } else {
+        if (currentSelection.length >= maxSelection) {
+            const first = currentSelection.shift();
+            const el = document.getElementById(`card-${first}`);
+            if(el) el.classList.remove('selected');
+        }
+        currentSelection.push(pid);
+        cardElement.classList.add('selected');
+    }
+    const counter = document.getElementById('selection-counter');
+    if(counter) counter.innerText = currentSelection.length;
+}
+
+function confirmActionSelection() {
+    if (currentSelection.length === 0) {
+        alert("Tu dois sélectionner quelqu'un !");
+        return;
+    }
+    if (actionSourceRole === 'l_orphelin' && currentSelection.length < 2) {
+        if(!confirm("Tu n'as choisi qu'une seule personne pour le couple. Continuer ?")) return;
+    }
+    
     const updates = {};
-    let msg = `Action effectuée sur ${targetName}.`;
+    let msg = "";
 
-    // 1. L'ORPHELIN / CUPIDON (Création du lien amoureux)
-    if (roleId === 'l_orphelin') { 
-        // Note: Ici on fait simple, on lie l'Orphelin à sa cible (Couple)
-        // Ou on peut dire que l'Orphelin choisit DEUX personnes.
-        // Pour simplifier l'interface clic unique : L'Orphelin SE lie à la cible.
-        updates[`games/${currentGameCode}/players/${targetPid}/attributes/lover_by_${sourcePid}`] = true;
-        updates[`games/${currentGameCode}/players/${sourcePid}/attributes/lover_by_${targetPid}`] = true;
-        msg = "💘 Couple formé ! Ils sont liés.";
+    // 1. ORPHELIN (Couple)
+    if (actionSourceRole === 'l_orphelin') {
+        const coupleId = "couple_" + Date.now();
+        currentSelection.forEach(pid => {
+            updates[`games/${currentGameCode}/players/${pid}/attributes/lover_${coupleId}`] = true;
+        });
+        msg = "💘 Couple formé !";
     }
-
-    // 2. LOUP GAROU ROUGE (Donne son coeur)
-    else if (roleId === 'le_loup_garou_rouge') {
-        updates[`games/${currentGameCode}/players/${targetPid}/attributes/linked_red_by_${sourcePid}`] = true;
-        msg = "🩸 Coeur donné. Si la cible meurt, le Loup Rouge meurt.";
+    // 2. LOUP ROUGE (Cœur)
+    else if (actionSourceRole === 'le_loup_garou_rouge') {
+        const targetId = currentSelection[0];
+        updates[`games/${currentGameCode}/players/${targetId}/attributes/linked_red_by_${actionSourceId}`] = true;
+        msg = "🩸 Cœur donné.";
     }
-
-    // 3. TARGET (Détournement)
-    else if (roleId === 'target') {
-        updates[`games/${currentGameCode}/players/${targetPid}/attributes/target_mirror_by_${sourcePid}`] = true;
-        updates[`games/${currentGameCode}/players/${sourcePid}/attributes/is_targeting_${targetPid}`] = true;
+    // 3. TARGET (Miroir)
+    else if (actionSourceRole === 'target') {
+        const targetId = currentSelection[0];
+        updates[`games/${currentGameCode}/players/${targetId}/attributes/target_mirror_by_${actionSourceId}`] = true;
         msg = "🎯 Cible miroir définie.";
     }
-
-    // 4. PAPA DES LOUPS (Infection)
-    else if (roleId === 'le_papa_des_loups') {
-        updates[`games/${currentGameCode}/players/${targetPid}/attributes/infected`] = true;
-        // On change aussi son rôle en base ou on garde juste l'attribut ?
-        // L'attribut affiche la patte de loup. C'est suffisant visuellement.
-        msg = "🐾 Joueur infecté !";
+    // 4. AUTRES
+    else if (actionSourceRole === 'le_papa_des_loups') {
+        updates[`games/${currentGameCode}/players/${currentSelection[0]}/attributes/infected`] = true;
+        msg = "🐾 Infection réussie.";
+    }
+    else if (actionSourceRole === 'le_chuchoteur') {
+        updates[`games/${currentGameCode}/players/${currentSelection[0]}/attributes/silenced`] = true;
+        msg = "🤐 Silence imposé.";
+    }
+    else if (actionSourceRole === 'le_marabout' || actionSourceRole === 'le_gourou') {
+        updates[`games/${currentGameCode}/players/${currentSelection[0]}/attributes/bewitched`] = true;
+        msg = "😵‍💫 Ensorcellement réussi.";
     }
 
-    // 5. CHUCHOTEUR (Silence)
-    else if (roleId === 'le_chuchoteur') {
-        updates[`games/${currentGameCode}/players/${targetPid}/attributes/silenced`] = true;
-        msg = "🤐 Joueur réduit au silence.";
-    }
-
-    // 6. MARABOUT (Poupée / Ensorcellement)
-    else if (roleId === 'le_marabout' || roleId === 'le_gourou') {
-        updates[`games/${currentGameCode}/players/${targetPid}/attributes/bewitched`] = true;
-        msg = "😵‍💫 Joueur marabouté/ensorcelé.";
-    }
-
-    // ENVOI FIREBASE
     update(ref(db), updates).then(() => {
-        internalShowNotification("Succès", msg);
+        internalShowNotification("Action Validée", msg);
         window.closeModal('modal-role-selector');
     });
+}
+
+// LOGIQUE MORT EN CHAINE
+window.checkLinkedDeaths = function(victimId, isKilling) {
+    if (!isKilling) return; 
+
+    const players = currentPlayersData;
+    const victim = players[victimId];
+    if (!victim || !victim.attributes) return;
+
+    const updates = {};
+    let triggered = false;
+
+    // A. GESTION AMOUREUX (Recursif)
+    const loverAttr = Object.keys(victim.attributes).find(k => k.startsWith('lover_'));
+    if (loverAttr) {
+        Object.entries(players).forEach(([pid, p]) => {
+            if (pid !== victimId && p.status !== 'dead' && p.attributes && p.attributes[loverAttr]) {
+                if(confirm(`💔 ${victim.name} est mort(e) ! Son amoureux(se) ${p.name} doit-il mourir aussi ?`)) {
+                    updates[`games/${currentGameCode}/players/${pid}/status`] = 'dead';
+                    triggered = true;
+                    setTimeout(() => window.checkLinkedDeaths(pid, true), 500);
+                }
+            }
+        });
+    }
+
+    // B. GESTION LOUP ROUGE
+    const redLinkAttr = Object.keys(victim.attributes).find(k => k.startsWith('linked_red_by_'));
+    if (redLinkAttr) {
+        const wolfId = redLinkAttr.replace('linked_red_by_', '');
+        const wolf = players[wolfId];
+        if (wolf && wolf.status !== 'dead') {
+            if(confirm(`🩸 ${victim.name} (Porteur du Cœur) est mort(e). Le Loup Rouge (${wolf.name}) doit-il mourir ?`)) {
+                updates[`games/${currentGameCode}/players/${wolfId}/status`] = 'dead';
+                triggered = true;
+            }
+        }
+    }
+
+    if (triggered) {
+        update(ref(db), updates);
+    }
+};
+
+window.togglePlayerStatus = function(pid, newStatus) {
+    const isKilling = newStatus === 'dead';
+    const updates = {};
+    updates[`games/${currentGameCode}/players/${pid}/status`] = newStatus;
+
+    if (!isKilling) {
+        if(confirm("Réinitialiser les pouvoirs de ce joueur (pour qu'il puisse rejouer à zéro) ?")) {
+            updates[`games/${currentGameCode}/players/${pid}/attributes`] = null;
+            updates[`games/${currentGameCode}/players/${pid}/drawnCard`] = null;
+        }
+    }
+
+    update(ref(db), updates).then(() => {
+        if (isKilling) window.checkLinkedDeaths(pid, true);
+        internalShowNotification("Mise à jour", `Joueur ${isKilling ? 'éliminé' : 'ressuscité'}.`);
+    });
+};
+
+function internalShowNotification(title, message) { 
+    if(window.showNotification) window.showNotification(title, message);
+    else alert(title + "\n" + message); 
 }
