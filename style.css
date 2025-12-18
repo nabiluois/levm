@@ -724,14 +724,14 @@ body.light-mode #modal-regles p, body.light-mode #modal-regles li, body.light-mo
 .summary-container { flex-wrap: wrap; }
 
 /* ============================================
-   19. PANINI ADMIN & TABLEAU (FIX ALIGNEMENT & AVATARS)
+   19. PANINI ADMIN & TABLEAU (CORRECTION V4 - AVATARS PARFAITS)
    ============================================ */
 .panini-admin-header { text-align: center; border-bottom: 1px solid var(--gold); padding-bottom: 20px; margin-bottom: 20px; position: relative; }
 .panini-admin-header h2 { text-align: center; width: 100%; margin-top: 10px; }
 
 /* CONTENEUR PRINCIPAL */
 .summary-container { 
-    display: flex; flex-direction: column; gap: 20px; width: 100%; 
+    display: flex; flex-direction: column; gap: 15px; width: 100%; 
     padding-bottom: 50px;
 }
 
@@ -740,8 +740,8 @@ body.light-mode #modal-regles p, body.light-mode #modal-regles li, body.light-mo
     border-bottom: 1px solid #333; padding-bottom: 15px; 
     display: flex; flex-direction: column; width: 100%; 
 }
-.summary-col img { width: 35px; vertical-align: middle; margin-right: 10px; }
-.summary-col strong { font-size: 1.4em; font-family: 'Pirata One'; vertical-align: middle; }
+.summary-col img { width: 30px; vertical-align: middle; margin-right: 10px; }
+.summary-col strong { font-size: 1.3em; font-family: 'Pirata One'; vertical-align: middle; }
 
 /* COULEURS */
 .village-col strong { color: #2ecc71; }
@@ -751,71 +751,106 @@ body.light-mode #modal-regles p, body.light-mode #modal-regles li, body.light-mo
 
 .col-content { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
 
-/* --- ITEM JOUEUR : GRID ROBUSTE --- */
+/* --- ITEM JOUEUR : STRUCTURE --- */
 .summary-list-item { 
     display: grid !important; 
-    /* 3 Colonnes : [Avatar 70px] [Infos (Reste)] [Bouton Action 50px] */
-    grid-template-columns: 70px 1fr 50px; 
+    /* 2 Colonnes : [ Contenu Joueur (extensible) ] [ Bouton Action (fixe) ] */
+    grid-template-columns: 1fr auto; 
     align-items: center; 
-    padding: 10px 5px; 
+    padding: 8px 10px; 
     border-radius: 12px; width: 100%; 
     position: relative;
     box-shadow: 0 2px 5px rgba(0,0,0,0.3);
     pointer-events: auto !important; 
     cursor: pointer !important;
-    min-height: 85px; /* Hauteur fixe pour éviter les décalages */
-    overflow: visible !important; /* Pour laisser dépasser les emojis */
+    min-height: 80px; 
+    overflow: visible !important; 
 }
 
 /* ZONE CLIQUABLE (Avatar + Texte) */
 .summary-click-area {
-    display: flex; align-items: center; gap: 10px; 
-    grid-column: 1 / 3; /* Occupe les colonnes 1 et 2 */
-    width: 100%; height: 100%;
+    display: flex; 
+    align-items: center; /*Important pour l'alignement vertical global */
+    justify-content: flex-start;
+    gap: 12px; 
+    grid-column: 1; 
+    width: 100%; 
+    height: 100%;
     pointer-events: auto !important;
     overflow: visible !important;
+    min-width: 0; 
 }
 
-/* AVATAR DANS LE TABLEAU : CERCLE STRICT */
+/* --- CONTENEUR AVATAR (LE CADRE) --- */
+/* C'est ici qu'on force la géométrie parfaite */
 .summary-click-area .admin-avatar-container {
-    width: 60px !important; height: 60px !important;
-    min-width: 60px !important;
-    margin-left: 5px;
-    /* On enlève overflow hidden ici pour voir les emojis qui dépassent */
-    overflow: visible !important; 
+    width: 60px !important; 
+    height: 60px !important;
+    min-width: 60px !important; /* Empêche l'écrasement */
+    min-height: 60px !important;
+    margin: 0 !important; /* Zéro marge pour un calage parfait */
+    padding: 0 !important;
+    
+    /* Force le cercle parfait sur le conteneur */
+    border-radius: 50% !important; 
+    box-sizing: border-box !important;
+
+    /* Centrage absolu de l'image dedans */
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    
+    position: relative;
+    flex-shrink: 0; /* Vital : empêche le flex de le réduire */
     background: transparent !important;
     border: none !important;
-    position: relative;
+    overflow: visible !important; /* Nécessaire pour les badges qui dépassent */
 }
 
-/* L'IMAGE SEULE EST RONDE */
+/* --- L'IMAGE ELLE-MÊME --- */
 .summary-click-area .admin-avatar-container img[alt="Avatar"] {
-    width: 100% !important; height: 100% !important;
+    width: 100% !important; 
+    height: 100% !important;
+    
+    /* Force le cercle parfait sur l'image */
     border-radius: 50% !important;
-    object-fit: cover !important;
+    /* Remplit le cercle sans déformation */
+    object-fit: cover !important; 
+    
+    /* La bordure est sur l'image pour être parfaitement nette */
     border: 2px solid var(--gold);
-    display: block;
+    box-sizing: border-box !important;
+    
     background: #000;
+    display: block;
+    margin: 0 !important;
 }
 
 /* TEXTES */
 .summary-text-col { 
     display: flex; flex-direction: column; 
-    justify-content: center; align-items: flex-start; 
-    overflow: hidden; /* Coupe le texte trop long */
-    padding-right: 5px;
-}
-.player-name { 
-    font-family: 'Almendra'; font-size: 1.2em; font-weight: bold; 
-    line-height: 1.1; color: #fff; margin-bottom: 3px; 
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; 
+    justify-content: center; 
+    align-items: flex-start; 
     text-align: left;
+    flex: 1; 
+    min-width: 0; /* Permet le wrap */
 }
+
+.player-name { 
+    font-family: 'Almendra'; font-size: 1.3em; font-weight: bold; 
+    color: #fff; margin: 0; 
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; 
+}
+
 .role-name { 
-    font-size: 0.85em; color: #ccc; font-style: italic; 
+    font-size: 0.9em; color: #ccc; font-style: italic; 
     font-family: 'Helvetica', sans-serif; opacity: 0.8; 
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%;
-    text-align: left; 
+    margin: 0;
+    white-space: normal !important; /* Autorise le retour à la ligne */
+    overflow: visible !important; 
+    text-overflow: clip !important;
+    line-height: 1.1; 
+    word-wrap: break-word; 
 }
 
 .dead-item .player-name { text-decoration: line-through; opacity: 0.7; }
@@ -823,64 +858,118 @@ body.light-mode #modal-regles p, body.light-mode #modal-regles li, body.light-mo
 
 /* BOUTON ECLAIR */
 .action-btn-flash {
-    grid-column: 3; 
-    justify-self: center;
+    grid-column: 2; 
+    justify-self: end;
     background: linear-gradient(135deg, #f1c40f, #d35400); 
     border: 2px solid white; border-radius: 50%; 
-    width: 42px; height: 42px; 
+    width: 45px; height: 45px; 
+    min-width: 45px; 
     display: flex; align-items: center; justify-content: center; 
     font-size: 1.2em; cursor: pointer; 
     box-shadow: 0 0 10px rgba(243, 156, 18, 0.6); 
     z-index: 150; position: relative;
+    margin-left: 8px; 
 }
 .action-btn-flash:active { transform: scale(0.9); }
 
 /* ============================================
-   20. NOUVELLES INTERACTIONS (V64)
+   20. ACTION SELECTOR (2 COLONNES & TEXTE WRAP)
    ============================================ */
 .initiator-header {
     background: rgba(0, 0, 0, 0.4);
     border-radius: 12px;
-    padding: 15px;
-    margin-bottom: 15px;
+    padding: 10px;
+    margin-bottom: 10px;
     border: 1px solid var(--gold);
     display: flex;
     flex-direction: column;
     align-items: center;
 }
-.player-selector-grid {
+
+/* GRILLE 2 COLONNES (Plus large, scroll vertical uniquement) */
+.action-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 15px;
-    padding: 10px;
-    padding-bottom: 50px;
+    grid-template-columns: repeat(2, 1fr); /* 2 joueurs par ligne */
+    gap: 10px;
+    padding: 5px;
+    padding-bottom: 80px; /* Espace large pour le bouton valider */
+    width: 100%;
+    overflow-x: hidden; /* Interdit le scroll horizontal */
+    overflow-y: auto;   /* Autorise le scroll vertical */
 }
+
+/* CARTE JOUEUR */
 .player-select-card {
     position: relative;
     background: rgba(255, 255, 255, 0.05);
-    border-radius: 15px;
-    overflow: hidden;
-    aspect-ratio: 1 / 1;
-    border: 3px solid transparent;
+    border-radius: 8px;
+    padding: 10px 5px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    border: 2px solid transparent; 
     cursor: pointer;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-    transition: transform 0.2s, border-color 0.2s;
+    transition: all 0.2s ease;
+    min-height: 110px; /* Hauteur min pour uniformiser */
+
+    /* GRISÉ PAR DÉFAUT */
+    filter: grayscale(100%) opacity(0.6); 
+    transform: scale(0.98);
 }
-.player-select-card:active {
-    transform: scale(0.95);
-}
-.player-select-card.active {
-    border-color: #2ecc71 !important;
-    box-shadow: 0 0 15px rgba(46, 204, 113, 0.4);
-}
-.player-select-card img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: opacity 0.3s;
-}
-.player-select-card.active img {
+
+/* ETAT SÉLECTIONNÉ */
+.player-select-card.selected {
+    filter: none !important; 
     opacity: 1 !important;
+    border-color: #2ecc71 !important; 
+    background: rgba(46, 204, 113, 0.1);
+    transform: scale(1.02);
+    box-shadow: 0 0 15px rgba(46, 204, 113, 0.4);
+    z-index: 10;
+}
+
+/* TEXTE : RETOUR À LA LIGNE FORCÉ */
+.player-select-card strong {
+    font-size: 0.9em;
+    margin-top: 8px;
+    width: 100%;
+    text-align: center;
+    color: #fff;
+    line-height: 1.2;
+    
+    /* Autorise le retour à la ligne */
+    white-space: normal !important; 
+    word-wrap: break-word !important;
+}
+
+/* ROLE SOUS LE PSEUDO */
+.player-select-card small {
+    display: block; 
+    color: #aaa; 
+    font-size: 0.75em; 
+    margin-top: 4px; 
+    line-height: 1.1; 
+    width: 100%; 
+    text-align: center;
+    
+    /* Autorise le retour à la ligne */
+    white-space: normal !important; 
+    word-wrap: break-word !important;
+}
+
+/* BOUTON VALIDER FLOTTANT */
+.btn-confirm-action {
+    position: fixed; 
+    bottom: 20px; left: 50%; transform: translateX(-50%);
+    width: 80%; max-width: 300px;
+    background: linear-gradient(135deg, #27ae60, #2ecc71);
+    color: white; border: 2px solid white;
+    padding: 12px; border-radius: 50px;
+    font-family: 'Pirata One'; font-size: 1.4em;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.8);
+    z-index: 200001; 
+    cursor: pointer;
 }
 
 /* ============================================
@@ -906,13 +995,40 @@ button.btn-validate.disabled {
 }
 
 /* ============================================
-   22. CORRECTIF Z-INDEX MODALE ROLE SELECT
+   22. CORRECTIF MODALE SÉLECTION (TITRE & Z-INDEX)
    ============================================ */
 #modal-role-selector {
-    z-index: var(--z-admin-modal); /* Doit être au-dessus de l'admin view */
+    z-index: var(--z-admin-modal); 
 }
+
 #modal-lock-intro {
     z-index: var(--z-lock);
+}
+
+/* FIX TITRE "CHANGER CARTE" COUPÉ */
+#modal-role-selector h2 {
+    white-space: normal !important;   
+    overflow: visible !important;     
+    text-overflow: clip !important;
+    height: auto !important;          
+    min-height: 40px; /* Hauteur min pour éviter la coupure */
+    
+    line-height: 1.2 !important;      
+    margin-top: 15px !important;      /* Un peu plus d'espace en haut */
+    margin-bottom: 20px !important;
+    
+    padding-right: 50px !important;   /* Marge à droite pour la croix */
+    padding-left: 20px !important;
+    
+    width: 100% !important;
+    max-width: 100% !important;
+    
+    border: none !important;          
+    background: transparent !important;
+    box-shadow: none !important;
+    text-shadow: none !important;     
+    color: var(--gold) !important;
+    text-align: center !important;
 }
 
 /* ============================================

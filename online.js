@@ -88,31 +88,56 @@ document.addEventListener('DOMContentLoaded', () => {
    4. UTILITAIRES (AVATAR, SESSION, SCAN)
    ============================================ */
 
-// FIX AVATAR : Image ronde + Emojis visibles (overflow visible)
-function generateAvatarWithBadges(player, size = "60px", border = "2px solid var(--gold)") {
-    const avatarSrc = player.avatar || "icon.png";
-    const isMayor = player.isMayor;
-    let iconsHtml = "";
+// GÉNÉRATEUR UNIVERSEL DE BADGES
+// isSummary = true : Garde les emojis éloignés (Tableau)
+// isSummary = false : Colle les emojis à la photo (Partout ailleurs)
+function generateBadgesHTML(player, isSummary = false) {
+    let html = "";
 
+    // CONFIGURATION DES POSITIONS
+    const pos = isSummary ? 
+        { m_t: '-10px', m_l: '-8px', tr_t: '-5px', tr_r: '-5px', bl_b: '-2px', bl_l: '-2px' } : // Mode Large (Tableau)
+        { m_t: '-5px', m_l: '-5px', tr_t: '0px', tr_r: '0px', bl_b: '0px', bl_l: '0px' };     // Mode Serré (Défaut)
+
+    // 1. LE MAIRE
+    if (player.isMayor) {
+        html += `<span style="position:absolute; top:${pos.m_t}; left:${pos.m_l}; font-size:1.6em; z-index:100; filter:drop-shadow(0 2px 2px black);">🎖️</span>`;
+    }
+
+    // 2. RECUPERATION DES EFFETS
+    let effects = [];
     if (player.attributes) {
-        const attrs = Object.keys(player.attributes);
-        if (attrs.some(k => k.startsWith('lover'))) iconsHtml += `<span style="position:absolute; top:-5px; right:-5px; font-size:1.4em; text-shadow:0 0 2px black; z-index:50;">💘</span>`;
-        if (attrs.some(k => k.startsWith('target'))) iconsHtml += `<span style="position:absolute; bottom:-5px; right:-5px; font-size:1.4em; text-shadow:0 0 2px black; z-index:50;">🎯</span>`;
-        if (attrs.some(k => k.startsWith('infected'))) iconsHtml += `<span style="position:absolute; bottom:-5px; left:-5px; font-size:1.4em; text-shadow:0 0 2px black; z-index:50;">🐾</span>`;
-        if (attrs.some(k => k.startsWith('linked_red'))) iconsHtml += `<span style="position:absolute; top:-5px; left:-5px; font-size:1.4em; text-shadow:0 0 2px black; z-index:50;">🩸</span>`;
-        
-        if (attrs.some(k => k.startsWith('silenced'))) iconsHtml += `<span style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); font-size:2em; z-index:60; opacity:0.9;">🤐</span>`;
-        if (attrs.some(k => k.startsWith('bewitched'))) iconsHtml += `<span style="position:absolute; top:0; left:50%; transform:translateX(-50%); font-size:1.5em; z-index:50;">😵‍💫</span>`;
+        const a = player.attributes;
+        if (Object.keys(a).some(k => k.startsWith('lover'))) effects.push('💘');
+        if (Object.keys(a).some(k => k.startsWith('linked_red'))) effects.push('❤️');
+        if (Object.keys(a).some(k => k.startsWith('infected'))) effects.push('🐾');
+        if (Object.keys(a).some(k => k.startsWith('target'))) effects.push('🎯');
+        if (Object.keys(a).some(k => k.startsWith('bewitched'))) effects.push('😵‍💫');
+        if (Object.keys(a).some(k => k.startsWith('silenced'))) effects.push('🤐');
     }
 
-    if (isMayor) {
-        iconsHtml += `<span style="position:absolute; top:-15px; left:-10px; font-size:1.8em; z-index:70; filter:drop-shadow(0 2px 2px black);">🎖️</span>`;
+    // 3. PLACEMENT DES EMOJIS
+    if (effects.length > 0) {
+        html += `<span style="position:absolute; top:${pos.tr_t}; right:${pos.tr_r}; font-size:1.3em; z-index:90; text-shadow:0 0 3px black;">${effects[0]}</span>`;
+
+        if (effects.length > 1) {
+            const others = effects.slice(1).join('');
+            html += `<div style="position:absolute; bottom:${pos.bl_b}; left:${pos.bl_l}; display:flex; flex-direction:row-reverse; z-index:90; font-size:1.1em; letter-spacing:-5px; text-shadow:0 0 3px black;">${others}</div>`;
+        }
     }
+
+    return html;
+}
+
+// GÉNÉRATEUR D'AVATAR COMPLET
+function generateAvatarWithBadges(player, size = "60px", border = "2px solid var(--gold)", isSummary = false) {
+    const avatarSrc = player.avatar || "icon.png";
+    const badgesHtml = generateBadgesHTML(player, isSummary);
 
     return `
         <div class="admin-avatar-container" style="position:relative; width:${size}; height:${size}; min-width:${size}; overflow:visible;">
             <img src="${avatarSrc}" alt="Avatar" style="width:100%; height:100%; object-fit:cover; border-radius:50%; border:${border}; display:block; background:#000;">
-            ${iconsHtml}
+            ${badgesHtml}
         </div>
     `;
 }
@@ -343,17 +368,30 @@ function setupAdminListeners() {
         const players = snapshot.val() || {};
         currentPlayersData = players; // Mise à jour de la variable globale
 
-        // Mise à jour de la liste visuelle
+        // 1. Mise à jour de la GRILLE principale (Arrière-plan)
         if(typeof updateAdminUI === 'function') {
             updateAdminUI(players);
         }
 
-        // Mise à jour temps réel d'un joueur ouvert (Panini)
+        // 2. Mise à jour du DASHBOARD (Tableau Récapitulatif)
+        const panel = document.querySelector('.details-panel');
+        if (panel && panel.classList.contains('active')) {
+            // On vérifie si c'est bien le dashboard qui est ouvert
+            const header = panel.querySelector('.panini-admin-header h2');
+            
+            // CORRECTION ICI : On cherche "DASHBOARD" (le nouveau nom)
+            if (header && header.textContent.includes('DASHBOARD')) {
+                // On relance la fonction pour redessiner la liste et les émojis instantanément
+                window.openRoleSummaryPanel();
+            }
+        }
+
+        // 3. Mise à jour temps réel d'un JOUEUR OUVERT (Fiche détail)
         if (currentlyOpenedPlayerId && players[currentlyOpenedPlayerId]) {
             const p = players[currentlyOpenedPlayerId];
             const roleId = p.draftRole || p.role;
             const isDead = p.status === 'dead';
-            // Appel sécurisé à refresh
+            
             if(window.refreshAdminPlayerContent) {
                 window.refreshAdminPlayerContent(currentlyOpenedPlayerId, p.name, roleId, isDead, p.avatar, p.isMayor, p);
             }
@@ -469,7 +507,8 @@ function generateDashboardControls() {
     const btnTable = document.createElement('button');
     btnTable.className = "btn-admin-action";
     btnTable.style.cssText = "background:#34495e; color:#ecf0f1; border:1px solid #7f8c8d; padding:10px; width:100%; border-radius:6px; font-family:'Pirata One'; font-size:1.1em; cursor:pointer;";
-    btnTable.innerHTML = `📊 TABLEAU DES RÔLES (<span id="ctrl-total">${distributionSelection.length}</span>)`;
+    /* NOM MODIFIÉ ICI */
+    btnTable.innerHTML = `📊 DASHBOARD (<span id="ctrl-total">${distributionSelection.length}</span>)`;
     btnTable.onclick = () => window.openRoleSummaryPanel();
     wrapper.appendChild(btnTable);
 
@@ -483,7 +522,8 @@ function generateDashboardControls() {
     const btnReset = document.createElement('button');
     btnReset.className = "btn-admin-action";
     btnReset.style.cssText = "background:#c0392b; color:white; border:1px solid #e74c3c; padding:8px; width:100%; border-radius:6px; font-family:'Pirata One'; font-size:1em; cursor:pointer; opacity:0.8;";
-    btnReset.innerHTML = "🗑️ DÉSICÔNISER (RESET)";
+    /* NOM MODIFIÉ ICI */
+    btnReset.innerHTML = "🗑️ RESET";
     btnReset.onclick = () => window.resetGameToLobby();
     wrapper.appendChild(btnReset);
 
@@ -532,7 +572,7 @@ window.resetGameToLobby = function() {
 };
 
 /* ============================================
-   7. TABLEAU RECAPITULATIF (CORRIGÉ V90 - CLICS)
+   7. TABLEAU RECAPITULATIF (DASHBOARD)
    ============================================ */
 window.openRoleSummaryPanel = function() {
     const rolesVillage = [];
@@ -542,7 +582,6 @@ window.openRoleSummaryPanel = function() {
     
     const interactiveRoles = ['l_orphelin', 'target', 'le_loup_garou_rouge', 'le_loup_garou_maudit', 'le_loup_garou_alpha', 'le_papa_des_loups', 'le_chuchoteur', 'le_marabout'];
 
-    // Fonction de nettoyage pour éviter les bugs d'apostrophe
     const safeStr = (str) => str ? str.replace(/'/g, "\\'") : "";
 
     const createLine = (roleId, playerObj, playerId) => {
@@ -553,16 +592,16 @@ window.openRoleSummaryPanel = function() {
         
         if (playerObj) {
             const isDead = playerObj.status === 'dead';
-            // Style de base de la ligne
             const bgStyle = isDead 
                 ? "background:#2c3e50; color:#95a5a6; border:1px solid #7f8c8d;" 
                 : "background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,215,0,0.3);";
             
-            const avatarHtml = generateAvatarWithBadges(playerObj, "50px");
+            // Mode Large (isSummary = true)
+            const avatarHtml = generateAvatarWithBadges(playerObj, "50px", "2px solid var(--gold)", true);
+            
             const safeName = safeStr(playerObj.name);
             const safeAvatar = safeStr(playerObj.avatar);
 
-            // Bouton Action (Eclair)
             let actionBtn = "";
             if (interactiveRoles.includes(roleId) && !isDead) {
                 actionBtn = `
@@ -572,7 +611,6 @@ window.openRoleSummaryPanel = function() {
                 `;
             }
 
-            // Ligne Joueur Complète (Cliquable)
             html = `
                 <div class="summary-list-item ${isDead ? 'dead-item' : ''}" style="${bgStyle}">
                     <div class="summary-click-area" onclick="window.openAdminPlayerDetail('${playerId}', '${safeName}', '${roleId}', ${isDead}, '${safeAvatar}', ${playerObj.isMayor})">
@@ -623,11 +661,14 @@ window.openRoleSummaryPanel = function() {
         });
     }
 
+    // MODIFICATION ICI : Header repensé pour éviter le chevauchement
     const summaryHTML = `
-        <div class="panini-admin-header">
-            <h2 style="color:var(--gold); font-family:'Pirata One'; font-size:2em; margin:0;">RÉPARTITION</h2>
-            <button class="close-details" onclick="window.internalCloseDetails()" style="position:absolute; right:0; top:0; background:transparent; border:none; color:gold; font-size:2em; cursor:pointer; pointer-events:auto; z-index:20002;">✕</button>
+        <div class="panini-admin-header" style="position:relative; padding:15px 50px 15px 15px; border-bottom:2px solid var(--gold); margin-bottom:20px;">
+            <h2 style="color:var(--gold); font-family:'Pirata One'; font-size:2em; margin:0; width:100%; text-align:center;">DASHBOARD</h2>
+            
+            <button class="close-details" onclick="window.internalCloseDetails()" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); background:transparent; border:none; color:gold; font-size:2em; cursor:pointer; pointer-events:auto; z-index:20002;">✕</button>
         </div>
+        
         <div class="summary-container">
             ${rolesVillage.length ? `<div class="summary-col village-col"><img src="Village.svg"> <strong>VILLAGE (${rolesVillage.length})</strong><div class="col-content">${rolesVillage.join('')}</div></div>` : ''}
             ${rolesLoup.length ? `<div class="summary-col loup-col"><img src="Loup.svg"> <strong>LOUPS (${rolesLoup.length})</strong><div class="col-content">${rolesLoup.join('')}</div></div>` : ''}
@@ -647,7 +688,6 @@ window.openRoleSummaryPanel = function() {
         }
         contentDiv.innerHTML = summaryHTML;
         
-        // SECURITE JS : On force le Z-Index au max
         panel.style.zIndex = "99999";
         overlay.style.zIndex = "99998";
         
@@ -795,7 +835,8 @@ window.openResurrectModal = function(playerId) {
         modalTitle.style.display = 'block';
         modalTitle.innerText = isDraftMode ? "CHANGER CARTE" : "RESSUSCITER";
     }
-    document.getElementById('modal-role-selector').style.zIndex = "25000"; 
+    // MODIFICATION ICI : Z-Index augmenté à 200000 pour passer devant le profil
+    document.getElementById('modal-role-selector').style.zIndex = "200000"; 
     window.openModal('modal-role-selector');
 };
 
@@ -888,7 +929,8 @@ window.openEventSelector = function(playerId, category) {
         });
         grid.appendChild(catGrid);
         
-        document.getElementById('modal-role-selector').style.zIndex = "25000"; 
+        // MODIFICATION ICI : Z-Index augmenté à 200000 pour passer devant tout
+        document.getElementById('modal-role-selector').style.zIndex = "200000"; 
         window.openModal('modal-role-selector');
         
         // 3. CACHER LE LOADER
@@ -1061,7 +1103,8 @@ window.openAdminPlayerDetail = function(pid, name, roleId, isDead, avatarSrc, is
     const fullData = players[pid]; 
     refreshAdminPlayerContent(pid, name, roleId, isDead, avatarSrc, isMayor, fullData);
 
-    modal.style.zIndex = "20000";
+    // FIX Z-INDEX : Doit être supérieur au panel (99999)
+    modal.style.zIndex = "100005";
     window.openModal('modal-player-detail');
 };
 
@@ -1264,23 +1307,25 @@ function listenForPlayerUpdates() {
     let lastRole = null;
     let lastCardImg = null;
     let currentAttributes = {}; 
-    let currentStatus = 'alive';
+    let lastStatus = null; // Nouveau tracker pour détecter la résurrection
     let lastMayor = false;
     
     onValue(myPlayerRef, (snapshot) => {
         const data = snapshot.val();
         if (!data) return;
         
-        currentStatus = data.status || 'alive';
+        const currentStatus = data.status || 'alive';
         const panel = document.querySelector('.details-panel');
         const overlay = document.querySelector('.details-overlay');
 
         let uiHtml = "";
 
+        // Gestion Visuelle Globale (Ecran Rouge ou Normal)
         if (currentStatus === 'dead') {
             document.body.classList.add('dead-state'); 
             uiHtml += `<h1 style="color:#c0392b; font-size:3em; text-align:center;">TU ES MORT 💀</h1>`;
             
+            // Si la carte est ouverte, on la grise en temps réel
             const cardEl = document.querySelector('#online-content-wrapper .carte-jeu');
             if(cardEl) {
                 cardEl.style.filter = "grayscale(100%)";
@@ -1291,6 +1336,7 @@ function listenForPlayerUpdates() {
             document.body.classList.remove('dead-state');
             uiHtml += `<h3 style="color:var(--gold);">Tu es en jeu !</h3>`;
             
+            // Si la carte est ouverte, on la réactive
             const cardEl = document.querySelector('#online-content-wrapper .carte-jeu');
             if(cardEl) {
                 cardEl.style.filter = "none";
@@ -1301,9 +1347,14 @@ function listenForPlayerUpdates() {
         if (data.role) {
             myCurrentRoleId = data.role; 
             
-            if (data.role !== lastRole || data.isMayor !== lastMayor) { 
+            // --- CORRECTION ICI ---
+            // On vérifie maintenant si le STATUT a changé (currentStatus !== lastStatus)
+            // Cela forcera le rafraîchissement de la modale carte pour enlever le texte "TU ES MORT"
+            if (data.role !== lastRole || data.isMayor !== lastMayor || currentStatus !== lastStatus) { 
                 lastRole = data.role; 
                 lastMayor = data.isMayor;
+                lastStatus = currentStatus; // Mise à jour du tracker
+                
                 revealRole(data.role, currentStatus, data.isMayor); 
             }
             
@@ -1410,85 +1461,99 @@ function internalShowNotification(title, message) {
 }
 
 /* ============================================
-   15. INTERACTIONS & ACTION SELECTOR (FINAL V5 - EMOJIS & LOGIC)
+   15. INTERACTIONS & ACTION SELECTOR (MARABOUT ILLIMITÉ)
    ============================================ */
-let currentSelection = []; // Liste des ID sélectionnés
-let maxSelection = 1;      // Limite (1 ou 2)
+let currentSelection = []; 
+let maxSelection = 1;      
 
-// FONCTION UTILITAIRE : GÉNÉRER LES BADGES (HTML SEUL)
-function getBadgesHTML(player) {
-    let iconsHtml = "";
-    if (player.attributes) {
-        const attrs = Object.keys(player.attributes);
-        if (attrs.some(k => k.startsWith('lover'))) iconsHtml += `<span style="position:absolute; top:0; right:0; font-size:1.2em; text-shadow:0 0 2px black; z-index:50;">💘</span>`;
-        if (attrs.some(k => k.startsWith('target'))) iconsHtml += `<span style="position:absolute; bottom:0; right:0; font-size:1.2em; text-shadow:0 0 2px black; z-index:50;">🎯</span>`;
-        if (attrs.some(k => k.startsWith('infected'))) iconsHtml += `<span style="position:absolute; bottom:0; left:0; font-size:1.2em; text-shadow:0 0 2px black; z-index:50;">🐾</span>`;
-        if (attrs.some(k => k.startsWith('linked_red'))) iconsHtml += `<span style="position:absolute; top:0; left:0; font-size:1.2em; text-shadow:0 0 2px black; z-index:50;">🩸</span>`;
-        if (attrs.some(k => k.startsWith('silenced'))) iconsHtml += `<span style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); font-size:1.5em; z-index:60;">🤐</span>`;
-        if (attrs.some(k => k.startsWith('bewitched'))) iconsHtml += `<span style="position:absolute; top:-5px; left:50%; transform:translateX(-50%); font-size:1.2em; z-index:50;">😵‍💫</span>`;
-    }
-    if (player.isMayor) iconsHtml += `<span style="position:absolute; top:-10px; left:-5px; font-size:1.5em; z-index:70; filter:drop-shadow(0 2px 2px black);">🎖️</span>`;
-    return iconsHtml;
-}
+// NOTE : La fonction getBadgesHTML a été supprimée car remplacée par generateBadgesHTML (Bloc 4)
 
 window.openPlayerSelectorForAction = function(sourceRoleId, sourcePlayerId) {
     actionSourceRole = sourceRoleId;
     actionSourceId = sourcePlayerId;
-    currentSelection = []; // Remise à zéro
+    currentSelection = []; 
 
-    // 1. DÉFINITION DE LA LIMITE
-    if (sourceRoleId === 'l_orphelin') maxSelection = 2; // Couple
-    else maxSelection = 1;
+    const players = currentPlayersData || {};
+    const aliveCount = Object.values(players).filter(p => p.status !== 'dead').length;
+
+    // 1. DÉFINITION DES LIMITES
+    if (sourceRoleId === 'l_orphelin') {
+        maxSelection = 2; 
+    } 
+    else if (sourceRoleId === 'le_marabout') {
+        maxSelection = aliveCount; // Marabout illimité
+    }
+    else {
+        maxSelection = 1;
+    }
 
     const modal = document.getElementById('modal-role-selector');
     if(!modal) return;
 
-    // 2. Info Source Player
-    const players = currentPlayersData || {};
     const sourcePlayer = players[sourcePlayerId];
-    const sourceRoleName = detectedRoles.find(r=>r.id===sourceRoleId)?.title || 'Rôle Inconnu';
+    const sourceRoleName = detectedRoles.find(r=>r.id===sourceRoleId)?.title || 'Action';
 
     const h2 = modal.querySelector('h2');
-    if(h2) h2.style.display = 'none'; // Cache le titre par défaut
-    
-    const ps = modal.querySelectorAll('p');
-    ps.forEach(p => p.style.display = 'none');
+    if(h2) h2.style.display = 'none';
+    modal.querySelectorAll('p').forEach(p => p.style.display = 'none');
 
-    // 3. HEADER CUSTOM (Photo du Donneur d'Ordre)
     const grid = document.getElementById('admin-role-grid');
     grid.innerHTML = "";
     
+    // --- PRÉ-SÉLECTION AUTOMATIQUE (CORRIGÉE AVEC ALPHA) ---
+    Object.entries(players).forEach(([pid, p]) => {
+        if (!p.attributes) return;
+        const attrs = Object.keys(p.attributes);
+        let isSelected = false;
+
+        if (sourceRoleId === 'l_orphelin' && attrs.some(k => k.startsWith('lover_'))) isSelected = true;
+        else if (sourceRoleId === 'le_loup_garou_rouge' && attrs.some(k => k.startsWith(`linked_red_by_${sourcePlayerId}`))) isSelected = true;
+        else if (sourceRoleId === 'target' && attrs.some(k => k.startsWith(`target_mirror_by_${sourcePlayerId}`))) isSelected = true;
+        
+        // ICI : On remet bien l'Alpha avec le Papa Loup
+        else if ((sourceRoleId === 'le_papa_des_loups' || sourceRoleId === 'le_loup_garou_alpha') && attrs.some(k => k.startsWith('infected'))) isSelected = true;
+        
+        else if (sourceRoleId === 'le_chuchoteur' && attrs.some(k => k.startsWith('silenced'))) isSelected = true;
+        else if ((sourceRoleId === 'le_marabout' || sourceRoleId === 'le_gourou') && attrs.some(k => k.startsWith('bewitched'))) isSelected = true;
+
+        if (isSelected) currentSelection.push(pid);
+    });
+    // -------------------------------------------
+
+    // HEADER AVEC PSEUDO
     const headerDiv = document.createElement('div');
     headerDiv.className = "initiator-header";
     headerDiv.innerHTML = `
-        <span style="color:var(--gold); font-family:'Pirata One'; font-size:1.1em; letter-spacing:1px;">ACTION DE :</span>
-        <div style="font-size:1.6em; color:white; font-family:'Pirata One'; margin-bottom:10px; line-height:1;">${sourceRoleName}</div>
-        ${generateAvatarWithBadges(sourcePlayer, "90px", "3px solid white")}
-        <div style="color:#2ecc71; font-size:1em; margin-top:10px; font-weight:bold;">
-            Sélectionne <span id="selection-counter">0</span> / ${maxSelection}
+        <div style="display:flex; align-items:center; gap:15px;">
+            ${generateAvatarWithBadges(sourcePlayer, "50px", "2px solid white")}
+            <div style="text-align:left;">
+                <div style="color:white; font-family:'Pirata One'; font-size:1.3em; line-height:1;">${sourceRoleName}</div>
+                <div style="color:var(--gold); font-size:1em; font-weight:bold;">${sourcePlayer.name}</div>
+                <div style="color:#ccc; font-size:0.8em; margin-top:3px;">Choisis <span id="selection-counter" style="color:#2ecc71; font-weight:bold;">${currentSelection.length}</span>/${maxSelection}</div>
+            </div>
         </div>
     `;
     grid.appendChild(headerDiv);
 
-    // 4. GRILLE DES CIBLES (Vivants seulement)
+    // GRILLE DES CIBLES
     const alivePlayers = Object.entries(players).filter(([id, p]) => p.status !== 'dead');
     const container = document.createElement('div');
     container.className = "action-grid";
 
     alivePlayers.forEach(([pid, p]) => {
-        // L'Orphelin ne peut pas se choisir lui-même
         if (pid === sourcePlayerId && sourceRoleId === 'l_orphelin') return; 
-        if (pid === sourcePlayerId) return; // Par défaut, on ne se cible pas soi-même
+        if (pid === sourcePlayerId) return; 
 
+        const badges = generateBadgesHTML(p); 
         const targetRoleName = detectedRoles.find(r => r.id === (p.role || p.draftRole))?.title || "???";
-        const badges = getBadgesHTML(p); // On récupère les emojis
+        const isPreSelected = currentSelection.includes(pid);
 
         const card = document.createElement('div');
-        card.className = "player-select-card"; // Géré par le CSS (Grayscale -> Couleur)
+        card.className = `player-select-card ${isPreSelected ? 'selected' : ''}`; 
         card.id = `card-${pid}`;
         
         card.innerHTML = `
-            <div style="position:relative; width:60px; height:60px; margin-bottom:5px;">
+            <div style="position:relative; width:50px; height:50px; margin:0 auto; overflow:visible;">
                 <img src="${p.avatar || 'icon.png'}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">
                 ${badges}
             </div>
@@ -1501,14 +1566,12 @@ window.openPlayerSelectorForAction = function(sourceRoleId, sourcePlayerId) {
     });
     grid.appendChild(container);
 
-    // 5. BOUTON VALIDER
     const btnValider = document.createElement('button');
     btnValider.className = "btn-confirm-action";
-    btnValider.innerText = "VALIDER";
+    btnValider.innerHTML = "VALIDER ✔";
     btnValider.onclick = confirmActionSelection;
     grid.appendChild(btnValider);
 
-    // 6. Z-Index MAX (Passe devant tout)
     modal.style.zIndex = "200000"; 
     window.openModal('modal-role-selector');
 };
@@ -1531,49 +1594,94 @@ function toggleSelection(pid, cardElement) {
 }
 
 function confirmActionSelection() {
-    if (currentSelection.length === 0) {
-        alert("Tu dois sélectionner quelqu'un !");
-        return;
-    }
-    if (actionSourceRole === 'l_orphelin' && currentSelection.length < 2) {
+    if (actionSourceRole === 'l_orphelin' && currentSelection.length === 1) {
         if(!confirm("Tu n'as choisi qu'une seule personne pour le couple. Continuer ?")) return;
     }
     
     const updates = {};
-    let msg = "";
+    let msg = "Action effectuée.";
+    const players = currentPlayersData || {};
+    const isReset = currentSelection.length === 0; 
 
-    // 1. ORPHELIN (Couple)
-    if (actionSourceRole === 'l_orphelin') {
-        const coupleId = "couple_" + Date.now();
-        currentSelection.forEach(pid => {
-            updates[`games/${currentGameCode}/players/${pid}/attributes/lover_${coupleId}`] = true;
+    // Nettoyage préalable des attributs
+    const clearAttribute = (prefix) => {
+        Object.entries(players).forEach(([pid, p]) => {
+            if(p.attributes) {
+                Object.keys(p.attributes).forEach(k => {
+                    if(k.startsWith(prefix)) {
+                        updates[`games/${currentGameCode}/players/${pid}/attributes/${k}`] = null;
+                    }
+                });
+            }
         });
-        msg = "💘 Couple formé !";
+    };
+
+    // 1. ORPHELIN
+    if (actionSourceRole === 'l_orphelin') {
+        clearAttribute('lover_'); 
+        if (!isReset) {
+            const coupleId = "couple_" + Date.now();
+            currentSelection.forEach(pid => {
+                updates[`games/${currentGameCode}/players/${pid}/attributes/lover_${coupleId}`] = true;
+            });
+            msg = "💘 Couple formé !";
+        } else {
+            msg = "💔 Couple annulé.";
+        }
     }
-    // 2. LOUP ROUGE (Cœur)
+    // 2. LOUP ROUGE
     else if (actionSourceRole === 'le_loup_garou_rouge') {
-        const targetId = currentSelection[0];
-        updates[`games/${currentGameCode}/players/${targetId}/attributes/linked_red_by_${actionSourceId}`] = true;
-        msg = "🩸 Cœur donné.";
+        clearAttribute(`linked_red_by_${actionSourceId}`);
+        if (!isReset) {
+            const targetId = currentSelection[0];
+            updates[`games/${currentGameCode}/players/${targetId}/attributes/linked_red_by_${actionSourceId}`] = true;
+            msg = "🩸 Cœur donné.";
+        } else {
+            msg = "🩸 Don de cœur annulé.";
+        }
     }
-    // 3. TARGET (Miroir)
+    // 3. TARGET
     else if (actionSourceRole === 'target') {
-        const targetId = currentSelection[0];
-        updates[`games/${currentGameCode}/players/${targetId}/attributes/target_mirror_by_${actionSourceId}`] = true;
-        msg = "🎯 Cible miroir définie.";
+        clearAttribute(`target_mirror_by_${actionSourceId}`);
+        if (!isReset) {
+            const targetId = currentSelection[0];
+            updates[`games/${currentGameCode}/players/${targetId}/attributes/target_mirror_by_${actionSourceId}`] = true;
+            msg = "🎯 Cible miroir définie.";
+        } else {
+            msg = "🎯 Cible annulée.";
+        }
     }
-    // 4. AUTRES
-    else if (actionSourceRole === 'le_papa_des_loups') {
-        updates[`games/${currentGameCode}/players/${currentSelection[0]}/attributes/infected`] = true;
-        msg = "🐾 Infection réussie.";
+    // 4. PAPA LOUP ET LOUP ALPHA (Même effet : Patte 🐾)
+    else if (actionSourceRole === 'le_papa_des_loups' || actionSourceRole === 'le_loup_garou_alpha') {
+        clearAttribute('infected'); 
+        if (!isReset) {
+            updates[`games/${currentGameCode}/players/${currentSelection[0]}/attributes/infected`] = true;
+            msg = "🐾 Infection réussie.";
+        } else {
+            msg = "🐾 Infection annulée.";
+        }
     }
+    // 5. CHUCHOTEUR
     else if (actionSourceRole === 'le_chuchoteur') {
-        updates[`games/${currentGameCode}/players/${currentSelection[0]}/attributes/silenced`] = true;
-        msg = "🤐 Silence imposé.";
+        clearAttribute('silenced');
+        if (!isReset) {
+            updates[`games/${currentGameCode}/players/${currentSelection[0]}/attributes/silenced`] = true;
+            msg = "🤐 Silence imposé.";
+        } else {
+            msg = "🤐 Silence levé.";
+        }
     }
+    // 6. MARABOUT / GOUROU
     else if (actionSourceRole === 'le_marabout' || actionSourceRole === 'le_gourou') {
-        updates[`games/${currentGameCode}/players/${currentSelection[0]}/attributes/bewitched`] = true;
-        msg = "😵‍💫 Ensorcellement réussi.";
+        clearAttribute('bewitched');
+        if (!isReset) {
+            currentSelection.forEach(pid => {
+                 updates[`games/${currentGameCode}/players/${pid}/attributes/bewitched`] = true;
+            });
+            msg = "😵‍💫 Ensorcellement réussi.";
+        } else {
+            msg = "✨ Ensorcellement dissipé.";
+        }
     }
 
     update(ref(db), updates).then(() => {
