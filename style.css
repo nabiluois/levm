@@ -11,14 +11,14 @@
   --text-light: #3e2f23;
   --gold: #d4af37;
 
-  /* ECHELLE DES Z-INDEX (HIERARCHIE STRICTE) */
+  /* Z-INDEX CORRIGÉS : Le Panel (6000) passe DEVANT l'Admin (5000) */
   --z-header: 100;
   --z-overlay: 1000;
   --z-menu: 1100;
   --z-modal: 2000;
-  --z-details: 4500;
-  --z-admin: 5000;
-  --z-admin-modal: 5500;
+  --z-admin: 5000;       
+  --z-details: 6000;     
+  --z-admin-modal: 7000; 
   --z-lock: 8000;
   --z-notif: 9000;
   --z-loader: 9999;
@@ -462,16 +462,20 @@ h2 {
 
 /* FIX PHOTO ADMIN DÉFINITIF (ROND PARFAIT) */
 .admin-avatar-container { 
-    width: 60px !important; 
-    height: 60px !important; 
     margin: 0 auto 5px auto; 
     position: relative !important; 
     background: #000; 
     border-radius: 50%; 
     flex-shrink: 0; 
-    aspect-ratio: 1 / 1; /* C'est la clé pour éviter l'ovale */
-    overflow: visible !important; /* Pour les emojis qui dépassent */
-    border: 2px solid var(--gold); 
+    aspect-ratio: 1 / 1; 
+    overflow: visible !important; 
+    border: 2px solid var(--gold);
+}
+
+/* 2. On force la petite taille UNIQUEMENT dans la grille des joueurs */
+.player-grid-admin .admin-avatar-container { 
+    width: 60px !important; 
+    height: 60px !important; 
 }
 
 .admin-avatar-container img[alt="Avatar"] { 
