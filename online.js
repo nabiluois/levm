@@ -52,6 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnJoin = document.getElementById('btn-join-action');
     if(btnJoin) btnJoin.addEventListener('click', joinGame);
 
+    // C'est cette fonction qui active le bouton "Créer une partie"
     attachCreateEvent();
     setInterval(attachCreateEvent, 1000);
 
@@ -78,31 +79,29 @@ function attachCreateEvent() {
 /* ============================================
    4. UTILITAIRES (AVATAR, SESSION, SCAN)
    ============================================ */
+// FIX AVATAR : Image ronde + Emojis visibles (overflow visible)
 function generateAvatarWithBadges(player, size = "60px", border = "2px solid var(--gold)") {
     const avatarSrc = player.avatar || "icon.png";
     const isMayor = player.isMayor;
     let iconsHtml = "";
 
-    // GESTION DES BADGES (EMOJIS)
     if (player.attributes) {
         const attrs = Object.keys(player.attributes);
-        // Positionnement absolu par rapport au conteneur de l'avatar
-        if (attrs.some(k => k.startsWith('lover'))) iconsHtml += `<span style="position:absolute; top:-5px; right:-5px; font-size:1.4em; text-shadow:0 0 3px black; z-index:20;">💘</span>`;
-        if (attrs.some(k => k.startsWith('target'))) iconsHtml += `<span style="position:absolute; bottom:-5px; right:-5px; font-size:1.4em; text-shadow:0 0 3px black; z-index:20;">🎯</span>`;
-        if (attrs.some(k => k.startsWith('infected'))) iconsHtml += `<span style="position:absolute; bottom:-5px; left:-5px; font-size:1.4em; text-shadow:0 0 3px black; z-index:20;">🐾</span>`;
-        if (attrs.some(k => k.startsWith('linked_red'))) iconsHtml += `<span style="position:absolute; top:-5px; left:-5px; font-size:1.4em; text-shadow:0 0 3px black; z-index:20;">🩸</span>`;
+        if (attrs.some(k => k.startsWith('lover'))) iconsHtml += `<span style="position:absolute; top:-5px; right:-5px; font-size:1.4em; text-shadow:0 0 2px black; z-index:50;">💘</span>`;
+        if (attrs.some(k => k.startsWith('target'))) iconsHtml += `<span style="position:absolute; bottom:-5px; right:-5px; font-size:1.4em; text-shadow:0 0 2px black; z-index:50;">🎯</span>`;
+        if (attrs.some(k => k.startsWith('infected'))) iconsHtml += `<span style="position:absolute; bottom:-5px; left:-5px; font-size:1.4em; text-shadow:0 0 2px black; z-index:50;">🐾</span>`;
+        if (attrs.some(k => k.startsWith('linked_red'))) iconsHtml += `<span style="position:absolute; top:-5px; left:-5px; font-size:1.4em; text-shadow:0 0 2px black; z-index:50;">🩸</span>`;
         
-        if (attrs.some(k => k.startsWith('silenced'))) iconsHtml += `<span style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); font-size:2em; text-shadow:0 0 5px black; z-index:25; opacity:0.8;">🤐</span>`;
-        if (attrs.some(k => k.startsWith('bewitched'))) iconsHtml += `<span style="position:absolute; top:0; left:50%; transform:translateX(-50%); font-size:1.5em; text-shadow:0 0 3px black; z-index:20;">😵‍💫</span>`;
+        if (attrs.some(k => k.startsWith('silenced'))) iconsHtml += `<span style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); font-size:2em; z-index:60; opacity:0.9;">🤐</span>`;
+        if (attrs.some(k => k.startsWith('bewitched'))) iconsHtml += `<span style="position:absolute; top:0; left:50%; transform:translateX(-50%); font-size:1.5em; z-index:50;">😵‍💫</span>`;
     }
 
     if (isMayor) {
-        iconsHtml += `<span style="position:absolute; top:-15px; left:-10px; font-size:1.8em; z-index:30; filter:drop-shadow(0 2px 2px rgba(0,0,0,0.8));">🎖️</span>`;
+        iconsHtml += `<span style="position:absolute; top:-15px; left:-10px; font-size:1.8em; z-index:70; filter:drop-shadow(0 2px 2px black);">🎖️</span>`;
     }
 
-    // STRUCTURE CORRIGÉE : Le conteneur n'a PAS overflow:hidden, l'image OUI (via border-radius)
     return `
-        <div class="admin-avatar-container" style="position:relative; width:${size}; height:${size}; min-width:${size};">
+        <div class="admin-avatar-container" style="position:relative; width:${size}; height:${size}; min-width:${size}; overflow:visible;">
             <img src="${avatarSrc}" alt="Avatar" style="width:100%; height:100%; object-fit:cover; border-radius:50%; border:${border}; display:block; background:#000;">
             ${iconsHtml}
         </div>
@@ -234,6 +233,15 @@ function scanContentFromHTML() {
         }
     });
 }
+
+window.closeAdminPanel = function() {
+    if(confirm("Quitter le mode Admin ?")) {
+        localStorage.removeItem('adminGameCode');
+        document.body.classList.remove('no-scroll'); 
+        location.reload(); 
+    }
+};
+
 /* ============================================
    5. ADMIN : INITIALISATION & CONNEXION
    ============================================ */
