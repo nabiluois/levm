@@ -44,52 +44,49 @@ let actionSourceId = null;
 let currentlyOpenedPlayerId = null; 
 
 /* ============================================
-   3. INITIALISATION & LISTENERS GLOBAUX (ULTIMATE FIX)
+   3. INITIALISATION & LISTENERS GLOBAUX (MODE CAPTURE)
    ============================================ */
 
-// Fonction Globale accessible directement par le HTML si besoin
-window.triggerCreateGame = function() {
-    const password = prompt("🔐 Mot de passe MJ :");
-    if(password === "1234") { 
-        if (typeof window.initCreateGame === 'function') {
-            window.initCreateGame(); 
-        } else {
-            alert("⚠️ Patiente encore 2 secondes, le jeu charge...");
+// ÉCOUTEUR UNIVERSEL EN PHASE DE CAPTURE (Passe avant tout le reste)
+window.addEventListener('click', function(e) {
+    // On vérifie si l'élément cliqué (ou son parent) est le bouton Créer
+    let target = e.target;
+    while (target && target !== document) {
+        if (target.id === 'btn-create-game') {
+            // On a trouvé le bouton ! On bloque les autres comportements
+            e.preventDefault();
+            e.stopPropagation();
+
+            // Logique de création
+            const password = prompt("🔐 Mot de passe MJ :");
+            if(password === "1234") { 
+                if (typeof window.initCreateGame === 'function') {
+                    window.initCreateGame(); 
+                } else {
+                    alert("⚠️ Le système charge encore... Réessaie dans 2 secondes.");
+                }
+            } 
+            else if (password !== null) { 
+                alert("⛔ Mot de passe incorrect !");
+            }
+            return; // Fin de l'action
         }
-    } 
-    else if (password !== null) { 
-        alert("⛔ Mot de passe incorrect !");
+        target = target.parentNode; // On remonte vers le parent
     }
-};
+}, true); // <--- LE TRUE EST IMPORTANT (Phase de capture)
 
 document.addEventListener('DOMContentLoaded', () => {
     try { scanContentFromHTML(); } catch(e) { console.error("Erreur Scan:", e); }
     
-    // 1. Bouton Rejoindre
+    // Bouton Rejoindre (Méthode classique)
     const btnJoin = document.getElementById('btn-join-action');
     if(btnJoin) btnJoin.onclick = joinGame;
 
-    // 2. Bouton Créer (MJ) - ASSIGNATION DIRECTE
-    const btnCreate = document.getElementById('btn-create-game');
-    if (btnCreate) {
-        // On supprime tout clone ou écouteur complexe
-        btnCreate.onclick = function(e) {
-            e.preventDefault();
-            e.stopPropagation(); // Empêche le clic de traverser
-            window.triggerCreateGame();
-        };
-        
-        // Sécurité tactile pour mobile
-        btnCreate.ontouchstart = function(e) {
-            e.stopPropagation();
-        };
-    }
-
-    // 3. Reprise Session Admin
+    // Reprise Session Admin
     const savedAdminCode = localStorage.getItem('adminGameCode');
     if (savedAdminCode) { showResumeButton(savedAdminCode); }
     
-    // 4. Reprise Session Joueur
+    // Reprise Session Joueur
     checkPlayerSession();
 });
 

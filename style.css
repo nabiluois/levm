@@ -209,6 +209,24 @@ body.no-scroll {
 
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
+/* AJOUT DE SÉCURITÉ POUR LE MENU EN LIGNE */
+#modal-online-menu {
+    z-index: 20000 !important; /* Très haut */
+}
+
+#modal-online-menu .modal-content {
+    overflow: visible !important; /* Permet aux popups de sortir */
+    pointer-events: auto !important; /* Assure le clic */
+}
+
+#btn-create-game {
+    position: relative;
+    z-index: 10;
+    cursor: pointer;
+    touch-action: manipulation; /* Optimisation mobile */
+    -webkit-tap-highlight-color: transparent;
+}
+
 /* ============================================
    6. RÈGLES & SLIDES
    ============================================ */
