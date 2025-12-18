@@ -49,36 +49,46 @@ let currentlyOpenedPlayerId = null;
 document.addEventListener('DOMContentLoaded', () => {
     try { scanContentFromHTML(); } catch(e) { console.error("Erreur Scan:", e); }
     
+    // A. Bouton Rejoindre
     const btnJoin = document.getElementById('btn-join-action');
-    if(btnJoin) btnJoin.addEventListener('click', joinGame);
+    if(btnJoin) {
+        btnJoin.onclick = joinGame; // Utilisation de onclick pour forcer l'événement
+    }
 
-    // C'est cette fonction qui active le bouton "Créer une partie"
-    attachCreateEvent();
-    setInterval(attachCreateEvent, 1000);
+    // B. Bouton Créer (MJ) - VERSION CORRIGÉE
+    const btnCreate = document.getElementById('btn-create-game');
+    if (btnCreate) {
+        // On supprime l'ancien système de setInterval et on attache directement
+        btnCreate.onclick = () => {
+            const password = prompt("🔐 Mot de passe MJ :");
+            if(password === "1234") { 
+                if (typeof window.initCreateGame === 'function') {
+                    window.initCreateGame(); 
+                } else {
+                    alert("Le système charge encore... réessaie dans 2 secondes.");
+                }
+            } 
+            else if (password !== null) { 
+                if(window.showNotification) window.showNotification("⛔ Erreur", "Accès refusé !");
+                else alert("Accès refusé !");
+            }
+        };
+    }
 
+    // C. Reprise Session Admin
     const savedAdminCode = localStorage.getItem('adminGameCode');
     if (savedAdminCode) { showResumeButton(savedAdminCode); }
     
+    // D. Reprise Session Joueur
     checkPlayerSession();
 });
 
-function attachCreateEvent() {
-    const btnCreate = document.getElementById('btn-create-game');
-    if(btnCreate && !btnCreate.getAttribute('data-ready')) {
-        btnCreate.addEventListener('click', () => {
-            const password = prompt("🔐 Mot de passe MJ :");
-            if(password === "1234") { window.initCreateGame(); } 
-            else if (password !== null) { 
-                internalShowNotification("⛔ Erreur", "Accès refusé !");
-            }
-        });
-        btnCreate.setAttribute('data-ready', 'true');
-    }
-}
+// Note : La fonction attachCreateEvent a été supprimée car elle est remplacée par le code ci-dessus plus fiable.
 
 /* ============================================
    4. UTILITAIRES (AVATAR, SESSION, SCAN)
    ============================================ */
+
 // FIX AVATAR : Image ronde + Emojis visibles (overflow visible)
 function generateAvatarWithBadges(player, size = "60px", border = "2px solid var(--gold)") {
     const avatarSrc = player.avatar || "icon.png";
@@ -241,7 +251,6 @@ window.closeAdminPanel = function() {
         location.reload(); 
     }
 };
-
 /* ============================================
    5. ADMIN : INITIALISATION & CONNEXION
    ============================================ */
