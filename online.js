@@ -78,31 +78,32 @@ function attachCreateEvent() {
 /* ============================================
    4. UTILITAIRES (AVATAR, SESSION, SCAN)
    ============================================ */
-function generateAvatarWithBadges(player, size = "60px", border = "1px solid var(--gold)") {
+function generateAvatarWithBadges(player, size = "60px", border = "2px solid var(--gold)") {
     const avatarSrc = player.avatar || "icon.png";
     const isMayor = player.isMayor;
     let iconsHtml = "";
 
+    // GESTION DES BADGES (EMOJIS)
     if (player.attributes) {
         const attrs = Object.keys(player.attributes);
-        if (attrs.some(k => k.startsWith('lover'))) iconsHtml += `<span style="position:absolute; top:-5px; left:-5px; font-size:1.2em; text-shadow:0 0 3px black; z-index:10;">💘</span>`;
-        if (attrs.some(k => k.startsWith('target'))) iconsHtml += `<span style="position:absolute; bottom:-5px; left:-5px; font-size:1.2em; text-shadow:0 0 3px black; z-index:10;">🎯</span>`;
-        if (attrs.some(k => k.startsWith('infected'))) iconsHtml += `<span style="position:absolute; bottom:-5px; right:-5px; font-size:1.2em; text-shadow:0 0 3px black; z-index:10;">🐾</span>`;
-        if (attrs.some(k => k.startsWith('linked_red'))) iconsHtml += `<span style="position:absolute; top:-5px; right:-5px; font-size:1.2em; text-shadow:0 0 3px black; z-index:10;">❤️</span>`;
-        if (attrs.some(k => k.startsWith('cursed_mentor'))) iconsHtml += `<span style="position:absolute; top:-8px; left:50%; transform:translateX(-50%); font-size:1em; text-shadow:0 0 3px black; z-index:10;">🌙</span>`;
+        // Positionnement absolu par rapport au conteneur de l'avatar
+        if (attrs.some(k => k.startsWith('lover'))) iconsHtml += `<span style="position:absolute; top:-5px; right:-5px; font-size:1.4em; text-shadow:0 0 3px black; z-index:20;">💘</span>`;
+        if (attrs.some(k => k.startsWith('target'))) iconsHtml += `<span style="position:absolute; bottom:-5px; right:-5px; font-size:1.4em; text-shadow:0 0 3px black; z-index:20;">🎯</span>`;
+        if (attrs.some(k => k.startsWith('infected'))) iconsHtml += `<span style="position:absolute; bottom:-5px; left:-5px; font-size:1.4em; text-shadow:0 0 3px black; z-index:20;">🐾</span>`;
+        if (attrs.some(k => k.startsWith('linked_red'))) iconsHtml += `<span style="position:absolute; top:-5px; left:-5px; font-size:1.4em; text-shadow:0 0 3px black; z-index:20;">🩸</span>`;
         
-        if (attrs.some(k => k.startsWith('silenced'))) iconsHtml += `<span style="position:absolute; bottom:5px; left:50%; transform:translateX(-50%); font-size:1.4em; text-shadow:0 0 3px black; z-index:15;">🤐</span>`;
-        if (attrs.some(k => k.startsWith('bewitched'))) iconsHtml += `<span style="position:absolute; top:5px; left:50%; transform:translateX(-50%); font-size:1.4em; text-shadow:0 0 3px black; z-index:15;">😵‍💫</span>`;
+        if (attrs.some(k => k.startsWith('silenced'))) iconsHtml += `<span style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); font-size:2em; text-shadow:0 0 5px black; z-index:25; opacity:0.8;">🤐</span>`;
+        if (attrs.some(k => k.startsWith('bewitched'))) iconsHtml += `<span style="position:absolute; top:0; left:50%; transform:translateX(-50%); font-size:1.5em; text-shadow:0 0 3px black; z-index:20;">😵‍💫</span>`;
     }
 
     if (isMayor) {
-        iconsHtml += `<span style="position:absolute; top:-12px; left:-12px; font-size:1.8em; z-index:20; text-shadow:0 0 4px black; filter:drop-shadow(0 2px 2px rgba(0,0,0,0.5));">🎖️</span>`;
+        iconsHtml += `<span style="position:absolute; top:-15px; left:-10px; font-size:1.8em; z-index:30; filter:drop-shadow(0 2px 2px rgba(0,0,0,0.8));">🎖️</span>`;
     }
 
-    /* FIX AVATAR : Image forcée à 100% de width/height pour respecter le border-radius du parent */
+    // STRUCTURE CORRIGÉE : Le conteneur n'a PAS overflow:hidden, l'image OUI (via border-radius)
     return `
-        <div class="admin-avatar-container" style="border:${border}; width:${size}; height:${size}; min-width:${size};">
-            <img src="${avatarSrc}" alt="Avatar" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">
+        <div class="admin-avatar-container" style="position:relative; width:${size}; height:${size}; min-width:${size};">
+            <img src="${avatarSrc}" alt="Avatar" style="width:100%; height:100%; object-fit:cover; border-radius:50%; border:${border}; display:block; background:#000;">
             ${iconsHtml}
         </div>
     `;
@@ -1343,7 +1344,7 @@ function internalShowNotification(title, message) {
 }
 
 /* ============================================
-   15. INTERACTIONS & ACTION SELECTOR
+   15. INTERACTIONS & ACTION SELECTOR (LOGIQUE CORRIGÉE)
    ============================================ */
 window.openPlayerSelectorForAction = function(sourceRoleId, sourcePlayerId) {
     actionSourceRole = sourceRoleId;
@@ -1358,43 +1359,102 @@ window.openPlayerSelectorForAction = function(sourceRoleId, sourcePlayerId) {
 
     // 2. Configuration Modale
     const h2 = modal.querySelector('h2');
-    if(h2) { h2.style.display = 'block'; h2.innerHTML = `<span style="font-size:0.8em">ACTION DE</span><br>${detectedRoles.find(r=>r.id===sourceRoleId)?.title || 'Rôle'}`; }
+    if(h2) { 
+        h2.style.display = 'block'; 
+        h2.innerHTML = `<span style="font-size:0.7em; color:#ccc;">ACTION DE :</span><br>${detectedRoles.find(r=>r.id===sourceRoleId)?.title || 'Rôle'}`; 
+    }
     
     const ps = modal.querySelectorAll('p');
-    ps.forEach(p => p.style.display = 'none'); // Cache les textes inutiles
+    ps.forEach(p => p.style.display = 'none'); 
 
     const grid = document.getElementById('admin-role-grid');
     grid.innerHTML = "";
     grid.style.display = "grid";
-    grid.style.gridTemplateColumns = "repeat(3, 1fr)";
+    grid.style.gridTemplateColumns = "repeat(3, 1fr)"; // 3 par ligne pour être lisible
     grid.style.gap = "10px";
+    grid.style.paddingBottom = "50px";
 
-    // 3. Génération de la grille des JOUEURS (et non des rôles)
+    // 3. Génération de la grille des CIBLES
     alivePlayers.forEach(([pid, p]) => {
-        if (pid === sourcePlayerId) return; // Ne pas se cibler soi-même
+        // Optionnel : ne pas se cibler soi-même (sauf exceptions)
+        if (pid === sourcePlayerId) return; 
 
         const card = document.createElement('div');
         card.className = "player-select-card";
-        card.style.cssText = "background:rgba(255,255,255,0.1); border-radius:10px; padding:5px; text-align:center; cursor:pointer; border:1px solid #555;";
+        card.style.cssText = "background:rgba(255,255,255,0.1); border-radius:10px; padding:8px; text-align:center; cursor:pointer; border:1px solid #555; display:flex; flex-direction:column; align-items:center;";
         
+        // Image ronde et propre
         card.innerHTML = `
-            <div style="width:50px; height:50px; margin:0 auto; border-radius:50%; overflow:hidden;">
-                <img src="${p.avatar || 'icon.png'}" style="width:100%; height:100%; object-fit:cover;">
+            <div style="width:60px; height:60px; border-radius:50%; overflow:hidden; border:2px solid #888; margin-bottom:5px;">
+                <img src="${p.avatar || 'icon.png'}" loading="eager" style="width:100%; height:100%; object-fit:cover;">
             </div>
-            <div style="font-size:0.8em; color:white; margin-top:5px; font-weight:bold; overflow:hidden; text-overflow:ellipsis;">${p.name}</div>
+            <div style="font-size:0.85em; color:white; font-weight:bold; overflow:hidden; text-overflow:ellipsis; width:100%;">${p.name}</div>
         `;
 
         card.onclick = () => {
             if(confirm(`Confirmer l'action sur ${p.name} ?`)) {
-                // Ici on pourrait ajouter la logique spécifique (ex: Cupidon lie 2 joueurs)
-                // Pour l'instant, on notifie juste le MJ.
-                internalShowNotification("Action Validée", `${p.name} a été ciblé.`);
-                window.closeModal('modal-role-selector');
+                applyActionLogic(sourceRoleId, sourcePlayerId, pid, p.name);
             }
         };
         grid.appendChild(card);
     });
 
-    modal.style.zIndex = "30000";
+    // 4. FIX Z-INDEX : Très haut pour passer devant le tableau Panini (99999)
+    modal.style.zIndex = "200000"; 
     window.openModal('modal-role-selector');
 };
+
+// LOGIQUE D'ÉCRITURE EN BASE DE DONNÉES (C'est ça qui manquait !)
+function applyActionLogic(roleId, sourcePid, targetPid, targetName) {
+    const updates = {};
+    let msg = `Action effectuée sur ${targetName}.`;
+
+    // 1. L'ORPHELIN / CUPIDON (Création du lien amoureux)
+    if (roleId === 'l_orphelin') { 
+        // Note: Ici on fait simple, on lie l'Orphelin à sa cible (Couple)
+        // Ou on peut dire que l'Orphelin choisit DEUX personnes.
+        // Pour simplifier l'interface clic unique : L'Orphelin SE lie à la cible.
+        updates[`games/${currentGameCode}/players/${targetPid}/attributes/lover_by_${sourcePid}`] = true;
+        updates[`games/${currentGameCode}/players/${sourcePid}/attributes/lover_by_${targetPid}`] = true;
+        msg = "💘 Couple formé ! Ils sont liés.";
+    }
+
+    // 2. LOUP GAROU ROUGE (Donne son coeur)
+    else if (roleId === 'le_loup_garou_rouge') {
+        updates[`games/${currentGameCode}/players/${targetPid}/attributes/linked_red_by_${sourcePid}`] = true;
+        msg = "🩸 Coeur donné. Si la cible meurt, le Loup Rouge meurt.";
+    }
+
+    // 3. TARGET (Détournement)
+    else if (roleId === 'target') {
+        updates[`games/${currentGameCode}/players/${targetPid}/attributes/target_mirror_by_${sourcePid}`] = true;
+        updates[`games/${currentGameCode}/players/${sourcePid}/attributes/is_targeting_${targetPid}`] = true;
+        msg = "🎯 Cible miroir définie.";
+    }
+
+    // 4. PAPA DES LOUPS (Infection)
+    else if (roleId === 'le_papa_des_loups') {
+        updates[`games/${currentGameCode}/players/${targetPid}/attributes/infected`] = true;
+        // On change aussi son rôle en base ou on garde juste l'attribut ?
+        // L'attribut affiche la patte de loup. C'est suffisant visuellement.
+        msg = "🐾 Joueur infecté !";
+    }
+
+    // 5. CHUCHOTEUR (Silence)
+    else if (roleId === 'le_chuchoteur') {
+        updates[`games/${currentGameCode}/players/${targetPid}/attributes/silenced`] = true;
+        msg = "🤐 Joueur réduit au silence.";
+    }
+
+    // 6. MARABOUT (Poupée / Ensorcellement)
+    else if (roleId === 'le_marabout' || roleId === 'le_gourou') {
+        updates[`games/${currentGameCode}/players/${targetPid}/attributes/bewitched`] = true;
+        msg = "😵‍💫 Joueur marabouté/ensorcelé.";
+    }
+
+    // ENVOI FIREBASE
+    update(ref(db), updates).then(() => {
+        internalShowNotification("Succès", msg);
+        window.closeModal('modal-role-selector');
+    });
+}

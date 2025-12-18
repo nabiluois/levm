@@ -687,12 +687,12 @@ body.light-mode #modal-regles p, body.light-mode #modal-regles li, body.light-mo
 .summary-container { flex-wrap: wrap; }
 
 /* ============================================
-   19. PANINI ADMIN & TABLEAU (STYLES AVANCÉS)
+   19. PANINI ADMIN & TABLEAU (FIX ALIGNEMENT & AVATARS)
    ============================================ */
 .panini-admin-header { text-align: center; border-bottom: 1px solid var(--gold); padding-bottom: 20px; margin-bottom: 20px; position: relative; }
 .panini-admin-header h2 { text-align: center; width: 100%; margin-top: 10px; }
 
-/* CONTENEUR PRINCIPAL DU TABLEAU */
+/* CONTENEUR PRINCIPAL */
 .summary-container { 
     display: flex; flex-direction: column; gap: 20px; width: 100%; 
     padding-bottom: 50px;
@@ -706,54 +706,95 @@ body.light-mode #modal-regles p, body.light-mode #modal-regles li, body.light-mo
 .summary-col img { width: 35px; vertical-align: middle; margin-right: 10px; }
 .summary-col strong { font-size: 1.4em; font-family: 'Pirata One'; vertical-align: middle; }
 
-/* COULEURS DES TITRES */
+/* COULEURS */
 .village-col strong { color: #2ecc71; }
 .loup-col strong { color: #c0392b; }
 .solo-col strong { color: #9b59b6; }
 .vampire-col strong { color: #34495e; border-top: 1px solid #333; padding-top: 15px; margin-top: 10px; }
 
-/* LISTE DES JOUEURS */
 .col-content { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
 
-/* ITEM JOUEUR : ALIGNEMENT STRICT (GRID) */
+/* --- ITEM JOUEUR : GRID ROBUSTE --- */
 .summary-list-item { 
     display: grid !important; 
-    grid-template-columns: 60px 1fr 50px; /* Colonnes : Avatar | Infos | Action */
+    /* 3 Colonnes : [Avatar 70px] [Infos (Reste)] [Bouton Action 50px] */
+    grid-template-columns: 70px 1fr 50px; 
     align-items: center; 
-    padding: 8px 10px; border-radius: 12px; width: 100%; 
+    padding: 10px 5px; 
+    border-radius: 12px; width: 100%; 
     position: relative;
     box-shadow: 0 2px 5px rgba(0,0,0,0.3);
     pointer-events: auto !important; 
     cursor: pointer !important;
-    min-height: 70px; /* Hauteur minimale uniforme */
+    min-height: 85px; /* Hauteur fixe pour éviter les décalages */
+    overflow: visible !important; /* Pour laisser dépasser les emojis */
 }
 
-/* ZONE DE CLIC GAUCHE (Avatar + Nom) */
+/* ZONE CLIQUABLE (Avatar + Texte) */
 .summary-click-area {
     display: flex; align-items: center; gap: 10px; 
-    grid-column: 1 / 3; /* Prend les 2 premières colonnes pour le clic */
+    grid-column: 1 / 3; /* Occupe les colonnes 1 et 2 */
     width: 100%; height: 100%;
     pointer-events: auto !important;
+    overflow: visible !important;
 }
 
-.summary-text-col { display: flex; flex-direction: column; justify-content: center; align-items: flex-start; }
-.player-name { font-family: 'Almendra'; font-size: 1.3em; font-weight: bold; line-height: 1.1; color: #fff; margin-bottom: 2px; }
-.role-name { font-size: 0.85em; color: #ccc; font-style: italic; font-family: 'Helvetica', sans-serif; opacity: 0.8; }
+/* AVATAR DANS LE TABLEAU : CERCLE STRICT */
+.summary-click-area .admin-avatar-container {
+    width: 60px !important; height: 60px !important;
+    min-width: 60px !important;
+    margin-left: 5px;
+    /* On enlève overflow hidden ici pour voir les emojis qui dépassent */
+    overflow: visible !important; 
+    background: transparent !important;
+    border: none !important;
+    position: relative;
+}
+
+/* L'IMAGE SEULE EST RONDE */
+.summary-click-area .admin-avatar-container img[alt="Avatar"] {
+    width: 100% !important; height: 100% !important;
+    border-radius: 50% !important;
+    object-fit: cover !important;
+    border: 2px solid var(--gold);
+    display: block;
+    background: #000;
+}
+
+/* TEXTES */
+.summary-text-col { 
+    display: flex; flex-direction: column; 
+    justify-content: center; align-items: flex-start; 
+    overflow: hidden; /* Coupe le texte trop long */
+    padding-right: 5px;
+}
+.player-name { 
+    font-family: 'Almendra'; font-size: 1.2em; font-weight: bold; 
+    line-height: 1.1; color: #fff; margin-bottom: 3px; 
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; 
+    text-align: left;
+}
+.role-name { 
+    font-size: 0.85em; color: #ccc; font-style: italic; 
+    font-family: 'Helvetica', sans-serif; opacity: 0.8; 
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%;
+    text-align: left; 
+}
 
 .dead-item .player-name { text-decoration: line-through; opacity: 0.7; }
-.summary-list-item.empty { display: flex !important; padding: 10px; border: 1px dashed #444; justify-content: center; color: #666; font-style: italic; grid-column: 1 / -1; }
+.summary-list-item.empty { display: flex !important; justify-content: center; color: #666; font-style: italic; border: 1px dashed #444; grid-column: 1 / -1; }
 
-/* BOUTON ECLAIR (ACTION) */
+/* BOUTON ECLAIR */
 .action-btn-flash {
-    grid-column: 3; /* Force à droite */
+    grid-column: 3; 
+    justify-self: center;
     background: linear-gradient(135deg, #f1c40f, #d35400); 
     border: 2px solid white; border-radius: 50%; 
-    width: 45px; height: 45px; 
+    width: 42px; height: 42px; 
     display: flex; align-items: center; justify-content: center; 
-    font-size: 1.4em; cursor: pointer; 
+    font-size: 1.2em; cursor: pointer; 
     box-shadow: 0 0 10px rgba(243, 156, 18, 0.6); 
-    z-index: 100; pointer-events: auto !important;
-    justify-self: end; /* Colle à droite */
+    z-index: 150; position: relative;
 }
 .action-btn-flash:active { transform: scale(0.9); }
 
