@@ -464,9 +464,11 @@ window.resetGameToLobby = function() {
 };
 
 /* ============================================
-   7. TABLEAU RECAPITULATIF (SUMMARY)
+   7. TABLEAU RECAPITULATIF (CORRIGÉ V89)
    ============================================ */
 window.openRoleSummaryPanel = function() {
+    console.log("Ouverture du tableau..."); // Pour vérifier dans la console si besoin
+
     const rolesVillage = [];
     const rolesLoup = [];
     const rolesSolo = [];
@@ -486,37 +488,37 @@ window.openRoleSummaryPanel = function() {
                 ? "background:#2c3e50; color:#95a5a6; text-decoration:line-through; border:1px solid #7f8c8d; opacity:0.7;" 
                 : "background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,215,0,0.3);";
             
-            const avatarHtml = generateAvatarWithBadges(playerObj, "55px");
+            // Avatar (petite taille pour la liste)
+            const avatarHtml = generateAvatarWithBadges(playerObj, "50px");
 
             let actionBtn = "";
             if (interactiveRoles.includes(roleId) && !isDead) {
                 actionBtn = `
                     <button onclick="event.stopPropagation(); window.openPlayerSelectorForAction('${roleId}', '${playerId}')" 
-                        style="background:linear-gradient(135deg, #f1c40f, #d35400); border:1px solid white; border-radius:50%; width:45px; height:45px; display:flex; align-items:center; justify-content:center; font-size:1.5em; cursor:pointer; box-shadow:0 0 10px rgba(243, 156, 18, 0.5); margin-left:auto; flex-shrink:0; position:relative; z-index:100; pointer-events:auto;">
+                        style="background:linear-gradient(135deg, #f1c40f, #d35400); border:1px solid white; border-radius:50%; width:40px; height:40px; display:flex; align-items:center; justify-content:center; font-size:1.2em; cursor:pointer; box-shadow:0 0 10px rgba(243, 156, 18, 0.5); margin-left:auto; flex-shrink:0; position:relative; z-index:100; pointer-events:auto;">
                         ⚡
                     </button>
                 `;
             }
 
             html = `
-                <div class="summary-list-item" style="${style} display:flex; align-items:center; gap:15px; padding:10px 10px; margin:8px 0; border-radius:15px; width:96%; position:relative;">
-                    
-                    <div style="flex:1; display:flex; align-items:center; gap:15px; cursor:pointer; pointer-events:auto;" onclick="window.openAdminPlayerDetail('${playerId}', '${playerObj.name}', '${roleId}', ${isDead}, '${playerObj.avatar}', ${playerObj.isMayor})">
+                <div class="summary-list-item" style="${style} display:flex; align-items:center; gap:10px; padding:8px; margin:5px 0; border-radius:10px; width:100%; position:relative;">
+                    <div style="flex:1; display:flex; align-items:center; gap:10px; cursor:pointer; pointer-events:auto;" onclick="window.openAdminPlayerDetail('${playerId}', '${playerObj.name}', '${roleId}', ${isDead}, '${playerObj.avatar}', ${playerObj.isMayor})">
                         ${avatarHtml}
-                        <div style="display:flex; flex-direction:column;">
-                            <span style="font-family:'Almendra'; font-size:1.3em; font-weight:bold; line-height:1.1;">${playerObj.name}</span>
-                            <span style="font-size:1em; color:#ddd;">${role.title}</span>
+                        <div style="display:flex; flex-direction:column; align-items:flex-start;">
+                            <span style="font-family:'Almendra'; font-size:1.1em; font-weight:bold; line-height:1;">${playerObj.name}</span>
+                            <span style="font-size:0.9em; color:#ccc;">${role.title}</span>
                         </div>
                     </div>
-
                     ${actionBtn}
                 </div>`;
         } else {
-            html = `<div class="summary-list-item" style="color:#ddd; padding:8px; font-size:1.1em;">${role.title}</div>`;
+            html = `<div class="summary-list-item" style="color:#888; padding:5px; font-size:0.9em; font-style:italic;">${role.title}</div>`;
         }
         return { html, cat: role.category };
     };
 
+    // Logique de tri inchangée...
     let assignedCount = 0;
     if (Object.keys(currentPlayersData).length > 0) {
         Object.entries(currentPlayersData).forEach(([pid, p]) => {
@@ -541,7 +543,7 @@ window.openRoleSummaryPanel = function() {
             const role = detectedRoles.find(r => r.id === id);
             if(role) {
                 const txt = qty > 1 ? `${role.title} (x${qty})` : role.title;
-                const html = `<div class="summary-list-item" style="color:#ddd; padding:10px;">${txt}</div>`;
+                const html = `<div class="summary-list-item" style="color:#aaa; padding:5px;">${txt}</div>`;
                 if(role.category === 'village') rolesVillage.push(html);
                 else if(role.category === 'loups') rolesLoup.push(html);
                 else if(role.category === 'vampires') rolesVampire.push(html);
@@ -553,13 +555,13 @@ window.openRoleSummaryPanel = function() {
     const summaryHTML = `
         <div class="panini-admin-header">
             <h2 style="color:var(--gold); font-family:'Pirata One'; font-size:2em; margin:0;">RÉPARTITION</h2>
-            <button class="close-details" onclick="window.internalCloseDetails()" style="position:absolute; right:0; top:0; background:transparent; border:none; color:gold; font-size:1.5em; cursor:pointer; pointer-events:auto; z-index:20002;">✕</button>
+            <button class="close-details" onclick="window.internalCloseDetails()" style="position:absolute; right:0; top:0; background:transparent; border:none; color:gold; font-size:2em; cursor:pointer; pointer-events:auto; z-index:20002;">✕</button>
         </div>
-        <div class="summary-container" style="display:flex; flex-direction:column; gap:10px;">
-            ${rolesVillage.length ? `<div class="summary-col" style="border-bottom:1px solid #333; padding-bottom:10px;"><img src="Village.svg" style="width:40px; margin-bottom:5px;"> <strong style="display:block; color:#2ecc71;">VILLAGE (${rolesVillage.length})</strong>${rolesVillage.join('')}</div>` : ''}
-            ${rolesLoup.length ? `<div class="summary-col" style="border-bottom:1px solid #333; padding-bottom:10px;"><img src="Loup.svg" style="width:40px; margin-bottom:5px;"> <strong style="display:block; color:#c0392b;">LOUPS (${rolesLoup.length})</strong>${rolesLoup.join('')}</div>` : ''}
-            ${rolesSolo.length ? `<div class="summary-col"><img src="Solo.svg" style="width:40px; margin-bottom:5px;"> <strong style="display:block; color:#9b59b6;">SOLOS (${rolesSolo.length})</strong>${rolesSolo.join('')}</div>` : ''}
-            ${rolesVampire.length ? `<div class="summary-col" style="border-top:1px solid #333; padding-top:10px;"><img src="Vampires.svg" style="width:40px; margin-bottom:5px;"> <strong style="display:block; color:#34495e;">VAMPIRES (${rolesVampire.length})</strong>${rolesVampire.join('')}</div>` : ''}
+        <div class="summary-container" style="display:flex; flex-direction:column; gap:15px; width:100%;">
+            ${rolesVillage.length ? `<div class="summary-col" style="border-bottom:1px solid #333; padding-bottom:10px;"><img src="Village.svg" style="width:30px; vertical-align:middle;"> <strong style="color:#2ecc71; font-size:1.2em;">VILLAGE (${rolesVillage.length})</strong><br>${rolesVillage.join('')}</div>` : ''}
+            ${rolesLoup.length ? `<div class="summary-col" style="border-bottom:1px solid #333; padding-bottom:10px;"><img src="Loup.svg" style="width:30px; vertical-align:middle;"> <strong style="color:#c0392b; font-size:1.2em;">LOUPS (${rolesLoup.length})</strong><br>${rolesLoup.join('')}</div>` : ''}
+            ${rolesSolo.length ? `<div class="summary-col"><img src="Solo.svg" style="width:30px; vertical-align:middle;"> <strong style="color:#9b59b6; font-size:1.2em;">SOLOS (${rolesSolo.length})</strong><br>${rolesSolo.join('')}</div>` : ''}
+            ${rolesVampire.length ? `<div class="summary-col" style="border-top:1px solid #333; padding-top:10px;"><img src="Vampires.svg" style="width:30px; vertical-align:middle;"> <strong style="color:#34495e; font-size:1.2em;">VAMPIRES (${rolesVampire.length})</strong><br>${rolesVampire.join('')}</div>` : ''}
         </div>
         <br><br><br>
     `;
@@ -573,130 +575,17 @@ window.openRoleSummaryPanel = function() {
              contentDiv = panel.querySelector('.details-content');
         }
         contentDiv.innerHTML = summaryHTML;
+        
+        // SECURITE JS : On force le style directement sur l'élément
+        panel.style.zIndex = "99999";
+        overlay.style.zIndex = "99998";
+        
         panel.classList.add('active');
         overlay.classList.add('active');
         document.body.classList.add('no-scroll');
-    }
-};
-
-/* ============================================
-   8. SÉLECTEUR D'ACTIONS (INTERACTION ROLES)
-   ============================================ */
-window.openPlayerSelectorForAction = function(roleType, sourceId) {
-    actionSourceRole = roleType;
-    actionSourceId = sourceId; 
-    
-    let title = "CHOISIR CIBLE";
-    let maxSelection = 1;
-    let attributeKey = "";
-    
-    if(roleType === 'l_orphelin') { title = "CHOISIR LES 2 AMOUREUX"; maxSelection = 2; attributeKey = "lover"; }
-    else if(roleType === 'target') { title = "DÉTOURNEMENT"; attributeKey = "target"; }
-    else if(roleType === 'le_loup_garou_rouge') { title = "LIER AU CŒUR"; attributeKey = "linked_red"; }
-    else if(roleType === 'le_loup_garou_maudit') { title = "CHOISIR MENTOR"; attributeKey = "cursed_mentor"; }
-    else if(roleType === 'le_papa_des_loups' || roleType === 'le_loup_garou_alpha') { title = "INFECTER"; attributeKey = "infected"; }
-    else if(roleType === 'le_chuchoteur') { title = "RENDRE MUET"; maxSelection = 1; attributeKey = "silenced"; }
-    else if(roleType === 'le_marabout') { title = "MARABOUTER"; maxSelection = 99; attributeKey = "bewitched"; }
-    else { title = "ACTION"; attributeKey = "generic_action"; }
-
-    const grid = document.getElementById('admin-role-grid');
-    const modal = document.getElementById('modal-role-selector');
-    if(!grid || !modal) return;
-
-    const ps = modal.querySelectorAll('p');
-    ps.forEach(p => p.style.display = 'none');
-    const h2 = modal.querySelector('h2');
-    if(h2) h2.style.display = 'none';
-
-    grid.style.display = "block"; 
-    grid.innerHTML = "";
-
-    const initiator = currentPlayersData[sourceId];
-    const roleObj = detectedRoles.find(r => r.id === (initiator.role || initiator.draftRole));
-    const roleName = roleObj ? roleObj.title : "";
-    
-    const headerDiv = document.createElement('div');
-    headerDiv.className = "initiator-header";
-    headerDiv.innerHTML = `
-        <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; margin-bottom:15px; border-bottom:1px solid #555; padding-bottom:10px; width:100%;">
-            <span style="color:#aaa; font-size:0.8em; text-transform:uppercase; letter-spacing:2px; margin-bottom:5px;">INITIÉ PAR</span>
-            <div style="position:relative; margin-bottom:5px;">
-                 ${generateAvatarWithBadges(initiator, "70px", "2px solid var(--gold)")}
-            </div>
-            <span style="display:block; color:var(--gold); font-family:'Pirata One'; font-size:1.6em; line-height:1;">${initiator.name}</span>
-            <span style="display:block; color:#ccc; font-size:1em; font-style:italic;">${roleName}</span>
-            
-            <h3 style="color:white; margin:15px 0 5px 0; font-size:1.3em; border:1px solid #444; padding:5px 15px; border-radius:20px; background:rgba(255,255,255,0.1);">${title}</h3>
-            <small style="color:#888;">(Max: ${maxSelection})</small>
-        </div>
-    `;
-    grid.appendChild(headerDiv);
-
-    const catGrid = document.createElement('div');
-    catGrid.className = "player-selector-grid"; 
-    catGrid.style.cssText = "display:grid; grid-template-columns: 1fr 1fr; gap:10px; padding-bottom:50px;";
-
-    Object.entries(currentPlayersData).forEach(([pid, p]) => {
-        const uniqueAttrKey = `${attributeKey}_by_${sourceId}`; 
-        const isSelected = p.attributes && p.attributes[uniqueAttrKey];
-
-        const div = document.createElement('div');
-        div.className = `player-select-card ${isSelected ? 'active' : ''}`;
-        div.style.cssText = `
-            position: relative; 
-            background: rgba(255,255,255,0.05); 
-            border-radius: 12px; 
-            overflow: hidden; 
-            aspect-ratio: 1/1;
-            border: 2px solid ${isSelected ? '#2ecc71' : 'transparent'};
-            cursor: pointer;
-        `;
-        
-        div.innerHTML = `
-            <div style="width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center;">
-                ${generateAvatarWithBadges(p, "60px", "none")}
-                <div style="width:100%; background:rgba(0,0,0,0.6); color:white; padding:5px; text-align:center; font-size:0.9em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:5px;">
-                    ${p.name}
-                </div>
-            </div>
-            ${isSelected ? '<div style="position:absolute; top:5px; right:5px; background:#2ecc71; color:white; border-radius:50%; width:25px; height:25px; display:flex; align-items:center; justify-content:center; font-weight:bold; z-index:20;">✓</div>' : ''}
-        `;
-        
-        div.onclick = () => window.togglePlayerSelection(pid, attributeKey, maxSelection, uniqueAttrKey);
-        catGrid.appendChild(div);
-    });
-    grid.appendChild(catGrid);
-    
-    modal.style.zIndex = "25000"; 
-    window.openModal('modal-role-selector');
-};
-
-window.togglePlayerSelection = function(targetPid, baseAttrKey, maxLimit, uniqueAttrKey) {
-    let currentCount = 0;
-    Object.values(currentPlayersData).forEach(p => {
-        if(p.attributes && p.attributes[uniqueAttrKey]) currentCount++;
-    });
-
-    const targetPlayer = currentPlayersData[targetPid];
-    const isCurrentlySelected = targetPlayer.attributes && targetPlayer.attributes[uniqueAttrKey];
-
-    const updates = {};
-
-    if (isCurrentlySelected) {
-        updates[`games/${currentGameCode}/players/${targetPid}/attributes/${uniqueAttrKey}`] = null;
     } else {
-        if (currentCount >= maxLimit) {
-            alert(`Maximum ${maxLimit} joueur(s) déjà sélectionné(s) ! Désélectionnez-en un d'abord.`);
-            return;
-        }
-        updates[`games/${currentGameCode}/players/${targetPid}/attributes/${uniqueAttrKey}`] = true;
+        alert("Erreur technique : Panel non trouvé dans le HTML");
     }
-
-    update(ref(db), updates).then(() => {
-        window.openPlayerSelectorForAction(actionSourceRole, actionSourceId);
-        if(!isCurrentlySelected) internalShowNotification("Action", "Joueur sélectionné.");
-        else internalShowNotification("Action", "Joueur retiré.");
-    });
 };
 
 /* ============================================

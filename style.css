@@ -391,19 +391,32 @@ h2 {
 #vm-overlay.active { display: block; }
 
 /* ============================================
-   11. PANEL DÉTAILS
+   11. PANEL DÉTAILS (CORRIGÉ FORCE BRUTE)
    ============================================ */
 .details-panel { 
   position: fixed; top: 0; right: -100%; width: 100%; max-width: 500px; 
   height: 100dvh; background: rgba(35, 25, 18, 0.98); 
-  z-index: 4500 !important; overflow-y: auto; -webkit-overflow-scrolling: touch; 
+  
+  /* Z-INDEX MAXIMUM : Passe devant l'Admin (5000) */
+  z-index: 99999 !important; 
+  
+  overflow-y: auto; -webkit-overflow-scrolling: touch; 
   padding: 25px; padding-bottom: 200px !important; 
   border-left: 2px solid var(--gold); box-shadow: -5px 0 25px rgba(0,0,0,0.8) !important;
   transition: right 0.3s cubic-bezier(0.25, 1, 0.5, 1), transform 0.1s linear; filter: none !important; -webkit-filter: none !important;
 }
 .details-panel.active { right: 0; }
 .details-panel::before { content: ''; position: absolute; top: 50%; left: 8px; transform: translateY(-50%); width: 5px; height: 60px; background-color: rgba(212, 175, 55, 0.5); border-radius: 10px; pointer-events: none; box-shadow: 0 0 10px rgba(212, 175, 55, 0.3); }
-.details-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 4400 !important; backdrop-filter: blur(5px); }
+
+.details-overlay { 
+  display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+  background: rgba(0,0,0,0.8); 
+  
+  /* Juste derrière le panel */
+  z-index: 99998 !important; 
+  
+  backdrop-filter: blur(5px); 
+}
 .details-overlay.active { display: block; }
 
 .details-header { display: block !important; text-align: center !important; margin-bottom: 0 !important; padding-bottom: 0 !important; }
@@ -427,7 +440,6 @@ h2 {
 .details-section p { display: block; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid rgba(212, 175, 55, 0.3); }
 .details-section p:last-child { border-bottom: none; padding-bottom: 0; margin-bottom: 0; }
 .emoji-svg { width: 1.3em !important; height: 1.3em !important; vertical-align: text-bottom !important; margin-right: 5px !important; display: inline-block !important; object-fit: contain !important; }
-
 /* ============================================
    12. ADMIN DASHBOARD (CORRIGÉ & FIX PHOTO OVALE)
    ============================================ */
@@ -666,12 +678,11 @@ body.light-mode #modal-regles p, body.light-mode #modal-regles li, body.light-mo
 .role-select-item { cursor: pointer; border: 2px solid transparent; text-align: center; transition: transform 0.2s; width: 100% !important; margin: 0 !important; }
 
 /* ============================================
-   18. FIX PANINI & Z-INDEX
+   18. FIX PANINI & Z-INDEX (NETTOYÉ)
    ============================================ */
-/* FIX IMPORTANT : Overlay 4400 < Panel 4500 */
-.details-overlay { z-index: 4400 !important; backdrop-filter: blur(5px); }
-.details-panel { z-index: 4500 !important; filter: none !important; -webkit-filter: none !important; box-shadow: -5px 0 25px rgba(0,0,0,0.8) !important; }
-.close-details { z-index: 11100 !important; cursor: pointer; }
+/* Les règles .details-panel et .details-overlay ont été déplacées et corrigées en Section 11 */
+/* On ne garde ici que ce qui est spécifique au contenu */
+
 .details-content { padding-bottom: 80px; width: 100%; }
 .summary-container { flex-wrap: wrap; }
 
