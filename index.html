@@ -1384,10 +1384,12 @@ La seule façon de le faire disparaître ? Le convoquer au bûcher, en plein j
       <span class="close-modal" onclick="closeModal('modal-player-detail')">✕</span>
       <h2 id="detail-pseudo" style="color:var(--gold); font-size:2em;">Pseudo</h2>
       
-      <div style="display:flex; justify-content:center; gap:20px; margin:20px 0;">
-        <div style="width:120px; height:120px; border-radius:50%; border:4px solid var(--gold); overflow:hidden; background:#000;">
-            <img id="detail-avatar" src="icon.png" style="width:100%; height:100%; object-fit:cover;">
+      <div style="display:flex; justify-content:center; align-items:center; gap:20px; margin:20px 0;">
+        
+        <div id="detail-avatar-wrapper">
+             <img id="detail-avatar" src="icon.png" style="width:120px; height:120px; border-radius:50%; object-fit:cover; border:4px solid var(--gold);">
         </div>
+
         <div style="width:80px; height:120px; border-radius:8px; border:2px solid #555; overflow:hidden;">
             <img id="detail-card" src="back.png" style="width:100%; height:100%; object-fit:cover;">
         </div>
@@ -1397,7 +1399,7 @@ La seule façon de le faire disparaître ? Le convoquer au bûcher, en plein j
       <div id="detail-status" style="margin-bottom:20px; font-weight:bold; color:#2ecc71;">VIVANT</div>
 
       <div id="detail-actions" style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-        </div>
+      </div>
     </div>
   </div>
 

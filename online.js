@@ -1109,7 +1109,9 @@ window.openAdminPlayerDetail = function(pid, name, roleId, isDead, avatarSrc, is
 
 window.refreshAdminPlayerContent = function(pid, name, roleId, isDead, avatarSrc, isMayor, fullData) {
     const pPseudo = document.getElementById('detail-pseudo');
-    const pAvatar = document.getElementById('detail-avatar');
+    // On cible le WRAPPER (le conteneur) au lieu de l'image directe
+    const pAvatarWrapper = document.getElementById('detail-avatar-wrapper'); 
+    
     const pRoleName = document.getElementById('detail-role-name');
     const pCard = document.getElementById('detail-card');
     const pStatus = document.getElementById('detail-status');
@@ -1117,10 +1119,10 @@ window.refreshAdminPlayerContent = function(pid, name, roleId, isDead, avatarSrc
 
     if(pPseudo) pPseudo.innerText = name;
     
-    // FIX PHOTO : On force une taille de 150px ici (Grande photo)
-    if(pAvatar && pAvatar.parentNode) {
+    // FIX PHOTO : On injecte la grande photo (150px) dans le wrapper propre
+    if(pAvatarWrapper) {
         const avatarContainer = generateAvatarWithBadges(fullData || {name:name, avatar:avatarSrc, isMayor:isMayor}, "150px", "4px solid var(--gold)");
-        pAvatar.parentNode.innerHTML = avatarContainer;
+        pAvatarWrapper.innerHTML = avatarContainer;
     }
     
     let displayImage = "back.png";

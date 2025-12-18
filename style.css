@@ -11,17 +11,17 @@
   --text-light: #3e2f23;
   --gold: #d4af37;
 
-  /* Z-INDEX CORRIGÉS : Le Panel (6000) passe DEVANT l'Admin (5000) */
+  /* ECHELLE DES Z-INDEX CORRIGÉE (HIERARCHIE STRICTE) */
   --z-header: 100;
   --z-overlay: 1000;
   --z-menu: 1100;
   --z-modal: 2000;
-  --z-admin: 5000;       
-  --z-details: 6000;     
-  --z-admin-modal: 7000; 
-  --z-lock: 8000;
-  --z-notif: 9000;
-  --z-loader: 9999;
+  --z-admin: 5000;       /* Le fond noir Admin */
+  --z-details: 20000;    /* LE TABLEAU DOIT ÊTRE ICI (TRES HAUT) */
+  --z-admin-modal: 25000; /* La sélection de cartes */
+  --z-lock: 30000;
+  --z-notif: 40000;
+  --z-loader: 50000;
 }
 
 html {
@@ -460,7 +460,7 @@ h2 {
 .admin-player-card.dead { filter: none !important; border: 1px solid #555 !important; background: linear-gradient(145deg, #1a0f0f, #000) !important; }
 .admin-player-card.dead img, .admin-player-card.dead strong, .admin-player-card.dead div:not(.admin-actions) { filter: grayscale(100%); opacity: 0.5; text-decoration: line-through; }
 
-/* FIX PHOTO ADMIN DÉFINITIF (ROND PARFAIT) */
+/* FIX PHOTO ADMIN (DÉFINITIF ET CENTRÉ) */
 .admin-avatar-container { 
     margin: 0 auto 5px auto; 
     position: relative !important; 
@@ -468,11 +468,15 @@ h2 {
     border-radius: 50%; 
     flex-shrink: 0; 
     aspect-ratio: 1 / 1; 
-    overflow: visible !important; 
-    border: 2px solid var(--gold);
+    overflow: hidden !important; /* Coupe tout ce qui dépasse */
+    border: 2px solid var(--gold); 
+    
+    /* CENTRAGE ABSOLU DE L'IMAGE */
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
 }
 
-/* 2. On force la petite taille UNIQUEMENT dans la grille des joueurs */
 .player-grid-admin .admin-avatar-container { 
     width: 60px !important; 
     height: 60px !important; 
