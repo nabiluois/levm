@@ -99,8 +99,8 @@ function generateAvatarWithBadges(player, size = "60px", border = "1px solid var
 
     // STYLE BLINDÉ : min-width/height + flex-shrink:0 pour empêcher l'écrasement ovale
     return `
-        <div style="position:relative; width:${size}; height:${size}; min-width:${size}; min-height:${size}; flex-shrink:0;">
-            <img src="${avatarSrc}" style="width:100%; height:100%; object-fit:cover; border-radius:50%; border:${border}; box-shadow:0 2px 5px rgba(0,0,0,0.5); display:block;">
+        <div class="admin-avatar-container" style="border:${border}; width:${size}; height:${size};">
+            <img src="${avatarSrc}" alt="Avatar">
             ${iconsHtml}
         </div>
     `;
@@ -279,6 +279,7 @@ function launchAdminInterface() {
 }
 
 function setupAdminListeners() {
+    // 1. ÉCOUTEUR PRINCIPAL (Mise à jour des joueurs)
     onValue(ref(db, 'games/' + currentGameCode + '/players'), (snapshot) => {
         const players = snapshot.val() || {};
         currentPlayersData = players;
@@ -290,6 +291,18 @@ function setupAdminListeners() {
             const isDead = p.status === 'dead';
             refreshAdminPlayerContent(currentlyOpenedPlayerId, p.name, roleId, isDead, p.avatar, p.isMayor, p);
         }
+    });
+
+    // 2. NOUVEL AJOUT : SURVEILLANCE CONNEXION
+    // C'est ici que l'on vérifie si le MJ perd internet
+    const connectedRef = ref(db, ".info/connected");
+    onValue(connectedRef, (snap) => {
+      if (snap.val() === false) {
+        // Uniquement si une partie est en cours
+        if (currentGameCode) {
+            internalShowNotification("⚠️ Réseau", "Connexion instable...");
+        }
+      }
     });
 }
 

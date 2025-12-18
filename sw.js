@@ -1,4 +1,4 @@
-const CACHE_NAME = 'village-maudit-v5.8';
+const CACHE_NAME = 'village-maudit-v5.9';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -97,4 +97,11 @@ self.addEventListener('fetch', (event) => {
         );
       })
   );
+});
+
+// 4. Force l'activation immédiate si demandé par le client
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.action === 'skipWaiting') {
+    self.skipWaiting();
+  }
 });

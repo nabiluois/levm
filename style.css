@@ -1,5 +1,5 @@
 /* ============================================
-   1. VARIABLES & RESET
+   1. VARIABLES & RESET & CONFIGURATION
    ============================================ */
 :root {
   --safe-top: env(safe-area-inset-top, 20px);
@@ -10,6 +10,22 @@
   --bg-light: #f5e6d3;
   --text-light: #3e2f23;
   --gold: #d4af37;
+
+  /* ECHELLE DES Z-INDEX (HIERARCHIE STRICTE) */
+  --z-header: 100;
+  --z-overlay: 1000;
+  --z-menu: 1100;
+  --z-modal: 2000;
+  --z-details: 4500;
+  --z-admin: 5000;
+  --z-admin-modal: 5500;
+  --z-lock: 8000;
+  --z-notif: 9000;
+  --z-loader: 9999;
+}
+
+html {
+  scroll-behavior: smooth; /* DÉFILEMENT FLUIDE */
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -23,7 +39,7 @@ body::-webkit-scrollbar-thumb {
 }
 
 /* ============================================
-   2. BODY & CONFIGURATION GLOBALE
+   2. BODY
    ============================================ */
 body {
   font-family: 'Almendra', serif;
@@ -37,7 +53,6 @@ body {
   transition: background 0.5s ease;
 }
 
-/* Bloque totalement le scroll d'arrière-plan */
 body.no-scroll { 
     overflow: hidden !important; 
     height: 100vh !important; 
@@ -56,7 +71,7 @@ body.no-scroll {
   backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
   border-bottom: 2px solid var(--gold);
   box-shadow: 0 5px 20px rgba(0,0,0,0.6);
-  z-index: 1000;
+  z-index: var(--z-header);
   display: flex; flex-direction: column;
 }
 
@@ -115,11 +130,12 @@ body.no-scroll {
 .extra-menu {
   position: fixed; top: 0; left: -300px; width: 280px; height: 100dvh;
   background: rgba(20, 14, 10, 0.98); border-right: 2px solid var(--gold);
-  z-index: 3000; transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: var(--z-menu);
+  transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex; flex-direction: column; padding: 20px; padding-bottom: calc(env(safe-area-inset-bottom) + 60px); box-shadow: 10px 0 30px rgba(0,0,0,0.8);
 }
 .extra-menu.open { left: 0; }
-.extra-menu-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 2900; backdrop-filter: blur(2px); }
+.extra-menu-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: var(--z-overlay); backdrop-filter: blur(2px); }
 .extra-menu-overlay.active { display: block; }
 
 .extra-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--gold); padding-bottom: 15px; margin-bottom: 30px; }
@@ -135,9 +151,9 @@ body.no-scroll {
 .extra-footer { margin-top: auto; text-align: center; font-size: 0.8em; opacity: 0.5; color: var(--gold); }
 
 /* ============================================
-   5. MODALES (STYLES DE BASE & ESPACEMENT)
+   5. MODALES (STYLES DE BASE)
    ============================================ */
-.modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.85); z-index: 4000; justify-content: center; align-items: center; padding: 20px; backdrop-filter: blur(5px); }
+.modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.85); z-index: var(--z-modal); justify-content: center; align-items: center; padding: 20px; backdrop-filter: blur(5px); }
 .modal.active { display: flex; animation: fadeIn 0.3s; }
 
 .modal-content { 
@@ -174,7 +190,7 @@ body.no-scroll {
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
 /* ============================================
-   6. RÈGLES DE BASE & SLIDES (MODALE LARGE)
+   6. RÈGLES & SLIDES
    ============================================ */
 .modal-large { max-width: 600px; height: 85vh; display: flex; flex-direction: column; padding: 0 !important; overflow: hidden !important; }
 .slides-container { 
@@ -241,7 +257,7 @@ body.no-scroll {
 .timeline-icon { width: 60%; height: 60%; object-fit: contain; display: block; }
 
 /* ============================================
-   7. PACTE MAUDIT (CORRECTIF ICONES MOBILE)
+   7. PACTE MAUDIT
    ============================================ */
 .rules-container-styled { display: flex; flex-direction: column; gap: 15px; }
 .rule-box { 
@@ -380,14 +396,14 @@ h2 {
 .details-panel { 
   position: fixed; top: 0; right: -100%; width: 100%; max-width: 500px; 
   height: 100dvh; background: rgba(35, 25, 18, 0.98); 
-  z-index: 11050 !important; overflow-y: auto; -webkit-overflow-scrolling: touch; 
+  z-index: 4500 !important; overflow-y: auto; -webkit-overflow-scrolling: touch; 
   padding: 25px; padding-bottom: 200px !important; 
   border-left: 2px solid var(--gold); box-shadow: -5px 0 25px rgba(0,0,0,0.8) !important;
   transition: right 0.3s cubic-bezier(0.25, 1, 0.5, 1), transform 0.1s linear; filter: none !important; -webkit-filter: none !important;
 }
 .details-panel.active { right: 0; }
 .details-panel::before { content: ''; position: absolute; top: 50%; left: 8px; transform: translateY(-50%); width: 5px; height: 60px; background-color: rgba(212, 175, 55, 0.5); border-radius: 10px; pointer-events: none; box-shadow: 0 0 10px rgba(212, 175, 55, 0.3); }
-.details-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 11000 !important; backdrop-filter: blur(5px); }
+.details-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 4400 !important; backdrop-filter: blur(5px); }
 .details-overlay.active { display: block; }
 
 .details-header { display: block !important; text-align: center !important; margin-bottom: 0 !important; padding-bottom: 0 !important; }
@@ -413,9 +429,9 @@ h2 {
 .emoji-svg { width: 1.3em !important; height: 1.3em !important; vertical-align: text-bottom !important; margin-right: 5px !important; display: inline-block !important; object-fit: contain !important; }
 
 /* ============================================
-   12. ADMIN DASHBOARD & ONLINE
+   12. ADMIN DASHBOARD (CORRIGÉ & FIX PHOTO OVALE)
    ============================================ */
-.admin-view { position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; background: #120c08; z-index: 10000; display: flex; flex-direction: column; overflow: hidden; }
+.admin-view { position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; background: #120c08; z-index: var(--z-admin); display: flex; flex-direction: column; overflow: hidden; }
 .admin-header-bar { background: #000 !important; border-bottom: 2px solid var(--gold); padding: 5px 10px !important; display: flex; align-items: center; justify-content: space-between; height: 50px !important; z-index: 10; }
 .admin-header-bar h2 { font-size: 0.9em !important; border: none !important; background: none !important; box-shadow: none !important; flex: 1 !important; text-align: center !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; margin: 0 5px !important; padding: 0 !important; }
 .btn-quit-admin { background: none; border: 1px solid #c0392b; color: #c0392b; padding: 2px 8px !important; border-radius: 5px; font-family: 'Pirata One'; cursor: pointer; font-size: 0.9em !important; }
@@ -426,24 +442,51 @@ h2 {
 .roles-list-container { max-height: 250px; overflow-y: auto; background: rgba(0,0,0,0.4); border-radius: 8px; padding: 10px; border: 1px solid #444; }
 .btn-distribute-big { width: 100%; padding: 8px 10px !important; font-size: 1em !important; margin-top: 5px !important; }
 
-/* Grille Admin */
+/* GRILLE & CARTES ADMIN */
 .player-grid-admin { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)) !important; gap: 8px !important; }
-.admin-player-card { background: linear-gradient(145deg, #2a1f15, #120c08); border: 1px solid #5a4633; border-radius: 8px; padding: 4px !important; display: flex; flex-direction: column; align-items: center; text-align: center; position: relative; transition: all 0.3s ease; padding-top: 5px !important; justify-content: flex-start !important; overflow: visible !important; }
-.admin-player-card img { width: 60px !important; height: auto !important; max-height: 90px !important; margin-bottom: 2px !important; border-radius: 5px; border: 1px solid rgba(212, 175, 55, 0.3); }
+
+.admin-player-card { 
+    background: linear-gradient(145deg, #2a1f15, #120c08); 
+    border: 1px solid #5a4633; border-radius: 8px; 
+    padding: 8px !important; /* Espace interne */
+    display: flex; flex-direction: column; align-items: center; text-align: center; 
+    position: relative; transition: all 0.3s ease; 
+    justify-content: flex-start !important; overflow: visible !important; 
+    cursor: pointer !important; pointer-events: auto !important; user-select: none; z-index: 1;
+}
+
 .admin-player-card strong { color: var(--gold); font-family: 'Pirata One', serif; font-size: 0.8em !important; margin-bottom: 2px !important; width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .admin-player-card div { font-size: 0.7em !important; line-height: 1 !important; }
 .admin-player-card.dead { filter: none !important; border: 1px solid #555 !important; background: linear-gradient(145deg, #1a0f0f, #000) !important; }
 .admin-player-card.dead img, .admin-player-card.dead strong, .admin-player-card.dead div:not(.admin-actions) { filter: grayscale(100%); opacity: 0.5; text-decoration: line-through; }
-.admin-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; width: 100%; margin-top: auto; }
-.btn-admin-mini { border: none; border-radius: 4px; padding: 10px 5px !important; font-size: 0.8em !important; font-weight: bold; cursor: pointer; flex-grow: 1; touch-action: manipulation; }
 
-/* FIX AVATAR ADMIN */
-.admin-avatar-container { width: 70px; height: 70px; margin: 0 auto 10px auto; position: relative !important; background: #000; border-radius: 50%; border: 2px solid var(--gold); overflow: visible !important; }
-.admin-avatar-container img[alt="Avatar"] { width: 100% !important; height: 100% !important; object-fit: cover !important; border-radius: 50% !important; display: block; }
+/* FIX PHOTO ADMIN DÉFINITIF (ROND PARFAIT) */
+.admin-avatar-container { 
+    width: 60px !important; 
+    height: 60px !important; 
+    margin: 0 auto 5px auto; 
+    position: relative !important; 
+    background: #000; 
+    border-radius: 50%; 
+    flex-shrink: 0; 
+    aspect-ratio: 1 / 1; /* C'est la clé pour éviter l'ovale */
+    overflow: visible !important; /* Pour les emojis qui dépassent */
+    border: 2px solid var(--gold); 
+}
+
+.admin-avatar-container img[alt="Avatar"] { 
+    width: 100% !important; 
+    height: 100% !important; 
+    object-fit: cover !important; 
+    border-radius: 50% !important; 
+    display: block; 
+}
+
 .mayor-badge { position: absolute !important; top: -5px !important; left: -5px !important; font-size: 1.5em !important; z-index: 60 !important; filter: drop-shadow(0 2px 2px black); }
-.attr-icon { position: absolute; font-size: 1.3em; filter: drop-shadow(0 0 2px black); z-index: 50; }
+.admin-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; width: 100%; margin-top: auto; }
+.btn-admin-mini { border: none; border-radius: 4px; padding: 10px 5px !important; font-size: 0.8em !important; font-weight: bold; cursor: pointer; flex-grow: 1; touch-action: manipulation; position: relative; z-index: 100; }
 
-/* 13. SYSTEME DE VERROUILLAGE (RESTORED) */
+/* 13. SYSTEME DE VERROUILLAGE */
 .lock-content { max-width: 380px !important; min-height: 450px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; background: linear-gradient(145deg, #1a120b 0%, #0f0804 100%); border: 2px solid var(--gold); padding: 30px 20px !important; }
 .lock-slide { display: none; flex-direction: column; align-items: center; width: 100%; animation: fadeIn 0.5s ease; }
 .lock-slide.active { display: flex; }
@@ -617,8 +660,9 @@ body.light-mode #modal-regles p, body.light-mode #modal-regles li, body.light-mo
 /* ============================================
    18. FIX PANINI & Z-INDEX
    ============================================ */
-.details-overlay { z-index: 11000 !important; backdrop-filter: blur(5px); }
-.details-panel { z-index: 11050 !important; filter: none !important; -webkit-filter: none !important; box-shadow: -5px 0 25px rgba(0,0,0,0.8) !important; }
+/* FIX IMPORTANT : Overlay 4400 < Panel 4500 */
+.details-overlay { z-index: 4400 !important; backdrop-filter: blur(5px); }
+.details-panel { z-index: 4500 !important; filter: none !important; -webkit-filter: none !important; box-shadow: -5px 0 25px rgba(0,0,0,0.8) !important; }
 .close-details { z-index: 11100 !important; cursor: pointer; }
 .details-content { padding-bottom: 80px; width: 100%; }
 .summary-container { flex-wrap: wrap; }
@@ -640,9 +684,8 @@ body.light-mode #modal-regles p, body.light-mode #modal-regles li, body.light-mo
 .summary-col:nth-child(3) .summary-list-item { background: rgba(155, 89, 182, 0.15); border-color: rgba(155, 89, 182, 0.5); color: #f4ecf7; }
 
 /* ============================================
-   20. NOUVELLES INTERACTIONS (V64) - ADDITIONNEL
+   20. NOUVELLES INTERACTIONS (V64)
    ============================================ */
-/* En-tête de la modale de sélection (L'initiateur) */
 .initiator-header {
     background: rgba(0, 0, 0, 0.4);
     border-radius: 12px;
@@ -653,21 +696,19 @@ body.light-mode #modal-regles p, body.light-mode #modal-regles li, body.light-mo
     flex-direction: column;
     align-items: center;
 }
-/* Grille 2 colonnes pour la sélection */
 .player-selector-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr; /* 2 colonnes strictes */
+    grid-template-columns: 1fr 1fr;
     gap: 15px;
     padding: 10px;
     padding-bottom: 50px;
 }
-/* Carte de joueur dans le sélecteur (Carré) */
 .player-select-card {
     position: relative;
     background: rgba(255, 255, 255, 0.05);
     border-radius: 15px;
     overflow: hidden;
-    aspect-ratio: 1 / 1; /* Force le carré */
+    aspect-ratio: 1 / 1;
     border: 3px solid transparent;
     cursor: pointer;
     box-shadow: 0 4px 10px rgba(0,0,0,0.3);
@@ -676,7 +717,6 @@ body.light-mode #modal-regles p, body.light-mode #modal-regles li, body.light-mo
 .player-select-card:active {
     transform: scale(0.95);
 }
-/* État sélectionné (Bordure verte) */
 .player-select-card.active {
     border-color: #2ecc71 !important;
     box-shadow: 0 0 15px rgba(46, 204, 113, 0.4);
@@ -694,64 +734,59 @@ body.light-mode #modal-regles p, body.light-mode #modal-regles li, body.light-mo
 /* ============================================
    21. BOUTONS VALIDÉS (FORCE BRUTE)
    ============================================ */
-/* On cible précisément les ID pour écraser la couleur verte */
 #modal-regles .btn-validate.disabled,
 #modal-regles-base .btn-validate.disabled,
 button.btn-validate.disabled {
-    background: #333 !important;       /* Fond Gris très foncé */
-    background-image: none !important; /* Supprime le dégradé vert */
-    border: 2px solid #555 !important; /* Bordure Grise */
-    color: #888 !important;            /* Texte Gris clair */
-    
-    cursor: not-allowed !important;    /* Curseur interdit */
-    pointer-events: none !important;   /* Empêche le clic */
-    
-    box-shadow: none !important;       /* Plus d'ombre */
-    animation: none !important;        /* Plus de clignotement */
-    transform: none !important;        /* Pas de zoom */
-    opacity: 0.6 !important;           /* Rend le bouton terne */
+    background: #333 !important;
+    background-image: none !important;
+    border: 2px solid #555 !important;
+    color: #888 !important;
+    cursor: not-allowed !important;
+    pointer-events: none !important;
+    box-shadow: none !important;
+    animation: none !important;
+    transform: none !important;
+    opacity: 0.6 !important;
 }
-/* On retire le petit doigt 👇 */
 .btn-validate.disabled::before {
     content: "" !important;
     display: none !important;
 }
 
 /* ============================================
-   22. CORRECTIF CLICS ADMIN (URGENT)
+   22. CORRECTIF Z-INDEX MODALE ROLE SELECT
    ============================================ */
-/* Force le Panini au-dessus de tout le reste */
-.details-panel {
-    z-index: 20000 !important; /* Très haut */
+#modal-role-selector {
+    z-index: var(--z-admin-modal); /* Doit être au-dessus de l'admin view */
 }
-.details-overlay {
-    z-index: 19999 !important;
+#modal-lock-intro {
+    z-index: var(--z-lock);
 }
-.close-details {
-    z-index: 20001 !important;
+
+/* ============================================
+   23. NOUVEAUX ELEMENTS (LOADER & TOAST)
+   ============================================ */
+.loader-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.7); z-index: var(--z-loader);
+    display: flex; justify-content: center; align-items: center;
+    backdrop-filter: blur(5px);
 }
-/* Rend les cartes joueurs Admin bien cliquables */
-.admin-player-card {
-    cursor: pointer !important;
-    pointer-events: auto !important;
-    user-select: none;
-    z-index: 1; /* Base */
+.spinner {
+    width: 50px; height: 50px;
+    border: 5px solid rgba(212, 175, 55, 0.3);
+    border-top: 5px solid var(--gold);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
 }
-/* Le bouton CHANGER en mode Prov ne doit pas bloquer le reste */
-.admin-player-card .btn-admin-mini {
-    position: relative;
-    z-index: 100; /* Passe au-dessus de la carte */
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+.update-toast {
+    position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(100px);
+    background: #2a1f15; border: 2px solid var(--gold); color: var(--gold);
+    padding: 15px 25px; border-radius: 50px; display: flex; gap: 15px; align-items: center;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.8); z-index: var(--z-notif);
+    transition: transform 0.3s ease; opacity: 0; pointer-events: none;
 }
-/* Lignes du tableau des rôles */
-.summary-list-item {
-    cursor: pointer !important;
-    pointer-events: auto !important;
-    position: relative;
-    z-index: 5;
-}
-/* Bouton Éclair dans le tableau */
-.summary-list-item button {
-    position: relative !important;
-    z-index: 50 !important; /* Passe LARGEMENT au-dessus du texte */
-    pointer-events: auto !important;
-}
+.update-toast.show { transform: translateX(-50%) translateY(0); opacity: 1; pointer-events: auto; }
+#reload-btn { background: var(--gold); color: black; border: none; padding: 5px 15px; border-radius: 20px; cursor: pointer; font-weight: bold; }

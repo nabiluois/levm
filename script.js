@@ -2522,7 +2522,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // LANCEMENT INITIAL
   initGameLock();
   
-  // ===============================
+ // ===============================
   // 14. EMOJIS DOS DE CARTE (CLIENT)
   // ===============================
   window.updateCardBackEmojis = function(attributes) {
@@ -2536,12 +2536,97 @@ document.addEventListener('DOMContentLoaded', function() {
       // Logique d'affichage : on vérifie s'il y a des clés qui commencent par...
       const hasInfected = Object.keys(attributes).some(k => k.startsWith('infected'));
       
-
-      }
+      // J'ai supprimé l'accolade fermante qui traînait ici
+      
       if (hasInfected) {
           container.innerHTML += `<div style="font-size:2em; filter:drop-shadow(0 0 3px black);">🐾</div>`;
-  
+      }
       
+      // (Tu pourras ajouter d'autres émojis ici plus tard si besoin : amoureux, cible, etc.)
+
+  }; // La fonction se ferme bien ici à la fin
+
+  // ===============================
+  // GESTION DU LOADING SPINNER
+  // ===============================
+  window.showLoader = function() {
+      const l = document.getElementById('global-loader');
+      if(l) l.style.display = 'flex';
   };
+  window.hideLoader = function() {
+      const l = document.getElementById('global-loader');
+      if(l) l.style.display = 'none';
+  };
+
+  // Modification de la fonction openDetails pour inclure le loader
+  const originalOpenDetails = window.openDetails || openDetails;
+  window.openDetails = function(cardData) {
+      window.showLoader(); // Affiche le spinner
+      
+      // On précharge l'image ou la vidéo avant d'afficher
+      const img = new Image();
+      img.src = cardData.image;
+      img.onload = () => {
+          window.hideLoader(); // Cache le spinner quand prêt
+          // Appel de la fonction d'origine (copie ta logique existante ici si besoin)
+          // Pour faire simple, on réutilise ta logique d'insertion HTML ici :
+          const content = document.querySelector('.details-panel .details-content');
+          if(content) {
+             const videoSrc = cardData.image.replace(/\.(png|jpg|jpeg|webp)$/i, '.mp4');
+             content.innerHTML = `
+               <div class="details-header">
+                 <h2 class="details-title">${cardData.title}</h2>
+                 <button class="close-details" onclick="closeDetails()">✕</button>
+               </div>
+               <div class="media-wrapper" style="position:relative; min-height:200px; display:flex; justify-content:center;">
+                   <video class="details-video" src="${videoSrc}" poster="${cardData.image}" autoplay loop muted playsinline webkit-playsinline style="width:100%; height:auto; display:block;"></video>
+               </div>
+               <div class="details-section">${cardData.description || ''}</div>
+             `;
+             
+             // Gestion erreur vidéo (comme avant)
+             const v = content.querySelector('video');
+             if(v) { v.onerror = () => { v.parentNode.innerHTML = `<img src="${cardData.image}" class="details-image" style="width:100%;">`; }; }
+             
+             document.querySelector('.details-panel').classList.add('active');
+             document.querySelector('.details-overlay').classList.add('active');
+             document.body.classList.add('no-scroll');
+          }
+      };
+      img.onerror = () => { window.hideLoader(); }; // Sécurité
+  };
+
+  // ===============================
+  // UPDATE PWA NOTIFICATION
+  // ===============================
+  let newWorker;
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').then(reg => {
+      reg.addEventListener('updatefound', () => {
+        newWorker = reg.installing;
+        newWorker.addEventListener('statechange', () => {
+          if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+            // Mise à jour disponible !
+            const toast = document.getElementById('update-notification');
+            if(toast) toast.classList.add('show');
+          }
+        });
+      });
+    });
+  }
+  
+  const reloadBtn = document.getElementById('reload-btn');
+  if(reloadBtn) {
+      reloadBtn.addEventListener('click', () => {
+          if(newWorker) newWorker.postMessage({ action: 'skipWaiting' });
+      });
+  }
+  
+  let refreshing;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (refreshing) return;
+      window.location.reload();
+      refreshing = true;
+  });
 
 }); // FIN DOMContentLoaded

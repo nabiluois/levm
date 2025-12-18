@@ -18,11 +18,18 @@
   <link href="https://fonts.googleapis.com/css2?family=Almendra&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Pirata+One&display=swap" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+  <link rel="preload" as="image" href="back.png">
+  <link rel="preload" as="image" href="Village.svg">
+  <link rel="preload" as="image" href="Loup.svg">
   <link href="style.css" rel="stylesheet">
   <link href="manifest.json" rel="manifest">
   <link rel="apple-touch-icon" href="icon.png">
 </head>
 <body>
+  
+  <div id="global-loader" class="loader-overlay" style="display:none;">
+    <div class="spinner"></div>
+  </div>
 
   <header class="main-header">
     <div class="header-top">
@@ -1403,5 +1410,9 @@ La seule façon de le faire disparaître ? Le convoquer au bûcher, en plein j
       window.addEventListener('load', () => navigator.serviceWorker.register('sw.js'));
     }
   </script>
+  <div id="update-notification" class="update-toast">
+    <span>Une mise à jour est disponible !</span>
+    <button id="reload-btn">Mettre à jour</button>
+  </div>
 </body>
 </html>
