@@ -44,44 +44,31 @@ let actionSourceId = null;
 let currentlyOpenedPlayerId = null; 
 
 /* ============================================
-   3. INITIALISATION & LISTENERS GLOBAUX (MÉTHODE DIRECTE)
+   3. INITIALISATION & LISTENERS GLOBAUX (NETTOYÉ)
    ============================================ */
 
-// On attache la fonction directement à la fenêtre (window) pour que le HTML la voie
-window.forcerCreationMJ = function() {
-    console.log("Clic détecté sur Créer Partie"); // Pour vérifier
-    
-    // Petite sécurité pour le chargement
-    if (typeof window.initCreateGame !== 'function') {
-        alert("⏳ Le système démarre... Réessaie dans 2 secondes.");
-        return;
-    }
-
-    const password = prompt("🔐 Mot de passe MJ :");
-    if(password === "1234") { 
-        window.initCreateGame(); 
-    } 
-    else if (password !== null) { 
-        alert("⛔ Mot de passe incorrect !");
-    }
-};
-
 document.addEventListener('DOMContentLoaded', () => {
+    // 1. Scan du contenu HTML pour les images
     try { scanContentFromHTML(); } catch(e) { console.error("Erreur Scan:", e); }
     
-    // Bouton Rejoindre (On garde l'ancien système car il pose moins de souci)
+    // 2. Gestion du bouton "Rejoindre" (Lui on le laisse ici)
     const btnJoin = document.getElementById('btn-join-action');
     if(btnJoin) btnJoin.onclick = joinGame;
 
-    // Reprise Session Admin
+    // 3. Reprise de session Admin si existante
     const savedAdminCode = localStorage.getItem('adminGameCode');
     if (savedAdminCode) { showResumeButton(savedAdminCode); }
     
-    // Reprise Session Joueur
+    // 4. Vérification session Joueur
     checkPlayerSession();
     
-    console.log("✅ Online.js est prêt et chargé.");
+    // DEBUG : Confirme que le script est lu
+    console.log("✅ Online.js chargé. initCreateGame est prêt.");
 });
+
+// NOTE IMPORTANTE : La gestion du clic "Créer" est maintenant gérée 
+// directement dans le code HTML (index.html) via l'attribut onclick.
+// Ce script se contente de fournir la fonction window.initCreateGame ci-dessous.
 
 /* ============================================
    4. UTILITAIRES (AVATAR, SESSION, SCAN)
