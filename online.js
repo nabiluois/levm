@@ -44,41 +44,32 @@ let actionSourceId = null;
 let currentlyOpenedPlayerId = null; 
 
 /* ============================================
-   3. INITIALISATION & LISTENERS GLOBAUX (MODE CAPTURE)
+   3. INITIALISATION & LISTENERS GLOBAUX (MÉTHODE DIRECTE)
    ============================================ */
 
-// ÉCOUTEUR UNIVERSEL EN PHASE DE CAPTURE (Passe avant tout le reste)
-window.addEventListener('click', function(e) {
-    // On vérifie si l'élément cliqué (ou son parent) est le bouton Créer
-    let target = e.target;
-    while (target && target !== document) {
-        if (target.id === 'btn-create-game') {
-            // On a trouvé le bouton ! On bloque les autres comportements
-            e.preventDefault();
-            e.stopPropagation();
-
-            // Logique de création
-            const password = prompt("🔐 Mot de passe MJ :");
-            if(password === "1234") { 
-                if (typeof window.initCreateGame === 'function') {
-                    window.initCreateGame(); 
-                } else {
-                    alert("⚠️ Le système charge encore... Réessaie dans 2 secondes.");
-                }
-            } 
-            else if (password !== null) { 
-                alert("⛔ Mot de passe incorrect !");
-            }
-            return; // Fin de l'action
-        }
-        target = target.parentNode; // On remonte vers le parent
+// On attache la fonction directement à la fenêtre (window) pour que le HTML la voie
+window.forcerCreationMJ = function() {
+    console.log("Clic détecté sur Créer Partie"); // Pour vérifier
+    
+    // Petite sécurité pour le chargement
+    if (typeof window.initCreateGame !== 'function') {
+        alert("⏳ Le système démarre... Réessaie dans 2 secondes.");
+        return;
     }
-}, true); // <--- LE TRUE EST IMPORTANT (Phase de capture)
+
+    const password = prompt("🔐 Mot de passe MJ :");
+    if(password === "1234") { 
+        window.initCreateGame(); 
+    } 
+    else if (password !== null) { 
+        alert("⛔ Mot de passe incorrect !");
+    }
+};
 
 document.addEventListener('DOMContentLoaded', () => {
     try { scanContentFromHTML(); } catch(e) { console.error("Erreur Scan:", e); }
     
-    // Bouton Rejoindre (Méthode classique)
+    // Bouton Rejoindre (On garde l'ancien système car il pose moins de souci)
     const btnJoin = document.getElementById('btn-join-action');
     if(btnJoin) btnJoin.onclick = joinGame;
 
@@ -88,6 +79,8 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Reprise Session Joueur
     checkPlayerSession();
+    
+    console.log("✅ Online.js est prêt et chargé.");
 });
 
 /* ============================================
