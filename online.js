@@ -44,45 +44,55 @@ let actionSourceId = null;
 let currentlyOpenedPlayerId = null; 
 
 /* ============================================
-   3. INITIALISATION & LISTENERS GLOBAUX (FIX V3)
+   3. INITIALISATION & LISTENERS GLOBAUX (FIX FINAL)
    ============================================ */
 
-// Fonction de création sécurisée accessible globalement
-window.actionCreateGame = function() {
+// 1. Définition Globale de l'action (Accessible partout)
+window.handleCreateGameClick = function() {
     const password = prompt("🔐 Mot de passe MJ :");
     if(password === "1234") { 
         if (typeof window.initCreateGame === 'function') {
             window.initCreateGame(); 
         } else {
-            alert("Le système charge encore... réessaie dans 2 secondes.");
+            alert("⏳ Le système charge encore... Réessaie dans 2 secondes.");
         }
     } 
     else if (password !== null) { 
-        alert("⛔ Accès refusé ! Mot de passe incorrect.");
+        alert("⛔ Accès refusé !");
     }
 };
 
-// Écouteur global (Délégation) : Fonctionne même si le bouton apparaît plus tard
-document.addEventListener('click', function(e) {
-    if (e.target && e.target.id === 'btn-create-game') {
-        e.preventDefault();
-        e.stopPropagation();
-        window.actionCreateGame();
-    }
-});
-
+// 2. Attachement Forcé au chargement
 document.addEventListener('DOMContentLoaded', () => {
     try { scanContentFromHTML(); } catch(e) { console.error("Erreur Scan:", e); }
     
-    // A. Bouton Rejoindre
+    // Bouton Rejoindre
     const btnJoin = document.getElementById('btn-join-action');
     if(btnJoin) btnJoin.onclick = joinGame;
 
-    // B. Reprise Session Admin
+    // Bouton Créer (MJ) - Force brute
+    const btnCreate = document.getElementById('btn-create-game');
+    if (btnCreate) {
+        // On retire les anciens écouteurs pour éviter les doublons
+        const newBtn = btnCreate.cloneNode(true);
+        btnCreate.parentNode.replaceChild(newBtn, btnCreate);
+        
+        // On attache le clic proprement
+        newBtn.addEventListener('click', (e) => {
+            e.preventDefault();   // Empêche les comportements par défaut
+            e.stopPropagation();  // Empêche la propagation
+            window.handleCreateGameClick();
+        });
+        
+        // Sécurité tactile pour mobile
+        newBtn.addEventListener('touchstart', (e) => {
+            e.stopPropagation(); // Empêche le "ghost click"
+        }, {passive: true});
+    }
+
+    // Reprise Session
     const savedAdminCode = localStorage.getItem('adminGameCode');
     if (savedAdminCode) { showResumeButton(savedAdminCode); }
-    
-    // C. Reprise Session Joueur
     checkPlayerSession();
 });
 

@@ -58,8 +58,8 @@ body.no-scroll {
     height: 100dvh !important; 
     position: fixed !important; 
     width: 100% !important;
-    touch-action: none !important; 
-    overscroll-behavior: none !important; /* EMPÊCHE LE REBOND iOS */
+    /* touch-action: none;  <-- CETTE LIGNE BLOQUAIT LES CLICS, ON LA SUPPRIME */
+    overscroll-behavior: none !important;
 }
 
 /* ============================================
