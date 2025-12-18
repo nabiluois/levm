@@ -47,9 +47,12 @@ let currentlyOpenedPlayerId = null;
    3. INITIALISATION & LISTENERS GLOBAUX
    ============================================ */
 
-// ÉCOUTEUR DE CLIC UNIVERSEL (C'est lui qui fait marcher le bouton)
+// ÉCOUTEUR DE CLIC UNIVERSEL (CORRIGÉ)
 document.addEventListener('click', function(e) {
-    if (e.target && e.target.id === 'btn-create-game') {
+    // On cherche le bouton, même si on clique sur l'emoji ou le texte à l'intérieur
+    const btn = e.target.closest('#btn-create-game');
+    
+    if (btn) {
         e.preventDefault();
         e.stopPropagation();
 
@@ -59,7 +62,7 @@ document.addEventListener('click', function(e) {
             if (typeof window.initCreateGame === 'function') {
                 window.initCreateGame(); 
             } else {
-                alert("Erreur : Attends 2 secondes que le système charge.");
+                alert("Erreur : Le système charge encore... Réessaie dans 2 secondes.");
             }
         } else if (password !== null) { 
             alert("⛔ Mot de passe incorrect !");
@@ -1639,8 +1642,3 @@ window.togglePlayerStatus = function(pid, newStatus) {
         internalShowNotification("Mise à jour", `Joueur ${isKilling ? 'éliminé' : 'ressuscité'}.`);
     });
 };
-
-function internalShowNotification(title, message) { 
-    if(window.showNotification) window.showNotification(title, message);
-    else alert(title + "\n" + message); 
-}
