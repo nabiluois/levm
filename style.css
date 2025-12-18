@@ -55,10 +55,11 @@ body {
 
 body.no-scroll { 
     overflow: hidden !important; 
-    height: 100vh !important; 
+    height: 100dvh !important; 
     position: fixed !important; 
     width: 100% !important;
     touch-action: none !important; 
+    overscroll-behavior: none !important; /* EMPÊCHE LE REBOND iOS */
 }
 
 /* ============================================
@@ -440,6 +441,7 @@ h2 {
 .details-section p { display: block; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid rgba(212, 175, 55, 0.3); }
 .details-section p:last-child { border-bottom: none; padding-bottom: 0; margin-bottom: 0; }
 .emoji-svg { width: 1.3em !important; height: 1.3em !important; vertical-align: text-bottom !important; margin-right: 5px !important; display: inline-block !important; object-fit: contain !important; }
+
 /* ============================================
    12. ADMIN DASHBOARD (CORRIGÉ & FIX PHOTO OVALE)
    ============================================ */
@@ -449,7 +451,7 @@ h2 {
 .btn-quit-admin { background: none; border: 1px solid #c0392b; color: #c0392b; padding: 2px 8px !important; border-radius: 5px; font-family: 'Pirata One'; cursor: pointer; font-size: 0.9em !important; }
 .admin-code-badge { background: rgba(46, 204, 113, 0.1) !important; color: #2ecc71 !important; padding: 2px 8px !important; border-radius: 8px; font-weight: 900 !important; font-family: 'Verdana', sans-serif !important; font-size: 1.2em !important; letter-spacing: 2px !important; border: 1px solid #2ecc71 !important; text-transform: uppercase; margin: 0 !important; }
 
-.admin-content-scroll { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 100px; }
+.admin-content-scroll { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 100px; -webkit-overflow-scrolling: touch; }
 .admin-section { background: rgba(255, 255, 255, 0.03); border: 1px solid #333; border-radius: 10px; padding: 15px; margin-bottom: 20px; }
 .roles-list-container { max-height: 250px; overflow-y: auto; background: rgba(0,0,0,0.4); border-radius: 8px; padding: 10px; border: 1px solid #444; }
 .btn-distribute-big { width: 100%; padding: 8px 10px !important; font-size: 1em !important; margin-top: 5px !important; }
@@ -460,33 +462,30 @@ h2 {
 .admin-player-card { 
     background: linear-gradient(145deg, #2a1f15, #120c08); 
     border: 1px solid #5a4633; border-radius: 8px; 
-    padding: 8px !important; /* Espace interne */
+    padding: 10px 5px !important; 
     display: flex; flex-direction: column; align-items: center; text-align: center; 
     position: relative; transition: all 0.3s ease; 
     justify-content: flex-start !important; overflow: visible !important; 
     cursor: pointer !important; pointer-events: auto !important; user-select: none; z-index: 1;
 }
 
-.admin-player-card strong { color: var(--gold); font-family: 'Pirata One', serif; font-size: 0.8em !important; margin-bottom: 2px !important; width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.admin-player-card strong { color: var(--gold); font-family: 'Pirata One', serif; font-size: 0.9em !important; margin-top: 5px !important; width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .admin-player-card div { font-size: 0.7em !important; line-height: 1 !important; }
 .admin-player-card.dead { filter: none !important; border: 1px solid #555 !important; background: linear-gradient(145deg, #1a0f0f, #000) !important; }
 .admin-player-card.dead img, .admin-player-card.dead strong, .admin-player-card.dead div:not(.admin-actions) { filter: grayscale(100%); opacity: 0.5; text-decoration: line-through; }
 
-/* FIX PHOTO ADMIN (DÉFINITIF ET CENTRÉ) */
+/* FIX PHOTO ADMIN : CERCLE PARFAIT ET IMAGE CONTENUE */
 .admin-avatar-container { 
-    margin: 0 auto 5px auto; 
+    margin: 0 auto; 
     position: relative !important; 
     background: #000; 
-    border-radius: 50%; 
+    border-radius: 50% !important; 
     flex-shrink: 0; 
     aspect-ratio: 1 / 1; 
-    overflow: hidden !important; /* Coupe tout ce qui dépasse */
-    border: 2px solid var(--gold); 
-    
-    /* CENTRAGE ABSOLU DE L'IMAGE */
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
+    overflow: hidden !important; 
+    display: flex !important; align-items: center; justify-content: center !important;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    z-index: 5;
 }
 
 .player-grid-admin .admin-avatar-container { 
@@ -494,6 +493,7 @@ h2 {
     height: 60px !important; 
 }
 
+/* L'image prend 100% du conteneur et est rognée par le border-radius du parent */
 .admin-avatar-container img[alt="Avatar"] { 
     width: 100% !important; 
     height: 100% !important; 
@@ -504,7 +504,7 @@ h2 {
 
 .mayor-badge { position: absolute !important; top: -5px !important; left: -5px !important; font-size: 1.5em !important; z-index: 60 !important; filter: drop-shadow(0 2px 2px black); }
 .admin-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; width: 100%; margin-top: auto; }
-.btn-admin-mini { border: none; border-radius: 4px; padding: 10px 5px !important; font-size: 0.8em !important; font-weight: bold; cursor: pointer; flex-grow: 1; touch-action: manipulation; position: relative; z-index: 100; }
+.btn-admin-mini { border: none; border-radius: 4px; padding: 6px 5px !important; font-size: 0.8em !important; font-weight: bold; cursor: pointer; flex-grow: 1; touch-action: manipulation; position: relative; z-index: 100; }
 
 /* 13. SYSTEME DE VERROUILLAGE */
 .lock-content { max-width: 380px !important; min-height: 450px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; background: linear-gradient(145deg, #1a120b 0%, #0f0804 100%); border: 2px solid var(--gold); padding: 30px 20px !important; }
@@ -715,41 +715,45 @@ body.light-mode #modal-regles p, body.light-mode #modal-regles li, body.light-mo
 /* LISTE DES JOUEURS */
 .col-content { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
 
-/* ITEM JOUEUR INDIVIDUEL */
+/* ITEM JOUEUR : ALIGNEMENT STRICT (GRID) */
 .summary-list-item { 
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 8px 12px; border-radius: 12px; width: 100%; 
+    display: grid !important; 
+    grid-template-columns: 60px 1fr 50px; /* Colonnes : Avatar | Infos | Action */
+    align-items: center; 
+    padding: 8px 10px; border-radius: 12px; width: 100%; 
     position: relative;
     box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-    
-    /* CRUCIAL POUR LE CLIC */
     pointer-events: auto !important; 
     cursor: pointer !important;
+    min-height: 70px; /* Hauteur minimale uniforme */
 }
 
 /* ZONE DE CLIC GAUCHE (Avatar + Nom) */
 .summary-click-area {
-    display: flex; align-items: center; gap: 15px; flex: 1;
+    display: flex; align-items: center; gap: 10px; 
+    grid-column: 1 / 3; /* Prend les 2 premières colonnes pour le clic */
+    width: 100%; height: 100%;
     pointer-events: auto !important;
 }
 
-.summary-text-col { display: flex; flex-direction: column; }
-.player-name { font-family: 'Almendra'; font-size: 1.2em; font-weight: bold; line-height: 1.1; color: #fff; }
-.role-name { font-size: 0.9em; color: #ccc; font-style: italic; }
+.summary-text-col { display: flex; flex-direction: column; justify-content: center; align-items: flex-start; }
+.player-name { font-family: 'Almendra'; font-size: 1.3em; font-weight: bold; line-height: 1.1; color: #fff; margin-bottom: 2px; }
+.role-name { font-size: 0.85em; color: #ccc; font-style: italic; font-family: 'Helvetica', sans-serif; opacity: 0.8; }
 
 .dead-item .player-name { text-decoration: line-through; opacity: 0.7; }
-.summary-list-item.empty { padding: 10px; border: 1px dashed #444; justify-content: center; }
+.summary-list-item.empty { display: flex !important; padding: 10px; border: 1px dashed #444; justify-content: center; color: #666; font-style: italic; grid-column: 1 / -1; }
 
 /* BOUTON ECLAIR (ACTION) */
 .action-btn-flash {
+    grid-column: 3; /* Force à droite */
     background: linear-gradient(135deg, #f1c40f, #d35400); 
     border: 2px solid white; border-radius: 50%; 
     width: 45px; height: 45px; 
     display: flex; align-items: center; justify-content: center; 
     font-size: 1.4em; cursor: pointer; 
     box-shadow: 0 0 10px rgba(243, 156, 18, 0.6); 
-    flex-shrink: 0; margin-left: 10px;
     z-index: 100; pointer-events: auto !important;
+    justify-self: end; /* Colle à droite */
 }
 .action-btn-flash:active { transform: scale(0.9); }
 

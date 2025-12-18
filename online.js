@@ -99,9 +99,10 @@ function generateAvatarWithBadges(player, size = "60px", border = "1px solid var
         iconsHtml += `<span style="position:absolute; top:-12px; left:-12px; font-size:1.8em; z-index:20; text-shadow:0 0 4px black; filter:drop-shadow(0 2px 2px rgba(0,0,0,0.5));">🎖️</span>`;
     }
 
+    /* FIX AVATAR : Image forcée à 100% de width/height pour respecter le border-radius du parent */
     return `
-        <div class="admin-avatar-container" style="border:${border}; width:${size}; height:${size};">
-            <img src="${avatarSrc}" alt="Avatar">
+        <div class="admin-avatar-container" style="border:${border}; width:${size}; height:${size}; min-width:${size};">
+            <img src="${avatarSrc}" alt="Avatar" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">
             ${iconsHtml}
         </div>
     `;
@@ -168,7 +169,7 @@ function restorePlayerSession(code, id) {
             if(lobbyStatus) lobbyStatus.style.display = 'block';
             
             if(window.closeModal) window.closeModal('modal-online-menu'); 
-            if(window.openModal) window.openModal('modal-join-game');        
+            if(window.openModal) window.openModal('modal-join-game');         
             listenForPlayerUpdates();
         } else {
             internalShowNotification("Info", "Partie terminée ou expirée.");
@@ -1340,3 +1341,60 @@ function internalShowNotification(title, message) {
     if(window.showNotification) window.showNotification(title, message);
     else alert(title + "\n" + message); 
 }
+
+/* ============================================
+   15. INTERACTIONS & ACTION SELECTOR
+   ============================================ */
+window.openPlayerSelectorForAction = function(sourceRoleId, sourcePlayerId) {
+    actionSourceRole = sourceRoleId;
+    actionSourceId = sourcePlayerId;
+
+    const modal = document.getElementById('modal-role-selector');
+    if(!modal) return;
+
+    // 1. Récupération des joueurs
+    const players = currentPlayersData || {};
+    const alivePlayers = Object.entries(players).filter(([id, p]) => p.status !== 'dead');
+
+    // 2. Configuration Modale
+    const h2 = modal.querySelector('h2');
+    if(h2) { h2.style.display = 'block'; h2.innerHTML = `<span style="font-size:0.8em">ACTION DE</span><br>${detectedRoles.find(r=>r.id===sourceRoleId)?.title || 'Rôle'}`; }
+    
+    const ps = modal.querySelectorAll('p');
+    ps.forEach(p => p.style.display = 'none'); // Cache les textes inutiles
+
+    const grid = document.getElementById('admin-role-grid');
+    grid.innerHTML = "";
+    grid.style.display = "grid";
+    grid.style.gridTemplateColumns = "repeat(3, 1fr)";
+    grid.style.gap = "10px";
+
+    // 3. Génération de la grille des JOUEURS (et non des rôles)
+    alivePlayers.forEach(([pid, p]) => {
+        if (pid === sourcePlayerId) return; // Ne pas se cibler soi-même
+
+        const card = document.createElement('div');
+        card.className = "player-select-card";
+        card.style.cssText = "background:rgba(255,255,255,0.1); border-radius:10px; padding:5px; text-align:center; cursor:pointer; border:1px solid #555;";
+        
+        card.innerHTML = `
+            <div style="width:50px; height:50px; margin:0 auto; border-radius:50%; overflow:hidden;">
+                <img src="${p.avatar || 'icon.png'}" style="width:100%; height:100%; object-fit:cover;">
+            </div>
+            <div style="font-size:0.8em; color:white; margin-top:5px; font-weight:bold; overflow:hidden; text-overflow:ellipsis;">${p.name}</div>
+        `;
+
+        card.onclick = () => {
+            if(confirm(`Confirmer l'action sur ${p.name} ?`)) {
+                // Ici on pourrait ajouter la logique spécifique (ex: Cupidon lie 2 joueurs)
+                // Pour l'instant, on notifie juste le MJ.
+                internalShowNotification("Action Validée", `${p.name} a été ciblé.`);
+                window.closeModal('modal-role-selector');
+            }
+        };
+        grid.appendChild(card);
+    });
+
+    modal.style.zIndex = "30000";
+    window.openModal('modal-role-selector');
+};
