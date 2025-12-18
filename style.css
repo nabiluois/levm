@@ -221,10 +221,9 @@ body.no-scroll {
 
 #btn-create-game {
     position: relative;
-    z-index: 10;
+    z-index: 99999 !important; /* Passe devant tout */
+    pointer-events: auto !important; /* Force le clic */
     cursor: pointer;
-    touch-action: manipulation; /* Optimisation mobile */
-    -webkit-tap-highlight-color: transparent;
 }
 
 /* ============================================

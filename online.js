@@ -47,39 +47,35 @@ let currentlyOpenedPlayerId = null;
    3. INITIALISATION & LISTENERS GLOBAUX
    ============================================ */
 
-// C'est ici que la magie opère : on écoute n'importe quel clic sur la page
+// ÉCOUTEUR DE CLIC UNIVERSEL (C'est lui qui fait marcher le bouton)
 document.addEventListener('click', function(e) {
-    
-    // Si l'élément cliqué a l'ID "btn-create-game"
     if (e.target && e.target.id === 'btn-create-game') {
-        e.preventDefault(); // On bloque les interférences
-        
-        // La logique du mot de passe
+        e.preventDefault();
+        e.stopPropagation();
+
         const password = prompt("🔐 Mot de passe MJ :");
-        
         if(password === "1234") { 
-            // On lance la fonction de création (définie plus bas)
+            // Appel de la fonction publique
             if (typeof window.initCreateGame === 'function') {
                 window.initCreateGame(); 
             } else {
-                alert("Erreur : Le système n'est pas encore prêt. Attends 2 secondes.");
+                alert("Erreur : Attends 2 secondes que le système charge.");
             }
-        } 
-        else if (password !== null) { 
+        } else if (password !== null) { 
             alert("⛔ Mot de passe incorrect !");
         }
     }
 });
 
+// Initialisation classique
 document.addEventListener('DOMContentLoaded', () => {
-    // Scan des images
     try { scanContentFromHTML(); } catch(e) { console.error(e); }
     
-    // Bouton Rejoindre (Lui marche bien, on touche pas)
+    // Bouton Rejoindre
     const btnJoin = document.getElementById('btn-join-action');
     if(btnJoin) btnJoin.onclick = joinGame;
 
-    // Reprise Session Admin & Joueur
+    // Reprise Session
     const savedAdminCode = localStorage.getItem('adminGameCode');
     if (savedAdminCode) { showResumeButton(savedAdminCode); }
     checkPlayerSession();
@@ -256,6 +252,7 @@ window.closeAdminPanel = function() {
    ============================================ */
 
 // 1. CRÉATION DE PARTIE (Accessible via window.initCreateGame)
+// IMPORTANT : Le "window." est obligatoire pour que le bouton HTML le trouve
 window.initCreateGame = function() {
     console.log("🚀 Lancement de la création...");
 
