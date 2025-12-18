@@ -44,31 +44,46 @@ let actionSourceId = null;
 let currentlyOpenedPlayerId = null; 
 
 /* ============================================
-   3. INITIALISATION & LISTENERS GLOBAUX (NETTOYÉ)
+   3. INITIALISATION & LISTENERS GLOBAUX
    ============================================ */
 
-document.addEventListener('DOMContentLoaded', () => {
-    // 1. Scan du contenu HTML pour les images
-    try { scanContentFromHTML(); } catch(e) { console.error("Erreur Scan:", e); }
+// C'est ici que la magie opère : on écoute n'importe quel clic sur la page
+document.addEventListener('click', function(e) {
     
-    // 2. Gestion du bouton "Rejoindre" (Lui on le laisse ici)
+    // Si l'élément cliqué a l'ID "btn-create-game"
+    if (e.target && e.target.id === 'btn-create-game') {
+        e.preventDefault(); // On bloque les interférences
+        
+        // La logique du mot de passe
+        const password = prompt("🔐 Mot de passe MJ :");
+        
+        if(password === "1234") { 
+            // On lance la fonction de création (définie plus bas)
+            if (typeof window.initCreateGame === 'function') {
+                window.initCreateGame(); 
+            } else {
+                alert("Erreur : Le système n'est pas encore prêt. Attends 2 secondes.");
+            }
+        } 
+        else if (password !== null) { 
+            alert("⛔ Mot de passe incorrect !");
+        }
+    }
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Scan des images
+    try { scanContentFromHTML(); } catch(e) { console.error(e); }
+    
+    // Bouton Rejoindre (Lui marche bien, on touche pas)
     const btnJoin = document.getElementById('btn-join-action');
     if(btnJoin) btnJoin.onclick = joinGame;
 
-    // 3. Reprise de session Admin si existante
+    // Reprise Session Admin & Joueur
     const savedAdminCode = localStorage.getItem('adminGameCode');
     if (savedAdminCode) { showResumeButton(savedAdminCode); }
-    
-    // 4. Vérification session Joueur
     checkPlayerSession();
-    
-    // DEBUG : Confirme que le script est lu
-    console.log("✅ Online.js chargé. initCreateGame est prêt.");
 });
-
-// NOTE IMPORTANTE : La gestion du clic "Créer" est maintenant gérée 
-// directement dans le code HTML (index.html) via l'attribut onclick.
-// Ce script se contente de fournir la fonction window.initCreateGame ci-dessous.
 
 /* ============================================
    4. UTILITAIRES (AVATAR, SESSION, SCAN)

@@ -1298,20 +1298,9 @@ La seule façon de le faire disparaître ? Le convoquer au bûcher, en plein j
       <h2 style="color:var(--gold);">Le Village Connecté</h2>
       <p>Connectez vos téléphones pour distribuer les rôles.</p>
       
-      <button id="btn-create-game" class="btn-submit" 
-        style="margin-bottom:15px; background:#27ae60; color:white;" 
-        onclick="var pass = prompt('🔐 Mot de passe MJ :'); 
-                 if(pass === '1234') { 
-                     if(typeof window.initCreateGame === 'function') { 
-                         window.initCreateGame(); 
-                     } else { 
-                         alert('ERREUR : Le script charge encore ou est bloqué. Attends 2 secondes.'); 
-                     } 
-                 } else if(pass !== null) { 
-                     alert('Mot de passe incorrect'); 
-                 }">
-    👑 Créer une partie (MJ)
-</button>
+      <button id="btn-create-game" class="btn-submit" style="margin-bottom:15px; background:#27ae60; color:white;">
+        👑 Créer une partie (MJ)
+      </button>
       
       <button onclick="openModal('modal-join-game'); closeModal('modal-online-menu')" class="btn-submit" style="background:#2980b9; color:white;">
         🎮 Rejoindre une partie
