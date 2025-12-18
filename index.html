@@ -1300,7 +1300,16 @@ La seule façon de le faire disparaître ? Le convoquer au bûcher, en plein j
       
       <button id="btn-create-game" class="btn-submit" 
         style="margin-bottom:15px; background:#27ae60; color:white;" 
-        onclick="var pass = prompt('🔐 Mot de passe MJ :'); if(pass === '1234') { if(window.initCreateGame) { window.initCreateGame(); } else { alert('ERREUR : Le fichier online.js ne s\'est pas chargé correctement.'); } } else if(pass !== null) { alert('Mot de passe incorrect'); }">
+        onclick="var pass = prompt('🔐 Mot de passe MJ :'); 
+                 if(pass === '1234') { 
+                     if(typeof window.initCreateGame === 'function') { 
+                         window.initCreateGame(); 
+                     } else { 
+                         alert('ERREUR : Le script charge encore ou est bloqué. Attends 2 secondes.'); 
+                     } 
+                 } else if(pass !== null) { 
+                     alert('Mot de passe incorrect'); 
+                 }">
     👑 Créer une partie (MJ)
 </button>
       

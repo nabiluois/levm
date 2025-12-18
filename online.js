@@ -239,70 +239,120 @@ window.closeAdminPanel = function() {
 /* ============================================
    5. ADMIN : INITIALISATION & CONNEXION
    ============================================ */
+
+// 1. CRÉATION DE PARTIE (Accessible via window.initCreateGame)
 window.initCreateGame = function() {
+    console.log("🚀 Lancement de la création...");
+
+    // A. Génération du Code (4 lettres majuscules)
     currentGameCode = Math.random().toString(36).substring(2, 6).toUpperCase();
     myPlayerId = "MJ_ADMIN";
-    localStorage.setItem('adminGameCode', currentGameCode);
-    launchAdminInterface();
-    set(ref(db, 'games/' + currentGameCode), { status: 'waiting', created_at: Date.now() });
-};
 
-window.restoreAdminSession = function(savedCode) {
-    currentGameCode = savedCode;
-    myPlayerId = "MJ_ADMIN";
-    get(child(ref(db), `games/${currentGameCode}`)).then((snapshot) => {
-        if(snapshot.exists()) {
-            internalShowNotification("Admin", `Reconnexion réussie : ${currentGameCode}`);
-            launchAdminInterface();
-        } else {
-            alert("Partie introuvable.");
-            localStorage.removeItem('adminGameCode');
-            location.reload();
-        }
+    // B. Sauvegarde Locale
+    localStorage.setItem('adminGameCode', currentGameCode);
+
+    // C. Interface Immédiate
+    launchAdminInterface();
+
+    // D. Envoi Firebase (Création de la salle)
+    set(ref(db, 'games/' + currentGameCode), {
+        status: 'waiting',
+        created_at: Date.now()
+    }).then(() => {
+        console.log("✅ Partie créée sur Firebase : " + currentGameCode);
+        if(window.showNotification) internalShowNotification("Succès", "Salle " + currentGameCode + " ouverte !");
+    }).catch((error) => {
+        console.error("ERREUR FIREBASE:", error);
+        alert("Erreur critique Firebase : " + error.message);
     });
 };
 
+// 2. RESTAURATION DE SESSION
+window.restoreAdminSession = function(savedCode) {
+    currentGameCode = savedCode;
+    myPlayerId = "MJ_ADMIN";
+
+    // Vérification si la partie existe encore
+    get(child(ref(db), `games/${currentGameCode}`)).then((snapshot) => {
+        if(snapshot.exists()) {
+            if(window.showNotification) internalShowNotification("Admin", `Reconnexion réussie : ${currentGameCode}`);
+            launchAdminInterface();
+        } else {
+            alert("Cette partie n'existe plus ou a expiré.");
+            localStorage.removeItem('adminGameCode');
+            location.reload();
+        }
+    }).catch((err) => {
+        alert("Erreur de connexion : " + err.message);
+    });
+};
+
+// 3. LANCEMENT DE L'INTERFACE ADMIN
 function launchAdminInterface() {
+    console.log("💻 Ouverture du Dashboard Admin");
+
+    // Affichage du Code
     const codeDisplay = document.getElementById('game-code-display');
     if(codeDisplay) codeDisplay.innerText = currentGameCode;
-    
-    const adminDash = document.getElementById('admin-dashboard');
+
+    // Fermeture du menu
     if(window.closeModal) window.closeModal('modal-online-menu');
-    
-    if(adminDash) adminDash.style.display = 'flex';
-    document.body.classList.add('no-scroll'); 
+
+    // Affichage du Dashboard
+    const adminDash = document.getElementById('admin-dashboard');
+    if(adminDash) {
+        adminDash.style.display = 'flex';
+    } else {
+        console.error("❌ ERREUR : Élément #admin-dashboard introuvable !");
+        return;
+    }
+
+    // Verrouillage Scroll
+    document.body.classList.add('no-scroll');
     document.body.style.overflow = 'hidden';
     document.body.style.position = 'fixed';
     document.body.style.width = '100%';
     document.body.style.top = '0';
-    
+
+    // Démarrage des Écouteurs et Contrôles
     setupAdminListeners();
-    generateDashboardControls(); 
+    if(typeof generateDashboardControls === 'function') {
+        generateDashboardControls();
+    }
 }
 
+// 4. ÉCOUTEURS FIREBASE (Mises à jour en temps réel)
 function setupAdminListeners() {
-    // 1. ÉCOUTEUR PRINCIPAL (Mise à jour des joueurs)
+    // A. Écoute des Joueurs
     onValue(ref(db, 'games/' + currentGameCode + '/players'), (snapshot) => {
         const players = snapshot.val() || {};
-        currentPlayersData = players;
-        updateAdminUI(players);
-        
+        currentPlayersData = players; // Mise à jour de la variable globale
+
+        // Mise à jour de la liste visuelle
+        if(typeof updateAdminUI === 'function') {
+            updateAdminUI(players);
+        }
+
+        // Mise à jour temps réel d'un joueur ouvert (Panini)
         if (currentlyOpenedPlayerId && players[currentlyOpenedPlayerId]) {
             const p = players[currentlyOpenedPlayerId];
             const roleId = p.draftRole || p.role;
             const isDead = p.status === 'dead';
-            refreshAdminPlayerContent(currentlyOpenedPlayerId, p.name, roleId, isDead, p.avatar, p.isMayor, p);
+            // Appel sécurisé à refresh
+            if(window.refreshAdminPlayerContent) {
+                window.refreshAdminPlayerContent(currentlyOpenedPlayerId, p.name, roleId, isDead, p.avatar, p.isMayor, p);
+            }
         }
     });
 
-    // 2. SURVEILLANCE CONNEXION
+    // B. Surveillance Connexion
     const connectedRef = ref(db, ".info/connected");
     onValue(connectedRef, (snap) => {
-      if (snap.val() === false) {
-        if (currentGameCode) {
-            internalShowNotification("⚠️ Réseau", "Connexion instable...");
+        if (snap.val() === false) {
+            console.warn("⚠️ Perte de connexion Firebase");
+        } else {
+            console.log("✅ Connecté à Firebase");
         }
-      }
     });
 }
 
