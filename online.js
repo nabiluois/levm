@@ -464,17 +464,18 @@ window.resetGameToLobby = function() {
 };
 
 /* ============================================
-   7. TABLEAU RECAPITULATIF (CORRIGÉ V89)
+   7. TABLEAU RECAPITULATIF (CORRIGÉ V90 - CLICS)
    ============================================ */
 window.openRoleSummaryPanel = function() {
-    console.log("Ouverture du tableau..."); // Pour vérifier dans la console si besoin
-
     const rolesVillage = [];
     const rolesLoup = [];
     const rolesSolo = [];
     const rolesVampire = [];
     
     const interactiveRoles = ['l_orphelin', 'target', 'le_loup_garou_rouge', 'le_loup_garou_maudit', 'le_loup_garou_alpha', 'le_papa_des_loups', 'le_chuchoteur', 'le_marabout'];
+
+    // Fonction de nettoyage pour éviter les bugs d'apostrophe
+    const safeStr = (str) => str ? str.replace(/'/g, "\\'") : "";
 
     const createLine = (roleId, playerObj, playerId) => {
         const role = detectedRoles.find(r => r.id === roleId);
@@ -484,41 +485,43 @@ window.openRoleSummaryPanel = function() {
         
         if (playerObj) {
             const isDead = playerObj.status === 'dead';
-            const style = isDead 
-                ? "background:#2c3e50; color:#95a5a6; text-decoration:line-through; border:1px solid #7f8c8d; opacity:0.7;" 
+            // Style de base de la ligne
+            const bgStyle = isDead 
+                ? "background:#2c3e50; color:#95a5a6; border:1px solid #7f8c8d;" 
                 : "background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,215,0,0.3);";
             
-            // Avatar (petite taille pour la liste)
             const avatarHtml = generateAvatarWithBadges(playerObj, "50px");
+            const safeName = safeStr(playerObj.name);
+            const safeAvatar = safeStr(playerObj.avatar);
 
+            // Bouton Action (Eclair)
             let actionBtn = "";
             if (interactiveRoles.includes(roleId) && !isDead) {
                 actionBtn = `
-                    <button onclick="event.stopPropagation(); window.openPlayerSelectorForAction('${roleId}', '${playerId}')" 
-                        style="background:linear-gradient(135deg, #f1c40f, #d35400); border:1px solid white; border-radius:50%; width:40px; height:40px; display:flex; align-items:center; justify-content:center; font-size:1.2em; cursor:pointer; box-shadow:0 0 10px rgba(243, 156, 18, 0.5); margin-left:auto; flex-shrink:0; position:relative; z-index:100; pointer-events:auto;">
+                    <button class="action-btn-flash" onclick="event.stopPropagation(); window.openPlayerSelectorForAction('${roleId}', '${playerId}')">
                         ⚡
                     </button>
                 `;
             }
 
+            // Ligne Joueur Complète (Cliquable)
             html = `
-                <div class="summary-list-item" style="${style} display:flex; align-items:center; gap:10px; padding:8px; margin:5px 0; border-radius:10px; width:100%; position:relative;">
-                    <div style="flex:1; display:flex; align-items:center; gap:10px; cursor:pointer; pointer-events:auto;" onclick="window.openAdminPlayerDetail('${playerId}', '${playerObj.name}', '${roleId}', ${isDead}, '${playerObj.avatar}', ${playerObj.isMayor})">
+                <div class="summary-list-item ${isDead ? 'dead-item' : ''}" style="${bgStyle}">
+                    <div class="summary-click-area" onclick="window.openAdminPlayerDetail('${playerId}', '${safeName}', '${roleId}', ${isDead}, '${safeAvatar}', ${playerObj.isMayor})">
                         ${avatarHtml}
-                        <div style="display:flex; flex-direction:column; align-items:flex-start;">
-                            <span style="font-family:'Almendra'; font-size:1.1em; font-weight:bold; line-height:1;">${playerObj.name}</span>
-                            <span style="font-size:0.9em; color:#ccc;">${role.title}</span>
+                        <div class="summary-text-col">
+                            <span class="player-name">${playerObj.name}</span>
+                            <span class="role-name">${role.title}</span>
                         </div>
                     </div>
                     ${actionBtn}
                 </div>`;
         } else {
-            html = `<div class="summary-list-item" style="color:#888; padding:5px; font-size:0.9em; font-style:italic;">${role.title}</div>`;
+            html = `<div class="summary-list-item empty" style="color:#888; font-style:italic;">${role.title}</div>`;
         }
         return { html, cat: role.category };
     };
 
-    // Logique de tri inchangée...
     let assignedCount = 0;
     if (Object.keys(currentPlayersData).length > 0) {
         Object.entries(currentPlayersData).forEach(([pid, p]) => {
@@ -543,7 +546,7 @@ window.openRoleSummaryPanel = function() {
             const role = detectedRoles.find(r => r.id === id);
             if(role) {
                 const txt = qty > 1 ? `${role.title} (x${qty})` : role.title;
-                const html = `<div class="summary-list-item" style="color:#aaa; padding:5px;">${txt}</div>`;
+                const html = `<div class="summary-list-item empty" style="color:#aaa;">${txt}</div>`;
                 if(role.category === 'village') rolesVillage.push(html);
                 else if(role.category === 'loups') rolesLoup.push(html);
                 else if(role.category === 'vampires') rolesVampire.push(html);
@@ -557,11 +560,11 @@ window.openRoleSummaryPanel = function() {
             <h2 style="color:var(--gold); font-family:'Pirata One'; font-size:2em; margin:0;">RÉPARTITION</h2>
             <button class="close-details" onclick="window.internalCloseDetails()" style="position:absolute; right:0; top:0; background:transparent; border:none; color:gold; font-size:2em; cursor:pointer; pointer-events:auto; z-index:20002;">✕</button>
         </div>
-        <div class="summary-container" style="display:flex; flex-direction:column; gap:15px; width:100%;">
-            ${rolesVillage.length ? `<div class="summary-col" style="border-bottom:1px solid #333; padding-bottom:10px;"><img src="Village.svg" style="width:30px; vertical-align:middle;"> <strong style="color:#2ecc71; font-size:1.2em;">VILLAGE (${rolesVillage.length})</strong><br>${rolesVillage.join('')}</div>` : ''}
-            ${rolesLoup.length ? `<div class="summary-col" style="border-bottom:1px solid #333; padding-bottom:10px;"><img src="Loup.svg" style="width:30px; vertical-align:middle;"> <strong style="color:#c0392b; font-size:1.2em;">LOUPS (${rolesLoup.length})</strong><br>${rolesLoup.join('')}</div>` : ''}
-            ${rolesSolo.length ? `<div class="summary-col"><img src="Solo.svg" style="width:30px; vertical-align:middle;"> <strong style="color:#9b59b6; font-size:1.2em;">SOLOS (${rolesSolo.length})</strong><br>${rolesSolo.join('')}</div>` : ''}
-            ${rolesVampire.length ? `<div class="summary-col" style="border-top:1px solid #333; padding-top:10px;"><img src="Vampires.svg" style="width:30px; vertical-align:middle;"> <strong style="color:#34495e; font-size:1.2em;">VAMPIRES (${rolesVampire.length})</strong><br>${rolesVampire.join('')}</div>` : ''}
+        <div class="summary-container">
+            ${rolesVillage.length ? `<div class="summary-col village-col"><img src="Village.svg"> <strong>VILLAGE (${rolesVillage.length})</strong><div class="col-content">${rolesVillage.join('')}</div></div>` : ''}
+            ${rolesLoup.length ? `<div class="summary-col loup-col"><img src="Loup.svg"> <strong>LOUPS (${rolesLoup.length})</strong><div class="col-content">${rolesLoup.join('')}</div></div>` : ''}
+            ${rolesSolo.length ? `<div class="summary-col solo-col"><img src="Solo.svg"> <strong>SOLOS (${rolesSolo.length})</strong><div class="col-content">${rolesSolo.join('')}</div></div>` : ''}
+            ${rolesVampire.length ? `<div class="summary-col vampire-col"><img src="Vampires.svg"> <strong>VAMPIRES (${rolesVampire.length})</strong><div class="col-content">${rolesVampire.join('')}</div></div>` : ''}
         </div>
         <br><br><br>
     `;
@@ -576,15 +579,13 @@ window.openRoleSummaryPanel = function() {
         }
         contentDiv.innerHTML = summaryHTML;
         
-        // SECURITE JS : On force le style directement sur l'élément
+        // SECURITE JS : On force le Z-Index au max
         panel.style.zIndex = "99999";
         overlay.style.zIndex = "99998";
         
         panel.classList.add('active');
         overlay.classList.add('active');
         document.body.classList.add('no-scroll');
-    } else {
-        alert("Erreur technique : Panel non trouvé dans le HTML");
     }
 };
 
