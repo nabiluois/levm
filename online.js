@@ -44,42 +44,45 @@ let actionSourceId = null;
 let currentlyOpenedPlayerId = null; 
 
 /* ============================================
-   3. INITIALISATION & LISTENERS GLOBAUX
+   3. INITIALISATION & LISTENERS GLOBAUX (FIX V3)
    ============================================ */
+
+// Fonction de création sécurisée accessible globalement
+window.actionCreateGame = function() {
+    const password = prompt("🔐 Mot de passe MJ :");
+    if(password === "1234") { 
+        if (typeof window.initCreateGame === 'function') {
+            window.initCreateGame(); 
+        } else {
+            alert("Le système charge encore... réessaie dans 2 secondes.");
+        }
+    } 
+    else if (password !== null) { 
+        alert("⛔ Accès refusé ! Mot de passe incorrect.");
+    }
+};
+
+// Écouteur global (Délégation) : Fonctionne même si le bouton apparaît plus tard
+document.addEventListener('click', function(e) {
+    if (e.target && e.target.id === 'btn-create-game') {
+        e.preventDefault();
+        e.stopPropagation();
+        window.actionCreateGame();
+    }
+});
+
 document.addEventListener('DOMContentLoaded', () => {
     try { scanContentFromHTML(); } catch(e) { console.error("Erreur Scan:", e); }
     
     // A. Bouton Rejoindre
     const btnJoin = document.getElementById('btn-join-action');
-    if(btnJoin) {
-        btnJoin.onclick = joinGame; // Utilisation de onclick pour forcer l'événement
-    }
+    if(btnJoin) btnJoin.onclick = joinGame;
 
-    // B. Bouton Créer (MJ) - VERSION CORRIGÉE
-    const btnCreate = document.getElementById('btn-create-game');
-    if (btnCreate) {
-        // On supprime l'ancien système de setInterval et on attache directement
-        btnCreate.onclick = () => {
-            const password = prompt("🔐 Mot de passe MJ :");
-            if(password === "1234") { 
-                if (typeof window.initCreateGame === 'function') {
-                    window.initCreateGame(); 
-                } else {
-                    alert("Le système charge encore... réessaie dans 2 secondes.");
-                }
-            } 
-            else if (password !== null) { 
-                if(window.showNotification) window.showNotification("⛔ Erreur", "Accès refusé !");
-                else alert("Accès refusé !");
-            }
-        };
-    }
-
-    // C. Reprise Session Admin
+    // B. Reprise Session Admin
     const savedAdminCode = localStorage.getItem('adminGameCode');
     if (savedAdminCode) { showResumeButton(savedAdminCode); }
     
-    // D. Reprise Session Joueur
+    // C. Reprise Session Joueur
     checkPlayerSession();
 });
 
