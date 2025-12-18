@@ -44,59 +44,54 @@ let actionSourceId = null;
 let currentlyOpenedPlayerId = null; 
 
 /* ============================================
-   3. INITIALISATION & LISTENERS GLOBAUX (FIX FINAL)
+   3. INITIALISATION & LISTENERS GLOBAUX (ULTIMATE FIX)
    ============================================ */
 
-// 1. Définition Globale de l'action (Accessible partout)
-window.handleCreateGameClick = function() {
+// Fonction Globale accessible directement par le HTML si besoin
+window.triggerCreateGame = function() {
     const password = prompt("🔐 Mot de passe MJ :");
     if(password === "1234") { 
         if (typeof window.initCreateGame === 'function') {
             window.initCreateGame(); 
         } else {
-            alert("⏳ Le système charge encore... Réessaie dans 2 secondes.");
+            alert("⚠️ Patiente encore 2 secondes, le jeu charge...");
         }
     } 
     else if (password !== null) { 
-        alert("⛔ Accès refusé !");
+        alert("⛔ Mot de passe incorrect !");
     }
 };
 
-// 2. Attachement Forcé au chargement
 document.addEventListener('DOMContentLoaded', () => {
     try { scanContentFromHTML(); } catch(e) { console.error("Erreur Scan:", e); }
     
-    // Bouton Rejoindre
+    // 1. Bouton Rejoindre
     const btnJoin = document.getElementById('btn-join-action');
     if(btnJoin) btnJoin.onclick = joinGame;
 
-    // Bouton Créer (MJ) - Force brute
+    // 2. Bouton Créer (MJ) - ASSIGNATION DIRECTE
     const btnCreate = document.getElementById('btn-create-game');
     if (btnCreate) {
-        // On retire les anciens écouteurs pour éviter les doublons
-        const newBtn = btnCreate.cloneNode(true);
-        btnCreate.parentNode.replaceChild(newBtn, btnCreate);
-        
-        // On attache le clic proprement
-        newBtn.addEventListener('click', (e) => {
-            e.preventDefault();   // Empêche les comportements par défaut
-            e.stopPropagation();  // Empêche la propagation
-            window.handleCreateGameClick();
-        });
+        // On supprime tout clone ou écouteur complexe
+        btnCreate.onclick = function(e) {
+            e.preventDefault();
+            e.stopPropagation(); // Empêche le clic de traverser
+            window.triggerCreateGame();
+        };
         
         // Sécurité tactile pour mobile
-        newBtn.addEventListener('touchstart', (e) => {
-            e.stopPropagation(); // Empêche le "ghost click"
-        }, {passive: true});
+        btnCreate.ontouchstart = function(e) {
+            e.stopPropagation();
+        };
     }
 
-    // Reprise Session
+    // 3. Reprise Session Admin
     const savedAdminCode = localStorage.getItem('adminGameCode');
     if (savedAdminCode) { showResumeButton(savedAdminCode); }
+    
+    // 4. Reprise Session Joueur
     checkPlayerSession();
 });
-
-// Note : La fonction attachCreateEvent a été supprimée car elle est remplacée par le code ci-dessus plus fiable.
 
 /* ============================================
    4. UTILITAIRES (AVATAR, SESSION, SCAN)
