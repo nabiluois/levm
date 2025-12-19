@@ -1,4 +1,4 @@
-const CACHE_NAME = 'village-maudit-v6.2';
+const CACHE_NAME = 'village-maudit-v6.3'; // J'ai incrémenté la version pour forcer la mise à jour
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -11,7 +11,7 @@ const ASSETS_TO_CACHE = [
   'https://fonts.googleapis.com/css2?family=Pirata+One&display=swap',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css',
 
-  // Icônes de l'interface (Essentielles pour le menu)
+  // Icônes de l'interface (SVG RESTENT SVG)
   './Village.svg',
   './Loup.svg',
   './Solo.svg',
@@ -19,29 +19,29 @@ const ASSETS_TO_CACHE = [
   './Cartes_vm.svg',
   './Details.svg',
   './Bug.svg',
-  './icon.png',
+  './icon.webp', // Changé en webp
 
-  // DOS DE CARTES (ESSENTIEL OFFLINE)
-  './back.png',
-  './back_or.png',
-  './back_argant.png',
-  './back_bronze.png',
+  // DOS DE CARTES (ESSENTIEL OFFLINE - Changés en webp)
+  './back.webp',
+  './back_or.webp',
+  './back_argant.webp',
+  './back_bronze.webp',
 
-  // Images des Rôles (Noms corrigés selon ton HTML)
-  './le_paysan.png',
-  './le_loup_garou.png',
-  './la_sorciere.png',
-  './le_voyant.png',               // CORRIGÉ (était la_voyante)
-  './le_chasseur_de_vampires.png', // CORRIGÉ (était le_chasseur)
-  './l_orphelin.png',              // CORRIGÉ (était cupidon)
-  './la_fille.png',                // CORRIGÉ (était la_petite_fille)
-  './le_clodo.png',                // CORRIGÉ (était le_voleur)
-  './le_bucheron.png',
-  './le_bienfaiteur.png',
-  './l_homme_a_la_hache.png',
-  './le_loup_garou_rouge.png',
-  './le_loup_garou_maudit.png',
-  './le_papa_des_loups.png'
+  // Images des Rôles (Changés en webp)
+  './le_paysan.webp',
+  './le_loup_garou.webp',
+  './la_sorciere.webp',
+  './le_voyant.webp',
+  './le_chasseur_de_vampires.webp',
+  './l_orphelin.webp',
+  './la_fille.webp',
+  './le_clodo.webp',
+  './le_bucheron.webp',
+  './le_bienfaiteur.webp',
+  './l_homme_a_la_hache.webp',
+  './le_loup_garou_rouge.webp',
+  './le_loup_garou_maudit.webp',
+  './le_papa_des_loups.webp'
 ];
 
 // 1. Installation du Service Worker

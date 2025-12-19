@@ -5,7 +5,7 @@ const paniniRoles = [
   {
     id: "LE PAYSAN",
   title: "Le Paysan",
-  image: "le_paysan.png",
+  image: "le_paysan.webp",
   description: `
   <span style="font-size:1.2em;">
     <img src="le_paysan.svg" class="emoji-svg" alt="Paysan"> <strong>Le Paysan</strong>
@@ -39,7 +39,7 @@ const paniniRoles = [
 {
   id: "LA SORCIÈRE",
   title: "La Sorcière",
-  image: "la_sorciere.png",
+  image: "la_sorciere.webp",
   description: `
   <span style="font-size:1.2em;">
     <img src="la_sorciere.svg" class="emoji-svg" alt="Sorcière"> <strong>La Sorcière</strong>
@@ -77,7 +77,7 @@ const paniniRoles = [
   
   id: "L’HOMME À LA HACHE",
   title: "L’Homme à la Hache",
-  image: "l_homme_a_la_hache.png",
+  image: "l_homme_a_la_hache.webp",
   description: `
   <span style="font-size:1.2em;">
     <img src="l_homme_a_la_hache.svg" class="emoji-svg" alt="Hache"> <strong>L’Homme à la Hache</strong>
@@ -114,7 +114,7 @@ const paniniRoles = [
 {
   id: "CERBÈRE",
   title: "Cerbère",
-  image: "cerbere.png",
+  image: "cerbere.webp",
   description: `
   <span style="font-size:1.2em;">
     <img src="cerbere.svg" class="emoji-svg" alt="Cerbère"> <strong>Cerbère</strong>
@@ -150,7 +150,7 @@ const paniniRoles = [
 {
   id: "LE CONDAMNÉ",
   title: "Le Condamné",
-  image: "le_condamne.png",
+  image: "le_condamne.webp",
   description: `
   <span style="font-size:1.2em;">
     <img src="le_condamne.svg" class="emoji-svg" alt="Condamné"> <strong>Le Condamné</strong>
@@ -188,7 +188,7 @@ const paniniRoles = [
 {
   id: "LE MENTALISTE",
   title: "Le Mentaliste",
-  image: "le_mentaliste.png",
+  image: "le_mentaliste.webp",
   description: `
   <span style="font-size:1.2em;">
     <img src="le_mentaliste.svg" class="emoji-svg" alt="Mentaliste"> <strong>Le Mentaliste</strong>
@@ -225,7 +225,7 @@ const paniniRoles = [
 {
   id: "L’INSOMNIAQUE",
   title: "L’Insomniaque",
-  image: "l_insomniaque.png",
+  image: "l_insomniaque.webp",
   description: `
   <span style="font-size:1.2em;">
     <img src="l_insomniaque.svg" class="emoji-svg" alt="Insomniaque"> <strong>L’Insomniaque</strong>
@@ -260,7 +260,7 @@ const paniniRoles = [
 {
   id: "L’ORPHELIN",
   title: "L’Orphelin",
-  image: "l_orphelin.png",
+  image: "l_orphelin.webp",
   description: `
   <span style="font-size:1.2em;">
     <img src="l_orphelin.svg" class="emoji-svg" alt="Orphelin"> <strong>L’Orphelin</strong>
@@ -295,7 +295,7 @@ const paniniRoles = [
 {
   id: "LE TRAQUEUR",
   title: "Le Traqueur",
-  image: "le_traqueur.png",
+  image: "le_traqueur.webp",
   description: `
   <span style="font-size:1.2em;">
     <img src="le_traqueur.svg" class="emoji-svg" alt="Traqueur"> <strong>Le Traqueur</strong>
@@ -332,7 +332,7 @@ const paniniRoles = [
   
   id: "LE DON JUAN",
   title: "Le Don Juan",
-  image: "le_don_juan.png",
+  image: "le_don_juan.webp",
   description: `
   <span style="font-size:1.2em;">
     <img src="le_don_juan.svg" class="emoji-svg" alt="Don Juan"> <strong>Le Don Juan</strong>
@@ -381,7 +381,7 @@ const paniniRoles = [
 {
   id: "LA CAMERISTE",
   title: "La Camériste",
-  image: "la_cameriste.png",
+  image: "la_cameriste.webp",
   description: `
   <span style="font-size:1.2em;">
     <img src="la_cameriste.svg" class="emoji-svg" alt="Camériste"> <strong>La Camériste</strong>
@@ -418,7 +418,7 @@ const paniniRoles = [
 {
   id: "LA BALANCE",
   title: "La Balance",
-  image: "la_balance.png",
+  image: "la_balance.webp",
   description: `
   <span style="font-size:1.2em;">
     <img src="la_balance.svg" class="emoji-svg" alt="Balance"> <strong>La Balance</strong>
@@ -455,7 +455,7 @@ const paniniRoles = [
 {
   id: "LE CHUCHOTEUR",
   title: "Le Chuchoteur",
-  image: "le_chuchoteur.png",
+  image: "le_chuchoteur.webp",
   description: `
   <span style="font-size:1.2em;">
     <img src="le_chuchoteur.svg" class="emoji-svg" alt="Chuchoteur"> <strong>Le Chuchoteur</strong>
@@ -491,7 +491,7 @@ const paniniRoles = [
 {
   id: "LA FILLE",
   title: "La Fille",
-  image: "la_fille.png",
+  image: "la_fille.webp",
   description: `
   <span style="font-size:1.2em;">
     <img src="la_fille.svg" class="emoji-svg" alt="Fille"> <strong>La Fille</strong>
@@ -526,7 +526,7 @@ const paniniRoles = [
 {
   id: "LA DAME DE COMPLAISANCE",
   title: "La Dame de Complaisance",
-  image: "la_dame_de_complaisance.png",
+  image: "la_dame_de_complaisance.webp",
   description: `
   <span style="font-size:1.2em;">
     <img src="la_dame_de_complaisance.svg" class="emoji-svg" alt="Dame"> <strong>La Dame de Complaisance</strong>
@@ -563,7 +563,7 @@ const paniniRoles = [
 {
   id: "TARGET",
   title: "Target",
-  image: "target.png",
+  image: "target.webp",
   description: `
   <span style="font-size:1.2em;">
     <img src="target.svg" class="emoji-svg" alt="Target"> <strong>Target</strong>
@@ -611,7 +611,7 @@ const paniniRoles = [
   
   id: "LE MILLIARDAIRE",
   title: "Le Milliardaire",
-  image: "le_milliardaire.png",
+  image: "le_milliardaire.webp",
   description: `
   <span style="font-size:1.2em;">
     <img src="le_milliardaire.svg" class="emoji-svg" alt="Milliardaire"> <strong>Le Milliardaire</strong>
@@ -658,7 +658,7 @@ const paniniRoles = [
 {
   id: "LE BIENFAITEUR",
   title: "Le Bienfaiteur",
-  image: "le_bienfaiteur.png",
+  image: "le_bienfaiteur.webp",
   description: `
   <span style="font-size:1.2em;">
     <img src="le_bienfaiteur.svg" class="emoji-svg" alt="Bienfaiteur"> <strong>Le Bienfaiteur</strong>
@@ -694,7 +694,7 @@ const paniniRoles = [
 {
   id: "LE DÉVOREUR D’ÂMES",
   title: "Le Dévoreur d’Âmes",
-  image: "le_devoreur_d_ames.png",
+  image: "le_devoreur_d_ames.webp",
   description: `
   <span style="font-size:1.2em;">
     <img src="le_devoreur_d_ames.svg" class="emoji-svg" alt="Dévoreur"> <strong>Le Dévoreur d’Âmes</strong>
@@ -731,7 +731,7 @@ const paniniRoles = [
 {
   id: "LE BUCHERON",
   title: "Le Bûcheron",
-  image: "le_bucheron.png",
+  image: "le_bucheron.webp",
   description: `
   <span style="font-size:1.2em;">
     <img src="le_bucheron.svg" class="emoji-svg" alt="Bûcheron"> <strong>Le Bûcheron</strong>
@@ -766,7 +766,7 @@ const paniniRoles = [
 {
   id: "LE FOSSOYEUR",
   title: "Le Fossoyeur",
-  image: "le_fossoyeur.png",
+  image: "le_fossoyeur.webp",
   description: `
   <span style="font-size:1.2em;">
     <img src="le_fossoyeur.svg" class="emoji-svg" alt="Fossoyeur"> <strong>Le Fossoyeur</strong>
@@ -802,7 +802,7 @@ const paniniRoles = [
 {
   id: "LE VOYANT",
   title: "Le Voyant",
-  image: "le_voyant.png",
+  image: "le_voyant.webp",
   description: `
   <span style="font-size:1.2em;">
     <img src="le_voyant.svg" class="emoji-svg" alt="Voyant"> <strong>Le Voyant</strong>
@@ -837,7 +837,7 @@ const paniniRoles = [
 {
   id: "OLAF ET PILAF",
   title: "Olaf et Pilaf",
-  image: "olaf_et_pilaf.png",
+  image: "olaf_et_pilaf.webp",
   description: `
   <span style="font-size:1.2em;">
     <img src="olaf_et_pilaf.svg" class="emoji-svg" alt="Olaf et Pilaf"> <strong>Olaf et Pilaf</strong>
@@ -873,7 +873,7 @@ const paniniRoles = [
 {
   id: "LE MARABOUT",
   title: "Le Marabout",
-  image: "le_marabout.png",
+  image: "le_marabout.webp",
   description: `
   <span style="font-size:1.2em;">
     <img src="le_marabout.svg" class="emoji-svg" alt="Marabout"> <strong>Le Marabout</strong>
@@ -919,7 +919,7 @@ const paniniRoles = [
 {
   id: "LE DETECTIVE",
   title: "Le Détective",
-  image: "le_detective.png",
+  image: "le_detective.webp",
   description: `
   <span style="font-size:1.2em;">
     <img src="le_detective.svg" class="emoji-svg" alt="Détective"> <strong>Le Détective</strong>
@@ -955,7 +955,7 @@ const paniniRoles = [
 {
   id: "LE CHAT",
   title: "Le Chat",
-  image: "le_chat.png",
+  image: "le_chat.webp",
   description: `
   <span style="font-size:1.2em;">
     <img src="le_chat.svg" class="emoji-svg" alt="Chat"> <strong>Le Chat</strong>
@@ -991,7 +991,7 @@ const paniniRoles = [
   
   id: "L’IVROGNE",
   title: "L’Ivrogne",
-  image: "l_ivrogne.png",
+  image: "l_ivrogne.webp",
   description: `
   <span style="font-size:1.2em;">
     <img src="l_ivrogne.svg" class="emoji-svg" alt="Ivrogne"> <strong>L’Ivrogne</strong>
@@ -1027,7 +1027,7 @@ const paniniRoles = [
 {
   id: "LE PETIT RIGOLO",
   title: "Le Petit Rigolo",
-  image: "le_petit_rigolo.png",
+  image: "le_petit_rigolo.webp",
   description: `
   <span style="font-size:1.2em;">
     <img src="le_petit_rigolo.svg" class="emoji-svg" alt="Rigolo"> <strong>Le Petit Rigolo</strong>
@@ -1063,7 +1063,7 @@ const paniniRoles = [
 {
   id: "UCHRONIE",
   title: "Uchronie",
-  image: "uchronie.png",
+  image: "uchronie.webp",
   description: `
   <span style="font-size:1.2em;">
     <img src="uchronie.svg" class="emoji-svg" alt="Uchronie"> <strong>Uchronie</strong>
@@ -1101,7 +1101,7 @@ const paniniRoles = [
 {
   id: "LE CLODO",
   title: "Le Clodo",
-  image: "le_clodo.png",
+  image: "le_clodo.webp",
   description: `
   <span style="font-size:1.2em;">
     <img src="le_clodo.svg" class="emoji-svg" alt="Clodo"> <strong>Le Clodo</strong>
@@ -1139,7 +1139,7 @@ const paniniRoles = [
 {
   id: "LE LOUP-GAROU",
   title: "Le Loup-Garou",
-  image: "le_loup_garou.png",
+  image: "le_loup_garou.webp",
   description: `
   <span style="font-size:1.2em;">
     <img src="le_loup_garou.svg" class="emoji-svg" alt="Loup-Garou"> <strong>Le Loup-Garou</strong>
@@ -1175,7 +1175,7 @@ const paniniRoles = [
 {
   id: "LE LOUP-GAROU ROUGE",
   title: "Le Loup-Garou Rouge",
-  image: "le_loup_garou_rouge.png",
+  image: "le_loup_garou_rouge.webp",
   description: `
   <span style="font-size:1.2em;">
     <img src="le_loup_garou_rouge.svg" class="emoji-svg" alt="Rouge"> <strong>Le Loup-Garou Rouge</strong>
@@ -1212,7 +1212,7 @@ const paniniRoles = [
 {
   id: "LE LOUP-GAROU MAUDIT",
   title: "Le Loup-Garou Maudit",
-  image: "le_loup_garou_maudit.png",
+  image: "le_loup_garou_maudit.webp",
   description: `
   <span style="font-size:1.2em;">
     <img src="le_loup_garou_maudit.svg" class="emoji-svg" alt="Maudit"> <strong>Le Loup-Garou Maudit</strong>
@@ -1253,7 +1253,7 @@ const paniniRoles = [
 {
   id: "LE LOUP-GAROU ALPHA",
   title: "Le Loup-Garou Alpha",
-  image: "le_loup_garou_alpha.png",
+  image: "le_loup_garou_alpha.webp",
   description: `
   <span style="font-size:1.2em;">
     <img src="le_loup_garou_alpha.svg" class="emoji-svg" alt="Alpha"> <strong>Le Loup-Garou Alpha</strong>
@@ -1293,7 +1293,7 @@ const paniniRoles = [
 {
   id: "LOUP-GAROU VOYANT",
   title: "Loup-Garou Voyant",
-  image: "loup_garou_voyant.png",
+  image: "loup_garou_voyant.webp",
   description: `
   <span style="font-size:1.2em;">
     <img src="loup_garou_voyant.svg" class="emoji-svg" alt="LG Voyant"> <strong>Loup-Garou Voyant</strong>
@@ -1328,7 +1328,7 @@ const paniniRoles = [
 {
   id: "LE LOUP GAROU BAVARD",
   title: "Le Loup-Garou Bavard",
-  image: "le_loup_garou_bavard.png",
+  image: "le_loup_garou_bavard.webp",
   description: `
   <span style="font-size:1.2em;">
     <img src="le_loup_garou_bavard.svg" class="emoji-svg" alt="Bavard"> <strong>Le Loup-Garou Bavard</strong>
@@ -1365,7 +1365,7 @@ const paniniRoles = [
 {
   id: "LE LOUP GAROU FAINEANT",
   title: "Le Loup-Garou Fainéant",
-  image: "le_loup_garou_faineant.png",
+  image: "le_loup_garou_faineant.webp",
   description: `
   <span style="font-size:1.2em;">
     <img src="le_loup_garou_faineant.svg" class="emoji-svg" alt="Fainéant"> <strong>Le Loup-Garou Fainéant</strong>
@@ -1402,7 +1402,7 @@ const paniniRoles = [
 {
   id: "LE PAPA DES LOUPS",
   title: "Le Papa des Loups",
-  image: "le_papa_des_loups.png",
+  image: "le_papa_des_loups.webp",
   description: `
   <span style="font-size:1.2em;">
     <img src="le_papa_des_loups.svg" class="emoji-svg" alt="Papa Loup"> <strong>Le Papa des Loups</strong>
@@ -1438,7 +1438,7 @@ const paniniRoles = [
 {
   id: "L'ENFANT LOUP-GAROU",
   title: "L’Enfant Loup-Garou",
-  image: "l_enfant_loup_garou.png",
+  image: "l_enfant_loup_garou.webp",
   description: `
   <span style="font-size:1.2em;">
     <img src="l_enfant_loup_garou.svg" class="emoji-svg" alt="Enfant Loup"> <strong>L’Enfant Loup-Garou</strong>
@@ -1474,7 +1474,7 @@ const paniniRoles = [
 {
   id: "LA BÊTE IMMONDE",
   title: "La Bête Immonde",
-  image: "la_bete_immonde.png",
+  image: "la_bete_immonde.webp",
   description: `
   <span style="font-size:1.2em;">
     <img src="la_bete_immonde.svg" class="emoji-svg" alt="Bête"> <strong>La Bête Immonde</strong>
@@ -1512,7 +1512,7 @@ const paniniRoles = [
   
   id: "L'AVOCAT DU DIABLE",
   title: "L’Avocat du Diable",
-  image: "l_avocat_du_diable.png",
+  image: "l_avocat_du_diable.webp",
   description: `
   <span style="font-size:1.2em;">
     <img src="l_avocat_du_diable.svg" class="emoji-svg" alt="Avocat"> <strong>L’Avocat du Diable</strong>
@@ -1549,7 +1549,7 @@ const paniniRoles = [
 {
   id: "LA VALKYRIE",
   title: "La Valkyrie",
-  image: "la_valkyrie.png",
+  image: "la_valkyrie.webp",
   description: `
   <span style="font-size:1.2em;">
     <img src="la_valkyrie.svg" class="emoji-svg" alt="Valkyrie"> <strong>La Valkyrie</strong>
@@ -1586,7 +1586,7 @@ const paniniRoles = [
 {
   id: "LE CLOWN",
   title: "Le Clown",
-  image: "le_clown.png",
+  image: "le_clown.webp",
   description: `
   <span style="font-size:1.2em;">
     <img src="le_clown.svg" class="emoji-svg" alt="Clown"> <strong>Le Clown</strong>
@@ -1622,7 +1622,7 @@ const paniniRoles = [
 {
   id: "LE DIABLE",
   title: "Le Diable",
-  image: "le_diable.png",
+  image: "le_diable.webp",
   description: `
   <span style="font-size:1.2em;">
     <img src="le_diable.svg" class="emoji-svg" alt="Diable"> <strong>Le Diable</strong>
@@ -1664,7 +1664,7 @@ const paniniRoles = [
 {
   id: "LE GOUROU",
   title: "Le Gourou",
-  image: "le_gourou.png",
+  image: "le_gourou.webp",
   description: `
   <span style="font-size:1.2em;">
     <img src="le_gourou.svg" class="emoji-svg" alt="Gourou"> <strong>Le Gourou</strong>
@@ -1700,7 +1700,7 @@ const paniniRoles = [
 {
   id: "LE CHEVALIER DE LA MORT",
   title: "Le Chevalier de la Mort",
-  image: "le_chevalier_de_la_mort.png",
+  image: "le_chevalier_de_la_mort.webp",
   description: `
   <span style="font-size:1.2em;">
     <img src="le_chevalier_de_la_mort.svg" class="emoji-svg" alt="Chevalier"> <strong>Le Chevalier de la Mort</strong>
@@ -1736,7 +1736,7 @@ const paniniRoles = [
 {
   id: "LE SERIAL KILLER",
   title: "Le Serial Killer",
-  image: "le_serial_killer.png",
+  image: "le_serial_killer.webp",
   description: `
   <span style="font-size:1.2em;">
     <img src="le_serial_killer.svg" class="emoji-svg" alt="Serial Killer"> <strong>Le Serial Killer</strong>
@@ -1772,7 +1772,7 @@ const paniniRoles = [
 {
   id: "LE LOUP-GAROU SAUVAGE",
   title: "Le Loup-Garou Sauvage",
-  image: "le_loup_garou_sauvage.png",
+  image: "le_loup_garou_sauvage.webp",
   description: `
   <span style="font-size:1.2em;">
     <img src="le_loup_garou_sauvage.svg" class="emoji-svg" alt="Sauvage"> <strong>Le Loup-Garou Sauvage</strong>
@@ -1807,7 +1807,7 @@ const paniniRoles = [
 {
   id: "LES JUMEAUX EXPLOSIFS",
   title: "Les Jumeaux Explosifs",
-  image: "les_jumeaux_explosifs.png",
+  image: "les_jumeaux_explosifs.webp",
   description: `
   <span style="font-size:1.2em;">
     <img src="les_jumeaux_explosifs.svg" class="emoji-svg" alt="Jumeaux"> <strong>Les Jumeaux Explosifs</strong>
@@ -1845,7 +1845,7 @@ const paniniRoles = [
 {
   id: "DRACULA",
   title: "Dracula",
-  image: "dracula.png",
+  image: "dracula.webp",
   description: `
   <span style="font-size:1.2em;">
     <img src="dracula.svg" class="emoji-svg" alt="Dracula"> <strong>Dracula</strong>
@@ -1883,7 +1883,7 @@ const paniniRoles = [
 {
   id: "LA SUCCUBE",
   title: "La Succube",
-  image: "la_succube.png",
+  image: "la_succube.webp",
   description: `
   <span style="font-size:1.2em;">
     <img src="la_succube.svg" class="emoji-svg" alt="Succube"> <strong>La Succube</strong>
@@ -1920,7 +1920,7 @@ const paniniRoles = [
 {
   id: "LE CHASSEUR DE VAMPIRES",
   title: "Le Chasseur de Vampires",
-  image: "le_chasseur_de_vampires.png",
+  image: "le_chasseur_de_vampires.webp",
   description: `
   <span style="font-size:1.2em;">
     <img src="le_chasseur_de_vampires.svg" class="emoji-svg" alt="Chasseur"> <strong>Le Chasseur de Vampires</strong>
@@ -1956,7 +1956,7 @@ const paniniRoles = [
 {
   id: "LE DÉMON VAMPIRE",
   title: "Le Démon Vampire",
-  image: "le_demon_vampire.png",
+  image: "le_demon_vampire.webp",
   description: `
   <span style="font-size:1.2em;">
     <img src="le_demon_vampire.svg" class="emoji-svg" alt="Démon"> <strong>Le Démon Vampire</strong>
@@ -2587,7 +2587,6 @@ document.addEventListener('DOMContentLoaded', function() {
              // Gestion erreur vidéo (comme avant)
              const v = content.querySelector('video');
              if(v) { v.onerror = () => { v.parentNode.innerHTML = `<img src="${cardData.image}" class="details-image" style="width:100%;">`; }; }
-             
              document.querySelector('.details-panel').classList.add('active');
              document.querySelector('.details-overlay').classList.add('active');
              document.body.classList.add('no-scroll');

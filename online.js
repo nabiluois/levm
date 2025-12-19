@@ -70,11 +70,7 @@ document.addEventListener('click', function(e) {
         
         if (input) {
             const cleanInput = input.trim(); // Enlève les espaces inutiles
-            const attemptHash = cypherInput(cleanInput);
-
-            // --- AFFICHE LE CODE SECRET POUR TOI (A EFFACER ENSUITE) ---
-            alert("Pour le mot de passe '" + cleanInput + "', le code secret est : " + attemptHash);
-            // -----------------------------------------------------------
+            const attemptHash = cypherInput(cleanInput); 
 
             // Mets le numéro que l'alerte t'a donné ici à la place du 0
             const targetHash = 1427395148; 
@@ -152,7 +148,7 @@ function generateBadgesHTML(player, isSummary = false) {
 
 // GÉNÉRATEUR D'AVATAR COMPLET
 function generateAvatarWithBadges(player, size = "60px", border = "2px solid var(--gold)", isSummary = false) {
-    const avatarSrc = player.avatar || "icon.png";
+    const avatarSrc = player.avatar || "icon.webp";
     const badgesHtml = generateBadgesHTML(player, isSummary);
 
     return `
@@ -1162,7 +1158,7 @@ window.refreshAdminPlayerContent = function(pid, name, roleId, isDead, avatarSrc
         pAvatarWrapper.innerHTML = avatarContainer;
     }
     
-    let displayImage = "back.png";
+    let displayImage = "back.webp";
     let displayName = "Aucun rôle";
 
     const r = detectedRoles.find(x => x.id === roleId);
@@ -1411,11 +1407,11 @@ function listenForPlayerUpdates() {
 
         if (data.drawnCard && data.drawnCard.image !== lastCardImg) {
             lastCardImg = data.drawnCard.image;
-            let backImage = "back.png"; 
+            let backImage = "back.webp"; 
             const cat = data.drawnCard.category ? data.drawnCard.category.toUpperCase() : "";
-            if (cat.includes('GOLD') || cat.includes('OR')) backImage = "back_or.png";
-            else if (cat.includes('SILVER') || cat.includes('ARGENT')) backImage = "back_argant.png";
-            else if (cat.includes('BRONZE')) backImage = "back_bronze.png";
+            if (cat.includes('GOLD') || cat.includes('OR')) backImage = "back_or.webp";
+            else if (cat.includes('SILVER') || cat.includes('ARGENT')) backImage = "back_argant.webp";
+            else if (cat.includes('BRONZE')) backImage = "back_bronze.webp";
             
             if(panel && overlay) {
                 panel.innerHTML = `
@@ -1472,7 +1468,7 @@ function revealRole(roleId, status, isMayor) {
             <div class="carte-jeu visible" onclick="${clickAction}" style="width:300px; height:450px; margin:0 auto; transform:translateY(0); opacity:1; filter:${filterStyle}; transition:filter 0.5s;">
                 <div class="carte-inner">
                     <div class="carte-front">
-                        <img src="back.png" style="width:100%; height:100%; object-fit:cover;">
+                        <img src="back.webp" style="width:100%; height:100%; object-fit:cover;">
                         ${mayorBadge}
                         <div id="card-emoji-container" style="position:absolute; top:10px; left:10px; display:flex; flex-direction:column; gap:5px; z-index:50;"></div>
                     </div>
@@ -1590,7 +1586,7 @@ window.openPlayerSelectorForAction = function(sourceRoleId, sourcePlayerId) {
         
         card.innerHTML = `
             <div style="position:relative; width:50px; height:50px; margin:0 auto; overflow:visible;">
-                <img src="${p.avatar || 'icon.png'}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">
+                <img src="${p.avatar || 'icon.webp'}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">
                 ${badges}
             </div>
             <strong>${p.name}</strong>
