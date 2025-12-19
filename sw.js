@@ -1,4 +1,4 @@
-const CACHE_NAME = 'village-maudit-v6.3'; // J'ai incrémenté la version pour forcer la mise à jour
+const CACHE_NAME = 'village-maudit-v6.4'; // J'ai incrémenté la version pour forcer la mise à jour
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
