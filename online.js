@@ -47,25 +47,48 @@ let currentlyOpenedPlayerId = null;
    3. INITIALISATION & LISTENERS GLOBAUX
    ============================================ */
 
-// ÉCOUTEUR DE CLIC UNIVERSEL (CORRIGÉ)
+// Fonction de Hachage (Simple & Robuste)
+function cypherInput(str) {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+        let char = str.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash; // Convertit en 32bit integer
+    }
+    return hash;
+}
+
+// ÉCOUTEUR DE CLIC (AVEC MOUCHARD TEMPORAIRE)
 document.addEventListener('click', function(e) {
-    // On cherche le bouton, même si on clique sur l'emoji ou le texte à l'intérieur
     const btn = e.target.closest('#btn-create-game');
     
     if (btn) {
         e.preventDefault();
         e.stopPropagation();
 
-        const password = prompt("🔐 Mot de passe MJ :");
-        if(password === "1234") { 
-            // Appel de la fonction publique
-            if (typeof window.initCreateGame === 'function') {
-                window.initCreateGame(); 
-            } else {
-                alert("Erreur : Le système charge encore... Réessaie dans 2 secondes.");
+        const input = prompt("🔐 Mot de passe MJ :");
+        
+        if (input) {
+            const cleanInput = input.trim(); // Enlève les espaces inutiles
+            const attemptHash = cypherInput(cleanInput);
+
+            // --- AFFICHE LE CODE SECRET POUR TOI (A EFFACER ENSUITE) ---
+            alert("Pour le mot de passe '" + cleanInput + "', le code secret est : " + attemptHash);
+            // -----------------------------------------------------------
+
+            // Mets le numéro que l'alerte t'a donné ici à la place du 0
+            const targetHash = 1427395148; 
+
+            if(attemptHash === targetHash) { 
+                if (typeof window.initCreateGame === 'function') {
+                    window.initCreateGame(); 
+                } else {
+                    alert("Erreur : Le système charge encore...");
+                }
+            } else { 
+                // Je laisse passer pour le test, mais remettrai l'alerte erreur après
+                console.log("Mauvais code, mais mode test.");
             }
-        } else if (password !== null) { 
-            alert("⛔ Mot de passe incorrect !");
         }
     }
 });
@@ -74,11 +97,9 @@ document.addEventListener('click', function(e) {
 document.addEventListener('DOMContentLoaded', () => {
     try { scanContentFromHTML(); } catch(e) { console.error(e); }
     
-    // Bouton Rejoindre
     const btnJoin = document.getElementById('btn-join-action');
     if(btnJoin) btnJoin.onclick = joinGame;
 
-    // Reprise Session
     const savedAdminCode = localStorage.getItem('adminGameCode');
     if (savedAdminCode) { showResumeButton(savedAdminCode); }
     checkPlayerSession();
@@ -97,7 +118,7 @@ function generateBadgesHTML(player, isSummary = false) {
     // CONFIGURATION DES POSITIONS
     const pos = isSummary ? 
         { m_t: '-10px', m_l: '-8px', tr_t: '-5px', tr_r: '-5px', bl_b: '-2px', bl_l: '-2px' } : // Mode Large (Tableau)
-        { m_t: '-5px', m_l: '-5px', tr_t: '0px', tr_r: '0px', bl_b: '0px', bl_l: '0px' };     // Mode Serré (Défaut)
+        { m_t: '-5px', m_l: '-5px', tr_t: '0px', tr_r: '0px', bl_b: '0px', bl_l: '0px' };      // Mode Serré (Défaut)
 
     // 1. LE MAIRE
     if (player.isMayor) {
@@ -203,7 +224,7 @@ function restorePlayerSession(code, id) {
             if(lobbyStatus) lobbyStatus.style.display = 'block';
             
             if(window.closeModal) window.closeModal('modal-online-menu'); 
-            if(window.openModal) window.openModal('modal-join-game');         
+            if(window.openModal) window.openModal('modal-join-game');          
             listenForPlayerUpdates();
         } else {
             internalShowNotification("Info", "Partie terminée ou expirée.");
@@ -275,6 +296,18 @@ window.closeAdminPanel = function() {
         location.reload(); 
     }
 };
+
+// Fonction de sécurité pour nettoyer les textes (Anti-Bug)
+function escapeHtml(text) {
+    if (!text) return text;
+    return text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
 /* ============================================
    5. ADMIN : INITIALISATION & CONNEXION
    ============================================ */
@@ -463,15 +496,18 @@ function updateAdminUI(players) {
                 draftBtn = `<button class="btn-admin-mini" style="background:#3498db; color:white; width:100%; border:none; padding:8px; font-family:'Pirata One'; font-size:1em; margin-top:3px; position:relative; z-index:100;" onclick="event.stopPropagation(); window.openResurrectModal('${id}')">🔄 CHANGER</button>`;
             }
 
+            // SÉCURITÉ : On nettoie le nom avant de l'afficher
+            const safeName = escapeHtml(p.name); 
+
             gridHTML += `
-                <div class="admin-player-card ${isDead ? 'dead' : ''}" style="position:relative; cursor:pointer;" onclick="window.openAdminPlayerDetail('${id}', '${p.name}', '${currentRoleId || ''}', ${isDead}, '${p.avatar}', ${p.isMayor})">
+                <div class="admin-player-card ${isDead ? 'dead' : ''}" style="position:relative; cursor:pointer;" onclick="window.openAdminPlayerDetail('${id}', '${safeName.replace(/'/g, "\\'")}', '${currentRoleId || ''}', ${isDead}, '${p.avatar}', ${p.isMayor})">
                     ${isDraft ? '<div style="background:#e67e22; color:white; font-size:0.6em; padding:2px 5px; border-radius:4px; position:absolute; top:3px; left:3px; z-index:10; font-weight:bold;">PROV.</div>' : ''}
                     
                     <div class="admin-avatar-container" style="border:none; width:auto; height:auto; background:transparent;">
                         ${avatarHtml}
                     </div>
                     
-                    <strong style="font-size:0.9em;">${p.name}</strong>
+                    <strong style="font-size:0.9em;">${safeName}</strong>
                     ${roleTitle ? `<div class="role-text-badge badge-${roleCategory}">${roleTitle}</div>` : ''}
                     
                     ${draftBtn}

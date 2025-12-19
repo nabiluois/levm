@@ -21,6 +21,12 @@ const ASSETS_TO_CACHE = [
   './Bug.svg',
   './icon.png',
 
+  // DOS DE CARTES (ESSENTIEL OFFLINE)
+  './back.png',
+  './back_or.png',
+  './back_argant.png',
+  './back_bronze.png',
+
   // Images des Rôles (Noms corrigés selon ton HTML)
   './le_paysan.png',
   './le_loup_garou.png',
@@ -36,10 +42,6 @@ const ASSETS_TO_CACHE = [
   './le_loup_garou_rouge.png',
   './le_loup_garou_maudit.png',
   './le_papa_des_loups.png'
-  
-  // NOTE : Les autres images (SVG manquants, cartes VM, etc.) seront ajoutées 
-  // au cache automatiquement dès qu'elles seront affichées une première fois 
-  // grâce à la fonction "fetch" ci-dessous.
 ];
 
 // 1. Installation du Service Worker
