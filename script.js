@@ -1,7 +1,7 @@
 // ===============================
 // PANINI : RÔLES DÉTAILLÉS
 // ===============================
-const paniniRoles = [
+window.paniniRoles = [
   {
     id: "LE PAYSAN",
   title: "Le Paysan",
@@ -1992,9 +1992,14 @@ const paniniRoles = [
 
 document.addEventListener('DOMContentLoaded', function() {
   
-  // ===============================
+// ===============================
   // 1. INITIALISATION & VARIABLES
   // ===============================
+  
+  // CORRECTIF ESPACES : Remplace les doubles sauts par un espace plus aéré (14px)
+  document.querySelectorAll('.carte-back p').forEach(p => {
+      p.innerHTML = p.innerHTML.replace(/\n\s*\n/g, '<span style="display:block; height:14px;"></span>');
+  });
   
   let overlay = document.querySelector('.details-overlay');
   if (!overlay) {
@@ -2008,7 +2013,7 @@ document.addEventListener('DOMContentLoaded', function() {
     detailsPanel.innerHTML = '<div class="details-content"></div>';
   }
   
-  const cardsArray = Array.from(document.querySelectorAll('.carte-jeu')); 
+  const cardsArray = Array.from(document.querySelectorAll('.carte-jeu'));
 
   // ===============================
   // 13. SYSTÈME DE DÉVERROUILLAGE & VALIDATION (V3 - VISUEL)

@@ -1023,16 +1023,12 @@ function generateDashboardControls() {
     container.style.background = "transparent";
     container.style.maxHeight = "none";
 
-    // --- CORRECTION MAJEURE : PRÉSERVATION DE LA SÉLECTION ---
-    // On ne vide plus la sélection systématiquement.
-    // On ne la remplit depuis la base de données QUE si elle est vide (au chargement de la page)
     if (distributionSelection.length === 0 && currentPlayersData) {
         Object.values(currentPlayersData).forEach(p => {
             if (p.draftRole) distributionSelection.push(p.draftRole);
             else if (p.role && !isDraftMode) distributionSelection.push(p.role);
         });
     }
-    // ---------------------------------------------------------
 
     const wrapper = document.createElement('div');
     wrapper.className = "admin-controls-wrapper";
@@ -1040,7 +1036,6 @@ function generateDashboardControls() {
     wrapper.style.flexDirection = "column";
     wrapper.style.gap = "8px";
 
-    // 1. BOUTONS PRINCIPAUX
     const btnVote = document.createElement('button');
     btnVote.className = "btn-admin-action";
     btnVote.style.cssText = "background:#d35400; color:white; border:1px solid #e67e22; padding:12px; width:100%; border-radius:6px; font-family:'Pirata One'; font-size:1.2em; cursor:pointer; margin-bottom:5px;";
@@ -1064,7 +1059,6 @@ function generateDashboardControls() {
 
     container.appendChild(wrapper);
 
-    // 2. BLOC-NOTES MJ
     const noteWrapper = document.createElement('div');
     noteWrapper.className = "mj-notepad-wrapper";
     noteWrapper.style.marginTop = "15px";
@@ -1079,22 +1073,21 @@ function generateDashboardControls() {
     noteWrapper.appendChild(textArea);
     container.appendChild(noteWrapper);
 
-    // 3. BOUTONS BAS
     const bottomWrapper = document.createElement('div');
     bottomWrapper.style.display = "flex";
     bottomWrapper.style.flexDirection = "column";
     bottomWrapper.style.gap = "8px";
 
-    // --- BOUTON BLOCK CARD ---
+    // --- BOUTON BLOCK CARD (MISE À JOUR) ---
     const btnBlock = document.createElement('button');
     btnBlock.id = "btn-block-cards";
     btnBlock.className = "btn-admin-action";
     if (cardsLockedState) {
         btnBlock.style.cssText = "background:#c0392b; color:white; border:2px solid white; padding:12px; width:100%; border-radius:6px; font-family:'Pirata One'; font-size:1.2em; cursor:pointer;";
-        btnBlock.innerHTML = "🔒 UNLOCK CARDS (Bloqué)";
+        btnBlock.innerHTML = "🔒 UNLOCK CARD";
     } else {
         btnBlock.style.cssText = "background:#27ae60; color:white; border:1px solid #2ecc71; padding:12px; width:100%; border-radius:6px; font-family:'Pirata One'; font-size:1.2em; cursor:pointer;";
-        btnBlock.innerHTML = "🔓 BLOCK CARDS (Libre)";
+        btnBlock.innerHTML = "🔓 BLOCK CARD LIBRE";
     }
     btnBlock.onclick = () => window.toggleCardLock();
     bottomWrapper.appendChild(btnBlock);
@@ -2060,9 +2053,7 @@ function distributeRoles() {
         const playerIds = Object.keys(players);
         const updates = {};
 
-        // SÉCURITÉ : On débloque FORCÉMENT les cartes à la distribution
-        updates[`games/${currentGameCode}/cardsLocked`] = false;
-
+        // On ne touche pas à cardsLocked ici pour respecter le choix du MJ
         playerIds.forEach((id, index) => {
             if (selectedRoles[index]) {
                 updates[`games/${currentGameCode}/players/${id}/draftRole`] = selectedRoles[index];
@@ -2085,10 +2076,8 @@ window.revealRolesToEveryone = function() {
         if(!players) return;
         
         const updates = {};
-
-        // ⚠️ CORRECTION IMPORTANTE : ON FORCE LE DÉBLOCAGE ICI
-        // Sinon les cartes restent bloquées/cachées après la révélation
-        updates[`games/${currentGameCode}/cardsLocked`] = false; 
+        // On maintient l'état actuel de cardsLockedState au lieu de forcer 'false'
+        updates[`games/${currentGameCode}/cardsLocked`] = cardsLockedState; 
 
         Object.entries(players).forEach(([id, p]) => {
             if(p.draftRole) {
@@ -2101,7 +2090,6 @@ window.revealRolesToEveryone = function() {
         update(ref(db), updates).then(() => {
             internalShowNotification("Succès", "Rôles révélés à tous les joueurs !");
             isDraftMode = false;
-            // On met à jour les boutons du MJ pour montrer que c'est débloqué
             if(typeof generateDashboardControls === 'function') {
                 generateDashboardControls();
             }
@@ -2568,57 +2556,35 @@ function cleanupListeners() {
 
 
 // 2. RESTAURATION SESSION (Avec nettoyage préalable)
-
 window.restorePlayerSession = function(code, id) {
-
     cleanupListeners(); // <--- COUPURE NETTE
-
     
+    // IMPORTANT : On remet la variable à zéro par défaut !
+    cardsLockedState = false; 
 
     currentGameCode = code;
-
     myPlayerId = id;
-
     get(child(ref(db), `games/${code}/players/${id}`)).then((snapshot) => {
-
         if(snapshot.exists()) {
-
             document.getElementById('btn-join-action').style.display = 'none';
-
             const lobbyStatus = document.getElementById('player-lobby-status');
-
             if(lobbyStatus) lobbyStatus.style.display = 'block';
-
             
-
             if(window.closeModal) window.closeModal('modal-online-menu'); 
-
             if(window.openModal) window.openModal('modal-join-game');            
-
             
-
             // LANCE LES ÉCOUTEURS
-
             listenForPlayerUpdates(); 
-
             listenToGlobalPlayers();  
-
             listenForVoteState();     
-
+            listenForGameSettings(); // <--- C'EST LUI QUI MANQUAIT !
         } else {
-
             internalShowNotification("Info", "Partie terminée ou expirée.");
-
             localStorage.removeItem('vm_player_code');
-
             localStorage.removeItem('vm_player_id');
-
             location.reload();
-
         }
-
     });
-
 };
 
 
@@ -2700,13 +2666,24 @@ function listenForGameSettings() {
     onValue(ref(db, `games/${currentGameCode}/cardsLocked`), (snapshot) => {
         cardsLockedState = snapshot.val() || false;
         
-        // Mise à jour interface MJ
+        // Mise à jour immédiate du bouton MJ si on est l'admin
         if (myPlayerId === 'MJ_ADMIN') {
-            if(typeof generateDashboardControls === 'function') generateDashboardControls(); 
+            const btnBlock = document.getElementById('btn-block-cards');
+            if (btnBlock) {
+                if (cardsLockedState) {
+                    btnBlock.style.background = "#c0392b";
+                    btnBlock.style.border = "2px solid white";
+                    btnBlock.innerHTML = "🔒 UNLOCK CARD";
+                } else {
+                    btnBlock.style.background = "#27ae60";
+                    btnBlock.style.border = "1px solid #2ecc71";
+                    btnBlock.innerHTML = "🔓 BLOCK CARD LIBRE";
+                }
+            }
         } 
         // Mise à jour interface JOUEUR
         else {
-            window.refreshLockVisuals(); // Appel de la fonction centrale
+            window.refreshLockVisuals();
         }
     });
 }
@@ -2772,6 +2749,7 @@ function joinGame() {
                 listenToGlobalPlayers(); 
 
                 listenForVoteState();     
+                listenForGameSettings(); // <--- C'EST LUI QUI MANQUAIT AUSSI !
 
             });
 
@@ -2913,115 +2891,66 @@ function listenForPlayerUpdates() {
 
 
 
-        if (data.role) {
-
-            myCurrentRoleId = data.role; 
-
-            if (data.role !== lastRole || data.isMayor !== lastMayor || currentStatus !== lastStatus) { 
-
+if (data.role) {
+            myCurrentRoleId = data.role;
+            
+            // Si le panel n'est pas ouvert, on l'affiche de force !
+            const isVisible = document.querySelector('.details-panel').classList.contains('active');
+            
+            if (data.role !== lastRole || data.isMayor !== lastMayor || !isVisible) { 
                 lastRole = data.role; 
-
                 lastMayor = data.isMayor;
-
-                lastStatus = currentStatus; 
-
-                revealRole(data.role, currentStatus, data.isMayor); 
-
+                
+                // On appelle la fonction d'affichage
+                setTimeout(() => {
+                    window.revealRole(data.role, currentStatus, data.isMayor);
+                }, 200);
             }
 
-            
-
-            const btnColor = currentStatus === 'dead' ? '#555' : 'var(--gold)';
-
-            const btnText = currentStatus === 'dead' ? '#999' : 'black';
-
-            const btnLabel = currentStatus === 'dead' ? '🃏 VOIR MA CARTE (MÉMOIRE)' : '🃏 VOIR MA CARTE';
-
-            
-
+            // Mise à jour du bouton dans le menu village
             uiHtml += `
-
             <div style="margin:20px 0;">
-
-                <button class="btn-menu" style="background:${btnColor}; color:${btnText}; font-weight:bold; padding:15px; width:100%; border:2px solid #fff;" onclick="window.showMyRoleAgain()">
-
-                    ${btnLabel}
-
+                <button class="btn-menu" style="background:var(--gold); color:black; font-weight:bold; padding:15px; width:100%; border:2px solid #fff;" onclick="window.revealRole('${data.role}', '${currentStatus}', ${data.isMayor})">
+                    🃏 VOIR MA CARTE
                 </button>
-
             </div>`;
-
+            
             const lobbyStatus = document.getElementById('player-lobby-status');
-
             if(lobbyStatus) lobbyStatus.innerHTML = uiHtml;
-
         }
-
-
 
         if (data.drawnCard && data.drawnCard.image !== lastCardImg) {
-
             lastCardImg = data.drawnCard.image;
-
             let backImage = "back.webp"; 
-
             const cat = data.drawnCard.category ? data.drawnCard.category.toUpperCase() : "";
-
             if (cat.includes('GOLD') || cat.includes('OR')) backImage = "back_or.webp";
-
             else if (cat.includes('SILVER') || cat.includes('ARGENT')) backImage = "back_argant.webp";
-
             else if (cat.includes('BRONZE')) backImage = "back_bronze.webp";
-
             
-
             if(panel && overlay) {
-
                 panel.style.padding = "0"; 
-
                 panel.innerHTML = `
-
                 <div id="online-content-wrapper" style="width:100%; height:100dvh; display:flex; flex-direction:column; justify-content:center; align-items:center; position:relative;">
-
                     <button class="close-details" onclick="window.internalCloseDetails()" style="position:absolute; top:20px; right:20px; z-index:100; background:rgba(0,0,0,0.6); color:white; border:1px solid gold; border-radius:50%; width:40px; height:40px; font-size:20px;">✕</button>
-
                     <div class="carte-jeu visible" onclick="this.classList.toggle('flipped')" style="width:300px; height:450px; margin:0; transform:translateY(0); opacity:1; flex-shrink:0;">
-
                         <div class="carte-inner">
-
                             <div class="carte-front"><img src="${backImage}" style="width:100%; height:100%; object-fit:cover;"></div>
-
                             <div class="carte-back" style="padding:0;"><img src="${data.drawnCard.image}" style="width:100%; height:100%; object-fit:cover; border-radius:12px;"></div>
-
                         </div>
-
                     </div>
-
                 </div>`;
-
-                panel.classList.add('active'); overlay.classList.add('active');
-
+                panel.classList.add('active'); 
+                overlay.classList.add('active');
                 document.body.classList.add('no-scroll');
-
             }
-
         }
-
-
 
         if (JSON.stringify(data.attributes) !== JSON.stringify(currentAttributes)) {
-
             currentAttributes = data.attributes || {};
-
             window.updateCardBackEmojis(currentAttributes);
-
         }
-
     });
-
 }
-
-
 
 window.showMyRoleAgain = function() { 
 
@@ -3039,63 +2968,60 @@ window.showMyRoleAgain = function() {
 
 
 
-// 6. AFFICHAGE CARTE (CORRIGÉ : VARIABLE clickAction)
-function revealRole(roleId, status, isMayor) {
-    if(window.closeModal) {
-        window.closeModal('modal-join-game'); 
-        window.closeModal('modal-online-menu');
-    }
-    const roleData = detectedRoles.find(r => r.id === roleId);
-    if(roleData) {
-        if(navigator.vibrate) navigator.vibrate([200, 100, 200]);
-        const panel = document.querySelector('.details-panel');
-        const overlay = document.querySelector('.details-overlay');
-        if(!panel || !overlay) return;
-        
-        const isDead = status === 'dead';
-        const filterStyle = isDead ? "grayscale(100%)" : "none";
-        
-        const lockedClass = ""; 
-        const deadClass = isDead ? "dead-card" : "";
-        
-        // C'est ici qu'on définit le nom de la variable : clickAction
-        const clickAction = isDead ? "" : 'onclick="window.handleCardClick(this)"';
-        
-        const instructionText = isDead ? "TU ES MORT" : "CLIQUE POUR RETOURNER";
-        const mayorBadge = isMayor ? `<div style="position:absolute; top:-10px; left:-10px; font-size:3.5em; z-index:100; filter:drop-shadow(2px 4px 6px black);">🎖️</div>` : '';
-        
-        panel.style.padding = "0"; 
-        panel.style.paddingBottom = "0";
+// 6. AFFICHAGE CARTE (CORRIGÉ : VARIABLE clickAction + FIX MATCHING RÔLE)
+window.revealRole = function(roleId, status, isMayor) {
+    // 1. On récupère les données du rôle
+    // On cherche d'abord dans detectedRoles (car l'ID correspond exactement au fichier online)
+    let roleData = detectedRoles.find(r => r.id === roleId);
 
-        panel.innerHTML = `
-        <div id="online-content-wrapper" style="width:100%; height:100dvh; display:flex; flex-direction:column; justify-content:center; align-items:center; position:relative;">
-            
-            <button class="close-details" onclick="window.internalCloseDetails()" style="position:absolute; top:20px; right:20px; z-index:100; background:rgba(0,0,0,0.6); color:white; border:1px solid gold; border-radius:50%; width:40px; height:40px; font-size:20px;">✕</button>
-            
-            <div class="carte-jeu visible ${lockedClass} ${deadClass}" ${clickAction} style="width:300px; height:450px; margin:0; transform:translateY(0); opacity:1; filter:${filterStyle}; transition:filter 0.5s; flex-shrink:0;">
-                <div class="carte-inner">
-                    <div class="carte-front">
-                        <img src="back.webp" style="width:100%; height:100%; object-fit:cover;">
-                        ${mayorBadge}
-                        <div id="card-emoji-container" style="position:absolute; top:10px; left:10px; display:flex; flex-direction:column; gap:5px; z-index:50;"></div>
-                    </div>
-                    <div class="carte-back" style="padding:0; border:none;">
-                        <img src="${roleData.image}" style="width:100%; height:100%; object-fit:cover; border-radius:12px;">
-                    </div>
+    // Si pas trouvé, on tente une recherche plus large dans paniniRoles
+    if (!roleData && typeof paniniRoles !== 'undefined') {
+        roleData = paniniRoles.find(r => r.id === roleId || r.id === roleId.toUpperCase());
+    }
+
+    // Si toujours rien, on arrête (sécurité)
+    if(!roleData) {
+        console.warn("Rôle introuvable pour l'affichage :", roleId);
+        return;
+    }
+
+    const panel = document.querySelector('.details-panel');
+    const overlay = document.querySelector('.details-overlay');
+    
+    // 2. Préparation des classes (Mort / Blocage MJ)
+    const isDead = status === 'dead';
+    const lockedClass = (window.cardsLockedState) ? "locked-by-mj" : ""; 
+    const deadClass = isDead ? "dead-card" : "";
+    
+    // 3. Construction HTML
+    panel.innerHTML = `
+    <div id="online-content-wrapper" style="width:100%; height:100dvh; display:flex; flex-direction:column; justify-content:center; align-items:center;">
+        <button class="close-details" onclick="window.internalCloseDetails()" style="position:absolute; top:20px; right:20px; z-index:100; background:rgba(0,0,0,0.6); color:white; border:1px solid gold; border-radius:50%; width:40px; height:40px;">✕</button>
+        <div class="carte-jeu visible ${lockedClass} ${deadClass}" onclick="window.handleCardClick(this)" style="width:300px; height:450px;">
+            <div class="carte-inner">
+                <div class="carte-front">
+                    <img src="back.webp" style="width:100%; height:100%; object-fit:cover;">
+                    ${isMayor ? '<div style="position:absolute; top:-10px; left:-10px; font-size:3.5em; z-index:100;">🎖️</div>' : ''}
+                </div>
+                <div class="carte-back" style="padding:0;">
+                    <img src="${roleData.image}" style="width:100%; height:100%; object-fit:cover; border-radius:12px;">
                 </div>
             </div>
-            
-            <p style="color:${isDead ? '#c0392b' : 'white'}; margin-top:20px; font-family:'Pirata One'; font-size:1.5em; text-shadow:0 0 5px black; text-align:center; width:100%;">${instructionText}</p>
-        </div>`;
-        
-        panel.classList.add('active'); overlay.classList.add('active');
+        </div>
+        <p style="color:white; margin-top:20px; font-family:'Pirata One'; font-size:1.5em;">${isDead ? "TU ES MORT" : "CLIQUE POUR RETOURNER"}</p>
+    </div>`;
+    
+    // 4. Affichage (AVEC FIX Z-INDEX POUR PASSER DEVANT LE LOBBY)
+    panel.style.zIndex = "200000";
+    overlay.style.zIndex = "199999";
 
-        setTimeout(() => {
-            if(window.refreshLockVisuals) window.refreshLockVisuals();
-        }, 50);
-    }
-}
-
+    panel.classList.add('active'); 
+    overlay.classList.add('active');
+    document.body.classList.add('no-scroll');
+    
+    // 5. Application immédiate du verrouillage visuel
+    if(window.refreshLockVisuals) window.refreshLockVisuals();
+};
 /* ============================================
 
    14. NOTIFICATIONS
