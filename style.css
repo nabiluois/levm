@@ -51,15 +51,26 @@ body {
   padding-top: calc(var(--header-height-mobile) + 20px); 
   min-height: 100vh;
   transition: background 0.5s ease;
+  font-size: 16px; /* Taille mobile */
+}
+
+/* ZOOM PC : Texte beaucoup plus gros pour "rapprocher" le contenu */
+@media (min-width: 1024px) {
+  body {
+    font-size: 24px; 
+    padding-top: calc(var(--header-height-desktop) + 40px);
+  }
 }
 
 body.no-scroll { 
     overflow: hidden !important; 
-    height: 100dvh !important; 
+    height: 100vh !important; 
     position: fixed !important; 
     width: 100% !important;
-    /* touch-action: none;  <-- CETTE LIGNE BLOQUAIT LES CLICS, ON LA SUPPRIME */
-    overscroll-behavior: none !important;
+    top: 0 !important;
+    left: 0 !important;
+    touch-action: none !important; /* Bloque le scroll tactile */
+    -webkit-overflow-scrolling: auto !important;
 }
 
 /* ============================================
@@ -330,8 +341,11 @@ body.no-scroll {
    8. TITRES DE SECTIONS & GRILLES
    ============================================ */
 section:not(#event-cards), .category { 
-    display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; 
-    margin: 0 auto 50px auto; max-width: 1400px; padding: 0 12px; padding-bottom: 60px; 
+    display: grid; 
+    grid-template-columns: repeat(2, 1fr); /* Mobile : 2 colonnes */
+    gap: 20px; 
+    /* Largeur contenue pour éviter l'étirement infini, mais assez large pour le confort */
+    margin: 0 auto 50px auto; max-width: 1200px; padding: 0 20px; padding-bottom: 60px; 
     background-image: linear-gradient(90deg, transparent, var(--gold), transparent); 
     background-size: 60% 1px; background-repeat: no-repeat; background-position: bottom center; 
     scroll-margin-top: calc(var(--header-height-mobile) + 20px); 
@@ -341,20 +355,24 @@ section:not(#event-cards), .category {
 h2 { 
     grid-column: 1 / -1; display: flex; align-items: center; justify-content: center; 
     background: #2b2016; border: 3px double var(--gold); border-radius: 50px; 
-    color: var(--gold); padding: 12px 35px; width: fit-content; margin: 50px auto 30px auto; 
+    color: var(--gold); padding: 15px 40px; width: fit-content; margin: 60px auto 40px auto; 
     text-shadow: 0 0 10px rgba(255, 199, 44, 0.8); box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5); 
-    font-family: 'Pirata One', serif; font-size: 1.8em; position: relative; letter-spacing: 1px; 
+    font-family: 'Pirata One', serif; font-size: 2em; position: relative; letter-spacing: 1px; transform: scale(1.1);
 }
 .section-icon { height: 1.4em; width: auto; margin-right: 15px; vertical-align: middle; filter: drop-shadow(0 0 5px rgba(255, 199, 44, 0.8)); }
 
 @media (max-width: 768px) {
-  h2 { white-space: nowrap; padding-left: 15px; padding-right: 15px; max-width: 95%; overflow: hidden; }
+  h2 { white-space: nowrap; padding-left: 15px; padding-right: 15px; max-width: 95%; overflow: hidden; transform: scale(1); }
   .section-icon { margin-right: 6px; }
 }
 
-@media (min-width: 500px) { section:not(#event-cards), .category { grid-template-columns: repeat(3, 1fr); } }
-@media (min-width: 800px) { section:not(#event-cards), .category { grid-template-columns: repeat(4, 1fr); gap: 25px; } }
-@media (min-width: 1200px) { section:not(#event-cards), .category { grid-template-columns: repeat(5, 1fr); } }
+/* PC : ON FORCE 3 COLONNES POUR AVOIR DE GROSSES CARTES */
+@media (min-width: 900px) { 
+    section:not(#event-cards), .category { 
+        grid-template-columns: repeat(3, 1fr); 
+        gap: 30px; 
+    } 
+}
 
 /* ============================================
    9. CARTES DE JEU (FLIP & STYLE)
@@ -414,8 +432,8 @@ h2 {
 /* ============================================
    10. CARTES ÉVÉNEMENTS (VM)
    ============================================ */
-#event-cards { display: block; padding: 0 10px 80px 10px; max-width: 1400px; margin: 0 auto; scroll-margin-top: calc(var(--header-height-mobile) + 20px); }
-.event-subtitle { display: block; width: 100%; text-align: center; font-family: 'Pirata One', serif; font-size: 1.6em; margin: 40px 0 20px 0; grid-column: 1 / -1; }
+#event-cards { display: block; padding: 0 20px 80px 20px; max-width: 1200px; margin: 0 auto; scroll-margin-top: calc(var(--header-height-mobile) + 20px); }
+.event-subtitle { display: block; width: 100%; text-align: center; font-family: 'Pirata One', serif; font-size: 2em; margin: 50px 0 30px 0; grid-column: 1 / -1; }
 .gold-title { color: gold; text-shadow: 0 0 15px gold; }
 .silver-title { color: silver; text-shadow: 0 0 15px silver; }
 .bronze-title { color: #cd7f32; text-shadow: 0 0 15px #cd7f32; }
@@ -423,7 +441,7 @@ h2 {
 .carte-vm { width: 100%; aspect-ratio: 2/3; border-radius: 12px; overflow: hidden; cursor: pointer; position: relative; opacity: 1; background: #1a1510; border: 2px solid rgba(212, 175, 55, 0.3); box-shadow: inset 0 0 20px rgba(0,0,0,0.8); transition: transform 0.3s ease; padding: 0; }
 .carte-vm:hover { transform: scale(1.05); border-color: var(--gold); }
 .carte-vm img { width: 100%; height: 100%; object-fit: cover; display: block; margin: 0; }
-.carte-vm.zoomed { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(1) !important; z-index: 2200; width: 85vw; max-width: 450px; height: auto; aspect-ratio: auto; box-shadow: 0 0 50px rgba(0,0,0,0.95); border: 3px solid var(--gold); background: #000; padding: 0; }
+.carte-vm.zoomed { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(1) !important; z-index: 2200; width: 85vw; max-width: 500px; height: auto; aspect-ratio: auto; box-shadow: 0 0 50px rgba(0,0,0,0.95); border: 3px solid var(--gold); background: #000; padding: 0; }
 #vm-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 2150; backdrop-filter: blur(5px); }
 #vm-overlay.active { display: block; }
 
@@ -637,82 +655,85 @@ body.light-mode #modal-regles p, body.light-mode #modal-regles li, body.light-mo
 .badge-inconnu { background: #7f8c8d; }
 
 /* ============================================
-   17. DASHBOARD & MODALES
+   17. DASHBOARD & MODALES (Layout Colonne & Scroll)
    ============================================ */
+
+/* FIX SCROLL BLOQUÉ (Renforcé) */
+body.no-scroll { 
+    overflow: hidden !important; 
+    height: 100vh !important; 
+    position: fixed !important; 
+    width: 100% !important;
+    top: 0 !important;
+    left: 0 !important;
+    touch-action: none !important;
+}
+
+/* FIX APPAREIL PHOTO CENTRÉ */
+#photo-preview {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+#photo-preview span {
+    padding-top: 5px; /* Ajustement visuel */
+    line-height: 0;
+}
+
+/* DASHBOARD : BOUTON OK EN DESSOUS */
 .selection-dashboard {
     position: sticky;
     top: 0;
     background: #1a120b;
     z-index: 500;
-    padding: 10px 5px;
+    padding: 15px 10px;
     border-bottom: 2px solid var(--gold);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
     box-shadow: 0 5px 15px rgba(0,0,0,0.8);
     margin: -10px -10px 10px -10px;
+    
+    /* C'est ICI la correction importante : Colonne */
+    display: flex;
+    flex-direction: column !important; 
+    align-items: center;
+    gap: 10px; 
 }
+
 .dashboard-stats {
     display: flex;
     gap: 15px;
     font-family: 'Pirata One';
-    font-size: 1.2em;
+    font-size: 1.3em;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    flex-wrap: wrap; 
 }
+
 .stat-item { display: flex; align-items: center; gap: 5px; }
 .stat-item img { width: 24px; height: 24px; }
 .stat-item span { color: #fff; }
+
 .btn-compact {
     background: #2ecc71;
     color: #fff;
     border: 1px solid #fff;
-    padding: 5px 15px;
-    border-radius: 20px;
+    padding: 8px 0;
+    border-radius: 8px;
     font-family: 'Pirata One';
-    font-size: 1.1em;
+    font-size: 1.2em;
     cursor: pointer;
     text-transform: uppercase;
+    width: 100%; /* Prend toute la largeur */
+    text-align: center;
 }
-.role-select-item img {
-    filter: grayscale(100%);
-    opacity: 0.5;
-    transition: all 0.2s ease;
-    border: 2px solid transparent;
-    transform: scale(0.95);
-}
-.role-select-item.selected img {
-    filter: none;
-    opacity: 1;
-    border-color: var(--gold);
-    transform: scale(1);
-    box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
-}
-.role-select-item {
-    position: relative !important;
-    overflow: visible !important;
-}
-.qty-badge {
-    position: absolute;
-    top: -5px; right: 5px;
-    background: #c0392b; color: white;
-    font-family: 'Pirata One'; font-size: 1em;
-    min-width: 25px; height: 25px;
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    border: 2px solid #fff; z-index: 50;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.5);
-}
-.category-separator {
-    color: var(--gold);
-    font-family: 'Pirata One';
-    font-size: 1.4em;
-    border-bottom: 1px solid #555;
-    margin-top: 15px;
-    margin-bottom: 5px;
-    padding-bottom: 2px;
-    clear: both;
-}
+
+.role-select-item img { filter: grayscale(100%); opacity: 0.5; transition: all 0.2s; transform: scale(0.95); }
+.role-select-item.selected img { filter: none; opacity: 1; border-color: var(--gold); transform: scale(1); }
+.role-select-item { position: relative !important; overflow: visible !important; }
+.qty-badge { position: absolute; top: -5px; right: 5px; background: #c0392b; color: white; min-width: 25px; height: 25px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid #fff; z-index: 50; }
+.category-separator { color: var(--gold); font-family: 'Pirata One'; font-size: 1.4em; border-bottom: 1px solid #555; margin-top: 15px; margin-bottom: 5px; clear: both; }
 .admin-grid-container { display: grid !important; grid-template-columns: repeat(3, 1fr) !important; gap: 6px !important; padding: 10px 5px !important; width: 100% !important; }
-.role-select-item { cursor: pointer; border: 2px solid transparent; text-align: center; transition: transform 0.2s; width: 100% !important; margin: 0 !important; }
+.role-select-item { cursor: pointer; border: 2px solid transparent; text-align: center; width: 100% !important; margin: 0 !important; }
 
 /* ============================================
    18. FIX PANINI & Z-INDEX (NETTOYÉ)
@@ -1058,3 +1079,230 @@ button.btn-validate.disabled {
 }
 .update-toast.show { transform: translateX(-50%) translateY(0); opacity: 1; pointer-events: auto; }
 #reload-btn { background: var(--gold); color: black; border: none; padding: 5px 15px; border-radius: 20px; cursor: pointer; font-weight: bold; }
+
+/* ============================================
+   25. SYSTÈME DE VOTE (URNE & RÉSULTATS)
+   ============================================ */
+.vote-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: #1a120b; z-index: 60000; /* Au-dessus de tout */
+    display: flex; flex-direction: column; align-items: center;
+    padding: 20px; overflow-y: auto;
+    transition: opacity 0.3s;
+}
+
+.vote-title {
+    font-family: 'Pirata One'; color: var(--gold); font-size: 2em;
+    text-align: center; margin-bottom: 20px; text-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+    animation: pulseRed 2s infinite;
+}
+@keyframes pulseRed { 0% { color: var(--gold); } 50% { color: #c0392b; } 100% { color: var(--gold); } }
+
+.vote-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;
+    width: 100%; max-width: 600px; margin-bottom: 80px;
+}
+
+.vote-card {
+    background: rgba(255,255,255,0.05); border: 1px solid #555;
+    border-radius: 10px; padding: 10px; text-align: center;
+    cursor: pointer; transition: all 0.2s; position: relative;
+}
+.vote-card.selected {
+    background: rgba(192, 57, 43, 0.2);
+    border: 2px solid #c0392b;
+    transform: scale(1.05);
+    box-shadow: 0 0 20px rgba(192, 57, 43, 0.6);
+}
+.vote-card img { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; margin-bottom: 5px; }
+.vote-card span { display: block; font-size: 0.9em; color: #fff; line-height: 1.2; }
+
+/* VISUALISATION DES RÉSULTATS (PILES) */
+.results-container {
+    display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; width: 100%;
+}
+.result-column {
+    display: flex; flex-direction: column; align-items: center;
+    background: rgba(0,0,0,0.3); border-radius: 15px; padding: 15px;
+    min-width: 100px; border-bottom: 4px solid #555;
+}
+.result-column.leader { border-color: #c0392b; background: rgba(192, 57, 43, 0.1); }
+.accused-avatar { width: 80px; height: 80px; border-radius: 50%; border: 3px solid #fff; margin-bottom: 10px; object-fit: cover; }
+.voters-stack { display: flex; flex-direction: column-reverse; align-items: center; margin-top: 10px; gap: -10px; }
+.voter-mini { width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--gold); object-fit: cover; margin-top: -15px; box-shadow: 0 2px 5px black; }
+
+/* BOUTON FLOTTANT */
+.btn-vote-confirm {
+    position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+    background: linear-gradient(135deg, #c0392b, #8e44ad);
+    color: white; border: 2px solid white; padding: 15px 40px;
+    font-family: 'Pirata One'; font-size: 1.5em; border-radius: 50px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.8); cursor: pointer; z-index: 60005;
+}
+/* BARRE DE PROGRESSION VOTE */
+.vote-progress-wrapper {
+    width: 100%; max-width: 300px;
+    margin: 0 auto 20px auto;
+    position: relative;
+}
+.vote-progress-track {
+    background: rgba(0, 0, 0, 0.5);
+    height: 15px; border-radius: 10px;
+    border: 1px solid #555; overflow: hidden;
+}
+.vote-progress-fill {
+    height: 100%; background: linear-gradient(90deg, #27ae60, #2ecc71);
+    width: 0%; transition: width 0.5s ease-out;
+    box-shadow: 0 0 10px rgba(46, 204, 113, 0.5);
+}
+.vote-progress-text {
+    text-align: center; color: #ccc;
+    font-size: 0.9em; margin-top: 5px;
+    font-family: 'Almendra', serif; letter-spacing: 1px;
+}
+
+/* CARTE VOTE BLANC */
+.vote-card.blanc {
+    border-color: #fff;
+    background: rgba(255, 255, 255, 0.1);
+}
+.vote-card.blanc.selected {
+    background: #fff;
+    color: #000;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.6);
+}
+.vote-card.blanc span { color: inherit; font-weight: bold; }
+
+/* COLONNE RÉSULTAT BLANC */
+.result-column.blanc {
+    border-bottom-color: #aaa;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+/* --- VOTE BLANC (STYLE REVU) --- */
+.btn-vote-blanc {
+    width: 100%; 
+    padding: 20px;
+    margin: 0 0 25px 0; /* Marge en bas pour séparer des visages */
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid #bdc3c7;
+    border-radius: 12px;
+    color: #fff;
+    font-family: 'Pirata One'; font-size: 1.4em;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 15px;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+.btn-vote-blanc:active { transform: scale(0.98); }
+.btn-vote-blanc.selected {
+    background: #ecf0f1;
+    color: #2c3e50;
+    border-color: #fff;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+    font-weight: bold;
+}
+
+/* On cache le bouton confirmer car le vote est instantané maintenant (avec possibilité de changer) */
+.btn-vote-confirm { display: none !important; }
+
+/* --- PHOTO ÉLIMINÉ --- */
+.eliminated-photo {
+    width: 100px; height: 100px;
+    border-radius: 50%;
+    border: 4px solid #c0392b;
+    box-shadow: 0 0 25px rgba(192, 57, 43, 0.8);
+    object-fit: cover;
+    margin: 0 auto 15px auto;
+    display: block;
+    animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* --- BOUTON FLOTTANT MJ (Sur les résultats) --- */
+.mj-floating-stop {
+    position: fixed; top: 20px; right: 20px;
+    background: #c0392b; color: white;
+    border: 2px solid white; border-radius: 30px;
+    padding: 10px 20px;
+    font-family: 'Pirata One'; font-size: 1.3em;
+    z-index: 300000 !important; /* Z-INDEX MAXIMUM */
+    cursor: pointer;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.8);
+    pointer-events: auto !important; /* FORCE LE CLIC */
+    text-transform: uppercase;
+    animation: popIn 0.5s ease;
+}
+
+/* LORSQUE LE VOTE EST COMPLET (100%) */
+.vote-grid.locked {
+    opacity: 0.7;
+    pointer-events: none; /* Bloque les clics */
+    filter: grayscale(0.5);
+}
+
+.vote-status-message {
+    text-align: center;
+    color: #f1c40f;
+    font-family: 'Pirata One';
+    font-size: 1.4em;
+    margin-bottom: 10px;
+    animation: pulse 1.5s infinite;
+}
+
+/* ============================================
+   26. NOUVEAUTÉS V7 (MENU & BLOCK CARD)
+   ============================================ */
+
+/* BOUTON MENU "MA CARTE" (CORRIGÉ : TAILLE RÉDUITE) */
+.menu-card-shortcut {
+    display: flex; /* Flexbox pour bien centrer */
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%; /* Prend la largeur disponible */
+    cursor: pointer;
+    transition: transform 0.2s ease;
+    padding: 5px 0;
+    overflow: hidden; /* Sécurité anti-débordement */
+}
+
+.menu-card-shortcut:active { transform: scale(0.95); }
+
+.menu-card-shortcut img {
+    width: 45px;  /* TAILLE RÉDUITE (était 70px) */
+    height: auto; /* Garde les proportions automatiquement */
+    max-width: 100%;
+    border-radius: 6px;
+    border: 2px solid var(--gold);
+    box-shadow: 0 0 10px rgba(0,0,0,0.8);
+    object-fit: cover;
+    margin-bottom: 5px;
+    transition: box-shadow 0.3s;
+}
+
+.menu-card-shortcut:hover img { box-shadow: 0 0 15px rgba(212, 175, 55, 0.6); }
+
+.menu-card-shortcut span {
+    font-family: 'Pirata One', serif; 
+    color: var(--gold);
+    font-size: 1.1em; 
+    text-shadow: 0 2px 2px black; 
+    letter-spacing: 1px;
+    text-align: center;
+}
+
+/* CARTE BLOQUÉE (PAR LE MJ) */
+.carte-jeu.locked-by-mj {
+    pointer-events: none !important; /* Empeche le clic */
+    filter: grayscale(80%) brightness(0.7); /* Effet visuel "désactivé" */
+}
+/* Ajout d'un petit cadenas visuel si bloqué */
+.carte-jeu.locked-by-mj::before {
+    content: "🔒";
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 4em; z-index: 50;
+    text-shadow: 0 0 20px black;
+    opacity: 0.8;
+}
