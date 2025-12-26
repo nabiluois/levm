@@ -2349,21 +2349,45 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
 // ===============================
-    // 8. ZOOM CARTES VM
+    // 8. ZOOM CARTES VM (CORRECTIF INSTANTANÉ)
     // ===============================
     const vmOverlay = document.getElementById('vm-overlay');
+    
     function closeZoom() {
         document.querySelectorAll('.carte-vm.zoomed').forEach(c => c.classList.remove('zoomed'));
         if (vmOverlay) vmOverlay.classList.remove('active');
+        
+        // 1. On coupe l'animation fluide pour que ce soit INSTANTANÉ
+        document.documentElement.style.scrollBehavior = 'auto';
+        
+        // 2. On débloque la page
         document.body.classList.remove('no-scroll');
+        document.body.style.top = ''; 
+        
+        // 3. On téléporte la page à l'ancienne position
+        window.scrollTo(0, scrollPosition);
+        
+        // 4. On remet l'animation fluide après un tout petit délai
+        setTimeout(() => {
+            document.documentElement.style.scrollBehavior = '';
+        }, 10);
     }
+
     function openZoom(card) {
-        if (document.body.classList.contains('locked-game')) return; // Sécurité
+        if (document.body.classList.contains('locked-game')) return; 
+        
+        // On note la position actuelle
+        scrollPosition = window.scrollY;
+        
         document.querySelectorAll('.carte-vm.zoomed').forEach(c => c.classList.remove('zoomed'));
         card.classList.add('zoomed');
         if (vmOverlay) vmOverlay.classList.add('active');
+        
+        // On fige la page à cette position exacte
+        document.body.style.top = `-${scrollPosition}px`;
         document.body.classList.add('no-scroll');
     }
+
     document.querySelectorAll('.carte-vm').forEach(card => {
         card.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -2371,9 +2395,9 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     if (vmOverlay) vmOverlay.addEventListener('click', closeZoom);
-
+    
     // ===============================
-    // 9. DÉTAILS PANEL
+    // 9. DÉTAILS PANEL (CORRECTIF INSTANTANÉ)
     // ===============================
     window.closeDetails = function() {
         if (detailsPanel) {
@@ -2381,22 +2405,33 @@ document.addEventListener('DOMContentLoaded', function() {
             setTimeout(() => { detailsPanel.style.transform = ''; }, 300);
         }
         if(overlay) overlay.classList.remove('active');
+        
+        // 1. Coupe l'animation fluide -> Retour INSTANTANÉ
+        document.documentElement.style.scrollBehavior = 'auto';
+        
         document.body.classList.remove('no-scroll');
+        document.body.style.top = '';
+        window.scrollTo(0, scrollPosition);
+        
+        // 2. Remet l'animation fluide
+        setTimeout(() => {
+            document.documentElement.style.scrollBehavior = '';
+        }, 10);
+        
         const v = detailsPanel ? detailsPanel.querySelector('video') : null;
         if(v) v.pause();
     };
+
     overlay.addEventListener('click', function() {
         if(detailsPanel.classList.contains('active')) closeDetails();
     });
+
     function openDetails(cardData) {
         if (navigator.vibrate) navigator.vibrate(15);
         const content = detailsPanel.querySelector('.details-content') || detailsPanel;
         
-        // On construit le chemin vidéo
         const videoSrc = cardData.image.replace(/\.(png|jpg|jpeg|webp)$/i, '.mp4');
         
-        // Contenu HTML propre : on insère SEULEMENT la vidéo d'abord.
-        // Si elle échoue, le JS la remplacera proprement par l'image.
         content.innerHTML = `
           <div class="details-header">
             <h2 class="details-title">${cardData.title}</h2>
@@ -2409,22 +2444,27 @@ document.addEventListener('DOMContentLoaded', function() {
           <div class="details-section">${cardData.description || ''}</div>
         `;
 
-        // Logique de remplacement d'erreur plus propre
         const videoEl = content.querySelector('.details-video');
         const wrapper = content.querySelector('.media-wrapper');
         
         if(videoEl) {
             videoEl.addEventListener('error', () => {
-                // Si la vidéo plante, on vide le wrapper et on met l'image
                 wrapper.innerHTML = `<img src="${cardData.image}" alt="${cardData.title}" class="details-image" style="width:100%; height:auto; display:block;">`;
             });
         }
 
+        // --- BLOCAGE POSITION ---
+        scrollPosition = window.scrollY;
+        
         detailsPanel.classList.add('active');
         overlay.classList.add('active');
+        
+        document.body.style.top = `-${scrollPosition}px`;
         document.body.classList.add('no-scroll');
+        
         detailsPanel.scrollTop = 0;
     }
+
     document.addEventListener('click', (e) => {
         if (e.target.closest('.btn-details')) {
             e.stopPropagation();
@@ -2563,15 +2603,13 @@ document.addEventListener('DOMContentLoaded', function() {
     // Modification de la fonction openDetails pour inclure le loader
     const originalOpenDetails = window.openDetails || openDetails;
     window.openDetails = function(cardData) {
-        window.showLoader(); // Affiche le spinner
+        window.showLoader(); 
         
-        // On précharge l'image ou la vidéo avant d'afficher
         const img = new Image();
         img.src = cardData.image;
+        
         img.onload = () => {
-            window.hideLoader(); // Cache le spinner quand prêt
-            // Appel de la fonction d'origine (copie ta logique existante ici si besoin)
-            // Pour faire simple, on réutilise ta logique d'insertion HTML ici :
+            window.hideLoader(); 
             const content = document.querySelector('.details-panel .details-content');
             if(content) {
                const videoSrc = cardData.image.replace(/\.(png|jpg|jpeg|webp)$/i, '.mp4');
@@ -2586,15 +2624,20 @@ document.addEventListener('DOMContentLoaded', function() {
                  <div class="details-section">${cardData.description || ''}</div>
                `;
                
-               // Gestion erreur vidéo (comme avant)
                const v = content.querySelector('video');
                if(v) { v.onerror = () => { v.parentNode.innerHTML = `<img src="${cardData.image}" class="details-image" style="width:100%;">`; }; }
+               
+               // --- CORRECTIF SCROLL (C'est ici que ça se joue) ---
+               scrollPosition = window.scrollY;
+               
                document.querySelector('.details-panel').classList.add('active');
                document.querySelector('.details-overlay').classList.add('active');
+               
+               document.body.style.top = `-${scrollPosition}px`;
                document.body.classList.add('no-scroll');
             }
         };
-        img.onerror = () => { window.hideLoader(); }; // Sécurité
+        img.onerror = () => { window.hideLoader(); }; 
     };
 
     // ===============================
