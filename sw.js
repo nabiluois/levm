@@ -1,7 +1,7 @@
 /* ============================================
    1. CONFIGURATION & FICHIERS À CACHER
    ============================================ */
-const CACHE_NAME = 'village-maudit-v6.5'; // J'ai incrémenté la version pour forcer la mise à jour
+const CACHE_NAME = 'village-maudit-v6.6'; // J'ai incrémenté la version pour forcer la mise à jour
 
 const ASSETS_TO_CACHE = [
     './',

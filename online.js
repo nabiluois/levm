@@ -1309,6 +1309,14 @@ window.refreshAdminPlayerContent = function(pid, name, roleId, isDead, avatarSrc
                 pActions.appendChild(btn);
             });
         }
+
+        // --- NOUVEAU : BOUTON KICK ---
+        const btnKick = document.createElement('button');
+        btnKick.className = "btn-submit";
+        btnKick.style.cssText = "background:#111; color:#e74c3c; border:1px solid #c0392b; grid-column: 1 / -1; margin-top:15px; opacity:0.8;";
+        btnKick.innerHTML = "🚫 EXPULSER (KICK)";
+        btnKick.onclick = () => window.kickPlayer(pid);
+        pActions.appendChild(btnKick);
     }
 };
 
@@ -1573,11 +1581,21 @@ function listenForPlayerUpdates() {
     unsubscribePlayer = onValue(myPlayerRef, (snapshot) => {
         const data = snapshot.val();
         
+        // --- DETECTION EXPULSION (KICK) ---
+        if (!data) {
+            // Si data est null, le joueur a été supprimé de la base
+            alert("Vous avez été exclu de la partie par le Maître du Jeu.");
+            localStorage.removeItem('vm_player_code');
+            localStorage.removeItem('vm_player_id');
+            location.reload();
+            return;
+        }
+        // ----------------------------------
+
         // BOUTON MENU : Afficher si rôle présent
         const menuBtn = document.getElementById('menu-my-card-li');
         if (!data || !data.role) {
             if(menuBtn) menuBtn.style.display = 'none';
-            if(!data) return; 
         } else {
             if(menuBtn) menuBtn.style.display = 'block';
         }
@@ -2493,4 +2511,22 @@ window.resetGameToLobby = function() {
         internalShowNotification("Reset", "Partie réinitialisée.");
         generateDashboardControls(); 
     });
+};
+
+/* ============================================
+   18. FONCTION KICK (EXPULSION)
+   ============================================ */
+window.kickPlayer = function(pid) {
+    if(confirm("⚠️ ATTENTION : Voulez-vous vraiment EXPULSER ce joueur de la partie ?\n\nIl sera déconnecté et supprimé de la liste.")) {
+        // On supprime le nœud du joueur dans Firebase
+        remove(ref(db, `games/${currentGameCode}/players/${pid}`))
+        .then(() => {
+            internalShowNotification("Admin", "Joueur expulsé avec succès.");
+            // On ferme la fenêtre de détail pour éviter les bugs visuels
+            window.internalCloseDetails();
+        })
+        .catch((err) => {
+            alert("Erreur lors de l'expulsion : " + err.message);
+        });
+    }
 };
