@@ -853,20 +853,20 @@ window.paniniRoles = [
             <img src="Pouvoir.svg" class="emoji-svg" alt="Pouvoir"> <strong>Pouvoir</strong>
         </span><br>
         Il existe deux cartes identiques : Olaf et Pilaf.<br><br>
-        Si l’un de vous deux devient maire du village (par élection ou par substitution), il devient immortel face à toutes les attaques (de jour comme de nuit), tant que son binôme est encore vivant.<br>
-        L’immortalité disparaît immédiatement si le binôme meurt : le maire redevient vulnérable.<br><br>
+        Au début de la partie, le Maître du Jeu réveille Olaf et Pilaf.<br>
+        Ils ouvrent les yeux et se reconnaissent mutuellement.<br><br>
         
         <span style="font-size:1.2em;">
             <img src="Conseils.svg" class="emoji-svg" alt="Conseils"> <strong>Conseils</strong>
         </span><br>
-        - Faites équipe pour vous soutenir mutuellement et préserver votre avantage unique.<br>
-        - Visez la mairie avec prudence, surtout si votre binôme est en sécurité.<br>
-        - Protégez-vous discrètement, car les loups-garous voudront rompre le duo pour détruire votre invincibilité.<br><br>
+        Olaf et Pilaf savent qu’ils sont dans le même camp (le village) et qu’ils peuvent se faire totalement confiance.<br>
+        Ils ne possèdent aucun pouvoir spécial, mais cette certitude leur permet de s’entraider, partager leurs soupçons et tenter ensemble de démasquer les Loups-Garous.br>
+        Attention : ils doivent rester discrets, car révéler leur lien pourrait faire d’eux des cibles prioritaires.<br><br>
         
         <span style="font-size:1.2em;">
             <img src="Description.svg" class="emoji-svg" alt="Description"> <strong>Description</strong>
         </span><br>
-        Paysan, cette carte se décline en deux exemplaires identiques. Si l'un des deux joueurs possédant cette carte est élu à la majorité ou devient le maire du village par substitution, alors il devient immortel face à toutes les attaques, de jour comme de nuit, à condition que son binôme soit toujours en jeu. S'il meurt, alors le maire perdra son immortalité.
+        Paysan, cette carte se décline en deux exemplaires identiques. Au début de la partie, le Maître du Jeu réveille Olaf et Pilaf. Ils ouvrent les yeux et se reconnaissent mutuellement. Olaf et Pilaf savent qu’ils sont dans le même camp (le village) et qu’ils peuvent se faire totalement confiance.
         `
     },
     {
@@ -891,7 +891,7 @@ window.paniniRoles = [
         Chaque nuit, tu places ta poupée vaudou chez un joueur de ton choix.<br>
         Ce joueur est protégé de toutes les attaques nocturnes (loups-garous, sorcière, etc.), rien ne peut le tuer ou le perturber cette nuit-là.<br>
         Mais : la capacité spéciale de nuit de ce joueur est bloquée cette nuit-là.<br>
-        Les joueurs directement à gauche et à droite de la cible perdent eux aussi leur pouvoir de nuit — mais ne sont pas protégés, eux peuvent être attaqués.<br><br>
+        <br><br>
         
         <span style="font-size:1.2em;">
             <img src="Skull.svg" class="emoji-svg" alt="Mort"> <strong>Effet secondaire</strong>
@@ -910,7 +910,7 @@ window.paniniRoles = [
             <img src="Description.svg" class="emoji-svg" alt="Description"> <strong>Description</strong>
         </span><br>
         Pouvoir : La Poupée Vaudou<br>
-        Chaque nuit, le Marabout place sa poupée vaudou chez un joueur. Ce joueur est protégé des attaques nocturnes. Rien ne passe. Même pas un mauvais rêve. MAIS… sa capacité de nuit est bloquée. Les voisins directs (à gauche et à droite) perdent eux aussi leur pouvoir de nuit, mais ne sont pas protégés.<br>
+        Chaque nuit, le Marabout place sa poupée vaudou chez un joueur. Ce joueur est protégé des attaques nocturnes. Rien ne passe. Même pas un mauvais rêve. MAIS… sa capacité de nuit est bloquée.<br>
         ☠️ Effet secondaire : Si le joueur en possession de la poupée meurt pendant la journée, la poupée est détruite dans les flammes du bûcher populaire. Le Marabout perd alors définitivement son pouvoir. Si le Marabout meurt, la poupée meurt aussi.<br>
         💡 Moralité : bouge ta poupée, souvent, subtilement, et idéalement loin des joueurs en danger.
         `
@@ -1031,7 +1031,7 @@ window.paniniRoles = [
         <span style="font-size:1.2em;">
             <img src="le_petit_rigolo.svg" class="emoji-svg" alt="Rigolo"> <strong>Le Petit Rigolo</strong>
         </span><br>
-        Quand la peur s’installe, il ramène la lumière : le rire, son arme contre la nuit et les loups.<br><br>
+        Lors de la première nuit, le Maître du Jeu réveille le Petit Rigolo. Il désigne un joueur de son choix..<br><br>
         
         <span style="font-size:1.2em;">
             <img src="Objectif.svg" class="emoji-svg" alt="Objectif"> <strong>Objectif</strong>
@@ -1042,21 +1042,21 @@ window.paniniRoles = [
         <span style="font-size:1.2em;">
             <img src="Pouvoir.svg" class="emoji-svg" alt="Pouvoir"> <strong>Pouvoir</strong>
         </span><br>
-        Chaque jour, tu dois faire rire au moins un joueur pour rester en vie.<br>
-        Le Maître du Jeu surveille que tu accomplis cette mission auprès du groupe.<br>
-        Si tu échoues à faire rire quelqu’un pendant la journée, tu meurs.<br><br>
+        À partir de ce moment, le Petit Rigolo doit s’acharner publiquement sur ce joueur :<br>
+        à chaque vote de jour,<br>
+        quoi qu’il arrive,<br>
+        il est obligé de voter contre cette personne.<br>
+        Il ne peut jamais changer d’avis, même s’il doute ou si la situation devient suspecte.<br><br>
         
         <span style="font-size:1.2em;">
             <img src="Conseils.svg" class="emoji-svg" alt="Conseils"> <strong>Conseils</strong>
         </span><br>
-        - Fais preuve d’imagination : blague, imitation, devinette… trouve ce qui amuse vraiment tes voisins !<br>
-        - Observe qui est réceptif à ton humour pour t’assurer de ta survie.<br>
-        - Reste attentif au jeu : faire rire peut parfois détourner l’attention ou t’innocenter.<br><br>
+        Si le joueur désigné par le Petit Rigolo meurt (de jour), alors le Petit Rigolo devient intouchable pendant les votes du jour<br><br>
         
         <span style="font-size:1.2em;">
             <img src="Description.svg" class="emoji-svg" alt="Description"> <strong>Description</strong>
         </span><br>
-        Chaque nuit qui passe, le village sombre petit à petit dans la terreur et la tourmente. Mais le Petit Rigolo est là pour redonner le sourire aux paysans. Son rôle est simple : chaque jour, il a l'obligation de faire rire au moins un joueur pour rester en vie. S'il échoue, il meurt. Le MJ reste attentif à ce qu'il parvienne bien à faire rire quelqu'un chaque jour.
+        La première nuit, le Petit Rigolo désigne un joueur. Dès le lendemain et chaque jour, il doit obligatoirement voter contre cette personne, sans jamais changer d’avis. Si le joueur désigné meurt, (de jour) alors le Petit Rigolo devient immunisé contre les votes du village : il ne pourra plus jamais être éliminé de jour.
         `
     },
     {
@@ -1078,7 +1078,7 @@ window.paniniRoles = [
         <span style="font-size:1.2em;">
             <img src="Pouvoir.svg" class="emoji-svg" alt="Pouvoir"> <strong>Pouvoir</strong>
         </span><br>
-        Jusqu’à deux fois dans la partie, lors d’un vote de jour, juste avant que le Maître du Jeu ne révèle le rôle du joueur éliminé, le MJ endort le village et te demande si tu veux remonter le temps :<br><br>
+        Une fois dans la partie, lors d’un vote de jour, juste avant que le Maître du Jeu ne révèle le rôle du joueur éliminé, le MJ endort le village et te demande si tu veux remonter le temps :<br><br>
         Si tu acceptes, le MJ te montre secrètement le rôle du joueur qui allait être éliminé.<br>
         La journée est alors entièrement rejouée comme si rien ne s'était passé : débat, défense, nouveau vote.<br>
         Tu peux utiliser l’information obtenue pour influencer ou anticiper la défense ou l’accusation du joueur en question.<br>
@@ -1094,7 +1094,7 @@ window.paniniRoles = [
             <img src="Description.svg" class="emoji-svg" alt="Description"> <strong>Description</strong>
         </span><br>
         Uchronie est un voyageur interdimensionnel capable de créer une réalité alternative… à condition de convaincre le village de ne pas refaire deux fois la même erreur. Lors des votes du village, Uchronie peut stopper le temps juste avant que le MJ ne révèle le rôle du joueur éliminé : le MJ endort le village et demande à Uchronie s’il veut utiliser son pouvoir et remonter le temps. À cet instant, le MJ lui montre secrètement le rôle du joueur sur le point de mourir, puis la journée est entièrement rejouée comme si rien ne s'était passé. Uchronie peut tenter de modifier le cours des événements en anticipant la défense du joueur éliminé ou en l’enfonçant si la carte qu’il a vue confirme ses soupçons.<br>
-        Uchronie peut utiliser deux fois sa capacité spéciale dans toute la partie. Après la seconde utilisation, il devient un paysan sans aucun pouvoir.
+        Uchronie peut utiliser une fois sa capacité spéciale dans toute la partie. Après son utilisation, il devient un paysan sans aucun pouvoir.
         `
     },
     {
@@ -1221,32 +1221,29 @@ window.paniniRoles = [
         <span style="font-size:1.2em;">
             <img src="Objectif.svg" class="emoji-svg" alt="Objectif"> <strong>Objectif</strong>
         </span><br>
-        (Mentor en vie)<br>
-        Survivre et aider les paysans à éliminer les loups-garous.<br>
-        Tu gagnes si tous les loups-garous (et, le cas échéant, tous les rôles solos) sont éliminés.<br><br>
-        (Mentor mort)<br>
         Survivre et éliminer tous les paysans.<br>
         Tu gagnes si tous les paysans (rôles solos spéciaux.) sont éliminés.<br><br>
         
         <span style="font-size:1.2em;">
             <img src="Pouvoir.svg" class="emoji-svg" alt="Pouvoir"> <strong>Pouvoir</strong>
         </span><br>
-        Début de partie : avant la première nuit, tu choisis en secret un joueur pour être ton Mentor. Ce lien est inconnu de tous, même du Mentor.<br>
-        <strong>Malédiction</strong> : tant que ton Mentor est en vie, tu passes pour un simple paysan (tu ne participes pas aux attaques des loups, tu n’es pas détecté comme loup).<br>
-        <strong>Transformation</strong> : si ton Mentor meurt, quelle qu’en soit la cause, tu te transformes et intègres la meute des loups-garous dès la nuit suivante.<br>
-        Tu participeras alors aux réunions et attaques nocturnes comme un loup classique.<br><br>
+        Il est le seul Loup-Garou qui ne se réveille jamais avec la meute. Les autres Loups ne savent pas qui il est.<br>
+        <strong>Malédiction</strong> : Au début de la partie, le Loup-Garou Maudit choisit deux joueurs.<br>
+        <strong>Transformation</strong> : Ces joueurs représentent ses chaînes.<br>
+        Tant qu’au moins un des deux est en vie : le Loup-Garou Maudit est enchaîné, il ne peut pas attaquer et n’est pas appelé la nuit. <br><br>
         
         <span style="font-size:1.2em;">
             <img src="Conseils.svg" class="emoji-svg" alt="Conseils"> <strong>Conseils</strong>
         </span><br>
-        - Si tu souhaites rejoindre rapidement la meute, fais en sorte que ton Mentor meure vite.<br>
-        - Sinon, joue opportuniste : tant que le Mentor est en vie, tu gagnes avec le village.<br>
-        - Dès que le Mentor meurt, la partie tourne en faveur des loups, et tu gagnes avec eux.<br><br>
+        Si les deux joueurs meurent au cours de la partie :<br>
+        le Loup-Garou Maudit est libéré.<br>
+        il est désormais appelé seul la nuit.<br>
+        et peut manger un joueur de son côté.<br><br>
         
         <span style="font-size:1.2em;">
             <img src="Description.svg" class="emoji-svg" alt="Description"> <strong>Description</strong>
         </span><br>
-        Né sous une lune de sang, il vit encore parmi les humains… mais la malédiction dort, tapie dans son âme. Avant la première nuit, le Loup-Garou Maudit choisit secrètement un joueur : son Mentor. Ce joueur n’est pas informé de ce lien maudit. Tant que le Mentor est en vie, le Loup-Garou Maudit est un simple paysan. Mais si le Mentor vient à mourir — quelle qu’en soit la cause — la malédiction s’éveille : Le Loup-Garou Maudit se transforme et rejoint la meute des Loups-Garous. Dès la nuit suivante, il se réveille avec eux et agit comme un loup à part entière.
+        Maudit dès sa naissance, ce loup ne chasse pas avec la meute. Il fait partie de l’équipe des Loups Garous et gagne avec eux, sans connaître leur identité. Au début de la partie, il lie son destin à deux joueurs, ses chaînes. Tant qu’au moins l’un d’eux est en vie, il reste enchaîné, incapable d’attaquer et non appelé la nuit. indétectable tant qu'il est enchainer. Lorsque ses deux chaînes meurent, la malédiction se brise. Le Loup-Garou Maudit est alors appelé seul la nuit et peut éliminer un joueur. ⚠️ Attention : Ne connaissant pas l’existence ni l’identité des autres Loups-Garous, ses éliminations nocturnes sont risquées et peuvent affaiblir son propre camp.
         `
     },
     {
@@ -1343,22 +1340,21 @@ window.paniniRoles = [
         <span style="font-size:1.2em;">
             <img src="Pouvoir.svg" class="emoji-svg" alt="Pouvoir"> <strong>Pouvoir (ou malédiction ?) : Langue bien pendue</strong>
         </span><br>
-        Chaque jour, entre le réveil du village et la fin des votes, tu dois obligatoirement dire "LOUP-GAROU" dans une phrase audible et explicite.<br>
-        Cela peut être une accusation ("Moi je pense que X est un loup-garou !"), une remarque ("C’est fou comme on parle peu des loups-garous aujourd’hui..."), etc.<br>
+        Chaque jour, entre le réveil du village et la fin des votes, tu dois obligatoirement dire la phrase magique que le MJ t’a montrée cette nuit.<br>
         Le Maître du Jeu doit clairement t’entendre.<br>
         Si tu ne le fais pas, ou si tu es trop discret, tu meurs mystérieusement à la fin de la journée.<br><br>
         
         <span style="font-size:1.2em;">
             <img src="Conseils.svg" class="emoji-svg" alt="Conseils"> <strong>Conseils</strong>
         </span><br>
-        - Place le mot de façon naturelle dans la conversation pour ne pas trop éveiller les soupçons.<br>
+        - Place la phrase de façon naturelle dans la conversation pour ne pas trop éveiller les soupçons.<br>
         - Ne force pas trop : trop insister peut aussi te mettre en danger.<br>
         - Reste vigilant : cette contrainte peut être un piège si le village devient attentif à ce détail.<br><br>
         
         <span style="font-size:1.2em;">
             <img src="Description.svg" class="emoji-svg" alt="Description"> <strong>Description</strong>
         </span><br>
-        Pouvoir (ou malédiction ?) : Langue bien pendue. Chaque jour, du réveil du village jusqu’à la fin des votes, le Loup-Garou Bavard doit obligatoirement dire "LOUP-GAROU" dans une phrase audible et explicite. Cela peut être une accusation, une remarque, etc. Le Maître du Jeu doit l’entendre clairement. S’il ne dit rien ou s’il est trop discret, il meurt mystérieusement à la fin de la journée. Peut-être étranglé par sa propre langue, qui sait ?
+        Ce Loup-Garou chasse avec la meute, comme les autres. Mais chaque nuit, après l’attaque collective, il est appelé seul par le Maître du Jeu. Le MJ lui montre alors une phrase, qui peut avoir du sens… ou pas. Le lendemain, le Loup-Garou Bavard doit glisser cette phrase dans les discussions du village, à n’importe quel moment de la journée. S’il ne le fait pas, il est éliminé. Parler trop peut le trahir. Se taire lui est fatal.
         `
     },
     {
@@ -1637,27 +1633,37 @@ window.paniniRoles = [
         <span style="font-size:1.2em;">
             <img src="Pouvoir.svg" class="emoji-svg" alt="Pouvoir"> <strong>Pouvoir — Doubleur de pouvoirs</strong>
         </span><br>
-        Chaque nuit, tu désignes secrètement un joueur : ce joueur verra son pouvoir spécial doublé pour ce tour.<br><br>
+        Chaque nuit, certains rôles peuvent demander à voir le Diable pour formuler un souhait.<br><br>
         Exemples :<br>
-        Si tu vises le Bienfaiteur, il peut protéger deux personnes cette nuit.<br>
-        Si tu vises un Loup-Garou, la meute pourra attaquer deux victimes cette nuit.<br>
-        Si tu vises la Sorcière, elle pourra utiliser deux potions, ou agir sur deux cibles la même nuit.<br>
-        Le jour, si le rôle visé possède un pouvoir diurne, cet effet est doublé.<br>
+        Si le diable accepte le Bienfaiteur, il peut protéger deux personnes cette nuit.<br>
+        Si le diable accepte Loup-Garou, le loup en question pourra manger deux fois cette nuit.<br>
+        Si le diable accepte la Sorcière, elle pourra  récupérer ses potions utiliser.<br>
+        Le jour, si le rôle possède un pouvoir diurne, le diable renforce.<br>
         Exemple : si le Bûcheron est éliminé ce jour-là, il emporte deux personnes dans sa chute, au lieu d’une seule.<br><br>
         
         <span style="font-size:1.2em;">
             <img src="Conseils.svg" class="emoji-svg" alt="Conseils"> <strong>Conseils</strong>
         </span><br>
-        - Choisis chaque nuit le joueur qui a le plus d’impact stratégique, sans jamais révéler ton orientation réelle.<br>
-        - Adapte-toi : favorise le camp en position de force pour garantir que tu survives à la fin.<br>
-        - Utilise ton pouvoir au moment clé pour inverser ou sceller le sort de la partie.<br><br>
+        ⚠️ Libre arbitre du Diable :<br>
+        Le Diable n’est jamais obligé d’accepter une demande.<br>
+        Il peut :<br>
+        toutes les refuser.<br>
+        toutes les accepter<br>
+        ou n’en accepter qu’une seule<br>
+        🎲 Le prix à payer :
+        Pour chaque demande acceptée, le Diable lance un dé.<br>
+        Chiffre pair → le joueur obtient son souhait.<br>
+        Chiffre impair → le joueur meurt immédiatement.<br><br>
         
         <span style="font-size:1.2em;">
             <img src="Description.svg" class="emoji-svg" alt="Description"> <strong>Description</strong>
         </span><br>
-        Le Diable choisit son camp en fonction du déroulement de la partie. Il gagne avec les paysans comme avec les Loups, tant qu’il est toujours en jeu.<br>
-        La nuit, le Diable a la possibilité de doubler la faculté spéciale d’un joueur. Exemple : s’il vise le Bienfaiteur, celui-ci protégera deux personnes ; s’il vise un Loup, les Loups pourront manger deux fois.<br>
-        Son pouvoir s’étend jusqu’au jour : lorsque des personnages ayant des pouvoirs diurnes agissent, leur capacité est également doublée. Exemple : si le Bûcheron est éliminé durant la journée, il emportera deux personnes avec lui. Le Diable reste neutre et opportuniste jusqu’au bout.
+        Le Diable est un rôle à part. Il peut jouer avec le village, avec les Loups-Garous, ou en solo : 😈 Révélation publique : Dès le début de la partie, le Diable est connu de tous. Le MJ lui demande de se révéler publiquement. 
+        🔮 Les souhaits : Chaque nuit, certains rôles peuvent demander à voir le Diable pour formuler un souhait. Tous les rôles ne peuvent pas le faire (la liste est décidée par le MJ). 
+        Exemples de souhaits possibles : Sorcière : récupérer ses potions (sans doublon) Voyante : regarder deux joueurs la même nuit (uniquement ce tour) Paysan : obtenir une protection nocturne pour la nuit suivante 
+        ⚠️ Libre arbitre du Diable : Le Diable n’est jamais obligé d’accepter une demande. Il peut : toutes les refuser toutes les accepter ou n’en accepter qu’une seule 
+        🎲 Le prix à payer : Pour chaque demande acceptée, le Diable lance un dé : Chiffre pair → le joueur obtient son souhait Chiffre impair → le joueur meurt immédiatement 
+        🌙 Déroulement la nuit : Les rôles nocturnes jouent normalement Avant le réveil du village, le MJ demande : « Qui souhaite voir le Diable ? » Les joueurs lèvent la main (le MJ sait qui ils sont)Au réveil, le MJ annonce au Diable quels rôles ont demandé à le voir Le Diable choisit qui il accepte et lance le dé pour chaque demande acceptée Le MJ applique les effets Un rôle puissant, imprévisible… où chaque faveur peut coûter la vie 😈🎲
         `
     },
     {
