@@ -1467,6 +1467,42 @@ window.paniniRoles = [
         `
     },
     {
+        id: "LE LOUP-GAROU DE LA BRUME",
+        title: "Le Loup-Garou de la Brume",
+        image: "le_loup_garou_de_la_brume.webp",
+        description: `
+        <span style="font-size:1.2em;">
+            <img src="le_loup_garou.svg" class="emoji-svg" alt="Loup Brume"> <strong>Le Loup-Garou de la Brume</strong>
+        </span><br>
+        <em>Une ombre parmi les ombres, il frappe quand on ne voit plus rien.</em><br><br>
+        
+        <span style="font-size:1.2em;">
+            <img src="Objectif.svg" class="emoji-svg" alt="Objectif"> <strong>Objectif</strong>
+        </span><br>
+        Survivre et éliminer tous les paysans.<br>
+        Tu gagnes si tous les paysans (rôles solos spéciaux.) sont éliminés.<br><br>
+        
+        <span style="font-size:1.2em;">
+            <img src="Pouvoir.svg" class="emoji-svg" alt="Pouvoir"> <strong>Pouvoir — Évanescence</strong>
+        </span><br>
+        Chaque nuit, il se réveille en même temps que les autres loups et participe normalement à leur action collective.<br>
+        Une fois cette phase terminée, il est appelé séparément pour utiliser son pouvoir.<br>
+        Son pouvoir lui permet de « Brumer » un joueur.<br><br>
+        
+        <span style="font-size:1.2em;">
+            <img src="Conseils.svg" class="emoji-svg" alt="Conseils"> <strong>Conseils</strong>
+        </span><br>
+        Un joueur brumé voit toutes ses actions de la nuit devenir aléatoires :.<br>
+         au lieu d’atteindre la cible choisie, ses actions s’appliqueront à une autre personne tirée au hasard, y compris le Loup des Brumes lui-même.<br>
+        Le hasard est déterminé par le Maître du Jeu, qui lance un dé pour désigner la nouvelle cible parmi les joueurs éligibles.<br><br>
+        
+        <span style="font-size:1.2em;">
+            <img src="Description.svg" class="emoji-svg" alt="Description"> <strong>Description</strong>
+        </span><br>
+        Le Loup des Brumes est une ombre parmi les loups-garous, Chaque nuit, il se réveille en même temps que les autres loups et participe normalement à leur action collective. Une fois cette phase terminée, il est appelé séparément pour utiliser son pouvoir. Son pouvoir lui permet de « Brumer » un joueur. Un joueur brumé voit toutes ses actions de la nuit devenir aléatoires : au lieu d’atteindre la cible choisie, ses actions s’appliqueront à une autre personne tirée au hasard, y compris le Loup des Brumes lui-même. Le hasard est déterminé par le Maître du Jeu, qui lance un dé pour désigner la nouvelle cible parmi les joueurs éligibles.
+        `
+    },
+    {
         id: "LA BÊTE IMMONDE",
         title: "La Bête Immonde",
         image: "la_bete_immonde.webp",
