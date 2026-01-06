@@ -50,15 +50,15 @@ let unsubscribePlayer = null;
 let unsubscribeGlobal = null;
 
 // =========================================================
-// ⚠️ FONCTION DE CLIC (C'est elle qui manquait !) 
+// ⚠️ FONCTION DE CLIC (CORRIGÉE : PLUS DE POP-UP) 
 // =========================================================
 window.handleCardClick = function(cardElement) {
     if (cardsLockedState) {
-        // Si c'est bloqué par le MJ
-        internalShowNotification('Stop', '🔒 Le MJ a bloqué les cartes !');
+        // Si c'est bloqué par le MJ : 
+        // On ne fait RIEN (pas de pop-up), juste une vibration d'erreur.
         if(navigator.vibrate) navigator.vibrate(100);
     } else {
-        // Si c'est libre
+        // Si c'est libre : On retourne la carte
         cardElement.classList.toggle('flipped');
         if(navigator.vibrate) navigator.vibrate(20);
     }
@@ -68,7 +68,7 @@ window.handleCardClick = function(cardElement) {
    3. INITIALISATION & LISTENERS GLOBAUX
    ============================================ */
 
-// Fonction de Hachage (Simple & Robuste)
+// Fonction de Hachage (Simple & Robuste pour masquer le mot de passe)
 function cypherInput(str) {
     let hash = 0;
     for (let i = 0; i < str.length; i++) {
@@ -79,7 +79,7 @@ function cypherInput(str) {
     return hash;
 }
 
-// ÉCOUTEUR DE CLIC (AVEC MOUCHARD TEMPORAIRE)
+// ÉCOUTEUR DE CLIC SÉCURISÉ (Création de partie)
 document.addEventListener('click', function(e) {
     const btn = e.target.closest('#btn-create-game');
     
@@ -87,31 +87,34 @@ document.addEventListener('click', function(e) {
         e.preventDefault();
         e.stopPropagation();
 
+        // Demande du mot de passe
         const input = prompt("🔐 Mot de passe MJ :");
         
         if (input) {
-            const cleanInput = input.trim(); // Enlève les espaces inutiles
+            const cleanInput = input.trim(); 
             const attemptHash = cypherInput(cleanInput); 
 
-            // Mets le numéro que l'alerte t'a donné ici à la place du 0
+            // HASH SÉCURISÉ (Ceci correspond à ton mot de passe actuel masqué)
+            // Si tu changes de mot de passe, tu devras générer un nouveau hash.
             const targetHash = 1427395148; 
 
             if(attemptHash === targetHash) { 
                 if (typeof window.initCreateGame === 'function') {
                     window.initCreateGame(); 
                 } else {
-                    alert("Erreur : Le système charge encore...");
+                    internalShowNotification("Erreur", "Le système charge encore...");
                 }
             } else { 
-                // Je laisse passer pour le test, mais remettrai l'alerte erreur après
-                console.log("Mauvais code, mais mode test.");
+                internalShowNotification("Accès Refusé", "Mot de passe incorrect.");
+                if(navigator.vibrate) navigator.vibrate(200);
             }
         }
     }
 });
 
-// Initialisation classique
+// Initialisation optimisée
 document.addEventListener('DOMContentLoaded', () => {
+    // On lance le scan (qui utilisera désormais paniniRoles en priorité)
     try { scanContentFromHTML(); } catch(e) { console.error(e); }
     
     const btnJoin = document.getElementById('btn-join-action');
@@ -127,17 +130,14 @@ document.addEventListener('DOMContentLoaded', () => {
    ============================================ */
 
 // GÉNÉRATEUR UNIVERSEL DE BADGES
-// isSummary = true : Garde les emojis éloignés (Tableau)
-// isSummary = false : Colle les emojis à la photo (Partout ailleurs)
 function generateBadgesHTML(player, isSummary = false) {
     let html = "";
-
-    // CONFIGURATION DES POSITIONS (Ajustées pour la nouvelle taille)
+    // CONFIGURATION DES POSITIONS
     const pos = isSummary ? 
-        { m_t: '-12px', m_l: '-10px', tr_t: '-8px', tr_r: '-8px', bl_b: '-5px', bl_l: '-5px' } : // Mode Large (Tableau)
-        { m_t: '-8px', m_l: '-8px', tr_t: '-4px', tr_r: '-4px', bl_b: '-2px', bl_l: '-2px' };       // Mode Serré (Défaut)
+        { m_t: '-12px', m_l: '-10px', tr_t: '-8px', tr_r: '-8px', bl_b: '-5px', bl_l: '-5px' } : 
+        { m_t: '-8px', m_l: '-8px', tr_t: '-4px', tr_r: '-4px', bl_b: '-2px', bl_l: '-2px' };
 
-    // 1. LE MAIRE (Agrandi : 1.6em -> 2.2em)
+    // 1. LE MAIRE
     if (player.isMayor) {
         html += `<span style="position:absolute; top:${pos.m_t}; left:${pos.m_l}; font-size:2.2em; z-index:100; filter:drop-shadow(0 2px 2px black);">🎖️</span>`;
     }
@@ -154,18 +154,14 @@ function generateBadgesHTML(player, isSummary = false) {
         if (Object.keys(a).some(k => k.startsWith('silenced'))) effects.push('🤐');
     }
 
-    // 3. PLACEMENT DES EMOJIS (Agrandis)
+    // 3. PLACEMENT DES EMOJIS
     if (effects.length > 0) {
-        // Principal (Haut Droite) : 1.3em -> 1.8em
         html += `<span style="position:absolute; top:${pos.tr_t}; right:${pos.tr_r}; font-size:1.8em; z-index:90; text-shadow:0 0 3px black;">${effects[0]}</span>`;
-
         if (effects.length > 1) {
             const others = effects.slice(1).join('');
-            // Secondaires (Bas Gauche) : 1.1em -> 1.5em
             html += `<div style="position:absolute; bottom:${pos.bl_b}; left:${pos.bl_l}; display:flex; flex-direction:row-reverse; z-index:90; font-size:1.5em; letter-spacing:-5px; text-shadow:0 0 3px black;">${others}</div>`;
         }
     }
-
     return html;
 }
 
@@ -233,11 +229,9 @@ function checkPlayerSession() {
     }
 }
 
-// 2. RESTAURATION SESSION (Avec RESET de la variable de blocage)
+// 2. RESTAURATION SESSION
 window.restorePlayerSession = function(code, id) {
     cleanupListeners(); 
-    
-    // IMPORTANT : On remet la variable à zéro par défaut !
     cardsLockedState = false; 
 
     currentGameCode = code;
@@ -251,11 +245,10 @@ window.restorePlayerSession = function(code, id) {
             if(window.closeModal) window.closeModal('modal-online-menu'); 
             if(window.openModal) window.openModal('modal-join-game');            
             
-            // LANCE LES ÉCOUTEURS
             listenForPlayerUpdates(); 
             listenToGlobalPlayers();  
             listenForVoteState();      
-            listenForGameSettings(); // S'assure que c'est bien lancé
+            listenForGameSettings(); 
         } else {
             internalShowNotification("Info", "Partie terminée ou expirée.");
             localStorage.removeItem('vm_player_code');
@@ -280,30 +273,50 @@ function showResumeButton(code) {
     }
 }
 
+// OPTIMISATION MAJEURE : SCAN FIABLE AVEC CATÉGORISATION FORCÉE + CORRECTIF IDs
 function scanContentFromHTML() {
     detectedRoles = [];
     detectedEvents = { gold: [], silver: [], bronze: [] };
     
-    const cards = document.querySelectorAll('.carte-jeu');
-    if (cards.length > 0) {
+    // 1. Chargement des Rôles depuis paniniRoles (Source Fiable)
+    if (typeof window.paniniRoles !== 'undefined' && Array.isArray(window.paniniRoles)) {
+        console.log("✅ Chargement des rôles depuis la configuration...");
+        window.paniniRoles.forEach(role => {
+            // FIX IDs : On utilise le nom de l'image pour l'ID pour la compatibilité
+            // (ex: "le_paysan.webp" -> "le_paysan" au lieu de "LE PAYSAN")
+            const fileId = role.image.split('/').pop().replace(/\.[^/.]+$/, "").toLowerCase();
+            
+            detectedRoles.push({
+                id: fileId, // ON UTILISE L'ID BASÉ SUR LE FICHIER
+                title: role.title,
+                image: role.image,
+                category: detectRoleCategory(fileId) // Tri automatique
+            });
+            // Préchargement
+            const preloadLink = new Image();
+            preloadLink.src = role.image;
+        });
+    } else {
+        // Fallback (Ancienne méthode si paniniRoles manque)
+        console.warn("⚠️ paniniRoles absent, scan HTML...");
+        const cards = document.querySelectorAll('.carte-jeu');
         cards.forEach((card) => {
             const imgTag = card.querySelector('.carte-front img');
             const titleTag = card.querySelector('.carte-back h3'); 
-            const section = card.closest('section');
-            const categoryId = section ? section.id : 'village'; 
-            
             if (imgTag && titleTag) {
                 const imgSrc = imgTag.getAttribute('src');
-                const id = imgSrc.split('/').pop().replace(/\.[^/.]+$/, "");
-                detectedRoles.push({ id: id, title: titleTag.innerText.trim(), image: imgSrc, category: categoryId });
-                
-                // PRÉCHARGEMENT IMMÉDIAT
-                const preloadLink = new Image();
-                preloadLink.src = imgSrc;
+                const id = imgSrc.split('/').pop().replace(/\.[^/.]+$/, "").toLowerCase();
+                detectedRoles.push({ 
+                    id: id, 
+                    title: titleTag.innerText.trim(), 
+                    image: imgSrc, 
+                    category: detectRoleCategory(id)
+                });
             }
         });
     }
 
+    // 2. Chargement des Cartes VM
     document.querySelectorAll('.carte-vm').forEach((card) => {
         const imgTag = card.querySelector('img');
         if (imgTag) {
@@ -311,12 +324,29 @@ function scanContentFromHTML() {
             if (card.classList.contains('gold')) detectedEvents.gold.push(imgSrc);
             else if (card.classList.contains('silver')) detectedEvents.silver.push(imgSrc);
             else if (card.classList.contains('bronze')) detectedEvents.bronze.push(imgSrc);
-            
-            // PRÉCHARGEMENT IMMÉDIAT
             const preloadLink = new Image();
             preloadLink.src = imgSrc;
         }
     });
+}
+
+// Helper INTELLIGENT pour trier les rôles (Sans dépendre du HTML)
+function detectRoleCategory(idRaw) {
+    const id = idRaw.toLowerCase();
+    
+    // 1. VAMPIRES (On vérifie en priorité)
+    if (id.includes('chasseur_de_vampires')) return 'vampires'; 
+    if (['dracula', 'succube', 'vampire'].some(v => id.includes(v))) return 'vampires';
+    
+    // 2. SOLOS (Liste précise)
+    const solos = ['bete', 'avocat', 'valkyrie', 'clown', 'diable', 'gourou', 'chevalier', 'serial', 'sauvage', 'jumeaux'];
+    if (solos.some(s => id.includes(s))) return 'solo';
+    
+    // 3. LOUPS (Le reste des loups)
+    if (id.includes('loup') || id.includes('papa') || id.includes('alpha')) return 'loups';
+    
+    // 4. PAR DÉFAUT -> VILLAGE
+    return 'village'; 
 }
 
 window.closeAdminPanel = function() {
@@ -327,27 +357,20 @@ window.closeAdminPanel = function() {
     }
 };
 
-// Fonction de sécurité pour nettoyer les textes (Anti-Bug)
 function escapeHtml(text) {
     if (!text) return text;
-    return text
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
+    return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
 }
 
 /* ============================================
    5. ADMIN : INITIALISATION & CONNEXION
    ============================================ */
 
-// 1. CRÉATION DE PARTIE (Accessible via window.initCreateGame)
-// IMPORTANT : Le "window." est obligatoire pour que le bouton HTML le trouve
+// 1. CRÉATION DE PARTIE
 window.initCreateGame = function() {
     console.log("🚀 Lancement de la création...");
 
-    // A. Génération du Code (4 lettres majuscules)
+    // A. Génération du Code
     currentGameCode = Math.random().toString(36).substring(2, 6).toUpperCase();
     myPlayerId = "MJ_ADMIN";
 
@@ -357,16 +380,16 @@ window.initCreateGame = function() {
     // C. Interface Immédiate
     launchAdminInterface();
 
-    // D. Envoi Firebase (Création de la salle)
+    // D. Envoi Firebase
     set(ref(db, 'games/' + currentGameCode), {
         status: 'waiting',
         created_at: Date.now()
     }).then(() => {
         console.log("✅ Partie créée sur Firebase : " + currentGameCode);
-        if(window.showNotification) internalShowNotification("Succès", "Salle " + currentGameCode + " ouverte !");
+        internalShowNotification("Succès", "Salle " + currentGameCode + " ouverte !");
     }).catch((error) => {
         console.error("ERREUR FIREBASE:", error);
-        alert("Erreur critique Firebase : " + error.message);
+        internalShowNotification("Erreur Critique", error.message);
     });
 };
 
@@ -375,24 +398,21 @@ window.restoreAdminSession = function(savedCode) {
     currentGameCode = savedCode;
     myPlayerId = "MJ_ADMIN";
 
-    // Vérification si la partie existe encore
     get(child(ref(db), `games/${currentGameCode}`)).then((snapshot) => {
         if(snapshot.exists()) {
-            if(window.showNotification) internalShowNotification("Admin", `Reconnexion réussie : ${currentGameCode}`);
+            internalShowNotification("Admin", `Reconnexion réussie : ${currentGameCode}`);
             launchAdminInterface();
         } else {
-            alert("Cette partie n'existe plus ou a expiré.");
+            internalShowNotification("Erreur", "Cette partie n'existe plus ou a expiré.");
             localStorage.removeItem('adminGameCode');
-            location.reload();
+            setTimeout(() => location.reload(), 2000);
         }
     }).catch((err) => {
-        alert("Erreur de connexion : " + err.message);
+        internalShowNotification("Erreur Connexion", err.message);
     });
 };
 
 // 3. LANCEMENT DE L'INTERFACE ADMIN
-
-// Remplace aussi la fonction launchAdminInterface pour le scroll :
 function launchAdminInterface() {
     console.log("💻 Ouverture du Dashboard Admin");
 
@@ -409,7 +429,6 @@ function launchAdminInterface() {
         return;
     }
 
-    // VERROUILLAGE SCROLL RENFORCÉ (FORCE LA CLASSE CSS)
     document.body.classList.add('no-scroll');
     
     const scrollContent = document.querySelector('.admin-content-scroll');
@@ -421,20 +440,18 @@ function launchAdminInterface() {
     }
 }
 
-// 4. ÉCOUTEURS FIREBASE (Mises à jour en temps réel)
+// 4. ÉCOUTEURS FIREBASE
 function setupAdminListeners() {
     listenForGameSettings();
     // A. Écoute des Joueurs
     onValue(ref(db, 'games/' + currentGameCode + '/players'), (snapshot) => {
         const players = snapshot.val() || {};
-        currentPlayersData = players; // Mise à jour de la variable globale
+        currentPlayersData = players; 
 
-        // 1. Mise à jour de la GRILLE principale (Arrière-plan)
         if(typeof updateAdminUI === 'function') {
             updateAdminUI(players);
         }
 
-        // 2. Mise à jour du DASHBOARD (Tableau Récapitulatif)
         const panel = document.querySelector('.details-panel');
         if (panel && panel.classList.contains('active')) {
             const header = panel.querySelector('.panini-admin-header h2');
@@ -443,7 +460,6 @@ function setupAdminListeners() {
             }
         }
 
-        // 3. Mise à jour temps réel d'un JOUEUR OUVERT (Fiche détail)
         if (currentlyOpenedPlayerId && players[currentlyOpenedPlayerId]) {
             const p = players[currentlyOpenedPlayerId];
             const roleId = p.draftRole || p.role;
@@ -455,8 +471,8 @@ function setupAdminListeners() {
         }
     });
 
-    // B. ÉCOUTE DU VOTE (Pour voir les résultats)
-    listenForVoteState(); // <--- AJOUT CRUCIAL POUR LE MJ
+    // B. ÉCOUTE DU VOTE
+    listenForVoteState(); 
 
     // C. Surveillance Connexion
     const connectedRef = ref(db, ".info/connected");
@@ -1437,7 +1453,7 @@ window.restorePlayerSession = function(code, id) {
             listenForPlayerUpdates(); 
             listenToGlobalPlayers();  
             listenForVoteState();      
-            listenForGameSettings(); // <--- C'EST LUI QUI MANQUAIT !
+            listenForGameSettings(); 
         } else {
             internalShowNotification("Info", "Partie terminée ou expirée.");
             localStorage.removeItem('vm_player_code');
@@ -1456,17 +1472,13 @@ function listenToGlobalPlayers() {
         const data = snapshot.val();
         if (data) {
             currentPlayersData = data; 
-            // CORRECTION CRUCIALE : 
-            // Si un vote est en cours et que les joueurs changent (ex: résurrection),
-            // on force le rafraîchissement de l'interface de vote.
+            // Si un vote est en cours, on rafraîchit l'interface
             if (window.currentVoteData && window.currentVoteData.status === 'voting') {
                 renderVoteInterface(); 
             }
         }
     });
 }
-
-// 4. REJOINDRE PARTIE (Avec nettoyage préalable)
 
 // ============================================
 // GESTION DU BLOCAGE (CORRECTION DÉFINITIVE)
@@ -1500,7 +1512,7 @@ window.toggleCardLock = function() {
     });
 };
 
-// 3. L'Écouteur Firebase (Modifié pour utiliser la nouvelle fonction)
+// 3. L'Écouteur Firebase
 function listenForGameSettings() {
     onValue(ref(db, `games/${currentGameCode}/cardsLocked`), (snapshot) => {
         cardsLockedState = snapshot.val() || false;
@@ -1527,10 +1539,7 @@ function listenForGameSettings() {
     });
 }
 
-// -------------------------------------------------------------
-// COLLE JUSTE AU DESSUS DE : function joinGame() { ...
-// -------------------------------------------------------------
-
+// 4. REJOINDRE LA PARTIE
 function joinGame() {
     const pseudo = document.getElementById('join-pseudo').value.trim();
     const code = document.getElementById('join-code').value.toUpperCase().trim();
@@ -1560,7 +1569,7 @@ function joinGame() {
                 listenForPlayerUpdates();
                 listenToGlobalPlayers(); 
                 listenForVoteState();      
-                listenForGameSettings(); // <--- C'EST LUI QUI MANQUAIT AUSSI !
+                listenForGameSettings(); 
             });
         } else { 
             internalShowNotification("Erreur", "Code partie introuvable !");
@@ -1575,7 +1584,6 @@ function listenForPlayerUpdates() {
     let lastRole = null;
     let lastCardImg = null;
     let currentAttributes = {}; 
-    let lastStatus = null; 
     let lastMayor = false;
     
     unsubscribePlayer = onValue(myPlayerRef, (snapshot) => {
@@ -1583,16 +1591,19 @@ function listenForPlayerUpdates() {
         
         // --- DETECTION EXPULSION (KICK) ---
         if (!data) {
-            // Si data est null, le joueur a été supprimé de la base
-            alert("Vous avez été exclu de la partie par le Maître du Jeu.");
+            document.body.innerHTML = `
+                <div style="height:100vh; display:flex; flex-direction:column; justify-content:center; align-items:center; background:#111; color:white; font-family:'Pirata One'; text-align:center; padding:20px;">
+                    <h1 style="color:#c0392b; font-size:3em; margin:0;">🚫 EXPULSÉ</h1>
+                    <p style="font-size:1.5em; margin:20px; color:#aaa;">Le Maître du Jeu t'a retiré de la partie.</p>
+                    <button onclick="location.reload()" style="padding:15px 30px; background:var(--gold); border:none; color:black; font-family:'Pirata One'; font-size:1.5em; cursor:pointer; border-radius:8px;">RETOUR AU MENU</button>
+                </div>
+            `;
             localStorage.removeItem('vm_player_code');
             localStorage.removeItem('vm_player_id');
-            location.reload();
             return;
         }
-        // ----------------------------------
 
-        // BOUTON MENU : Afficher si rôle présent
+        // BOUTON MENU
         const menuBtn = document.getElementById('menu-my-card-li');
         if (!data || !data.role) {
             if(menuBtn) menuBtn.style.display = 'none';
@@ -1623,10 +1634,11 @@ function listenForPlayerUpdates() {
             if(cardEl) {
                 cardEl.style.filter = "none";
                 
-                // GESTION CLIC + BLOCAGE MJ
+                // GESTION CLIC + BLOCAGE MJ (MODIFIÉ : PLUS DE NOTIF)
                 cardEl.onclick = function() { 
                     if(cardsLockedState) {
-                        internalShowNotification("Stop", "🔒 Le MJ a bloqué les cartes !");
+                        // Pas de notif, juste une vibration
+                        if(navigator.vibrate) navigator.vibrate(100);
                         return;
                     }
                     this.classList.toggle('flipped'); 
@@ -1644,21 +1656,27 @@ function listenForPlayerUpdates() {
         if (data.role) {
             myCurrentRoleId = data.role;
             
-            // Si le panel n'est pas ouvert, on l'affiche de force !
             const isVisible = document.querySelector('.details-panel').classList.contains('active');
             
             if (data.role !== lastRole || data.isMayor !== lastMayor || !isVisible) { 
                 lastRole = data.role; 
                 lastMayor = data.isMayor;
-                
-                // On appelle la fonction d'affichage
                 setTimeout(() => {
                     window.revealRole(data.role, currentStatus, data.isMayor);
                 }, 200);
             }
 
-            // Mise à jour du bouton dans le menu village
+            // AJOUT DU BOUTON CHANGEMENT PHOTO ICI
             uiHtml += `
+            <div style="text-align:center; margin-bottom:15px; margin-top:10px;">
+                <label for="update-avatar-input" style="cursor:pointer; display:inline-block; position:relative;">
+                    <img src="${data.avatar || 'icon.webp'}" style="width:70px; height:70px; border-radius:50%; border:2px solid var(--gold); object-fit:cover;">
+                    <div style="position:absolute; bottom:0; right:0; background:var(--gold); color:black; border-radius:50%; width:22px; height:22px; font-size:12px; line-height:22px; border:1px solid black;">✏️</div>
+                </label>
+                <input type="file" id="update-avatar-input" style="display:none;" accept="image/*" onchange="window.uploadNewAvatar(this)">
+                <div style="font-size:0.8em; color:#aaa; margin-top:5px;">${data.name}</div>
+            </div>
+
             <div style="margin:20px 0;">
                 <button class="btn-menu" style="background:var(--gold); color:black; font-weight:bold; padding:15px; width:100%; border:2px solid #fff;" onclick="window.revealRole('${data.role}', '${currentStatus}', ${data.isMayor})">
                     🃏 VOIR MA CARTE
@@ -1674,7 +1692,7 @@ function listenForPlayerUpdates() {
             let backImage = "back.webp"; 
             const cat = data.drawnCard.category ? data.drawnCard.category.toUpperCase() : "";
             if (cat.includes('GOLD') || cat.includes('OR')) backImage = "back_or.webp";
-            else if (cat.includes('SILVER') || cat.includes('ARGENT')) backImage = "back_argant.webp";
+            else if (cat.includes('SILVER') || cat.includes('ARGENT')) backImage = "back_argent.webp";
             else if (cat.includes('BRONZE')) backImage = "back_bronze.webp";
             
             if(panel && overlay) {
@@ -1702,26 +1720,15 @@ function listenForPlayerUpdates() {
     });
 }
 
-window.showMyRoleAgain = function() { 
-    if(!myCurrentRoleId) return; 
-    get(child(ref(db), `games/${currentGameCode}/players/${myPlayerId}`)).then((snapshot) => {
-        const d = snapshot.val();
-        if(d) revealRole(d.role, d.status || 'alive', d.isMayor || false);
-    });
-};
-
 // 6. AFFICHAGE CARTE (CORRIGÉ : VARIABLE clickAction + FIX MATCHING RÔLE)
 window.revealRole = function(roleId, status, isMayor) {
-    // 1. On récupère les données du rôle
-    // On cherche d'abord dans detectedRoles (car l'ID correspond exactement au fichier online)
+    // 1. On récupère les données du rôle (FIX : on cherche l'ID exact ou en majuscule)
     let roleData = detectedRoles.find(r => r.id === roleId);
 
-    // Si pas trouvé, on tente une recherche plus large dans paniniRoles
     if (!roleData && typeof paniniRoles !== 'undefined') {
         roleData = paniniRoles.find(r => r.id === roleId || r.id === roleId.toUpperCase());
     }
 
-    // Si toujours rien, on arrête (sécurité)
     if(!roleData) {
         console.warn("Rôle introuvable pour l'affichage :", roleId);
         return;
@@ -1753,7 +1760,7 @@ window.revealRole = function(roleId, status, isMayor) {
         <p style="color:white; margin-top:20px; font-family:'Pirata One'; font-size:1.5em;">${isDead ? "TU ES MORT" : "CLIQUE POUR RETOURNER"}</p>
     </div>`;
     
-    // 4. Affichage (AVEC FIX Z-INDEX POUR PASSER DEVANT LE LOBBY)
+    // 4. Affichage
     panel.style.zIndex = "200000";
     overlay.style.zIndex = "199999";
 
@@ -2502,7 +2509,7 @@ window.resetGameToLobby = function() {
         });
     }
 
-    updates[`games/${currentGameCode}/vote`] = null;
+    updates[`games/${currentGameCode}/vote`] = null;s
     
     // SÉCURITÉ : On débloque les cartes au Reset
     updates[`games/${currentGameCode}/cardsLocked`] = false; 
@@ -2517,16 +2524,17 @@ window.resetGameToLobby = function() {
    18. FONCTION KICK (EXPULSION)
    ============================================ */
 window.kickPlayer = function(pid) {
+    // On demande confirmation avec un confirm natif (Seul le MJ le voit, c'est acceptable)
     if(confirm("⚠️ ATTENTION : Voulez-vous vraiment EXPULSER ce joueur de la partie ?\n\nIl sera déconnecté et supprimé de la liste.")) {
-        // On supprime le nœud du joueur dans Firebase
+        
         remove(ref(db, `games/${currentGameCode}/players/${pid}`))
         .then(() => {
             internalShowNotification("Admin", "Joueur expulsé avec succès.");
-            // On ferme la fenêtre de détail pour éviter les bugs visuels
             window.internalCloseDetails();
         })
         .catch((err) => {
-            alert("Erreur lors de l'expulsion : " + err.message);
+            console.error("Erreur Kick:", err);
+            internalShowNotification("Erreur", "Impossible d'expulser le joueur.");
         });
     }
 };

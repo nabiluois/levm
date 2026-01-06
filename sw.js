@@ -1,7 +1,7 @@
 /* ============================================
    1. CONFIGURATION & FICHIERS À CACHER
    ============================================ */
-const CACHE_NAME = 'village-maudit-v6.7'; // J'ai incrémenté la version pour forcer la mise à jour
+const CACHE_NAME = 'village-maudit-v6.8'; // J'ai incrémenté la version pour forcer la mise à jour
 
 const ASSETS_TO_CACHE = [
     './',
@@ -9,6 +9,7 @@ const ASSETS_TO_CACHE = [
     './style.css',
     './script.js',
     './manifest.json',
+    './online.js', 
 
     // Polices externes
     'https://fonts.googleapis.com/css2?family=Almendra&display=swap',
@@ -28,7 +29,7 @@ const ASSETS_TO_CACHE = [
     // DOS DE CARTES (ESSENTIEL OFFLINE - Changés en webp)
     './back.webp',
     './back_or.webp',
-    './back_argant.webp',
+    './back_argent.webp',
     './back_bronze.webp',
 
     // Images des Rôles (Changés en webp)

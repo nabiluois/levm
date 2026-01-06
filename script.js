@@ -2021,7 +2021,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const cardsArray = Array.from(document.querySelectorAll('.carte-jeu'));
 
     // ===============================
-    // 13. SYSTÈME DE DÉVERROUILLAGE & VALIDATION (V3 - VISUEL)
+    // 13. SYSTÈME DE DÉVERROUILLAGE & VALIDATION (CORRIGÉ V5)
     // ===============================
     
     // A. Navigation dans le cadenas (Slides Intro)
@@ -2036,7 +2036,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if(nextDot) nextDot.classList.add('active');
     };
 
-    // B. Fermer l'intro pour aller naviguer
+    // B. Fermer l'intro
     window.finishIntro = function() {
         closeModal('modal-lock-intro');
         setTimeout(() => {
@@ -2047,84 +2047,94 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 500);
     };
 
-    // C. Validation Manuelle des Règles
+    // C. Validation Règles
     window.finishRules = function() {
         localStorage.setItem('vm_rules_read', 'true');
-        
-        // On met à jour l'aspect du bouton immédiatement (Devient GRIS)
         updateValidationButtons();
-        
         closeModal('modal-regles-base');
         
-        if (localStorage.getItem('vm_pact_read') === 'true') {
-            showNotification("🔓 Accès Autorisé", "Tu as tout validé. Le Village s'ouvre à toi.");
-        } else {
-            showNotification("📜 Règles Validées", "Parfait. Maintenant, va signer le Pacte Maudit.");
+        // Mise à jour visuelle du menu
+        const menuLink = document.getElementById('link-regles-base');
+        if(menuLink) {
+            menuLink.classList.add('menu-completed');
+            menuLink.innerHTML = '<img src="Regle_de_base.svg" alt="Règles" class="menu-icon"> Règles de base ✅';
         }
         
         checkGameUnlock();
     };
 
-    // D. Signature Manuelle du Pacte
+    // D. Signature Pacte
     window.signPact = function() {
         localStorage.setItem('vm_pact_read', 'true');
-        
-        // On met à jour l'aspect du bouton immédiatement (Devient GRIS)
         updateValidationButtons();
-
         closeModal('modal-regles');
-        
-        if (localStorage.getItem('vm_rules_read') === 'true') {
-            showNotification("🩸 Pacte Signé", "Le sang est versé. Le Village s'ouvre à toi.");
-        } else {
-            showNotification("✍️ Pacte Signé", "C'est noté. N'oublie pas de lire les Règles.");
+
+        // Mise à jour visuelle du menu
+        const menuLink = document.getElementById('link-pact');
+        if(menuLink) {
+            menuLink.classList.add('menu-completed');
+            menuLink.innerHTML = '<img src="Le_pacte_maudit.svg" alt="Pacte" class="menu-icon"> Le Pacte Maudit ✅';
         }
         
         checkGameUnlock();
     };
 
-    // E. Vérification de l'état du jeu (Grisé ou pas)
+    // E. Vérification État du jeu
     function checkGameUnlock() {
         const rulesRead = localStorage.getItem('vm_rules_read') === 'true';
         const pactRead = localStorage.getItem('vm_pact_read') === 'true';
 
         if (rulesRead && pactRead) {
             document.body.classList.remove('locked-game');
+            // Notification succès final
+            if(!sessionStorage.getItem('unlocked_notif_shown')) {
+                showNotification("🔓 Village Ouvert", "Bienvenue. Fais attention à toi.");
+                sessionStorage.setItem('unlocked_notif_shown', 'true');
+            }
         } else {
             document.body.classList.add('locked-game');
         }
     }
 
-    // F. Fonction pour changer la couleur des boutons (VERT -> GRIS)
+    // F. Mise à jour Boutons & Menus (au chargement)
     function updateValidationButtons() {
         const rulesRead = localStorage.getItem('vm_rules_read') === 'true';
         const pactRead = localStorage.getItem('vm_pact_read') === 'true';
 
-        // 1. Bouton des Règles (dans le slide final)
+        // Bouton Règles
         const btnRules = document.querySelector('#modal-regles-base .btn-validate');
         if (btnRules && rulesRead) {
-            btnRules.classList.add('disabled');      // Ajoute la classe CSS grise
-            btnRules.innerHTML = "✅ Règles Lues";   // Change le texte
-            btnRules.removeAttribute('onclick');     // Coupe l'action
+            btnRules.classList.add('disabled');
+            btnRules.innerHTML = "✅ Règles Lues";
+            btnRules.removeAttribute('onclick');
+        }
+        // Menu Règles
+        const linkRules = document.getElementById('link-regles-base');
+        if(linkRules && rulesRead) {
+            linkRules.classList.add('menu-completed');
+            linkRules.innerHTML = '<img src="Regle_de_base.svg" alt="Règles" class="menu-icon"> Règles de base ✅';
         }
 
-        // 2. Bouton du Pacte (dans la modale pacte)
+        // Bouton Pacte
         const btnPact = document.querySelector('#modal-regles .btn-validate');
         if (btnPact && pactRead) {
-            btnPact.classList.add('disabled');       // Ajoute la classe CSS grise
-            btnPact.innerHTML = "✅ Pacte Signé";    // Change le texte
-            btnPact.removeAttribute('onclick');      // Coupe l'action
+            btnPact.classList.add('disabled');
+            btnPact.innerHTML = "✅ Pacte Signé";
+            btnPact.removeAttribute('onclick');
+        }
+        // Menu Pacte
+        const linkPact = document.getElementById('link-pact');
+        if(linkPact && pactRead) {
+            linkPact.classList.add('menu-completed');
+            linkPact.innerHTML = '<img src="Le_pacte_maudit.svg" alt="Pacte" class="menu-icon"> Le Pacte Maudit ✅';
         }
     }
 
-    // G. Lancement de l'Intro au démarrage
+    // G. Lancement Initial
     function initGameLock() {
+        updateValidationButtons();
         const rulesRead = localStorage.getItem('vm_rules_read') === 'true';
         const pactRead = localStorage.getItem('vm_pact_read') === 'true';
-
-        // On vérifie tout de suite si on doit griser les boutons
-        // (Utile si le joueur rafraîchit la page)
-        setTimeout(updateValidationButtons, 100);
 
         if (!rulesRead || !pactRead) {
             document.body.classList.add('locked-game');
@@ -2140,6 +2150,54 @@ document.addEventListener('DOMContentLoaded', function() {
             document.body.classList.remove('locked-game');
         }
     }
+    
+    // H. DÉTECTION SCROLL PACTE (Version Corrigée)
+window.initPactScrollListener = function() {
+    // On cible le conteneur avec la classe CSS spécifique
+    const scrollContainer = document.querySelector('#modal-regles .rules-container-styled');
+    const btnPact = document.getElementById('btn-sign-pact');
+    
+    if(!scrollContainer || !btnPact) return;
+
+    // CORRECTION ICI : On vérifie si c'est DÉJÀ SIGNÉ via le stockage, pas via la classe CSS
+    if(localStorage.getItem('vm_pact_read') === 'true') return;
+
+    // Fonction de vérification
+    const checkScroll = () => {
+        // Tolérance (50px) pour éviter les bugs sur mobile
+        const isAtBottom = scrollContainer.scrollTop + scrollContainer.clientHeight >= scrollContainer.scrollHeight - 50;
+        
+        if (isAtBottom) {
+            btnPact.classList.remove('disabled');
+            btnPact.style.animation = "superPulse 1s infinite ease-in-out";
+        }
+    };
+
+    // 1. On vérifie tout de suite (si le texte est court)
+    if (scrollContainer.scrollHeight <= scrollContainer.clientHeight + 50) {
+        btnPact.classList.remove('disabled');
+        btnPact.style.animation = "superPulse 1s infinite ease-in-out";
+    }
+
+    // 2. On écoute le scroll
+    scrollContainer.addEventListener('scroll', checkScroll);
+
+    // 3. Sécurité : on revérifie après 1 seconde
+    setTimeout(checkScroll, 1000);
+};
+
+    // I. FONCTION RESET (POUR LE DÉVELOPPEUR)
+    window.resetProgression = function() {
+        if(confirm("Réinitialiser ta progression pour tester comme un nouveau joueur ?")) {
+            localStorage.removeItem('vm_rules_read');
+            localStorage.removeItem('vm_pact_read');
+            localStorage.removeItem('theme');
+            location.reload();
+        }
+    };
+
+    // Lancement
+    initGameLock();
 
     // ===============================
     // 2. GESTION MENU BURGER
@@ -2159,8 +2217,8 @@ document.addEventListener('DOMContentLoaded', function() {
     if(closeExtraBtn) closeExtraBtn.addEventListener('click', toggleExtraMenu);
     if(extraOverlay) extraOverlay.addEventListener('click', toggleExtraMenu);
 
-    // ===============================
-    // 3. GESTION DES MODALES
+   // ===============================
+    // 3. GESTION DES MODALES (AVEC TRIGGER PACTE)
     // ===============================
     
     let scrollPosition = 0;
@@ -2171,13 +2229,18 @@ document.addEventListener('DOMContentLoaded', function() {
             scrollPosition = window.scrollY;
             modal.classList.add('active');
             
-            // Verrouillage scroll mobile
+            // Verrouillage scroll
             document.body.style.position = 'fixed';
             document.body.style.top = `-${scrollPosition}px`;
             document.body.style.width = '100%';
             document.body.style.overflow = 'hidden';
 
             if(extraMenu && extraMenu.classList.contains('open')) toggleExtraMenu();
+
+            // TRIGGER SPECIAL : Si c'est le Pacte, on lance l'écouteur de scroll
+            if(modalId === 'modal-regles') {
+                setTimeout(window.initPactScrollListener, 200);
+            }
         }
     };
 
@@ -2186,7 +2249,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if(modal) {
             modal.classList.remove('active');
             
-            // Déverrouillage scroll mobile
+            // Déverrouillage scroll
             document.body.style.position = '';
             document.body.style.top = '';
             document.body.style.width = '';
@@ -2195,13 +2258,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     };
 
-    // Empêcher la fermeture de l'intro en cliquant dehors (HARD LOCK)
+    // Empêcher la fermeture de l'intro en cliquant dehors
     document.querySelectorAll('.modal').forEach(modal => {
         modal.addEventListener('click', (e) => {
-            // SI C'EST L'INTRO : ON NE FAIT RIEN (Impossible de fermer sans le bouton)
             if (modal.id === 'modal-lock-intro') return;
-
-            // Pour les autres : OK
             if (e.target === modal) window.closeModal(modal.id);
         });
     });
@@ -2550,27 +2610,43 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // ===============================
-    // 12. GESTION DES SLIDES
+    // 12. GESTION DES SLIDES (AVEC UNLOCK BOUTON)
     // ===============================
     let currentSlideIndex = 0;
     const slides = document.querySelectorAll('.slide');
     const slideCounter = document.getElementById('slide-counter');
 
     window.changeSlide = function(direction) {
-        slides[currentSlideIndex].classList.remove('active');
+        // Masquer l'actuelle
+        if(slides[currentSlideIndex]) slides[currentSlideIndex].classList.remove('active');
+        
+        // Calcul
         currentSlideIndex += direction;
-        if (currentSlideIndex >= slides.length) currentSlideIndex = 0;
-        if (currentSlideIndex < 0) currentSlideIndex = slides.length - 1;
-        slides[currentSlideIndex].classList.add('active');
+        
+        // Bornes (On ne boucle pas, on bloque aux extrémités)
+        if (currentSlideIndex < 0) currentSlideIndex = 0;
+        if (currentSlideIndex >= slides.length) currentSlideIndex = slides.length - 1;
+        
+        // Afficher la nouvelle
+        if(slides[currentSlideIndex]) slides[currentSlideIndex].classList.add('active');
+        
+        // Compteur
         if(slideCounter) slideCounter.textContent = `${currentSlideIndex + 1} / ${slides.length}`;
+        
+        // Scroll top
         const container = document.querySelector('.slides-container');
         if(container) container.scrollTop = 0;
-        
-        // PLUS DE CHECKGAMEUNLOCK ICI ! (Correction du Bug)
-    };
 
-    // LANCEMENT INITIAL
-    initGameLock();
+        // --- LOGIQUE UNLOCK ---
+        // Si on est sur la dernière slide (index 8)
+        const btnRules = document.getElementById('btn-validate-rules');
+        if (btnRules && !btnRules.textContent.includes('Lues')) { // Si pas déjà validé
+            if (currentSlideIndex === slides.length - 1) {
+                btnRules.classList.remove('disabled');
+                btnRules.style.animation = "superPulse 1s infinite ease-in-out";
+            }
+        }
+    };
     
     // ===============================
     // 14. EMOJIS DOS DE CARTE (CLIENT)
@@ -2679,4 +2755,5 @@ document.addEventListener('DOMContentLoaded', function() {
         refreshing = true;
     });
 
+    
 }); // FIN DOMContentLoaded

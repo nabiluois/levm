@@ -82,8 +82,16 @@
             <button class="close-extra">✕</button>
         </div>
         <ul class="extra-links">
-            <li><a href="#" onclick="openModal('modal-regles-base')" style="border-color: #ff6b6b; color:#ff6b6b;"><img src="Regle_de_base.svg" alt="Règles" class="menu-icon"> Règles de base</a></li>
-            <li><a href="#" onclick="openModal('modal-regles')" style="border-color: #ff6b6b; color:#ff6b6b;"><img src="Le_pacte_maudit.svg" alt="Pacte" class="menu-icon"> Le Pacte Maudit</a></li>
+            <li>
+                <a href="#" id="link-regles-base" onclick="openModal('modal-regles-base'); return false;" style="border-color: #ff6b6b; color:#ff6b6b;">
+                    <img src="Regle_de_base.svg" alt="Règles" class="menu-icon"> Règles de base
+                </a>
+            </li>
+            <li>
+                <a href="#" id="link-pact" onclick="openModal('modal-regles'); return false;" style="border-color: #ff6b6b; color:#ff6b6b;">
+                    <img src="Le_pacte_maudit.svg" alt="Pacte" class="menu-icon"> Le Pacte Maudit
+                </a>
+            </li>
             <li><a href="#" onclick="openModal('modal-propose')"><img src="Forge_un_role.svg" alt="Forge" class="menu-icon"> Forge un Rôle</a></li>
             
             <li>
@@ -1084,9 +1092,10 @@ Le massacre ne s’arrête qu’une fois les deux Jumeaux découverts et élimin
     
     <!-- Modale Règles de Base -->
     <div id="modal-regles-base" class="modal">
-        <div class="modal-content modal-large">
+        <div class="modal-content modal-large" style="display:flex; flex-direction:column; padding-bottom:10px;">
             <span class="close-modal" onclick="closeModal('modal-regles-base')">✕</span>
-            <div class="slides-container">
+            
+            <div class="slides-container" style="flex:1; overflow-y:auto; margin-bottom:10px;">
                 
                 <div class="slide active">
                     <h2 class="slide-title">Règles Mécaniques de Base</h2>
@@ -1101,7 +1110,6 @@ Le massacre ne s’arrête qu’une fois les deux Jumeaux découverts et élimin
                     <div class="step-box"><div class="step-num">1</div><div class="step-content"><strong>Le Maître du Jeu (MJ) distribue les cartes</strong><p>Le MJ distribue secrètement une carte personnage face cachée à chaque joueur.</p></div></div>
                     <div class="step-box"><div class="step-num">2</div><div class="step-content"><strong>Chaque joueur découvre son rôle</strong><p>Les joueurs doivent prendre connaissance de leur rôle en toute discrétion.</p></div></div>
                     <div class="step-box"><div class="step-num">3</div><div class="step-content"><strong>En cas de doute</strong><p>Si un joueur a des questions, il doit consulter le site ou demander discrètement au MJ.</p></div></div>
-                    <div class="quote-box">"Chaque joueur doit garder son rôle secret afin de ne pas révéler son identité aux autres participants."</div>
                 </div>
 
                 <div class="slide">
@@ -1188,21 +1196,27 @@ Le massacre ne s’arrête qu’une fois les deux Jumeaux découverts et élimin
                     <div class="card-type silver"><i class="fas fa-medal"></i><div><strong>Carte ARGENT (Tour 4-6)</strong><p>Influe fortement sur la partie (bonus ou malus aux joueurs en jeu).</p></div></div>
                     <div class="card-type bronze"><i class="fas fa-award"></i><div><strong>Carte BRONZE (Tour 7+)</strong><p>Offre des bonus non négligeables utilisables lors de la prochaine partie.</p></div></div>
                     
-                    <div class="sticky-action-bar">
-                        <button class="btn-validate" onclick="finishRules()">✅ J'ai tout lu et compris</button>
+                    <div style="text-align:center; margin-top:30px; color:var(--gold);">
+                        <p><strong>FIN DES RÈGLES</strong></p>
+                        <p style="font-size:0.9em; opacity:0.8;">Validez ci-dessous 👇</p>
                     </div>
-                    </div>
+                </div>
 
             </div>
-            <div class="slides-nav">
-                <button onclick="changeSlide(-1)">❮ Précédent</button>
-                <span id="slide-counter">1 / 9</span>
-                <button onclick="changeSlide(1)">Suivant ❯</button>
+
+            <div style="background:#1a120b; padding-top:10px; border-top:1px solid #555; z-index:10;">
+                <div class="slides-nav">
+                    <button onclick="changeSlide(-1)">❮ Précédent</button>
+                    <span id="slide-counter">1 / 9</span>
+                    <button onclick="changeSlide(1)">Suivant ❯</button>
+                </div>
+                <button id="btn-validate-rules" class="btn-validate disabled" onclick="finishRules()" style="margin-top:10px;">
+                    ✅ J'ai tout lu et compris
+                </button>
             </div>
         </div>
     </div>
 
-    <!-- Modale Proposer un Rôle -->
     <div id="modal-propose" class="modal">
         <div class="modal-content">
             <span class="close-modal" onclick="closeModal('modal-propose')">✕</span>
@@ -1228,27 +1242,32 @@ Le massacre ne s’arrête qu’une fois les deux Jumeaux découverts et élimin
         </div>
     </div>
 
-    <!-- Modale Le Pacte Maudit -->
     <div id="modal-regles" class="modal">
-        <div class="modal-content">
+        <div class="modal-content" style="display:flex; flex-direction:column; max-height:90vh;">
             <span class="close-modal" onclick="closeModal('modal-regles')">✕</span>
             <h2>Le Pacte Maudit</h2>
+            
             <div class="rules-container-styled">
                 <div class="rule-box"><img src="Public.svg" class="pact-icon" alt="Public"><div class="rule-text"><h3>On s’écoute vraiment</h3><p>Chacun parle à son tour, on laisse les autres finir leurs phrases...</p></div></div>
-                <div class="rule-box"><img src="Respect.svg" class="pact-icon" alt="Respect"><div class="rule-text"><h3>Respect, fair-play et fun</h3><p>On est là pour passer un bon moment ensemble. Pas d’attaques personnelles, pas de mauvaise foi toxique, le but c’est de rire, bluffer et raconter une bonne histoire, pas de se fâcher.</p></div></div>
-                <div class="rule-box"><img src="Secret.svg" class="pact-icon" alt="Secret"><div class="rule-text"><h3>Secret absolu sur les rôles</h3><p>Interdiction de dévoiler son rôle, et pas d’allusions trop évidentes à son pouvoir secret. Si tu veux convaincre, fais-le par le jeu, pas en cassant le mystère.</p></div></div>
-                <div class="rule-box"><img src="Triche.svg" class="pact-icon" alt="Triche"><div class="rule-text"><h3>Pas de triche la nuit</h3><p>La nuit, tout le monde garde les yeux fermés, point final. Si tu ne peux pas t’empêcher de tricher, autant aller jouer à la PlayStation, ce sera plus simple pour tout le monde.</p></div></div>
-                <div class="rule-box"><img src="Carte.svg" class="pact-icon" alt="Carte"><div class="rule-text"><h3>Prends soin de ta carte</h3><p>Ta carte reste posée devant toi pour aider le MJ et éviter qu’elle s’abîme. Pas dans le sac, pas dans la poche… et encore moins sous tes fesses.</p></div></div>
-                <div class="rule-box"><img src="Captain.svg" class="pact-icon" alt="Captain"><div class="rule-text"><h3>Le MJ a le dernier mot</h3><p>On écoute le MJ et on respecte ses décisions, même si on n’est pas d’accord. C’est lui qui garde le rythme, tranche les litiges et protège l’ambiance de la partie.</p></div></div>
+                <div class="rule-box"><img src="Respect.svg" class="pact-icon" alt="Respect"><div class="rule-text"><h3>Respect, fair-play et fun</h3><p>On est là pour passer un bon moment ensemble. Pas d’attaques personnelles, pas de mauvaise foi toxique.</p></div></div>
+                <div class="rule-box"><img src="Secret.svg" class="pact-icon" alt="Secret"><div class="rule-text"><h3>Secret absolu sur les rôles</h3><p>Interdiction de dévoiler son rôle. Si tu veux convaincre, fais-le par le jeu, pas en cassant le mystère.</p></div></div>
+                <div class="rule-box"><img src="Triche.svg" class="pact-icon" alt="Triche"><div class="rule-text"><h3>Pas de triche la nuit</h3><p>La nuit, tout le monde garde les yeux fermés. Si tu triches, tu gâches le jeu pour tout le monde.</p></div></div>
+                <div class="rule-box"><img src="Carte.svg" class="pact-icon" alt="Carte"><div class="rule-text"><h3>Prends soin de ta carte</h3><p>Ta carte reste posée devant toi. Pas dans la poche, pas pliée.</p></div></div>
+                <div class="rule-box"><img src="Captain.svg" class="pact-icon" alt="Captain"><div class="rule-text"><h3>Le MJ a le dernier mot</h3><p>On respecte ses décisions. C’est lui qui garde le rythme et protège l’ambiance.</p></div></div>
+                
+                <div style="text-align:center; padding:20px 0; color:#aaa; font-style:italic;">
+                    (Scrollez jusqu'en bas pour activer le bouton)
+                </div>
             </div>
             
-            <div class="sticky-action-bar">
-                <button class="btn-validate" onclick="signPact()">✍️ Je signe le Pacte</button>
+            <div style="flex-shrink:0; padding-top:10px;">
+                <button id="btn-sign-pact" class="btn-validate disabled" onclick="signPact()">
+                    ✍️ Je signe le Pacte
+                </button>
             </div>
-            </div>
+        </div>
     </div>
 
-    <!-- Modale Signalement Bug -->
     <div id="modal-bug" class="modal">
         <div class="modal-content">
             <span class="close-modal" onclick="closeModal('modal-bug')">✕</span>
@@ -1272,7 +1291,6 @@ Le massacre ne s’arrête qu’une fois les deux Jumeaux découverts et élimin
         </div>
     </div>
 
-    <!-- Notification Toast -->
     <div id="custom-notification" class="notification-overlay">
         <div class="notification-box">
             <h3 id="notif-title">Message du Conseil</h3>
@@ -1281,7 +1299,6 @@ Le massacre ne s’arrête qu’une fois les deux Jumeaux découverts et élimin
         </div>
     </div>
 
-    <!-- Modale Lock Intro -->
     <div id="modal-lock-intro" class="modal" style="z-index: 6000;">
         <div class="modal-content lock-content">
             <div class="lock-slide active" id="lock-slide-0">
@@ -1472,6 +1489,8 @@ Le massacre ne s’arrête qu’une fois les deux Jumeaux découverts et élimin
         <button id="reload-btn">Mettre à jour</button>
     </div>
 
-</body>
+    <div style="text-align:center; padding-bottom:20px;">
+        <button id="dev-reset-btn" onclick="window.resetProgression()">🔄 Réinitialiser ma progression (Dev)</button>
+    </div>
+    </body>
 </html>
-```
