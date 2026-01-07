@@ -8,6 +8,9 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getDatabase, ref, set, push, onValue, update, get, child, remove, onDisconnect } 
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+// NOUVEAU : Import pour l'authentification sécurisée
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } 
+from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyDbOZGB_e-v82n3eZaXq3_Eq8GHW0OLkXo",
@@ -21,6 +24,7 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
+const auth = getAuth(app); // Initialisation de l'authentification
 const db = getDatabase(app);
 
 /* ============================================
@@ -65,21 +69,24 @@ window.handleCardClick = function(cardElement) {
 };
 
 /* ============================================
-   3. INITIALISATION & LISTENERS GLOBAUX
+   3. INITIALISATION & LISTENERS GLOBAUX (SÉCURISÉS)
    ============================================ */
 
-// Fonction de Hachage (Simple & Robuste pour masquer le mot de passe)
-function cypherInput(str) {
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-        let char = str.charCodeAt(i);
-        hash = ((hash << 5) - hash) + char;
-        hash = hash & hash; // Convertit en 32bit integer
+// 1. SURVEILLANCE DE L'ÉTAT DE CONNEXION (PERSISTANCE)
+// Permet de rester connecté même après rechargement de la page
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        console.log("👑 MJ Connecté :", user.email);
+        // On identifie clairement l'admin pour éviter les conflits
+        if (myPlayerId !== 'MJ_ADMIN') {
+             // Si nécessaire, on peut stocker l'info ici, mais l'ID sera forcé dans initCreateGame
+        }
+    } else {
+        console.log("Mode Joueur (Non connecté)");
     }
-    return hash;
-}
+});
 
-// ÉCOUTEUR DE CLIC SÉCURISÉ (Création de partie)
+// 2. CRÉATION DE PARTIE SÉCURISÉE (VIA FIREBASE AUTH)
 document.addEventListener('click', function(e) {
     const btn = e.target.closest('#btn-create-game');
     
@@ -87,30 +94,44 @@ document.addEventListener('click', function(e) {
         e.preventDefault();
         e.stopPropagation();
 
-        // Demande du mot de passe
-        const input = prompt("🔐 Mot de passe MJ :");
-        
-        if (input) {
-            const cleanInput = input.trim(); 
-            const attemptHash = cypherInput(cleanInput); 
-
-            // HASH SÉCURISÉ (Ceci correspond à ton mot de passe actuel masqué)
-            // Si tu changes de mot de passe, tu devras générer un nouveau hash.
-            const targetHash = 1427395148; 
-
-            if(attemptHash === targetHash) { 
-                if (typeof window.initCreateGame === 'function') {
-                    window.initCreateGame(); 
-                } else {
-                    internalShowNotification("Erreur", "Le système charge encore...");
-                }
-            } else { 
-                internalShowNotification("Accès Refusé", "Mot de passe incorrect.");
-                if(navigator.vibrate) navigator.vibrate(200);
+        // A. Si déjà connecté, on lance direct
+        if (auth.currentUser) {
+            if (typeof window.initCreateGame === 'function') {
+                window.initCreateGame();
             }
+            return;
+        }
+
+        // B. Sinon, on demande les identifiants
+        const email = prompt("📧 Email MJ :");
+        const password = prompt("🔑 Mot de passe :");
+
+        if (email && password) {
+            signInWithEmailAndPassword(auth, email, password)
+                .then((userCredential) => {
+                    internalShowNotification("Succès", "Bienvenue, Maître du Jeu.");
+                    if (typeof window.initCreateGame === 'function') {
+                        window.initCreateGame();
+                    }
+                })
+                .catch((error) => {
+                    console.error("Erreur Auth:", error);
+                    let msg = "Erreur de connexion.";
+                    if(error.code === 'auth/invalid-credential') msg = "Email ou mot de passe incorrect.";
+                    internalShowNotification("Erreur", msg);
+                });
         }
     }
 });
+
+// 3. FONCTION DE DÉCONNEXION (À lier à un bouton si besoin)
+window.logoutMJ = function() {
+    if(confirm("Se déconnecter du compte MJ ?")) {
+        signOut(auth).then(() => {
+            location.reload();
+        });
+    }
+};
 
 // Initialisation optimisée
 document.addEventListener('DOMContentLoaded', () => {
@@ -1770,6 +1791,29 @@ window.revealRole = function(roleId, status, isMayor) {
     
     // 5. Application immédiate du verrouillage visuel
     if(window.refreshLockVisuals) window.refreshLockVisuals();
+};
+
+// ============================================
+// FONCTION MANQUANTE : VOIR MA CARTE (MENU)
+// ============================================
+window.showMyRoleAgain = function() {
+    // 1. Vérifie si on a les données du joueur
+    if (!myPlayerId || !currentPlayersData || !currentPlayersData[myPlayerId]) {
+        console.log("Données non prêtes");
+        return;
+    }
+
+    const me = currentPlayersData[myPlayerId];
+
+    // 2. Vérifie si le joueur a un rôle
+    // Si pas de rôle, on affiche une jolie notif au lieu d'une alerte
+    if (!me.role) {
+        internalShowNotification("Patience...", "Le MJ n'a pas encore distribué les rôles !");
+        return;
+    }
+
+    // 3. Lance l'affichage
+    window.revealRole(me.role, me.status, me.isMayor);
 };
 
 /* ============================================
