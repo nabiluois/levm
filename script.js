@@ -2825,46 +2825,47 @@ window.initPactScrollListener = function() {
         }, 1500);
     }
 
-    // 3. FONCTION DU BOUTON (MODE "FORCE BRUTE")
+   // 3. FONCTION DU BOUTON (MODE "RESET TOTAL")
     window.checkForUpdates = function() {
+        // 1. Ferme le menu
         const closeExtra = document.querySelector('.close-extra');
         if(closeExtra) closeExtra.click();
 
-        if (!('serviceWorker' in navigator)) {
-            window.location.reload(); 
-            return;
-        }
-
-        showNotification("⚡ Analyse...", "Vérification et nettoyage...");
+        // 2. Feedback immédiat
+        showNotification("💥 RESET EN COURS", "Destruction de l'ancienne version...<br>Le site va redémarrer.");
+        
+        // On cache le bouton "fermer" pour que l'utilisateur attende
         const notifBtn = document.querySelector('#custom-notification button');
         if(notifBtn) notifBtn.style.display = 'none';
 
-        navigator.serviceWorker.ready.then(registration => {
-            return registration.update().then(() => {
-                return registration;
+        // 3. SUPPRESSION RADICALE
+        if ('serviceWorker' in navigator) {
+            // A. On désinscrit tous les Service Workers (on coupe le lien avec l'ancienne version)
+            navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                for(let registration of registrations) {
+                    registration.unregister();
+                }
             });
-        }).then((registration) => {
-            const newWorker = registration.installing || registration.waiting;
-            
-            if (newWorker) {
-                // CAS A : Vraie mise à jour trouvée (La Section 4 s'en occupera)
-                showNotification("📥 Mise à jour trouvée", "Installation en cours...");
-            } else {
-                // CAS B : Rien trouvé -> On force le nettoyage et le reload
-                showNotification("🔄 Synchronisation", "Nettoyage du cache et rechargement...");
-                
-                caches.keys().then(function(names) {
-                    for (let name of names) caches.delete(name);
-                });
 
+            // B. On supprime TOUT le cache (fichiers, images, tout)
+            caches.keys().then(function(names) {
+                return Promise.all(
+                    names.map(function(name) {
+                        return caches.delete(name);
+                    })
+                );
+            }).then(function() {
+                // C. Une fois vide, on force le rechargement depuis le serveur
+                console.log("Cache vidé. Redémarrage...");
                 setTimeout(() => {
+                    // window.location.reload(true) force le navigateur à ignorer son propre cache
                     window.location.reload(true);
                 }, 1000);
-            }
-        }).catch(err => {
-            console.error("Erreur MAJ:", err);
-            window.location.reload();
-        });
+            });
+        } else {
+            // Si pas de SW, on reload juste
+            window.location.reload(true);
+        }
     };
 
     // 4. DÉTECTION AUTOMATIQUE (INDISPENSABLE)
