@@ -2791,18 +2791,18 @@ window.initPactScrollListener = function() {
         refreshing = true;
     });
 
-    // =========================================================
-// GESTION DES MISES À JOUR (FINAL)
+   // =========================================================
+// GESTION DES MISES À JOUR (FINAL - HYBRIDE)
 // =========================================================
 
-    // 1. CONFIGURATION DE LA VERSION (A CHANGER A CHAQUE UPDATE)
-    const CURRENT_APP_VERSION = "1.6"; 
+    // 1. CONFIGURATION DE LA VERSION
+    const CURRENT_APP_VERSION = "1.7"; // ⚠️ Change ce chiffre ici ET dans sw.js
     
-    // Affiche la version v1.3 en bas du menu
+    // Affiche la version dans le menu
     const versionSpan = document.getElementById('version-display');
     if(versionSpan) versionSpan.innerText = `v${CURRENT_APP_VERSION}`;
 
-    // Affiche la version dans le Footer du site
+    // Affiche la version dans le Footer
     const existingFooter = document.querySelector('footer');
     if (existingFooter) {
         existingFooter.innerHTML = `
@@ -2814,61 +2814,60 @@ window.initPactScrollListener = function() {
         `;
     }
 
-    // 2. CHECK AU DÉMARRAGE (Si une mise à jour vient d'être faite)
+    // 2. MESSAGE DE SUCCÈS AU DÉMARRAGE
     if (localStorage.getItem('vm_just_updated') === 'true') {
         setTimeout(() => {
-            // LE POP-UP DE SUCCÈS
             showNotification(
                 "✨ Mise à jour effectuée", 
-                `Vous êtes passé en version <strong>${CURRENT_APP_VERSION}</strong>`
+                `Bienvenue dans la version <strong>${CURRENT_APP_VERSION}</strong>`
             );
             localStorage.removeItem('vm_just_updated');
         }, 1500);
     }
 
-    // 3. FONCTION DU BOUTON "VÉRIFIER MAJ"
+    // 3. FONCTION DU BOUTON (MODE "FORCE BRUTE")
     window.checkForUpdates = function() {
-        // Ferme le menu
         const closeExtra = document.querySelector('.close-extra');
         if(closeExtra) closeExtra.click();
 
         if (!('serviceWorker' in navigator)) {
-            showNotification("Info", "Mise à jour impossible sur ce navigateur.");
+            window.location.reload(); 
             return;
         }
 
-        // LE MESSAGE DE RECHERCHE
-        showNotification("Recherche en cours...", "Contact du serveur...");
-        
-        // On cache le bouton "Compris" pour forcer l'attente
+        showNotification("⚡ Analyse...", "Vérification et nettoyage...");
         const notifBtn = document.querySelector('#custom-notification button');
         if(notifBtn) notifBtn.style.display = 'none';
 
-        // Pause de 2 secondes pour l'effet "Travail en cours"
-        const minimumWait = new Promise(resolve => setTimeout(resolve, 2000));
-        
         navigator.serviceWorker.ready.then(registration => {
-            Promise.all([minimumWait, registration.update()]).then((values) => {
-                const reg = values[1]; 
-
-                // Si RIEN ne se passe (pas de nouvelle version trouvée)
-                if (!reg.installing && !reg.waiting) {
-                    // LE MESSAGE "RIEN A SIGNALER"
-                    showNotification(
-                        "✅ Tout est bon", 
-                        "Vous avez la dernière mise à jour."
-                    );
-                    if(notifBtn) notifBtn.style.display = 'block'; // On réaffiche le bouton
-                }
-            }).catch(err => {
-                console.error("Erreur MAJ:", err);
-                showNotification("Erreur", "Connexion au serveur impossible.");
-                if(notifBtn) notifBtn.style.display = 'block';
+            return registration.update().then(() => {
+                return registration;
             });
+        }).then((registration) => {
+            const newWorker = registration.installing || registration.waiting;
+            
+            if (newWorker) {
+                // CAS A : Vraie mise à jour trouvée (La Section 4 s'en occupera)
+                showNotification("📥 Mise à jour trouvée", "Installation en cours...");
+            } else {
+                // CAS B : Rien trouvé -> On force le nettoyage et le reload
+                showNotification("🔄 Synchronisation", "Nettoyage du cache et rechargement...");
+                
+                caches.keys().then(function(names) {
+                    for (let name of names) caches.delete(name);
+                });
+
+                setTimeout(() => {
+                    window.location.reload(true);
+                }, 1000);
+            }
+        }).catch(err => {
+            console.error("Erreur MAJ:", err);
+            window.location.reload();
         });
     };
 
-    // 4. DÉTECTION AUTOMATIQUE (Si une nouvelle version est trouvée)
+    // 4. DÉTECTION AUTOMATIQUE (INDISPENSABLE)
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.ready.then(registration => {
             registration.addEventListener('updatefound', () => {
@@ -2876,11 +2875,10 @@ window.initPactScrollListener = function() {
                 
                 newWorker.addEventListener('statechange', () => {
                     if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                        // LE MESSAGE D'INSTALLATION
-                        showNotification("🚀 Mise à jour trouvée", "Installation de la nouvelle version...");
+                        // C'est ici que l'installation réelle se valide
+                        showNotification("🚀 Mise à jour prête", "Application de la nouvelle version...");
                         localStorage.setItem('vm_just_updated', 'true');
                         
-                        // Force le rechargement
                         if(registration.waiting) registration.waiting.postMessage({ action: 'skipWaiting' });
                         else if (newWorker) newWorker.postMessage({ action: 'skipWaiting' });
                     }
