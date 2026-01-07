@@ -100,6 +100,12 @@
                 </a>
             </li>
 
+            <li>
+                <a href="#" onclick="window.checkForUpdates(); return false;" style="border-color: #3498db; color:#3498db;">
+                    <span class="menu-icon" style="font-size:1.5em; line-height:1;">🔄</span> Vérifier Mise à Jour
+                </a>
+            </li>
+
             <li><a href="#" onclick="openModal('modal-bug')"><img src="Bug.svg" alt="Bug" class="menu-icon"> Signaler un Bug</a></li>
 
             <li id="menu-my-card-li" style="display:none; margin-top:20px; text-align:center; border-top:1px solid #333; padding-top:20px;">
@@ -109,7 +115,12 @@
                 </div>
             </li>
         </ul>
-        <div class="extra-footer"><strong>© 2026 Le Village Maudit</strong><br><em>by Nabil & Joelson</em></div>
+        
+        <div class="extra-footer">
+            <strong>© 2026 Le Village Maudit</strong><br>
+            <em>by Nabil & Joelson</em><br>
+            <span id="version-display" style="font-family:sans-serif; opacity:0.6; font-size:0.9em;">v...</span>
+        </div>
     </nav>
 
     <!-- ============================================

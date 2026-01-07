@@ -2791,5 +2791,94 @@ window.initPactScrollListener = function() {
         refreshing = true;
     });
 
+    // =========================================================
+// AJOUTER CECI DANS script.js (À la fin du DOMContentLoaded)
+// =========================================================
+
+    // 1. CONFIGURATION DE LA VERSION ACTUELLE
+    const CURRENT_APP_VERSION = "7.2"; // DOIT CORRESPONDRE A CELLE DU SW.JS
     
+    // Mise à jour de l'affichage dans le menu
+    const versionSpan = document.getElementById('version-display');
+    if(versionSpan) versionSpan.innerText = `v${CURRENT_APP_VERSION}`;
+
+    // Mise à jour du Footer généré dynamiquement (Bloc 10 existant)
+    // Cherche le bloc "10. PIED DE PAGE" dans ton script actuel et remplace-le ou ajoute ceci :
+    const existingFooter = document.querySelector('footer');
+    if (existingFooter) {
+        existingFooter.innerHTML = `
+          <div style="text-align: center; padding: 40px 20px 60px; color: var(--gold); opacity: 0.7; font-family: 'Almendra', serif;">
+            <strong>© 2026 Le Village Maudit</strong><br>
+            <em style="font-size: 0.9em;">by Nabil & Joelson</em><br>
+            <span style="font-family:sans-serif; font-size:0.8em; opacity:0.5;">Version ${CURRENT_APP_VERSION}</span>
+          </div>
+        `;
+    }
+
+    // 2. FONCTION DE VÉRIFICATION MANUELLE
+    window.checkForUpdates = function() {
+        // Ferme le menu pour voir la notif
+        const closeExtra = document.querySelector('.close-extra');
+        if(closeExtra) closeExtra.click();
+
+        showNotification("📡 Recherche...", "Contact des esprits du réseau...");
+
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.ready.then(registration => {
+                // Force la vérification
+                registration.update().then(() => {
+                    // Si on arrive ici sans que le contrôleur change immédiatement,
+                    // on vérifie s'il y a un SW en attente
+                    if (registration.installing) {
+                        showNotification("📥 Téléchargement...", "Une nouvelle version arrive !");
+                    } else if (registration.waiting) {
+                        showNotification("✨ Mise à jour prête !", "Installation en cours...");
+                        // Envoie le message pour forcer l'activation (défini dans sw.js)
+                        registration.waiting.postMessage({ action: 'skipWaiting' });
+                    } else {
+                        // Petit délai pour simuler la recherche si c'est trop rapide
+                        setTimeout(() => {
+                            showNotification("✅ À Jour", `Tu utilises bien la version ${CURRENT_APP_VERSION}.<br>Aucune mise à jour détectée.`);
+                        }, 1000);
+                    }
+                });
+            }).catch(err => {
+                showNotification("Erreur", "Impossible de vérifier la mise à jour.");
+                console.error(err);
+            });
+        } else {
+            showNotification("Info", "Ce navigateur ne gère pas les mises à jour automatiques.");
+        }
+    };
+
+    // 3. ECOUTEUR AUTOMATIQUE (Amélioration du bloc existant)
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.ready.then(registration => {
+            registration.addEventListener('updatefound', () => {
+                const newWorker = registration.installing;
+                console.log("Nouveau worker détecté :", newWorker);
+                
+                newWorker.addEventListener('statechange', () => {
+                    console.log("Nouvel état worker :", newWorker.state);
+                    if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                        // Mise à jour disponible et installée, prête à être activée
+                        const toast = document.getElementById('update-notification');
+                        if(toast) {
+                            toast.querySelector('span').innerText = "Nouvelle version disponible !";
+                            toast.classList.add('show');
+                        }
+                    }
+                });
+            });
+        });
+        
+        // Force le rechargement quand le nouveau SW prend le contrôle
+        let refreshing = false;
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+            if (!refreshing) {
+                refreshing = true;
+                window.location.reload();
+            }
+        });
+    }
 }); // FIN DOMContentLoaded
