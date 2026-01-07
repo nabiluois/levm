@@ -2796,7 +2796,7 @@ window.initPactScrollListener = function() {
 // =========================================================
 
     // 1. CONFIGURATION DE LA VERSION
-    const CURRENT_APP_VERSION = "1.7"; // ⚠️ Change ce chiffre ici ET dans sw.js
+    const CURRENT_APP_VERSION = "1.8"; // ⚠️ Change ce chiffre ici ET dans sw.js
     
     // Affiche la version dans le menu
     const versionSpan = document.getElementById('version-display');
