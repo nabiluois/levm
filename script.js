@@ -2796,7 +2796,7 @@ window.initPactScrollListener = function() {
 // =========================================================
 
     // 1. CONFIGURATION DE LA VERSION
-    const CURRENT_APP_VERSION = "1.8"; // ⚠️ Change ce chiffre ici ET dans sw.js
+    const CURRENT_APP_VERSION = "1.9"; // ⚠️ Change ce chiffre ici ET dans sw.js
     
     // Affiche la version dans le menu
     const versionSpan = document.getElementById('version-display');
@@ -2832,7 +2832,7 @@ window.initPactScrollListener = function() {
         if(closeExtra) closeExtra.click();
 
         // 2. Feedback immédiat
-        showNotification("💥 RESET EN COURS", "Destruction de l'ancienne version...<br>Le site va redémarrer.");
+        showNotification("💥 UPDATE EN COURS", "Destruction de l'ancienne version...<br>Le site va redémarrer.");
         
         // On cache le bouton "fermer" pour que l'utilisateur attende
         const notifBtn = document.querySelector('#custom-notification button');
