@@ -1,7 +1,7 @@
 /* ============================================
    1. CONFIGURATION & FICHIERS À CACHER (SQUELETTE)
    ============================================ */
-const CACHE_NAME = 'village-maudit-v1.4'; // Version incrémentée pour forcer la MAJ
+const CACHE_NAME = 'village-maudit-v1.6'; // Version incrémentée pour forcer la MAJ
 
 // On ne cache ici que le STRICT MINIMUM pour que l'app se lance (le "squelette")
 // Les images des cartes se mettront en cache toutes seules quand on les verra (Lazy Caching)

@@ -2792,17 +2792,17 @@ window.initPactScrollListener = function() {
     });
 
     // =========================================================
-// GESTION DES MISES À JOUR (INTELLIGENTE)
+// GESTION DES MISES À JOUR (FINAL)
 // =========================================================
 
-    // 1. CONFIGURATION VERSION (À CHANGER À CHAQUE UPDATE)
-    const CURRENT_APP_VERSION = "1.4"; // IMPORTANT : Doit être identique au sw.js
+    // 1. CONFIGURATION DE LA VERSION (A CHANGER A CHAQUE UPDATE)
+    const CURRENT_APP_VERSION = "1.6"; 
     
-    // Affiche la version dans le menu
+    // Affiche la version v1.3 en bas du menu
     const versionSpan = document.getElementById('version-display');
     if(versionSpan) versionSpan.innerText = `v${CURRENT_APP_VERSION}`;
 
-    // Mise à jour du Footer
+    // Affiche la version dans le Footer du site
     const existingFooter = document.querySelector('footer');
     if (existingFooter) {
         existingFooter.innerHTML = `
@@ -2814,83 +2814,80 @@ window.initPactScrollListener = function() {
         `;
     }
 
-    // 2. CHECK AU DÉMARRAGE (MESSAGE "VOUS ETES MAINTENANT EN VERSION X")
-    // On vérifie si on vient de faire une mise à jour
+    // 2. CHECK AU DÉMARRAGE (Si une mise à jour vient d'être faite)
     if (localStorage.getItem('vm_just_updated') === 'true') {
         setTimeout(() => {
-            showNotification("✨ Mise à Jour Réussie", `Bienvenue dans la version ${CURRENT_APP_VERSION} !`);
-            localStorage.removeItem('vm_just_updated'); // On nettoie le marqueur
-        }, 1000);
+            // LE POP-UP DE SUCCÈS
+            showNotification(
+                "✨ Mise à jour effectuée", 
+                `Vous êtes passé en version <strong>${CURRENT_APP_VERSION}</strong>`
+            );
+            localStorage.removeItem('vm_just_updated');
+        }, 1500);
     }
 
-    // 3. FONCTION DU BOUTON (MANUELLE) - AVEC BOUTON CACHÉ PENDANT LA RECHERCHE
+    // 3. FONCTION DU BOUTON "VÉRIFIER MAJ"
     window.checkForUpdates = function() {
-        // 1. Ferme le menu
+        // Ferme le menu
         const closeExtra = document.querySelector('.close-extra');
         if(closeExtra) closeExtra.click();
 
-        // 2. Vérif support
         if (!('serviceWorker' in navigator)) {
             showNotification("Info", "Mise à jour impossible sur ce navigateur.");
             return;
         }
 
-        // 3. AFFICHER RECHERCHE ET CACHER LE BOUTON "COMPRIS"
-        // Cela empêche l'utilisateur de fermer la fenêtre trop vite
-        showNotification("📡 Recherche en cours...", "Contact du serveur...");
+        // LE MESSAGE DE RECHERCHE
+        showNotification("Recherche en cours...", "Contact du serveur...");
+        
+        // On cache le bouton "Compris" pour forcer l'attente
         const notifBtn = document.querySelector('#custom-notification button');
-        if(notifBtn) notifBtn.style.display = 'none'; 
+        if(notifBtn) notifBtn.style.display = 'none';
 
-        // 4. Lancer la vraie recherche réseau
+        // Pause de 2 secondes pour l'effet "Travail en cours"
+        const minimumWait = new Promise(resolve => setTimeout(resolve, 2000));
+        
         navigator.serviceWorker.ready.then(registration => {
-            // Force le navigateur à aller vérifier le fichier sw.js sur internet
-            return registration.update(); 
-        }).then((registration) => {
-            // La vérification est finie.
-            // Si on ne détecte aucune installation (installing) et aucune attente (waiting)
-            // C'est que le fichier n'a pas changé.
-            if (!registration.installing && !registration.waiting) {
-                setTimeout(() => {
-                    showNotification("✅ Vous êtes à jour", `Version actuelle : ${CURRENT_APP_VERSION}<br>Aucune nouveauté détectée.`);
-                    if(notifBtn) notifBtn.style.display = 'block'; // On réaffiche le bouton pour fermer
-                }, 800); // Petit délai pour lire le message de recherche
-            }
-            // Note : Si une mise à jour EST trouvée, l'écouteur "updatefound" (ci-dessous)
-            // prendra le relais pour afficher "Mise à jour trouvée" et recharger.
-        }).catch(err => {
-            console.error(err);
-            showNotification("Erreur", "Impossible de vérifier la mise à jour.<br>(Vérifiez votre connexion)");
-            if(notifBtn) notifBtn.style.display = 'block'; // On réaffiche le bouton en cas d'erreur
+            Promise.all([minimumWait, registration.update()]).then((values) => {
+                const reg = values[1]; 
+
+                // Si RIEN ne se passe (pas de nouvelle version trouvée)
+                if (!reg.installing && !reg.waiting) {
+                    // LE MESSAGE "RIEN A SIGNALER"
+                    showNotification(
+                        "✅ Tout est bon", 
+                        "Vous avez la dernière mise à jour."
+                    );
+                    if(notifBtn) notifBtn.style.display = 'block'; // On réaffiche le bouton
+                }
+            }).catch(err => {
+                console.error("Erreur MAJ:", err);
+                showNotification("Erreur", "Connexion au serveur impossible.");
+                if(notifBtn) notifBtn.style.display = 'block';
+            });
         });
     };
 
-    // 4. ÉCOUTEUR SYSTÈME (DÉTECTION AUTOMATIQUE)
+    // 4. DÉTECTION AUTOMATIQUE (Si une nouvelle version est trouvée)
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.ready.then(registration => {
             registration.addEventListener('updatefound', () => {
                 const newWorker = registration.installing;
                 
                 newWorker.addEventListener('statechange', () => {
-                    // Si une nouvelle version est installée et prête
                     if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                        showNotification("📥 Mise à jour trouvée", "Installation de la nouvelle version...");
-                        
-                        // On marque qu'on va mettre à jour pour le prochain démarrage
+                        // LE MESSAGE D'INSTALLATION
+                        showNotification("🚀 Mise à jour trouvée", "Installation de la nouvelle version...");
                         localStorage.setItem('vm_just_updated', 'true');
                         
-                        // On force la mise à jour (via le message skipWaiting)
-                        // Le rechargement se fera via l'événement 'controllerchange'
-                        if(registration.waiting) {
-                            registration.waiting.postMessage({ action: 'skipWaiting' });
-                        } else if (newWorker) {
-                            newWorker.postMessage({ action: 'skipWaiting' });
-                        }
+                        // Force le rechargement
+                        if(registration.waiting) registration.waiting.postMessage({ action: 'skipWaiting' });
+                        else if (newWorker) newWorker.postMessage({ action: 'skipWaiting' });
                     }
                 });
             });
         });
         
-        // RECHARGEMENT AUTOMATIQUE QUAND LA NOUVELLE VERSION PREND LE CONTRÔLE
         let refreshing = false;
         navigator.serviceWorker.addEventListener('controllerchange', () => {
             if (!refreshing) {
@@ -2899,4 +2896,5 @@ window.initPactScrollListener = function() {
             }
         });
     }
+
 }); // FIN DOMContentLoaded
