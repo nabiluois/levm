@@ -2796,7 +2796,7 @@ window.initPactScrollListener = function() {
 // =========================================================
 
     // 1. CONFIGURATION VERSION (À CHANGER À CHAQUE UPDATE)
-    const CURRENT_APP_VERSION = "1.3"; // IMPORTANT : Doit être identique au sw.js
+    const CURRENT_APP_VERSION = "1.4"; // IMPORTANT : Doit être identique au sw.js
     
     // Affiche la version dans le menu
     const versionSpan = document.getElementById('version-display');
@@ -2807,7 +2807,7 @@ window.initPactScrollListener = function() {
     if (existingFooter) {
         existingFooter.innerHTML = `
           <div style="text-align: center; padding: 40px 20px 60px; color: var(--gold); opacity: 0.7; font-family: 'Almendra', serif;">
-            <strong>© 2027 Le Village Maudit</strong><br>
+            <strong>© 2026 Le Village Maudit</strong><br>
             <em style="font-size: 0.9em;">by Nabil & Joelson</em><br>
             <span style="font-family:sans-serif; font-size:0.8em; opacity:0.5;">Version ${CURRENT_APP_VERSION}</span>
           </div>
@@ -2823,28 +2823,44 @@ window.initPactScrollListener = function() {
         }, 1000);
     }
 
-    // 3. FONCTION DU BOUTON (MANUELLE)
+    // 3. FONCTION DU BOUTON (MANUELLE) - AVEC BOUTON CACHÉ PENDANT LA RECHERCHE
     window.checkForUpdates = function() {
-        // Ferme le menu
+        // 1. Ferme le menu
         const closeExtra = document.querySelector('.close-extra');
         if(closeExtra) closeExtra.click();
 
+        // 2. Vérif support
         if (!('serviceWorker' in navigator)) {
             showNotification("Info", "Mise à jour impossible sur ce navigateur.");
             return;
         }
 
-        showNotification("📡 Recherche...", "Vérification des mises à jour...");
+        // 3. AFFICHER RECHERCHE ET CACHER LE BOUTON "COMPRIS"
+        // Cela empêche l'utilisateur de fermer la fenêtre trop vite
+        showNotification("📡 Recherche en cours...", "Contact du serveur...");
+        const notifBtn = document.querySelector('#custom-notification button');
+        if(notifBtn) notifBtn.style.display = 'none'; 
 
+        // 4. Lancer la vraie recherche réseau
         navigator.serviceWorker.ready.then(registration => {
-            registration.update().then(() => {
-                // Si aucune mise à jour n'est trouvée (pas d'installation, pas d'attente)
-                if (!registration.installing && !registration.waiting) {
-                    setTimeout(() => {
-                        showNotification("✅ Vous êtes à jour", `Version actuelle : ${CURRENT_APP_VERSION}`);
-                    }, 800);
-                }
-            });
+            // Force le navigateur à aller vérifier le fichier sw.js sur internet
+            return registration.update(); 
+        }).then((registration) => {
+            // La vérification est finie.
+            // Si on ne détecte aucune installation (installing) et aucune attente (waiting)
+            // C'est que le fichier n'a pas changé.
+            if (!registration.installing && !registration.waiting) {
+                setTimeout(() => {
+                    showNotification("✅ Vous êtes à jour", `Version actuelle : ${CURRENT_APP_VERSION}<br>Aucune nouveauté détectée.`);
+                    if(notifBtn) notifBtn.style.display = 'block'; // On réaffiche le bouton pour fermer
+                }, 800); // Petit délai pour lire le message de recherche
+            }
+            // Note : Si une mise à jour EST trouvée, l'écouteur "updatefound" (ci-dessous)
+            // prendra le relais pour afficher "Mise à jour trouvée" et recharger.
+        }).catch(err => {
+            console.error(err);
+            showNotification("Erreur", "Impossible de vérifier la mise à jour.<br>(Vérifiez votre connexion)");
+            if(notifBtn) notifBtn.style.display = 'block'; // On réaffiche le bouton en cas d'erreur
         });
     };
 
@@ -2863,7 +2879,7 @@ window.initPactScrollListener = function() {
                         localStorage.setItem('vm_just_updated', 'true');
                         
                         // On force la mise à jour (via le message skipWaiting)
-                        // Note: le rechargement se fera via l'événement 'controllerchange' ci-dessous
+                        // Le rechargement se fera via l'événement 'controllerchange'
                         if(registration.waiting) {
                             registration.waiting.postMessage({ action: 'skipWaiting' });
                         } else if (newWorker) {
