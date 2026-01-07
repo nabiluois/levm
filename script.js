@@ -2792,18 +2792,17 @@ window.initPactScrollListener = function() {
     });
 
     // =========================================================
-// AJOUTER CECI DANS script.js (À la fin du DOMContentLoaded)
+// GESTION DES MISES À JOUR (INTELLIGENTE)
 // =========================================================
 
-    // 1. CONFIGURATION DE LA VERSION ACTUELLE
-    const CURRENT_APP_VERSION = "7.2"; // DOIT CORRESPONDRE A CELLE DU SW.JS
+    // 1. CONFIGURATION VERSION (À CHANGER À CHAQUE UPDATE)
+    const CURRENT_APP_VERSION = "7.3"; // IMPORTANT : Doit être identique au sw.js
     
-    // Mise à jour de l'affichage dans le menu
+    // Affiche la version dans le menu
     const versionSpan = document.getElementById('version-display');
     if(versionSpan) versionSpan.innerText = `v${CURRENT_APP_VERSION}`;
 
-    // Mise à jour du Footer généré dynamiquement (Bloc 10 existant)
-    // Cherche le bloc "10. PIED DE PAGE" dans ton script actuel et remplace-le ou ajoute ceci :
+    // Mise à jour du Footer
     const existingFooter = document.querySelector('footer');
     if (existingFooter) {
         existingFooter.innerHTML = `
@@ -2815,64 +2814,67 @@ window.initPactScrollListener = function() {
         `;
     }
 
-    // 2. FONCTION DE VÉRIFICATION MANUELLE
+    // 2. CHECK AU DÉMARRAGE (MESSAGE "VOUS ETES MAINTENANT EN VERSION X")
+    // On vérifie si on vient de faire une mise à jour
+    if (localStorage.getItem('vm_just_updated') === 'true') {
+        setTimeout(() => {
+            showNotification("✨ Mise à Jour Réussie", `Bienvenue dans la version ${CURRENT_APP_VERSION} !`);
+            localStorage.removeItem('vm_just_updated'); // On nettoie le marqueur
+        }, 1000);
+    }
+
+    // 3. FONCTION DU BOUTON (MANUELLE)
     window.checkForUpdates = function() {
-        // Ferme le menu pour voir la notif
+        // Ferme le menu
         const closeExtra = document.querySelector('.close-extra');
         if(closeExtra) closeExtra.click();
 
-        showNotification("📡 Recherche...", "Contact des esprits du réseau...");
-
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.ready.then(registration => {
-                // Force la vérification
-                registration.update().then(() => {
-                    // Si on arrive ici sans que le contrôleur change immédiatement,
-                    // on vérifie s'il y a un SW en attente
-                    if (registration.installing) {
-                        showNotification("📥 Téléchargement...", "Une nouvelle version arrive !");
-                    } else if (registration.waiting) {
-                        showNotification("✨ Mise à jour prête !", "Installation en cours...");
-                        // Envoie le message pour forcer l'activation (défini dans sw.js)
-                        registration.waiting.postMessage({ action: 'skipWaiting' });
-                    } else {
-                        // Petit délai pour simuler la recherche si c'est trop rapide
-                        setTimeout(() => {
-                            showNotification("✅ À Jour", `Tu utilises bien la version ${CURRENT_APP_VERSION}.<br>Aucune mise à jour détectée.`);
-                        }, 1000);
-                    }
-                });
-            }).catch(err => {
-                showNotification("Erreur", "Impossible de vérifier la mise à jour.");
-                console.error(err);
-            });
-        } else {
-            showNotification("Info", "Ce navigateur ne gère pas les mises à jour automatiques.");
+        if (!('serviceWorker' in navigator)) {
+            showNotification("Info", "Mise à jour impossible sur ce navigateur.");
+            return;
         }
+
+        showNotification("📡 Recherche...", "Vérification des mises à jour...");
+
+        navigator.serviceWorker.ready.then(registration => {
+            registration.update().then(() => {
+                // Si aucune mise à jour n'est trouvée (pas d'installation, pas d'attente)
+                if (!registration.installing && !registration.waiting) {
+                    setTimeout(() => {
+                        showNotification("✅ Vous êtes à jour", `Version actuelle : ${CURRENT_APP_VERSION}`);
+                    }, 800);
+                }
+            });
+        });
     };
 
-    // 3. ECOUTEUR AUTOMATIQUE (Amélioration du bloc existant)
+    // 4. ÉCOUTEUR SYSTÈME (DÉTECTION AUTOMATIQUE)
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.ready.then(registration => {
             registration.addEventListener('updatefound', () => {
                 const newWorker = registration.installing;
-                console.log("Nouveau worker détecté :", newWorker);
                 
                 newWorker.addEventListener('statechange', () => {
-                    console.log("Nouvel état worker :", newWorker.state);
+                    // Si une nouvelle version est installée et prête
                     if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                        // Mise à jour disponible et installée, prête à être activée
-                        const toast = document.getElementById('update-notification');
-                        if(toast) {
-                            toast.querySelector('span').innerText = "Nouvelle version disponible !";
-                            toast.classList.add('show');
+                        showNotification("📥 Mise à jour trouvée", "Installation de la nouvelle version...");
+                        
+                        // On marque qu'on va mettre à jour pour le prochain démarrage
+                        localStorage.setItem('vm_just_updated', 'true');
+                        
+                        // On force la mise à jour (via le message skipWaiting)
+                        // Note: le rechargement se fera via l'événement 'controllerchange' ci-dessous
+                        if(registration.waiting) {
+                            registration.waiting.postMessage({ action: 'skipWaiting' });
+                        } else if (newWorker) {
+                            newWorker.postMessage({ action: 'skipWaiting' });
                         }
                     }
                 });
             });
         });
         
-        // Force le rechargement quand le nouveau SW prend le contrôle
+        // RECHARGEMENT AUTOMATIQUE QUAND LA NOUVELLE VERSION PREND LE CONTRÔLE
         let refreshing = false;
         navigator.serviceWorker.addEventListener('controllerchange', () => {
             if (!refreshing) {
