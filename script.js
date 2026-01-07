@@ -2796,7 +2796,7 @@ window.initPactScrollListener = function() {
 // =========================================================
 
     // 1. CONFIGURATION VERSION (À CHANGER À CHAQUE UPDATE)
-    const CURRENT_APP_VERSION = "7.3"; // IMPORTANT : Doit être identique au sw.js
+    const CURRENT_APP_VERSION = "1.3"; // IMPORTANT : Doit être identique au sw.js
     
     // Affiche la version dans le menu
     const versionSpan = document.getElementById('version-display');
@@ -2807,7 +2807,7 @@ window.initPactScrollListener = function() {
     if (existingFooter) {
         existingFooter.innerHTML = `
           <div style="text-align: center; padding: 40px 20px 60px; color: var(--gold); opacity: 0.7; font-family: 'Almendra', serif;">
-            <strong>© 2026 Le Village Maudit</strong><br>
+            <strong>© 2027 Le Village Maudit</strong><br>
             <em style="font-size: 0.9em;">by Nabil & Joelson</em><br>
             <span style="font-family:sans-serif; font-size:0.8em; opacity:0.5;">Version ${CURRENT_APP_VERSION}</span>
           </div>
