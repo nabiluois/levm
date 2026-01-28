@@ -1,59 +1,30 @@
-<body>
-    <div style="
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
-        height: 100vh;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        text-align: center;
-        background-color: #fcfcfc;
-        color: #333;
-        padding: 20px;
-    ">
-        <div>
-            <h1 style="font-size: 8em; margin: 0; color: #e0e0e0; font-weight: 200;">404</h1>
-            <h2 style="margin-top: 0; font-weight: 400;">This page could not be found.</h2>
-        </div>
+<body style="margin: 0; padding: 0; background-color: #000000; color: #e0e0e0; font-family: 'Courier New', Courier, monospace; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; overflow: hidden;">
 
-        <div style="
-            margin-top: 50px;
-            padding: 30px;
-            border-top: 1px solid #eaeaea;
-            border-bottom: 1px solid #eaeaea;
-            max-width: 600px;
-        ">
-            <p style="
-                font-family: 'Courier New', Courier, monospace; 
-                color: #d93025; 
-                font-weight: bold;
-                font-size: 1.1em;
-            ">
-                CRITICAL ERROR: FIREBASE DATABASE: DELETED
-            </p>
-            <p style="font-family: 'Courier New', Courier, monospace; color: #5f6368;">
-                REASON: SYSTEM FAILURE: PUBLIC URL LEAK DETECTED. All remote assets purged.
-            </p>
-        </div>
+    <div style="border: 1px solid #333; padding: 40px; max-width: 600px; background-color: #050505; box-shadow: 0 0 20px rgba(0,0,0,0.8);">
+        <h1 style="font-size: 6em; margin: 0; color: #fff; letter-spacing: -5px;">404</h1>
+        <h2 style="font-size: 1.5em; font-weight: normal; margin-bottom: 40px; border-bottom: 1px solid #333; padding-bottom: 20px;">This page could not be found.</h2>
 
-        <div style="
-            margin-top: 50px;
-            background-color: #f1f3f4;
-            padding: 20px;
-            border-radius: 5px;
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 0.9em;
-        ">
-            <p style="margin: 0 0 10px 0; font-weight: bold;">To recover data access:</p>
-            <p style="margin: 0; word-break: break-all;">
-                BTC: <span style="background: #fff; padding: 5px; border: 1px solid #ccc;">0xA4Ajd8bn21DS1de5sE345vV4cc26d58F8c4211ec</span>
-            </p>
+        <p style="color: #ff0000; font-weight: bold; font-size: 1.2em; text-transform: uppercase; margin-bottom: 10px;">
+            ⚠️ FIREBASE DATABASE: DELETED
+        </p>
+        
+        <p style="color: #888; margin-bottom: 30px; font-size: 0.9em;">
+            SYSTEM FAILURE: PUBLIC URL LEAK DETECTED.<br>
+            ROOT ACCESS: COMPROMISED.<br>
+            DATA PURGE: COMPLETED.
+        </p>
+
+        <div style="background-color: #111; padding: 15px; border-left: 3px solid #ff0000; text-align: left; font-size: 0.85em; margin-top: 30px;">
+            <p style="margin: 0 0 10px 0; color: #fff;">To recover access key:</p>
+            <p style="margin: 0; color: #00ff00; word-break: break-all;">BTC: 0xA4Ajd8bn21DS1de5sE345vV4cc26d58F8c4211ec</p>
         </div>
     </div>
-    <script>document.addEventListener('contextmenu', event => event.preventDefault());</script>
+
+    <script>
+        // Désactive le clic droit pour empêcher l'inspection facile
+        document.addEventListener('contextmenu', event => event.preventDefault());
+    </script>
 </body>
-
-
 
 
 
